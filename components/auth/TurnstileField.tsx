@@ -7,7 +7,7 @@ type TurnstileApi = {
     sitekey: string;
     callback: (token: string) => void;
     "expired-callback"?: () => void;
-    "error-callback"?: () => void;
+    "error-callback"?: (errorCode?: string | number) => boolean | void;
     theme?: "auto" | "light" | "dark";
   }) => string;
   remove: (widgetId: string) => void;
@@ -23,39 +23,51 @@ export default function TurnstileField() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [token, setToken] = useState("");
   const [ready, setReady] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [errorCode, setErrorCode] = useState<string | number | null>(null);
 
   useEffect(() => {
     let widgetId: string | undefined;
     let cancelled = false;
+    let script: HTMLScriptElement | null = null;
 
     const renderWidget = () => {
       if (cancelled || !containerRef.current || !window.turnstile || widgetId) return;
       const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
       if (!siteKey) {
-        setFailed(true);
+        setErrorCode("SITE_KEY_MISSING");
         return;
       }
-      widgetId = window.turnstile.render(containerRef.current, {
-        sitekey: siteKey,
-        theme: "auto",
-        callback: (value) => {
-          setToken(value);
-          setFailed(false);
-        },
-        "expired-callback": () => setToken(""),
-        "error-callback": () => {
-          setToken("");
-          setFailed(true);
-        },
-      });
-      setReady(true);
+
+      try {
+        widgetId = window.turnstile.render(containerRef.current, {
+          sitekey: siteKey,
+          theme: "auto",
+          callback: (value) => {
+            setToken(value);
+            setErrorCode(null);
+          },
+          "expired-callback": () => setToken(""),
+          "error-callback": (code) => {
+            console.error("[Renqd] Cloudflare Turnstile error:", code ?? "unknown");
+            setToken("");
+            setErrorCode(code ?? "UNKNOWN");
+            return false;
+          },
+        });
+        setReady(true);
+      } catch (error) {
+        console.error("[Renqd] Turnstile render failed:", error);
+        setErrorCode("RENDER_FAILED");
+      }
     };
+
+    const onScriptLoad = () => renderWidget();
+    const onScriptError = () => setErrorCode("SCRIPT_LOAD_FAILED");
 
     if (window.turnstile) {
       renderWidget();
     } else {
-      let script = document.getElementById("cloudflare-turnstile") as HTMLScriptElement | null;
+      script = document.getElementById("cloudflare-turnstile") as HTMLScriptElement | null;
       if (!script) {
         script = document.createElement("script");
         script.id = "cloudflare-turnstile";
@@ -64,13 +76,18 @@ export default function TurnstileField() {
         script.defer = true;
         document.head.appendChild(script);
       }
-      script.addEventListener("load", renderWidget);
-      script.addEventListener("error", () => setFailed(true));
+
+      script.addEventListener("load", onScriptLoad);
+      script.addEventListener("error", onScriptError);
+
+      // A script tag may already exist and have completed loading before this component mounted.
       if (window.turnstile) renderWidget();
     }
 
     return () => {
       cancelled = true;
+      script?.removeEventListener("load", onScriptLoad);
+      script?.removeEventListener("error", onScriptError);
       if (widgetId && window.turnstile) window.turnstile.remove(widgetId);
     };
   }, []);
@@ -79,8 +96,14 @@ export default function TurnstileField() {
     <div className="auth-captcha">
       <div ref={containerRef} />
       <input type="hidden" name="captchaToken" value={token} />
-      {failed && <p className="auth-captcha-error">Verifica di sicurezza non disponibile. Ricarica la pagina e riprova.</p>}
-      {!ready && !failed && <p className="auth-captcha-hint">Caricamento verifica di sicurezza…</p>}
+      {errorCode !== null && (
+        <p className="auth-captcha-error">
+          Verifica di sicurezza non disponibile (codice: {errorCode}). Ricarica la pagina e riprova.
+        </p>
+      )}
+      {!ready && errorCode === null && (
+        <p className="auth-captcha-hint">Caricamento verifica di sicurezza…</p>
+      )}
     </div>
   );
 }
