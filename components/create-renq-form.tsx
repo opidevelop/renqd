@@ -75,7 +75,17 @@ export function CreateRenqForm() {
   }
 
   return (
-    <div className="create-builder">
+    <div className="create-experience">
+      <div className="create-intro">
+        <div className="create-intro-copy">
+          <span className="create-intro-kicker"><span/> BUILD YOUR RANKING</span>
+          <h2>La tua classifica.<br/><em>Le tue regole.</em></h2>
+          <p>Costruisci il tuo Renq un passo alla volta. Scegli, aggiungi, metti in ordine.</p>
+        </div>
+        <div className="create-intro-art" aria-hidden="true"><span className="create-art-star">✳</span><span className="create-art-one">01</span><span className="create-art-two">02</span><span className="create-art-three">03</span></div>
+      </div>
+      <div className="create-step-caption"><span>IL TUO PERCORSO</span><span>6 PASSAGGI · CIRCA 2 MIN</span></div>
+      <div className="create-builder">
       <section className="builder-panel">
         <div className="builder-panel-heading"><span>01</span><div><h2>Scegli come creare</h2><p>Ogni modalità costruisce la classifica in modo diverso.</p></div></div>
         <div className="builder-mode-grid">
@@ -176,6 +186,7 @@ export function CreateRenqForm() {
       <div className="builder-footer">
         <div><span className="builder-save-dot"/><span>Bozza temporanea · non ancora salvata</span></div>
         <button type="button" className="builder-finish-button" disabled={!title.trim() || items.length < 2} onClick={continueDraft}>Continua <span>→</span></button>
+      </div>
       </div>
     </div>
   );
