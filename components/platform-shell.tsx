@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { signOut } from "@/app/(auth)/actions";
 import { usePathname } from "next/navigation";
 import {
   Compass, Home, Inbox, Plus, Search, Settings2, Sparkles, UserRound,
@@ -42,20 +43,4 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="platform-main">
-        <header className="platform-topbar">
-          <div className="platform-mobile-brand"><Link className="platform-brand" href="/home">renqd<span>.</span></Link></div>
-          <div className="platform-search"><Search size={16} /><span>Cerca classifiche, persone e argomenti</span><kbd>⌘ K</kbd></div>
-          <Link href="/inbox" className="topbar-inbox" aria-label="Apri inbox"><Inbox size={19} /></Link>
-          <Link href="/profile" className="topbar-avatar" aria-label="Apri profilo">R</Link>
-        </header>
-        <main className="platform-content">{children}</main>
-        <nav className="platform-mobile-nav" aria-label="Navigazione mobile">
-          {navigation.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href;
-            return <Link href={href} className={active ? "mobile-nav-link is-active" : "mobile-nav-link"} key={href}><Icon size={19} /><span>{label}</span></Link>;
-          })}
-        </nav>
-      </div>
-    </div>
-  );
-}
+        <header classN...[truncated]
