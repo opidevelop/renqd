@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://renqd.vercel.app"),
+  metadataBase: new URL("https://renqd.app"),
   title: {
     default: "Renqd — Rank. Compare. Share.",
     template: "%s | Renqd",
