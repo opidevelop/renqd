@@ -15,9 +15,11 @@ async function requestOrigin() {
 export async function signIn(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
+  const captchaToken = String(formData.get("captchaToken") ?? "");
   if (!email || !password) redirect("/login?error=missing");
+  if (!captchaToken) redirect("/login?error=captcha");
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken } });
   if (error) redirect("/login?error=credentials");
   redirect("/home");
 }
@@ -25,20 +27,24 @@ export async function signUp(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const username = String(formData.get("username") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
+  const captchaToken = String(formData.get("captchaToken") ?? "");
   if (!email || !username || password.length < 8) redirect("/register?error=validation");
+  if (!captchaToken) redirect("/register?error=captcha");
   if (!/^[a-z0-9_]{3,30}$/.test(username)) redirect("/register?error=username");
   const supabase = await createClient();
   const origin = await requestOrigin();
-  const { error } = await supabase.auth.signUp({ email, password, options: { data: { username }, emailRedirectTo: origin + "/auth/callback?next=/home" } });
+  const { error } = await supabase.auth.signUp({ email, password, options: { data: { username }, emailRedirectTo: origin + "/auth/callback?next=/home", captchaToken } });
   if (error) redirect("/register?error=signup");
   redirect("/register?checkEmail=1");
 }
 export async function requestPasswordReset(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const captchaToken = String(formData.get("captchaToken") ?? "");
   if (!email) redirect("/forgot-password?error=missing");
+  if (!captchaToken) redirect("/forgot-password?error=captcha");
   const supabase = await createClient();
   const origin = await requestOrigin();
-  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: origin + "/auth/callback?next=/reset-password" });
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: origin + "/auth/callback?next=/reset-password", captchaToken });
   if (error) redirect("/forgot-password?error=send");
   redirect("/forgot-password?sent=1");
 }
