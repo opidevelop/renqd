@@ -1,33 +1,37 @@
 import Link from "next/link";
-import { ArrowRight, Compass, Layers3, Plus, Swords, Timer } from "lucide-react";
+import { ArrowRight, Compass, Plus, Sparkles } from "lucide-react";
+
+const ideas = [
+  { label: "Musica", detail: "Album, artisti e playlist" },
+  { label: "Videogiochi", detail: "Saghe, franchise e giochi" },
+  { label: "Film e serie", detail: "Film, serie e personaggi" },
+  { label: "Libri", detail: "Libri, autori e saghe" },
+];
 
 export default function PlatformHomePage() {
   return (
     <>
-      <div className="platform-page-heading">
-        <div><div className="platform-overline">LA TUA HOME</div><h1>Benvenuto su Renqd.</h1><p>Le tue idee meritano un posto tutto loro.</p></div>
-        <Link className="platform-primary-link" href="/create">Crea una classifica <Plus size={15} /></Link>
-      </div>
-      <section className="platform-welcome">
-        <div className="welcome-decoration" aria-hidden="true">R</div>
-        <div className="platform-overline">DA DOVE VUOI INIZIARE?</div>
-        <h2>Ogni grande classifica comincia da una scelta.</h2>
-        <p>Scegli un argomento che ti appassiona, metti in ordine le tue preferenze e condividi il risultato con la community.</p>
+      <section className="home-create-hero">
+        <div className="home-create-copy">
+          <div className="platform-overline"><Sparkles size={12} /> IL TUO SPAZIO, LE TUE REGOLE</div>
+          <h1>Le tue passioni.<br /><span>In classifica.</span></h1>
+          <p>Da dove vuoi cominciare oggi?</p>
+          <Link className="home-create-button" href="/create"><span className="home-create-button-icon"><Plus size={22}/></span><span><strong>Crea un Renq</strong><small>Inizia una nuova classifica</small></span><ArrowRight size={19}/></Link>
+        </div>
+        <div className="home-create-art" aria-hidden="true"><span className="home-art-letter home-art-r">R</span><span className="home-art-letter home-art-q">Q</span><span className="home-art-dot">.</span></div>
       </section>
-      <div className="platform-section-title"><h2>Il tuo spazio</h2><span>PRONTO PER TE</span></div>
-      <div className="platform-stat-grid">
-        <div className="platform-panel platform-stat"><div className="platform-stat-label">LE TUE CLASSIFICHE</div><div className="platform-stat-value">—</div><div className="platform-stat-note">Ancora tutto da creare</div></div>
-        <div className="platform-panel platform-stat"><div className="platform-stat-label">COLLABORAZIONI</div><div className="platform-stat-value">—</div><div className="platform-stat-note">Le idee si uniscono</div></div>
-        <div className="platform-panel platform-stat"><div className="platform-stat-label">COMMUNITY</div><div className="platform-stat-value">—</div><div className="platform-stat-note">Da scoprire insieme</div></div>
-      </div>
-      <div className="platform-section-title"><h2>Comincia da qui</h2><span>3 MODALITÀ</span></div>
-      <div className="platform-shortcuts">
-        <Link className="platform-shortcut" href="/create"><div className="platform-shortcut-icon"><Layers3 size={19}/></div><h3>Renq</h3><p>Ordina manualmente i tuoi preferiti.</p></Link>
-        <Link className="platform-shortcut" href="/create"><div className="platform-shortcut-icon"><Swords size={19}/></div><h3>Battle Renq</h3><p>Confronta due elementi alla volta.</p></Link>
-        <Link className="platform-shortcut" href="/create"><div className="platform-shortcut-icon"><Timer size={19}/></div><h3>Speed Renq</h3><p>Metti alla prova il tuo istinto.</p></Link>
-      </div>
-      <div className="platform-section-title"><h2>Esplora nuove idee</h2></div>
-      <div className="platform-panel platform-empty"><div className="platform-empty-icon"><Compass size={22}/></div><h2>Il prossimo spunto potrebbe essere qui.</h2><p>La sezione Esplora ospiterà classifiche, argomenti e creator della community.</p><Link className="platform-primary-link" href="/explore">Vai a Esplora <ArrowRight size={14}/></Link></div>
+
+      <section className="home-ideas-section">
+        <div className="platform-section-title"><div><h2>Parti da una passione</h2><p>Puoi classificare praticamente qualsiasi cosa.</p></div><Link href="/create">Tutte le categorie <ArrowRight size={13}/></Link></div>
+        <div className="home-idea-grid">
+          {ideas.map((idea, index) => <Link href="/create" className="home-idea-card" key={idea.label}><span className={`home-idea-number home-idea-tone-${index}`}>0{index + 1}</span><strong>{idea.label}</strong><small>{idea.detail}</small><ArrowRight size={15}/></Link>)}
+        </div>
+      </section>
+
+      <section className="home-discover-row">
+        <div><div className="platform-overline">LA COMMUNITY</div><h2>Le classifiche degli altri<br/>possono ispirare le tue.</h2><p>Scopri idee nuove, confronta i gusti e trova il prossimo argomento da mettere in ordine.</p></div>
+        <Link className="home-explore-button" href="/explore"><Compass size={17}/> Esplora Renqd <ArrowRight size={15}/></Link>
+      </section>
     </>
   );
 }
