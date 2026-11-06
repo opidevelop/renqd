@@ -35,4 +35,22 @@ export async function signUp(formData: FormData) {
 export async function requestPasswordReset(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!email) redirect("/forgot-password?error=missing");
-  c...[truncated]
+  const supabase = await createClient();
+  const origin = await requestOrigin();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: origin + "/auth/callback?next=/reset-password" });
+  if (error) redirect("/forgot-password?error=send");
+  redirect("/forgot-password?sent=1");
+}
+export async function updatePassword(formData: FormData) {
+  const password = String(formData.get("password") ?? "");
+  if (password.length < 8) redirect("/reset-password?error=validation");
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) redirect("/reset-password?error=update");
+  redirect("/home");
+}
+export async function signOut() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
+}
