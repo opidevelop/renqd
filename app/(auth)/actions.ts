@@ -6,8 +6,9 @@ import { redirect } from "next/navigation";
 async function requestOrigin() {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host");
-  const allowed = host === "renqd.vercel.app" || host === "renqd.app" || host === "localhost:3000" || Boolean(host?.endsWith("-opiteam.vercel.app"));
-  const safeHost = allowed && host ? host : "renqd.vercel.app";
+  const isRenqdPreview = Boolean(host && /^renqd-[a-z0-9-]+-opiteam\.vercel\.app$/.test(host));
+  const allowed = host === "renqd.app" || host === "renqd.vercel.app" || host === "localhost:3000" || isRenqdPreview;
+  const safeHost = allowed && host ? host : "renqd.app";
   const protocol = safeHost === "localhost:3000" ? "http" : "https";
   return protocol + "://" + safeHost;
 }
