@@ -8,11 +8,11 @@ L'integrazione applicativa Supabase SSR è presente nel branch `develop`. Le var
 
 Prima di provare registrazione, conferma email e recupero password, verificare in **Authentication → URL Configuration**:
 
-- Site URL: `https://renqd.vercel.app` (sostituire con il dominio canonico quando `renqd.app` sarà configurato).
+- Site URL: `https://renqd.app` (dominio canonico configurato su Vercel; `www.renqd.app` reindirizza al dominio principale).
 - Redirect URL canonici:
-  - `https://renqd.vercel.app/auth/callback`
   - `https://renqd.app/auth/callback`
-- Redirect URL Preview Vercel: aggiungere un pattern ristretto per i deployment del progetto Renqd, ad esempio `https://renqd-*-opiteam.vercel.app/auth/callback`, verificando che il wildcard sia accettato dal validatore Supabase.
+  - `https://renqd.vercel.app/auth/callback` (compatibilità temporanea)
+- Redirect URL Preview Vercel: `https://renqd-*-opiteam.vercel.app/auth/callback` (solo deployment Preview del progetto Renqd; verificare che il wildcard sia accettato dal validatore Supabase).
 
 Non usare wildcard generici su tutti i domini Vercel.
 
