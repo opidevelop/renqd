@@ -6,6 +6,18 @@ import { ArrowDown, ArrowUp, Check, Layers3, Plus, Swords, Timer, Trash2, Users,
 type Mode = "renq" | "battle" | "speed";
 type Participation = "solo" | "collab";
 type Visibility = "live" | "reveal";
+type CategoryId = "music" | "games" | "film" | "books" | "sport" | "food" | "travel" | "custom";
+
+const categories: { id: CategoryId; label: string; icon: string; types: string[] }[] = [
+  { id: "music", label: "Musica", icon: "♫", types: ["Album", "Artisti", "Discografie", "Playlist personalizzata"] },
+  { id: "games", label: "Videogiochi", icon: "⌘", types: ["Giochi", "Saghe", "Franchise", "Personaggi", "Lista personalizzata"] },
+  { id: "film", label: "Film e serie", icon: "▣", types: ["Film", "Serie TV", "Franchise", "Personaggi", "Lista personalizzata"] },
+  { id: "books", label: "Libri", icon: "▤", types: ["Libri", "Autori", "Saga letterarie", "Personaggi", "Lista personalizzata"] },
+  { id: "sport", label: "Sport", icon: "◉", types: ["Atleti", "Squadre", "Competizioni", "Momenti sportivi", "Lista personalizzata"] },
+  { id: "food", label: "Cibo", icon: "✳", types: ["Piatti", "Ristoranti", "Cucine", "Ingredienti", "Lista personalizzata"] },
+  { id: "travel", label: "Viaggi", icon: "⌖", types: ["Città", "Paesi", "Luoghi", "Esperienze", "Lista personalizzata"] },
+  { id: "custom", label: "Custom", icon: "+", types: ["Lista personalizzata"] },
+];
 
 const modes: { id: Mode; label: string; description: string; icon: typeof Layers3 }[] = [
   { id: "renq", label: "Renq", description: "Ordina manualmente", icon: Layers3 },
@@ -18,6 +30,8 @@ export function CreateRenqForm() {
   const [title, setTitle] = useState("");
   const [itemInput, setItemInput] = useState("");
   const [items, setItems] = useState<string[]>([]);
+  const [category, setCategory] = useState<CategoryId | null>(null);
+  const [itemType, setItemType] = useState("");
   const [participation, setParticipation] = useState<Participation>("solo");
   const [visibility, setVisibility] = useState<Visibility>("live");
   const [allowTies, setAllowTies] = useState(false);
@@ -84,15 +98,32 @@ export function CreateRenqForm() {
       </section>
 
       <section className="builder-panel">
-        <div className="builder-panel-heading"><span>03</span><div><h2>Aggiungi gli elementi</h2><p>Inserisci da 2 a 100 elementi. Potrai riordinarli nella tua classifica.</p></div></div>
-        <form className="builder-add-form" onSubmit={addItem}>
-          <input className="builder-input" aria-label="Nuovo elemento" maxLength={120} placeholder="Scrivi un elemento da aggiungere..." value={itemInput} onChange={(event) => setItemInput(event.target.value)}/>
-          <button className="builder-add-button" type="submit" disabled={!itemInput.trim() || items.length >= 100}><Plus size={17}/> Aggiungi</button>
-        </form>
-        {notice && <p className="builder-notice" role="status">{notice}</p>}
-        <div className="builder-items-header"><span>I TUOI ELEMENTI</span><strong>{items.length} / 100</strong></div>
+        <div className="builder-panel-heading"><span>03</span><div><h2>Di cosa vuoi parlare?</h2><p>Scegli una macrocategoria e poi il tipo di elementi da mettere in classifica.</p></div></div>
+        <div className="builder-category-grid" aria-label="Scegli una macrocategoria">
+          {categories.map((entry) => (
+            <button type="button" key={entry.id} onClick={() => { setCategory(entry.id); setItemType(entry.types[0]); setItemInput(""); setNotice(""); }} className={category === entry.id ? "builder-category is-selected" : "builder-category"} aria-pressed={category === entry.id}>
+              <span className="builder-category-icon">{entry.icon}</span><strong>{entry.label}</strong><span className="builder-category-arrow">↗</span>
+            </button>
+          ))}
+        </div>
+        {category && (
+          <div className="builder-category-detail">
+            <div className="builder-category-detail-heading"><span>TIPO DI CLASSIFICA</span><strong>{categories.find((entry) => entry.id === category)?.label}</strong></div>
+            <div className="builder-type-list">
+              {categories.find((entry) => entry.id === category)?.types.map((type) => (
+                <button type="button" key={type} onClick={() => setItemType(type)} className={itemType === type ? "builder-type is-selected" : "builder-type"} aria-pressed={itemType === type}>{type}{itemType === type && <Check size={13}/>}</button>
+              ))}
+            </div>
+            <form className="builder-add-form" onSubmit={addItem}>
+              <input className="builder-input" aria-label="Nuovo elemento" maxLength={120} placeholder={category === "custom" ? "Scrivi qualsiasi elemento..." : `Aggiungi ${itemType.toLocaleLowerCase()} alla lista...`} value={itemInput} onChange={(event) => setItemInput(event.target.value)}/>
+              <button className="builder-add-button" type="submit" disabled={!itemInput.trim() || items.length >= 100}><Plus size={17}/> Aggiungi</button>
+            </form>
+            {notice && <p className="builder-notice" role="status">{notice}</p>}
+          </div>
+        )}
+        <div className="builder-items-header"><span>{itemType ? itemType.toLocaleUpperCase() : "I TUOI ELEMENTI"}</span><strong>{items.length} / 100</strong></div>
         {items.length === 0 ? (
-          <div className="builder-empty-items">La lista è vuota. Aggiungi il primo elemento per iniziare.</div>
+          <div className="builder-empty-items">{category ? "La lista è vuota. Aggiungi il primo elemento per iniziare." : "Scegli una categoria per iniziare a costruire la tua lista."}</div>
         ) : (
           <ol className="builder-items-list">
             {items.map((item, index) => (
