@@ -1,24 +1,23 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import { ArrowLeft, Heart, Share2, Sparkles, Trophy } from "lucide-react";
 import { DynamicCoverTheme } from "@/components/dynamic-cover-theme";
 
 const cover = "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/1e/7d/e8/1e7de8dc-8c53-e536-3c5b-22937fb8a37d/5054197756337.jpg/1200x1200bf-60.jpg";
 const tracks = [
   ["01","Bellissima","Il primo vortice"],
-  ["02","Mon Amour","La scintilla pop"],
-  ["03","Euforia","Energia pura"],
-  ["04","Ragazza Sola","Una corsa dentro"],
-  ["05","Indaco Violento","Il lato più intenso"],
-  ["06","Storie Brevi","con Tananai"],
-  ["07","Rosso Corallo","Colore e carattere"],
+  ["02","Sinceramente","Un manifesto pop"],
+  ["03","Mon Amour","La scintilla pop"],
+  ["04","Euforia","Energia pura"],
+  ["05","Ragazza Sola","Una corsa dentro"],
+  ["06","Rosso Corallo","Colore e carattere"],
+  ["07","Storie Brevi","con Tananai"],
   ["08","Bollicine","Leggera, ma non troppo"],
   ["09","Aria","Una pausa luminosa"],
-  ["10","La Crisi a Saint-Tropez","Un viaggio altrove"],
-  ["11","Gommapiuma","Morbida nostalgia"],
+  ["10","Gommapiuma","Morbida nostalgia"],
+  ["11","La Crisi a Saint-Tropez","Un viaggio altrove"],
   ["12","Ti Dico Solo","Senza giri di parole"],
   ["13","Stelle","A occhi aperti"],
-  ["14","Indaco Violento (Reprise)","La chiusura del viaggio"],
+  ["14","Indaco Violento","La chiusura del viaggio"],
 ];
 
 export default function AnnalisaRankingPage() {
@@ -41,7 +40,7 @@ export default function AnnalisaRankingPage() {
         </div>
       </section>
       <section className="rank-content">
-        <div className="rank-content-heading"><div><h2>La tracklist, in ordine</h2><p>Un esempio di ranking creato su Renqd</p></div><span className="rank-count">14 ELEMENTI</span></div>
+        <div className="rank-content-heading"><div><h2>La classifica delle tracce</h2><p>Un esempio di ranking creato su Renqd</p></div><span className="rank-count">14 ELEMENTI</span></div>
         <div className="rank-list">{tracks.map(([position,title,subtitle])=><div className="rank-track" key={position}><span className="rank-track-position">{position}</span><div><div className="rank-track-title">{title}</div><div className="rank-track-artist">{subtitle}</div></div><span className="rank-track-tag">{Number(position)===1?"TOP 1":Number(position)<=3?"TOP 3":"IN CLASSIFICA"}</span></div>)}</div>
         <div className="rank-dynamic-note"><Sparkles size={17}/><span><strong>Tema dinamico attivo.</strong> La palette viola e indaco è ricavata dai colori della copertina. In un contenuto diverso, il tema si adatterà automaticamente alla sua immagine.</span></div>
       </section>
