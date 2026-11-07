@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
-  Compass, Home, Inbox, Plus, Settings2, Sparkles, UserRound, LogOut,
+  Compass, Home, Inbox, Plus, Sparkles, UserRound, LogOut, Sun, Moon,
 } from "lucide-react";
 
 const navigation = [
@@ -17,9 +18,21 @@ const navigation = [
 
 export function PlatformShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("renqd-theme");
+    if (saved === "dark" || saved === "light") setTheme(saved);
+  }, []);
+
+  function toggleTheme() {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    window.localStorage.setItem("renqd-theme", next);
+  }
 
   return (
-    <div className="platform-frame">
+    <div className="platform-frame" data-theme={theme}>
       <aside className="platform-sidebar">
         <Link className="platform-brand" href="/home">renqd<span>.</span></Link>
         <div className="platform-side-caption">IL TUO UNIVERSO</div>
@@ -50,6 +63,9 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
         <header className="platform-topbar">
           <div className="platform-mobile-brand"><Link className="platform-brand" href="/home">renqd<span>.</span></Link></div>
           <div className="platform-topbar-context"><span className="platform-live-indicator"/> Il tuo spazio creativo</div>
+          <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label={theme === "light" ? "Attiva tema scuro" : "Attiva tema chiaro"} title={theme === "light" ? "Attiva tema scuro" : "Attiva tema chiaro"}>
+            {theme === "light" ? <Moon size={17}/> : <Sun size={17}/>}<span>{theme === "light" ? "Dark" : "Light"}</span>
+          </button>
           <Link href="/profile" className="topbar-avatar" aria-label="Apri profilo">R</Link>
         </header>
         <main className="platform-content">{children}</main>
