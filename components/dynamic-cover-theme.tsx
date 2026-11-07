@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, type ReactNode } from "react";
+import { useCallback, useRef, type ReactNode, type SyntheticEvent, type CSSProperties } from "react";
 
 function rgbToHsl(r: number, g: number, b: number) {
   const red=r/255, green=g/255, blue=b/255;
@@ -20,7 +20,7 @@ function rgbToHsl(r: number, g: number, b: number) {
 
 export function DynamicCoverTheme({ imageSrc, children }: { imageSrc: string; children: ReactNode }) {
   const rootRef=useRef<HTMLDivElement>(null);
-  const applyCoverPalette=useCallback((event: React.SyntheticEvent<HTMLImageElement>)=>{
+  const applyCoverPalette=useCallback((event: SyntheticEvent<HTMLImageElement>)=>{
     const image=event.currentTarget;
     const root=rootRef.current;
     if(!root || !image.naturalWidth) return;
@@ -53,7 +53,7 @@ export function DynamicCoverTheme({ imageSrc, children }: { imageSrc: string; ch
       root.dataset.paletteReady="fallback";
     }
   },[]);
-  return <div ref={rootRef} className="dynamic-cover-theme" style={{"--rank-a":"#8962b5","--rank-b":"#d3a7e6"} as React.CSSProperties}>
+  return <div ref={rootRef} className="dynamic-cover-theme" style={{"--rank-a":"#8962b5","--rank-b":"#d3a7e6"} as CSSProperties}>
     <img className="dynamic-cover-source" src={imageSrc} alt="" aria-hidden="true" crossOrigin="anonymous" onLoad={applyCoverPalette}/>
     {children}
   </div>;
