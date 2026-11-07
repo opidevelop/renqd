@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { ArrowLeft, Heart, Share2, Sparkles, Trophy } from "lucide-react";
 import { DynamicCoverTheme } from "@/components/dynamic-cover-theme";
 
@@ -23,7 +24,7 @@ const tracks = [
 export default function AnnalisaRankingPage() {
   return (
     <DynamicCoverTheme imageSrc={cover}>
-    <article className="rank-detail" style={{"--rank-a":"#8962b5","--rank-b":"#d3a7e6","--rank-c":"#241b36"} as React.CSSProperties}>
+    <article className="rank-detail" >
       <div className="rank-topline">
         <Link href="/home" className="rank-back"><ArrowLeft size={16}/> Torna alla Home</Link>
         <div className="rank-actions"><button className="rank-action" aria-label="Condividi"><Share2 size={15}/></button><button className="rank-action" aria-label="Aggiungi ai preferiti"><Heart size={15}/></button></div>
