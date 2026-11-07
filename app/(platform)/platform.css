@@ -478,8 +478,8 @@
 
 
 /* RENQD MINIMAL GLOW — ORANGE IDENTITY + PASTEL CATEGORIES */
-.platform-frame{--brand:#ff7900;--brand-strong:#ed6800;--brand-soft:#fff0e2;--ink:#242321;--muted:#817b74;--surface:#fff;--surface-2:#faf8f5;--line:#eee8e1;--music:#f8dce8;--games:#e9e1fb;--screen:#dceefa;--books:#ddf3e7;--sport:#ffead5;--custom:#fff2c9;background:var(--surface-2);color:var(--ink);transition:background .25s,color .25s}
-.platform-frame[data-theme="dark"]{--ink:#f7f4f0;--muted:#aaa29a;--surface:#1c1a19;--surface-2:#11100f;--line:#34302c;--brand-soft:#38251a;background:var(--surface-2);color:var(--ink)}
+.platform-frame{color-scheme:light;--brand:#ff7900;--brand-strong:#ed6800;--brand-soft:#fff0e2;--ink:#242321;--muted:#817b74;--surface:#fff;--surface-2:#faf8f5;--line:#eee8e1;--music:#f8dce8;--games:#e9e1fb;--screen:#dceefa;--books:#ddf3e7;--sport:#ffead5;--custom:#fff2c9;background:var(--surface-2);color:var(--ink);transition:background .25s,color .25s}
+.platform-frame[data-theme="dark"]{color-scheme:dark;--ink:#f7f4f0;--muted:#aaa29a;--surface:#1c1a19;--surface-2:#11100f;--line:#34302c;--brand-soft:#38251a;background:var(--surface-2);color:var(--ink)}
 .platform-frame .platform-sidebar,.platform-frame .platform-topbar,.platform-frame .platform-panel,.platform-frame .builder-panel{background:var(--surface);border-color:var(--line);color:var(--ink)}
 .platform-frame .platform-brand{color:var(--ink)}
 .platform-frame .platform-brand span{color:var(--brand)}
