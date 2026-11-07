@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, Heart, Share2, Sparkles, Trophy } from "lucide-react";
+import { ArrowLeft, Heart, Share2, Sparkles, Trophy } from "lucide-react";
+import { DynamicCoverTheme } from "@/components/dynamic-cover-theme";
 
 const cover = "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/1e/7d/e8/1e7de8dc-8c53-e536-3c5b-22937fb8a37d/5054197756337.jpg/1200x1200bf-60.jpg";
 const tracks = [
@@ -21,6 +22,7 @@ const tracks = [
 
 export default function AnnalisaRankingPage() {
   return (
+    <DynamicCoverTheme imageSrc={cover}>
     <article className="rank-detail" style={{"--rank-a":"#8962b5","--rank-b":"#d3a7e6","--rank-c":"#241b36"} as React.CSSProperties}>
       <div className="rank-topline">
         <Link href="/home" className="rank-back"><ArrowLeft size={16}/> Torna alla Home</Link>
@@ -43,5 +45,6 @@ export default function AnnalisaRankingPage() {
         <div className="rank-dynamic-note"><Sparkles size={17}/><span><strong>Tema dinamico attivo.</strong> La palette viola e indaco è ricavata dai colori della copertina. In un contenuto diverso, il tema si adatterà automaticamente alla sua immagine.</span></div>
       </section>
     </article>
+    </DynamicCoverTheme>
   );
 }
