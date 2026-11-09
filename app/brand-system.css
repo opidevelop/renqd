@@ -1,0 +1,27 @@
+/* Renqd public identity — Minimal Glow / Orange & Pastel */
+html{background:#fbfaf8;-webkit-text-size-adjust:100%}
+body{overscroll-behavior-y:none}
+input,textarea,select,[contenteditable="true"]{font-size:16px}
+button,a{-webkit-tap-highlight-color:transparent}
+:focus-visible{outline-color:#ff7900}
+.wordmark-dot{color:#ff7900}
+.hero-glow-one{background:#ffe7d3}.hero-glow-two{background:#f7e9df}
+.eyebrow{border-color:#f0e4d8;color:#a56836}
+.eyebrow-dot{background:#ff7900}
+.hero-highlight,.intro-grid h2 span,.section-heading h2 span,.community-card h2 span{color:#ff7900}
+.button-primary{background:#ff7900;box-shadow:0 8px 22px #ff79002b}
+.button-primary:hover{background:#e66d00;box-shadow:0 12px 28px #ff790033}
+.preview-count,.ranking-position.first{background:#fff0e2;color:#d66b12}
+.ranking-position.second{background:#f7e4eb;color:#a45c77}
+.ranking-position.third{background:#e5f1e8;color:#5e8768}
+.mode-lavender{background:#f0eafb;border-color:#e7def7}.mode-lavender .mode-icon{color:#7057b4}
+.mode-peach{background:#fff0e2;border-color:#f5e2d1}.mode-peach .mode-icon{color:#c36d2a}
+.mode-mint{background:#eaf3ec;border-color:#dcebe0}.mode-mint .mode-icon{color:#62836b}
+.community-card{background:#25231f}
+.community-icon{color:#ffad68}
+.community-card h2 span{color:#ffad68}
+.community-decoration span:nth-child(2){color:#ffad68}
+.header-cta:hover{background:#ff7900;border-color:#ff7900;color:white}
+.site-footer .wordmark-dot{color:#ff7900}
+@media(max-width:760px){.hero-section{padding-top:68px}.hero-content h1{letter-spacing:-3px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
