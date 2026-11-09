@@ -1,0 +1,4 @@
+.rank-cover-backdrop{position:absolute;z-index:-3;inset:0;overflow:hidden;pointer-events:none;isolation:isolate}
+.rank-cover-backdrop img{position:absolute;inset:-3%;width:106%;height:72%;object-fit:cover;object-position:center 24%;opacity:.34;filter:blur(30px) saturate(.9);transform:scale(1.04)}
+.rank-cover-backdrop-wash{position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 34%,transparent) 0%,color-mix(in srgb,var(--surface-2) 72%,transparent) 34%,var(--surface-2) 72%)}
+@media(max-width:650px){.rank-cover-backdrop img{height:56%;opacity:.28;filter:blur(24px) saturate(.85)}}
