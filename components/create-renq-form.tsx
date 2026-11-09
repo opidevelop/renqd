@@ -1,193 +1,29 @@
 "use client";
-
-import { useState, type FormEvent } from "react";
-import { ArrowDown, ArrowUp, Check, Layers3, Plus, Swords, Timer, Trash2, Users, Eye, EyeOff, SlidersHorizontal } from "lucide-react";
-
-type Mode = "renq" | "battle" | "speed";
-type Participation = "solo" | "collab";
-type Visibility = "live" | "reveal";
-type CategoryId = "music" | "games" | "film" | "books" | "sport" | "food" | "travel" | "custom";
-
-const categories: { id: CategoryId; label: string; icon: string; types: string[] }[] = [
-  { id: "music", label: "Musica", icon: "♫", types: ["Album", "Artisti", "Discografie", "Playlist personalizzata"] },
-  { id: "games", label: "Videogiochi", icon: "⌘", types: ["Giochi", "Saghe", "Franchise", "Personaggi", "Lista personalizzata"] },
-  { id: "film", label: "Film e serie", icon: "▣", types: ["Film", "Serie TV", "Franchise", "Personaggi", "Lista personalizzata"] },
-  { id: "books", label: "Libri", icon: "▤", types: ["Libri", "Autori", "Saga letterarie", "Personaggi", "Lista personalizzata"] },
-  { id: "sport", label: "Sport", icon: "◉", types: ["Atleti", "Squadre", "Competizioni", "Momenti sportivi", "Lista personalizzata"] },
-  { id: "food", label: "Cibo", icon: "✳", types: ["Piatti", "Ristoranti", "Cucine", "Ingredienti", "Lista personalizzata"] },
-  { id: "travel", label: "Viaggi", icon: "⌖", types: ["Città", "Paesi", "Luoghi", "Esperienze", "Lista personalizzata"] },
-  { id: "custom", label: "Custom", icon: "+", types: ["Lista personalizzata"] },
-];
-
-const modes: { id: Mode; label: string; description: string; icon: typeof Layers3 }[] = [
-  { id: "renq", label: "Renq", description: "Ordina manualmente", icon: Layers3 },
-  { id: "battle", label: "Battle Renq", description: "Confronta a coppie", icon: Swords },
-  { id: "speed", label: "Speed Renq", description: "Crea a tempo", icon: Timer },
-];
-
-export function CreateRenqForm() {
-  const [mode, setMode] = useState<Mode>("renq");
-  const [title, setTitle] = useState("");
-  const [itemInput, setItemInput] = useState("");
-  const [items, setItems] = useState<string[]>([]);
-  const [category, setCategory] = useState<CategoryId | null>(null);
-  const [itemType, setItemType] = useState("");
-  const [participation, setParticipation] = useState<Participation>("solo");
-  const [visibility, setVisibility] = useState<Visibility>("live");
-  const [allowTies, setAllowTies] = useState(false);
-  const [collaborators, setCollaborators] = useState(2);
-  const [duration, setDuration] = useState("60");
-  const [notice, setNotice] = useState("");
-
-  function addItem(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const value = itemInput.trim();
-    if (!value) return;
-    if (items.some((item) => item.toLocaleLowerCase() === value.toLocaleLowerCase())) {
-      setNotice("Questo elemento è già presente nella lista.");
-      return;
-    }
-    if (items.length >= 100) {
-      setNotice("Puoi inserire al massimo 100 elementi.");
-      return;
-    }
-    setItems((current) => [...current, value]);
-    setItemInput("");
-    setNotice("");
-  }
-
-  function moveItem(index: number, direction: -1 | 1) {
-    setItems((current) => {
-      const next = [...current];
-      const target = index + direction;
-      if (target < 0 || target >= next.length) return current;
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
-  }
-
-  function removeItem(index: number) {
-    setItems((current) => current.filter((_, itemIndex) => itemIndex !== index));
-  }
-
-  function continueDraft() {
-    setNotice("Configurazione pronta come anteprima. Salvataggio, inviti e pubblicazione saranno attivati con account e backend.");
-  }
-
-  return (
-    <div className="create-experience">
-      <div className="create-intro">
-        <div className="create-intro-copy">
-          <span className="create-intro-kicker"><span/> BUILD YOUR RANKING</span>
-          <h2>La tua classifica.<br/><em>Le tue regole.</em></h2>
-          <p>Costruisci il tuo Renq un passo alla volta. Scegli, aggiungi, metti in ordine.</p>
-        </div>
-        <div className="create-intro-art" aria-hidden="true"><span className="create-art-star">✳</span><span className="create-art-one">01</span><span className="create-art-two">02</span><span className="create-art-three">03</span></div>
-      </div>
-      <div className="create-step-caption"><span>IL TUO PERCORSO</span><span>6 PASSAGGI · CIRCA 2 MIN</span></div>
-      <div className="create-builder">
-      <section className="builder-panel">
-        <div className="builder-panel-heading"><span>01</span><div><h2>Scegli come creare</h2><p>Ogni modalità costruisce la classifica in modo diverso.</p></div></div>
-        <div className="builder-mode-grid">
-          {modes.map(({ id, label, description, icon: Icon }) => (
-            <button type="button" key={id} onClick={() => { setMode(id); setNotice(""); }} className={mode === id ? "builder-mode is-selected" : "builder-mode"}>
-              <span className="builder-mode-icon"><Icon size={18}/></span>
-              <span className="builder-mode-copy"><strong>{label}</strong><small>{description}</small></span>
-              <span className="builder-mode-check">{mode === id ? <Check size={14}/> : null}</span>
-            </button>
-          ))}
-        </div>
-        {mode === "speed" && <div className="builder-inline-setting"><label className="builder-label" htmlFor="speed-duration">DURATA DELLA SFIDA</label><select id="speed-duration" className="builder-select" value={duration} onChange={(event) => setDuration(event.target.value)}><option value="30">30 secondi</option><option value="60">60 secondi</option><option value="90">90 secondi</option><option value="120">120 secondi</option></select></div>}
-      </section>
-
-      <section className="builder-panel">
-        <div className="builder-panel-heading"><span>02</span><div><h2>Dai un titolo alla tua classifica</h2><p>Scegli un nome chiaro, che racconti il tuo argomento.</p></div></div>
-        <label className="builder-label" htmlFor="renq-title">TITOLO</label>
-        <input id="renq-title" className="builder-input" maxLength={80} placeholder="Es. I miei album preferiti di sempre" value={title} onChange={(event) => setTitle(event.target.value)}/>
-        <div className="builder-character-count">{title.length}/80</div>
-      </section>
-
-      <section className="builder-panel">
-        <div className="builder-panel-heading"><span>03</span><div><h2>Di cosa vuoi parlare?</h2><p>Scegli una macrocategoria e poi il tipo di elementi da mettere in classifica.</p></div></div>
-        <div className="builder-category-grid" aria-label="Scegli una macrocategoria">
-          {categories.map((entry) => (
-            <button type="button" key={entry.id} onClick={() => { setCategory(entry.id); setItemType(entry.types[0]); setItemInput(""); setNotice(""); }} className={category === entry.id ? "builder-category is-selected" : "builder-category"} aria-pressed={category === entry.id}>
-              <span className="builder-category-icon">{entry.icon}</span><strong>{entry.label}</strong><span className="builder-category-arrow">↗</span>
-            </button>
-          ))}
-        </div>
-        {category && (
-          <div className="builder-category-detail">
-            <div className="builder-category-detail-heading"><span>TIPO DI CLASSIFICA</span><strong>{categories.find((entry) => entry.id === category)?.label}</strong></div>
-            <div className="builder-type-list">
-              {categories.find((entry) => entry.id === category)?.types.map((type) => (
-                <button type="button" key={type} onClick={() => setItemType(type)} className={itemType === type ? "builder-type is-selected" : "builder-type"} aria-pressed={itemType === type}>{type}{itemType === type && <Check size={13}/>}</button>
-              ))}
-            </div>
-            <form className="builder-add-form" onSubmit={addItem}>
-              <input className="builder-input" aria-label="Nuovo elemento" maxLength={120} placeholder={category === "custom" ? "Scrivi qualsiasi elemento..." : `Aggiungi ${itemType.toLocaleLowerCase()} alla lista...`} value={itemInput} onChange={(event) => setItemInput(event.target.value)}/>
-              <button className="builder-add-button" type="submit" disabled={!itemInput.trim() || items.length >= 100}><Plus size={17}/> Aggiungi</button>
-            </form>
-            {notice && <p className="builder-notice" role="status">{notice}</p>}
-          </div>
-        )}
-        <div className="builder-items-header"><span>{itemType ? itemType.toLocaleUpperCase() : "I TUOI ELEMENTI"}</span><strong>{items.length} / 100</strong></div>
-        {items.length === 0 ? (
-          <div className="builder-empty-items">{category ? "La lista è vuota. Aggiungi il primo elemento per iniziare." : "Scegli una categoria per iniziare a costruire la tua lista."}</div>
-        ) : (
-          <ol className="builder-items-list">
-            {items.map((item, index) => (
-              <li key={item.toLocaleLowerCase()}>
-                <span className="builder-item-position">{String(index + 1).padStart(2, "0")}</span>
-                <span className="builder-item-name">{item}</span>
-                <div className="builder-item-actions">
-                  <button type="button" aria-label={`Sposta ${item} in alto`} onClick={() => moveItem(index, -1)} disabled={index === 0}><ArrowUp size={15}/></button>
-                  <button type="button" aria-label={`Sposta ${item} in basso`} onClick={() => moveItem(index, 1)} disabled={index === items.length - 1}><ArrowDown size={15}/></button>
-                  <button type="button" aria-label={`Rimuovi ${item}`} onClick={() => removeItem(index)}><Trash2 size={15}/></button>
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
-
-      <section className="builder-panel">
-        <div className="builder-panel-heading"><span>04</span><div><h2>Imposta la partecipazione</h2><p>Decidi chi contribuisce alla classifica.</p></div></div>
-        <div className="builder-option-grid">
-          <button type="button" className={participation === "solo" ? "builder-option is-selected" : "builder-option"} onClick={() => setParticipation("solo")}><span className="builder-option-icon"><SlidersHorizontal size={17}/></span><span><strong>Solo</strong><small>La classifica è personale.</small></span><span className="builder-option-check">{participation === "solo" && <Check size={13}/>}</span></button>
-          <button type="button" className={participation === "collab" ? "builder-option is-selected" : "builder-option"} onClick={() => setParticipation("collab")}><span className="builder-option-icon"><Users size={17}/></span><span><strong>Collaborativa</strong><small>Invita altre persone a partecipare.</small></span><span className="builder-option-check">{participation === "collab" && <Check size={13}/>}</span></button>
-        </div>
-        {participation === "collab" && <div className="builder-inline-setting"><label className="builder-label" htmlFor="collaborators">NUMERO DI PARTECIPANTI (INCLUSO TE)</label><select id="collaborators" className="builder-select" value={collaborators} onChange={(event) => setCollaborators(Number(event.target.value))}>{Array.from({length:9},(_,i)=>i+2).map((n)=><option value={n} key={n}>{n} partecipanti</option>)}</select><p className="builder-help">Gli inviti saranno disponibili quando attiveremo account e collaborazione.</p></div>}
-      </section>
-
-      <section className="builder-panel">
-        <div className="builder-panel-heading"><span>05</span><div><h2>Decidi quando mostrare i risultati</h2><p>La visibilità scelta resterà fissa una volta avviata la classifica.</p></div></div>
-        <div className="builder-option-grid">
-          <button type="button" className={visibility === "live" ? "builder-option is-selected" : "builder-option"} onClick={() => setVisibility("live")}><span className="builder-option-icon"><Eye size={17}/></span><span><strong>Live</strong><small>Mostra l’avanzamento in tempo reale.</small></span><span className="builder-option-check">{visibility === "live" && <Check size={13}/>}</span></button>
-          <button type="button" className={visibility === "reveal" ? "builder-option is-selected" : "builder-option"} onClick={() => setVisibility("reveal")}><span className="builder-option-icon"><EyeOff size={17}/></span><span><strong>Reveal</strong><small>Nascondi il ranking fino alla rivelazione.</small></span><span className="builder-option-check">{visibility === "reveal" && <Check size={13}/>}</span></button>
-        </div>
-      </section>
-
-      <section className="builder-panel">
-        <div className="builder-panel-heading"><span>06</span><div><h2>Preferenze della classifica</h2><p>Personalizza le regole prima di iniziare.</p></div></div>
-        <label className="builder-toggle-row"><span><strong>Consenti pari merito</strong><small>Permette di assegnare la stessa posizione a più elementi.</small></span><input type="checkbox" checked={allowTies} onChange={(event) => setAllowTies(event.target.checked)}/><span className="builder-toggle-ui"/></label>
-      </section>
-
-      <div className="builder-review">
-        <div className="builder-review-heading">RIEPILOGO DELLA BOZZA</div>
-        <div className="builder-review-grid">
-          <div><small>MODALITÀ</small><strong>{modes.find((item) => item.id === mode)?.label}</strong></div>
-          <div><small>ELEMENTI</small><strong>{items.length}</strong></div>
-          <div><small>PARTECIPAZIONE</small><strong>{participation === "solo" ? "Solo" : `Collaborativa · ${collaborators}`}</strong></div>
-          <div><small>VISIBILITÀ</small><strong>{visibility === "live" ? "Live" : "Reveal"}</strong></div>
-        </div>
-      </div>
-
-      <div className="builder-footer">
-        <div><span className="builder-save-dot"/><span>Bozza temporanea · non ancora salvata</span></div>
-        <button type="button" className="builder-finish-button" disabled={!title.trim() || items.length < 2} onClick={continueDraft}>Continua <span>→</span></button>
-      </div>
-      </div>
-    </div>
-  );
+import { useState } from "react";
+import { ArrowLeft,ArrowRight,Check,ChevronDown,ChevronUp,LoaderCircle,Plus,Search,Sparkles,Swords,Timer,Trash2,X,Layers3,Eye,EyeOff } from "lucide-react";
+import { loadCatalogItems,searchCatalog } from "@/lib/catalog/registry";
+import type { CatalogCategory,CatalogEntity,CatalogItem } from "@/lib/catalog/types";
+type Mode="renq"|"battle"|"speed"; type CategoryId=CatalogCategory|"custom";
+const modes=[{id:"renq" as const,label:"Renq",desc:"Ordina gli elementi come vuoi.",icon:Layers3,tone:"lavender"},{id:"battle" as const,label:"Battle Renq",desc:"Costruisci la classifica con confronti a coppie.",icon:Swords,tone:"peach"},{id:"speed" as const,label:"Speed Renq",desc:"Scegli d’istinto, contro il tempo.",icon:Timer,tone:"mint"}];
+const categories=[{id:"music" as const,label:"Musica",desc:"Album, artisti, discografie e playlist",tone:"music",types:["Album","Artisti","Discografie","Playlist personalizzata"]},{id:"games" as const,label:"Videogiochi",desc:"Giochi, saghe, franchise e personaggi",tone:"games",types:["Giochi","Saghe","Franchise","Personaggi","Lista personalizzata"]},{id:"film" as const,label:"Film e serie",desc:"Film, serie TV, franchise e personaggi",tone:"film",types:["Film","Serie TV","Franchise","Personaggi","Lista personalizzata"]},{id:"books" as const,label:"Libri",desc:"Libri, autori, saghe e personaggi",tone:"books",types:["Libri","Autori","Saga letterarie","Personaggi","Lista personalizzata"]},{id:"sport" as const,label:"Sport",desc:"Atleti, squadre, competizioni e momenti",tone:"sport",types:["Atleti","Squadre","Competizioni","Momenti sportivi","Lista personalizzata"]},{id:"food" as const,label:"Food",desc:"Piatti, ristoranti, cucine e ingredienti",tone:"food",types:["Piatti","Ristoranti","Cucine","Ingredienti","Lista personalizzata"]},{id:"travel" as const,label:"Viaggi",desc:"Città, paesi, luoghi ed esperienze",tone:"travel",types:["Città","Paesi","Luoghi","Esperienze","Lista personalizzata"]},{id:"custom" as const,label:"Custom",desc:"La tua lista, senza limiti",tone:"custom",types:["Lista personalizzata"]}];
+const steps=["Modalità","Categoria","Contenuto","Riepilogo"];
+export function CreateRenqForm(){
+ const [step,setStep]=useState(1);const [mode,setMode]=useState<Mode>("renq");const [categoryId,setCategoryId]=useState<CategoryId|null>(null);const [contentType,setContentType]=useState("");const [title,setTitle]=useState("");const [query,setQuery]=useState("");const [entities,setEntities]=useState<CatalogEntity[]>([]);const [selectedEntity,setSelectedEntity]=useState<CatalogEntity|null>(null);const [items,setItems]=useState<CatalogItem[]>([]);const [catalogState,setCatalogState]=useState("idle");const [manual,setManual]=useState("");const [notice,setNotice]=useState("");const [participation,setParticipation]=useState<"solo"|"collab">("solo");const [collaborators,setCollaborators]=useState(2);const [visibility,setVisibility]=useState<"live"|"reveal">("live");const [allowTies,setAllowTies]=useState(false);const [duration,setDuration]=useState("60");const [battleDepth,setBattleDepth]=useState("standard");
+ const category=categories.find((item)=>item.id===categoryId);const selectedCount=items.filter((item)=>item.selected).length;const manualType=categoryId==="custom"||contentType.toLowerCase().includes("personalizzata");
+ function chooseCategory(id:CategoryId){setCategoryId(id);setContentType("");setSelectedEntity(null);setEntities([]);setItems([]);setQuery("");setCatalogState("idle");setNotice("");}
+ async function runSearch(){if(!category||category.id==="custom"||!query.trim())return;setCatalogState("searching");setEntities([]);setSelectedEntity(null);setItems([]);const result=await searchCatalog(query.trim(),category.id,contentType);setEntities(result.entities);setCatalogState(result.status);}
+ async function chooseEntity(entity:CatalogEntity){if(!category||category.id==="custom")return;setSelectedEntity(entity);setCatalogState("loading");const result=await loadCatalogItems(entity,category.id,contentType);setItems(result.items.map((item)=>({...item,selected:true,source:"catalog"})));setCatalogState(result.status);}
+ function addManual(){const value=manual.trim();if(!value)return;if(items.some((item)=>item.title.toLowerCase()===value.toLowerCase())){setNotice("Questo elemento è già presente.");return;}if(items.length>=100){setNotice("Puoi inserire al massimo 100 elementi.");return;}setItems((current)=>[...current,{id:globalThis.crypto.randomUUID(),title:value,selected:true,source:"manual"}]);setManual("");setNotice("");}
+ function moveItem(index:number,direction:-1|1){setItems((current)=>{const next=[...current];const target=index+direction;if(target<0||target>=next.length)return current;[next[index],next[target]]=[next[target],next[index]];return next;});}
+ function updateItem(index:number,patch:Partial<CatalogItem>){setItems((current)=>current.map((item,i)=>i===index?{...item,...patch}:item));}
+ function next(){setStep((current)=>Math.min(4,current+1));setNotice("");}function back(){setStep((current)=>Math.max(1,current-1));setNotice("");}
+ return <div className="builder-experience"><div className="builder-progress"><div className="builder-progress-label"><span>IL TUO PERCORSO</span><strong>PASSAGGIO {step} DI 4</strong></div><div className="builder-progress-track">{steps.map((name,index)=><span key={name} className={index<step?"is-done":""}/>)}</div><div className="builder-step-names">{steps.map((name,index)=><span key={name} className={index+1===step?"is-current":index+1<step?"is-done":""}>{name}</span>)}</div></div>
+ {step===1&&<section className="builder-step"><div className="builder-step-heading"><span>01 — MODALITÀ</span><h2>Come vuoi creare<br/><em>il tuo Renq?</em></h2><p>Tre modi diversi di arrivare alla tua classifica. Scegli quello che ti somiglia.</p></div><div className="builder-mode-grid">{modes.map(({id,label,desc,icon:Icon,tone})=><button key={id} type="button" onClick={()=>setMode(id)} className={"builder-mode-card tone-"+tone+(mode===id?" is-selected":"")}><span className="mode-card-icon"><Icon size={22}/></span><strong>{label}</strong><small>{desc}</small><span className="mode-card-check">{mode===id?<Check size={16}/>:null}</span></button>)}</div></section>}
+ {step===2&&<section className="builder-step"><div className="builder-step-heading"><span>02 — CATEGORIA</span><h2>Da quale mondo<br/><em>vuoi partire?</em></h2><p>Scegli l’argomento che vuoi mettere in classifica.</p></div><div className="builder-category-grid">{categories.map(({id,label,desc,tone})=><button key={id} type="button" onClick={()=>chooseCategory(id)} className={"builder-category-card tone-"+tone+(categoryId===id?" is-selected":"")}><strong>{label}</strong><small>{desc}</small><span>{categoryId===id?<Check size={16}/>:"↗"}</span></button>)}</div></section>}
+ {step===3&&<section className="builder-step"><div className="builder-step-heading"><span>03 — TIPO DI CONTENUTO</span><h2>Che cosa vuoi<br/><em>mettere in ordine?</em></h2><p>Seleziona una tipologia. Quando un catalogo è collegato, potrai cercare il contenuto e caricare automaticamente i suoi elementi.</p></div><div className="builder-type-grid">{(category?.types??[]).map((type)=><button key={type} type="button" onClick={()=>{setContentType(type);setEntities([]);setSelectedEntity(null);setItems([]);setCatalogState("idle");}} className={"builder-type-option"+(contentType===type?" is-selected":"")}><span>{type}</span>{contentType===type?<Check size={17}/>:<ArrowRight size={16}/>}</button>)}</div>
+ {contentType&&!manualType&&<div className="catalog-search-panel"><div className="catalog-panel-heading"><div><span>RICERCA CATALOGO</span><strong>Seleziona {contentType.toLowerCase()}</strong></div><span className="catalog-status">{catalogState==="searching"||catalogState==="loading"?<LoaderCircle size={14} className="spin"/>:catalogState==="ready"?"DISPONIBILE":"INTEGRAZIONE IN PREPARAZIONE"}</span></div><form className="catalog-search" onSubmit={(event)=>{event.preventDefault();void runSearch();}}><Search size={17}/><input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder={"Cerca "+contentType.toLowerCase()+"…"}/><button type="submit" disabled={!query.trim()||catalogState==="searching"}>Cerca</button></form>{entities.length>0&&<div className="catalog-results">{entities.map((entity)=><button type="button" key={entity.id} onClick={()=>void chooseEntity(entity)} className={selectedEntity?.id===entity.id?"is-selected":""}><span><strong>{entity.title}</strong><small>{entity.subtitle??entity.provider}</small></span><ArrowRight size={16}/></button>)}</div>}{catalogState==="unavailable"&&<p className="catalog-empty">Il collegamento ai cataloghi verrà attivato progressivamente. Potrai comunque aggiungere gli elementi manualmente nel riepilogo.</p>}{catalogState==="error"&&<p className="catalog-empty">Non è stato possibile caricare il catalogo. Puoi continuare e inserire gli elementi manualmente.</p>}{catalogState==="ready"&&entities.length===0&&<p className="catalog-empty">Nessun risultato. Prova un’altra ricerca o aggiungi gli elementi manualmente.</p>}</div>}
+ {contentType&&<div className="builder-step-hint"><Sparkles size={16}/><span>Nel riepilogo potrai aggiungere, rimuovere, modificare e riordinare liberamente ogni elemento.</span></div>}</section>}
+ {step===4&&<section className="builder-step builder-review"><div className="builder-step-heading"><span>04 — RIEPILOGO E PERSONALIZZAZIONE</span><h2>La tua classifica,<br/><em>prima di cominciare.</em></h2><p>Rivedi il titolo e gli elementi. Tutto può essere modificato, anche dopo il caricamento dal catalogo.</p></div><div className="review-card"><label className="review-title-field">TITOLO DEL RENQ<input value={title} onChange={(event)=>setTitle(event.target.value)} maxLength={80} placeholder="Es. I miei album preferiti"/><small>{title.length}/80 caratteri</small></label><div className="review-context"><span>{category?.label??"Categoria"}</span><i>·</i><span>{contentType||"Lista personalizzata"}</span>{selectedEntity&&<><i>·</i><span>{selectedEntity.title}</span></>}</div><div className="review-items-heading"><div><span>ELEMENTI DELLA CLASSIFICA</span><strong>{selectedCount} selezionati <small>su {items.length}</small></strong></div><div className="selection-actions"><button type="button" onClick={()=>setItems((current)=>current.map((item)=>({...item,selected:false})))} disabled={!selectedCount}>Svuota selezione</button><button type="button" onClick={()=>setItems((current)=>current.map((item)=>({...item,selected:true})))} disabled={!items.length||selectedCount===items.length}>Seleziona tutti</button></div></div><div className="review-item-list">{items.length===0?<div className="review-empty"><span>✳</span><strong>La lista è pronta per prendere forma.</strong><p>{manualType?"Aggiungi gli elementi che vuoi mettere in classifica.":"Gli elementi del catalogo compariranno qui quando il collegamento sarà disponibile. Puoi iniziare aggiungendoli manualmente."}</p></div>:items.map((item,index)=><div className={"review-item "+(item.selected?"is-selected":"is-unselected")} key={item.id}><label className="review-item-select"><input type="checkbox" checked={item.selected} onChange={(event)=>updateItem(index,{selected:event.target.checked})}/><span className="custom-check"><Check size={12}/></span></label><div className="review-item-copy"><strong>{item.title}</strong><small>{item.source==="manual"?"Aggiunto manualmente":"Dal catalogo"}</small></div><div className="review-item-actions"><button type="button" onClick={()=>moveItem(index,-1)} disabled={index===0} aria-label="Sposta su"><ChevronUp size={16}/></button><button type="button" onClick={()=>moveItem(index,1)} disabled={index===items.length-1} aria-label="Sposta giù"><ChevronDown size={16}/></button><button type="button" onClick={()=>setItems((current)=>current.filter((_,i)=>i!==index))} aria-label="Rimuovi"><Trash2 size={15}/></button></div></div>)}</div><form className="manual-add-form" onSubmit={(event)=>{event.preventDefault();addManual();}}><Plus size={17}/><input value={manual} onChange={(event)=>setManual(event.target.value)} maxLength={120} placeholder="Aggiungi un elemento manualmente…"/><button type="submit" disabled={!manual.trim()||items.length>=100}>Aggiungi</button></form>{notice&&<p className="builder-notice">{notice}</p>}</div>
+ <div className="review-options"><div className="review-option-block"><div><strong>Partecipazione</strong><small>Chi costruisce questa classifica?</small></div><div className="segmented-options"><button type="button" className={participation==="solo"?"is-active":""} onClick={()=>setParticipation("solo")}>Solo</button><button type="button" className={participation==="collab"?"is-active":""} onClick={()=>setParticipation("collab")}>Collaborativa</button></div>{participation==="collab"&&<label className="collaborator-count">Partecipanti, incluso te <select value={collaborators} onChange={(event)=>setCollaborators(Number(event.target.value))}>{[2,3,4,5,6,7,8,9,10].map((n)=><option key={n} value={n}>{n}</option>)}</select></label>}</div><div className="review-option-block"><div><strong>Visibilità</strong><small>Quando rendere visibili le scelte?</small></div><div className="segmented-options"><button type="button" className={visibility==="live"?"is-active":""} onClick={()=>setVisibility("live")}><Eye size={14}/> Live</button><button type="button" className={visibility==="reveal"?"is-active":""} onClick={()=>setVisibility("reveal")}><EyeOff size={14}/> Reveal</button></div></div>{mode==="speed"&&<div className="review-option-block"><div><strong>Durata</strong><small>Tempo a disposizione</small></div><select value={duration} onChange={(event)=>setDuration(event.target.value)}><option value="30">30 secondi</option><option value="60">60 secondi</option><option value="90">90 secondi</option><option value="120">120 secondi</option></select></div>}{mode==="battle"&&<div className="review-option-block"><div><strong>Profondità dei confronti</strong><small>Quanto vuoi esplorare le preferenze?</small></div><div className="segmented-options"><button type="button" className={battleDepth==="quick"?"is-active":""} onClick={()=>setBattleDepth("quick")}>Rapida</button><button type="button" className={battleDepth==="standard"?"is-active":""} onClick={()=>setBattleDepth("standard")}>Standard</button><button type="button" className={battleDepth==="deep"?"is-active":""} onClick={()=>setBattleDepth("deep")}>Approfondita</button></div></div>}<label className="tie-option"><input type="checkbox" checked={allowTies} onChange={(event)=>setAllowTies(event.target.checked)}/> Consenti ex aequo</label></div></section>}
+ <div className="builder-navigation">{step>1?<button className="builder-back" type="button" onClick={back}><ArrowLeft size={16}/> Indietro</button>:<span/>}{step<4?<button className="builder-next" type="button" onClick={next}>Continua <ArrowRight size={17}/></button>:<button className="builder-next" type="button" onClick={()=>setNotice("Configurazione pronta. Salvataggio e pubblicazione verranno collegati nella fase funzionale.")}>Conferma configurazione <Check size={17}/></button>}</div></div>;
 }
