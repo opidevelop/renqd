@@ -143,3 +143,23 @@
 .public-home-footer .public-home-logo{color:#28241f;font-size:22px}.public-home-footer>a:last-child{display:flex;align-items:center;gap:7px;color:#a65a22;font-weight:800}
 @media(max-width:800px){.public-home{padding:0 20px}.public-home-header{height:68px}.public-home-hero{grid-template-columns:1fr;gap:15px;padding:53px 0 38px}.public-home-copy h1{font-size:clamp(48px,10vw,70px);letter-spacing:-3.5px}.public-home-copy>p{font-size:12px}.public-home-visual{min-height:360px}.visual-rank-card{width:min(390px,88%)}.visual-orbit-one{width:340px;height:250px}.visual-orbit-two{width:390px;height:300px}.visual-floating-battle{right:1%}.visual-floating-speed{left:0}.public-home-modes{padding:35px 0 48px}.public-mode-grid{grid-template-columns:1fr;gap:9px}.public-mode-grid article{min-height:130px}.public-home-footer{flex-wrap:wrap;gap:10px;padding:18px 0}.public-home-proof{margin-top:25px}}
 @media(max-width:440px){.public-home-header nav{gap:12px;font-size:10px}.public-home-register{padding:10px 11px}.public-home-hero{padding-top:42px}.public-home-visual{min-height:315px}.visual-rank-card{padding:18px 17px 14px}.visual-rank-card h2{font-size:21px}.visual-floating{padding:9px 10px}.visual-floating-battle{top:13px}.visual-floating-speed{bottom:10px}.visual-orbit-one{width:290px;height:220px}.visual-orbit-two{width:330px;height:260px}.public-home-footer{font-size:8px}}
+
+
+/* Renqd main polish: centered logo and category/subcategory spacing. */
+.platform-topbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;align-items:center!important;gap:0!important}
+.platform-header-logo{grid-column:2!important;justify-self:center!important;position:static!important;transform:none!important;margin:0!important}
+.platform-topbar>.topbar-avatar{grid-column:3!important;justify-self:end!important;align-self:center!important;margin:0!important}
+@media(min-width:901px){.builder-category-card{gap:12px!important;min-height:138px!important;padding-top:18px!important}.builder-category-card>svg{margin-bottom:14px!important}.builder-type-option{gap:12px!important}.builder-type-option>svg{margin-bottom:8px!important}}
+.review-combined-card{padding:0!important;overflow:hidden;background:#fff!important}
+.review-title-panel{margin:0!important;padding:20px!important;border:0!important;border-radius:0!important;background:#fff0e2!important;box-shadow:none!important;color:var(--ink)!important}
+.review-title-panel .review-title-field{color:#a96836!important}
+.review-title-panel .review-title-field input{border-color:#efd8c3!important;background:#fff!important;color:var(--ink)!important}
+.review-title-panel .review-title-field small{color:#a58b76!important}
+.review-title-panel .review-context{color:#98785e!important}
+.review-items-card{margin:0!important;padding:20px!important;border:0!important;border-top:1px solid #f0e3d7!important;border-radius:0!important;background:#fff!important}
+.speed-duration-grid .review-choice-card{min-height:126px}
+.speed-duration-grid .review-choice-card>svg{color:#bd7747}
+.speed-custom-duration{display:grid;gap:8px;max-width:260px;margin-top:16px;color:#a16b42;font-size:9px;font-weight:800}
+.speed-custom-duration input{height:42px;padding:0 12px;border:1px solid #eadfd4;border-radius:10px;background:#fff;color:var(--ink);font:inherit;font-size:12px}
+.public-home-footer{display:grid!important;place-items:center!important;justify-content:center!important;min-height:88px!important}
+.public-home-footer .public-home-logo{margin:0!important}
