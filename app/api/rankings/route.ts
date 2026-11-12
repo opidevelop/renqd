@@ -46,11 +46,17 @@ export async function POST(request:Request){
   if(updateError)return jsonError(updateError.message,500);
   if(completed){
    const {data:rankingTieSetting}=await supabase.from("rankings").select("allow_ties").eq("id",session.ranking_id).single();const rankingAllowsTies=Boolean(rankingTieSetting?.allow_ties);
-   const {data:allItems}=await supabase.from("ranking_items").select("id").eq("ranking_id",session.ranking_id);
-   const ordered=(allItems??[]).map(x=>x.id).sort((a,b)=>(state.wins[b]??0)-(state.wins[a]??0));
-   const tieIds=new Map<string,string>();if(rankingAllowsTies){const byWins=new Map<number,string[]>();for(const id of ordered){const wins=state.wins[id]??0;const group=byWins.get(wins)??[];group.push(id);byWins.set(wins,group);}for(const group of byWins.values())if(group.length>1){const groupId=crypto.randomUUID();for(const id of group)tieIds.set(id,groupId);}}
-   let position=0;let previousWins:number|null=null;for(let i=0;i<ordered.length;i++){const id=ordered[i];const wins=state.wins[id]??0;if(!tieIds.has(id)||wins!==previousWins)position=i+1-[...tieIds.entries()].filter(([member])=>ordered.indexOf(member)<i&&state.wins[member]===wins).length;previousWins=wins;await supabase.from("ranking_items").update({rank_position:position,tie_group_id:tieIds.get(id)??null}).eq("id",id);}
+   const {data:allItems}=await supabase.from("ranking_items").select("id").eq("ranking_id",session.ranking_id);const ids=(allItems??[]).map(x=>x.id);
+   const parent=new Map(ids.map(id=>[id,id]));const find=(id:string):string=>{const p=parent.get(id)??id;if(p===id)return id;const root=find(p);parent.set(id,root);return root;};
+   if(rankingAllowsTies){const byWins=new Map<number,string[]>();for(const id of ids){const wins=state.wins[id]??0;const group=byWins.get(wins)??[];group.push(id);byWins.set(wins,group);}for(const group of byWins.values())if(group.length>1)for(let i=1;i<group.length;i++){const a=find(group[0]),b=find(group[i]);if(a!==b)parent.set(b,a);}
+    for(const pair of state.tiePairs??[]){const a=find(pair.a),b=find(pair.b);if(a!==b)parent.set(b,a);}
+   }
+   const members=new Map<string,string[]>();for(const id of ids){const root=find(id);const group=members.get(root)??[];group.push(id);members.set(root,group);}
+   const groups=[...members.values()].sort((a,b)=>Math.max(...b.map(id=>state.wins[id]??0))-Math.max(...a.map(id=>state.wins[id]??0)));
+   const tieGroups:Record<string,string>={},rankPositions:Record<string,number>={};let position=0;
+   for(const group of groups){position++;const groupId=group.length>1?crypto.randomUUID():null;for(const id of group){rankPositions[id]=position;if(groupId)tieGroups[id]=groupId;await supabase.from("ranking_items").update({rank_position:position,tie_group_id:groupId}).eq("id",id);}}
    await supabase.from("rankings").update({status:"COMPLETED",completed_at:new Date().toISOString()}).eq("id",session.ranking_id);
+   return NextResponse.json({completed,cursor:state.cursor,total:state.pairs.length,wins:state.wins,tiePairs:state.tiePairs??[],tieGroups,rankPositions});
   }
   return NextResponse.json({completed,cursor:state.cursor,total:state.pairs.length,wins:state.wins});
  }
