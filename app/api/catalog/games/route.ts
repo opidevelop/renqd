@@ -105,7 +105,7 @@ function pokemonEntity(species: PokemonSpecies) {
 }
 async function searchCharacters(query: string, offset: number) {
   const normalized = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  const species = await getPokemonSpecies();
+  const species = await getPokemonSpecies().catch(() => []);
   const pokemonUniverse = normalized === "pokemon";
   const matchingSpecies = pokemonUniverse ? species : species.filter((item) => item.name.replace(/-/g, " ").includes(normalized));
   const pageSize = 50;
