@@ -41,7 +41,18 @@ const gamesProvider: CatalogProvider = {
   },
 };
 
-const providers: CatalogProvider[] = [musicProvider("itunes"), musicProvider("musicbrainz"), gamesProvider];
+const filmProvider: CatalogProvider = {
+  id: "tmdb",
+  supports: (category, contentType) => category === "film" && ["Film", "Serie TV", "Saghe cinematografiche", "Registi", "Attori", "Creatori"].includes(contentType),
+  async search(query, _category, contentType, offset = 1) {
+    return requestCatalog<{ entities: CatalogEntity[]; hasMore?: boolean; nextOffset?: number }>("/api/catalog/film", "tmdb", "search", contentType, { query, offset: String(offset) });
+  },
+  async getItems(entity, _category, contentType) {
+    const result = await requestCatalog<{ items: Omit<CatalogItem, "selected" | "source">[] }>("/api/catalog/film", "tmdb", "items", contentType, { payload: JSON.stringify(entity.payload ?? {}) });
+    return result.items;
+  },
+};
+const providers: CatalogProvider[] = [musicProvider("itunes"), musicProvider("musicbrainz"), gamesProvider, filmProvider];
 
 export async function searchCatalog(query: string, category: CatalogCategory, contentType: string, offset = 0) {
   const matching = providers.filter((provider) => provider.supports(category, contentType));
