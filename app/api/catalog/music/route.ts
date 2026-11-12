@@ -9,7 +9,7 @@ type MusicEntity = {
   payload?: Record<string, unknown>;
 };
 
-type MusicItem = { id: string; title: string; subtitle?: string; imageUrl?: string };
+type MusicItem = { id: string; title: string; subtitle?: string; imageUrl?: string; previewUrl?: string; appleMusicUrl?: string; spotifyUrl?: string };
 
 const ITUNES = "https://itunes.apple.com";
 const MUSICBRAINZ = "https://musicbrainz.org/ws/2";
@@ -41,6 +41,10 @@ async function itunesJson<T>(url: string): Promise<T> {
   if (!response.ok) throw new Error(`iTunes returned ${response.status}`);
   return response.json() as Promise<T>;
 }
+
+function spotifySearchUrl(query: string) { return `https://open.spotify.com/search/${encodeURIComponent(query)}`; }
+
+function normalizeMusicText(value: string) { return value.normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
 
 function artistCredit(credits?: Array<{ name?: string; artist?: { name?: string } }>) {
   return (credits ?? []).map((credit) => credit.name ?? credit.artist?.name).filter(Boolean).join(", ");
@@ -81,6 +85,7 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
         subtitle: typeof entry.primaryGenreName === "string" ? entry.primaryGenreName : "Artista",
         imageUrl, provider: "itunes" as const,
         payload: { artistId: entry.artistId, artistImageUrl: imageUrl },
+        spotifyUrl: spotifySearchUrl(entry.artistName),
       }))];
     }));
   }
@@ -96,6 +101,7 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
         imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : undefined,
         provider: "itunes" as const,
         payload: { collectionId: entry.collectionId, artistId: entry.artistId, artistName: artist },
+        spotifyUrl: spotifySearchUrl(`${artist} ${entry.collectionName}`),
       }];
     }
     return [];
@@ -119,7 +125,8 @@ async function searchMusicBrainz(query: string, contentType: string): Promise<Mu
         subtitle: [artistCredit(credits), date].filter(Boolean).join(" · "),
         imageUrl: "https://coverartarchive.org/release-group/" + group.id + "/front-250",
         provider: "musicbrainz" as const,
-        payload: { releaseGroupId: group.id, imageUrl: "https://coverartarchive.org/release-group/" + group.id + "/front-250" },
+        payload: { releaseGroupId: group.id, imageUrl: "https://coverartarchive.org/release-group/" + group.id + "/front-250", albumTitle: group.title, artistName: artistCredit(credits) },
+        spotifyUrl: spotifySearchUrl(`${artistCredit(credits)} ${group.title}`),
       }];
     });
   }
@@ -133,6 +140,7 @@ async function searchMusicBrainz(query: string, contentType: string): Promise<Mu
       subtitle: [disambiguation, country].filter(Boolean).join(" · ") || "Artista",
       imageUrl, provider: "musicbrainz" as const,
       payload: { artistId: artist.id, artistImageUrl: imageUrl },
+      spotifyUrl: spotifySearchUrl(artist.name),
     }))];
   }));
 }
@@ -145,12 +153,33 @@ async function loadItunesItems(payload: Record<string, unknown>, contentType: st
   return (data.results ?? []).flatMap((entry) => {
     if (contentType === "Album") {
       if (entry.wrapperType !== "track" || typeof entry.trackName !== "string") return [];
-      return [{ id: String(entry.trackId ?? entry.trackName), title: entry.trackName, subtitle: typeof entry.artistName === "string" ? entry.artistName : undefined, imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : undefined }];
+      const artist = typeof entry.artistName === "string" ? entry.artistName : "";
+      return [{ id: String(entry.trackId ?? entry.trackName), title: entry.trackName, subtitle: artist || undefined, imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : undefined, previewUrl: typeof entry.previewUrl === "string" ? entry.previewUrl : undefined, appleMusicUrl: typeof entry.trackViewUrl === "string" ? entry.trackViewUrl : undefined, spotifyUrl: spotifySearchUrl(`${artist} ${entry.trackName}`) }];
     }
     if (entry.wrapperType !== "collection" || typeof entry.collectionName !== "string") return [];
     const year = typeof entry.releaseDate === "string" ? entry.releaseDate.slice(0, 4) : "";
-    return [{ id: String(entry.collectionId ?? entry.collectionName), title: entry.collectionName, subtitle: year || undefined, imageUrl: typeof payload.artistImageUrl === "string" ? payload.artistImageUrl : (typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : undefined) }];
+    const artist = typeof payload.artistName === "string" ? payload.artistName : "";
+    return [{ id: String(entry.collectionId ?? entry.collectionName), title: entry.collectionName, subtitle: year || undefined, imageUrl: typeof payload.artistImageUrl === "string" ? payload.artistImageUrl : (typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : undefined), spotifyUrl: spotifySearchUrl(`${artist} ${entry.collectionName}`) }];
   });
+}
+
+async function loadItunesAlbumTrackMetadata(albumTitle: string, artistName: string) {
+  try {
+    const searchParams = new URLSearchParams({ term: `${albumTitle} ${artistName}`.trim(), entity: "album", limit: "5", country: "IT" });
+    const search = await itunesJson<{ results?: Array<Record<string, unknown>> }>(`${ITUNES}/search?${searchParams}`);
+    const wantedAlbum = normalizeMusicText(albumTitle);
+    const wantedArtist = normalizeMusicText(artistName);
+    const match = (search.results ?? []).find((entry) => typeof entry.collectionId === "number" && normalizeMusicText(String(entry.collectionName ?? "")) === wantedAlbum && (!wantedArtist || normalizeMusicText(String(entry.artistName ?? "")) === wantedArtist));
+    if (!match || typeof match.collectionId !== "number") return new Map<string, { previewUrl?: string; appleMusicUrl?: string }>();
+    const lookupParams = new URLSearchParams({ id: String(match.collectionId), entity: "song", limit: "200", country: "IT" });
+    const lookup = await itunesJson<{ results?: Array<Record<string, unknown>> }>(`${ITUNES}/lookup?${lookupParams}`);
+    const metadata = new Map<string, { previewUrl?: string; appleMusicUrl?: string }>();
+    for (const track of lookup.results ?? []) {
+      if (track.wrapperType !== "track" || typeof track.trackName !== "string") continue;
+      metadata.set(normalizeMusicText(track.trackName), { previewUrl: typeof track.previewUrl === "string" ? track.previewUrl : undefined, appleMusicUrl: typeof track.trackViewUrl === "string" ? track.trackViewUrl : undefined });
+    }
+    return metadata;
+  } catch { return new Map<string, { previewUrl?: string; appleMusicUrl?: string }>(); }
 }
 
 async function loadMusicBrainzItems(payload: Record<string, unknown>, contentType: string): Promise<MusicItem[]> {
@@ -160,24 +189,23 @@ async function loadMusicBrainzItems(payload: Record<string, unknown>, contentTyp
     const params = new URLSearchParams({ "release-group": id, inc: "recordings", fmt: "json", limit: "1" });
     const data = await musicBrainzJson<{ releases?: Array<{ media?: Array<{ tracks?: Array<{ id?: string; position?: number; title?: string; recording?: { id?: string; title?: string } }> }> }> }>(`${MUSICBRAINZ}/release?${params}`);
     const tracks = data.releases?.[0]?.media?.flatMap((medium) => medium.tracks ?? []) ?? [];
+    const albumTitle = typeof payload.albumTitle === "string" ? payload.albumTitle : "";
+    const artistName = typeof payload.artistName === "string" ? payload.artistName : "";
+    const previewMetadata = albumTitle ? await loadItunesAlbumTrackMetadata(albumTitle, artistName) : new Map<string, { previewUrl?: string; appleMusicUrl?: string }>();
     return tracks.flatMap((track) => {
       const title = track.recording?.title ?? track.title;
       if (!title) return [];
-      return [{ id: track.recording?.id ?? track.id ?? `${track.position}-${title}`, title, subtitle: track.position ? `Traccia ${track.position}` : undefined, imageUrl: typeof payload.imageUrl === "string" ? payload.imageUrl : undefined }];
+      const metadata = previewMetadata.get(normalizeMusicText(title));
+      return [{ id: track.recording?.id ?? track.id ?? `${track.position}-${title}`, title, subtitle: track.position ? `Traccia ${track.position}` : undefined, imageUrl: typeof payload.imageUrl === "string" ? payload.imageUrl : undefined, previewUrl: metadata?.previewUrl, appleMusicUrl: metadata?.appleMusicUrl, spotifyUrl: spotifySearchUrl(`${artistName} ${title}`) }];
     });
   }
   const id = payload.artistId;
   if (typeof id !== "string" || !/^[0-9a-f-]{36}$/i.test(id)) throw new Error("Invalid MusicBrainz artist identifier");
   const params = new URLSearchParams({ artist: id, type: "album|ep", fmt: "json", limit: "100" });
   const data = await musicBrainzJson<{ "release-groups"?: Array<{ id: string; title: string; "first-release-date"?: string; "primary-type"?: string }> }>(`${MUSICBRAINZ}/release-group?${params}`);
-  return (data["release-groups"] ?? []).map((group) => ({
-    id: group.id,
-    title: group.title,
-    subtitle: [group["primary-type"], group["first-release-date"]].filter(Boolean).join(" · ") || undefined,
-    imageUrl: typeof payload.artistImageUrl === "string" ? payload.artistImageUrl : undefined,
-  }));
+  const artistName = typeof payload.artistName === "string" ? payload.artistName : "";
+  return (data["release-groups"] ?? []).map((group) => ({ id: group.id, title: group.title, subtitle: [group["primary-type"], group["first-release-date"]].filter(Boolean).join(" · ") || undefined, imageUrl: typeof payload.artistImageUrl === "string" ? payload.artistImageUrl : undefined, spotifyUrl: spotifySearchUrl(`${artistName} ${group.title}`) }));
 }
-
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const action = params.get("action");
