@@ -9,6 +9,8 @@ type Props = {
   onChange: (path: string, previewUrl: string) => void;
   onReset?: () => void;
   canReset?: boolean;
+  focusPosition?: { x: number; y: number };
+  onFocusChange?: (position: { x: number; y: number }) => void;
   variant?: "panel" | "overlay";
 };
 
