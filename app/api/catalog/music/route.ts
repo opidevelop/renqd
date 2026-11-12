@@ -47,12 +47,20 @@ function artistCredit(credits?: Array<{ name?: string; artist?: { name?: string 
 }
 
 async function resolveArtistImage(name: string): Promise<string | undefined> {
-  const params = new URLSearchParams({ action: "query", generator: "search", gsrsearch: name, gsrnamespace: "0", gsrlimit: "5", prop: "pageimages", piprop: "thumbnail", pithumbsize: "400", format: "json" });
+  const params = new URLSearchParams({ action: "query", titles: name, prop: "pageimages", piprop: "thumbnail", pithumbsize: "400", format: "json" });
   try {
     const response = await fetch("https://en.wikipedia.org/w/api.php?" + params, { headers: { Accept: "application/json", "User-Agent": USER_AGENT }, next: { revalidate: 86400 } });
-    if (!response.ok) return undefined;
-    const data = await response.json() as { query?: { pages?: Record<string, { thumbnail?: { source?: string } }> } };
-    return Object.values(data.query?.pages ?? {}).find((page) => page.thumbnail?.source)?.thumbnail?.source;
+    if (response.ok) {
+      const data = await response.json() as { query?: { pages?: Record<string, { thumbnail?: { source?: string } }> } };
+      const image = Object.values(data.query?.pages ?? {}).find((page) => page.thumbnail?.source)?.thumbnail?.source;
+      if (image) return image;
+    }
+  } catch { /* Try a catalog-art fallback below. */ }
+  try {
+    const fallbackParams = new URLSearchParams({ term: name, entity: "album", limit: "1", country: "IT" });
+    const fallback = await itunesJson<{ results?: Array<{ artworkUrl100?: string }> }>(ITUNES + "/search?" + fallbackParams);
+    const artwork = fallback.results?.[0]?.artworkUrl100;
+    return typeof artwork === "string" ? artwork.replace("100x100", "300x300") : undefined;
   } catch { return undefined; }
 }
 async function searchItunes(query: string, contentType: string): Promise<MusicEntity[]> {
