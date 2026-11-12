@@ -312,7 +312,7 @@
 
 
 /* Saved Renq — podium metals, warm ranking numerals and full-bleed cover */
-.saved-renq-hero{min-height:480px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-end}
+.saved-renq-hero{min-height:480px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-end;border-radius:24px 24px 0 0}
 .saved-renq-cover{transform:none;filter:saturate(.9);image-rendering:auto}
 .saved-renq-cover-shade{background:linear-gradient(180deg,rgba(15,12,10,.04) 0%,rgba(15,12,10,.16) 34%,rgba(15,12,10,.62) 66%,rgba(15,12,10,.88) 100%)}
 .saved-renq-hero-copy{padding:42px 38px 22px}
@@ -324,7 +324,7 @@
 .saved-renq-medal.medal-2{border-color:#aeb8c3;background:linear-gradient(145deg,#fff,#dce3e9);box-shadow:0 0 0 3px rgba(156,170,184,.16),0 3px 10px rgba(67,80,94,.12)}
 .saved-renq-medal.medal-3{border-color:#b8794e;background:linear-gradient(145deg,#fbe2ce,#d69a70);box-shadow:0 0 0 3px rgba(184,121,78,.15),0 3px 10px rgba(105,62,34,.13)}
 .renq-finish>svg:first-child{color:#e9822c!important;stroke:#e9822c!important}
-@media(max-width:680px){.saved-renq-hero{min-height:430px}.saved-renq-hero-copy{padding:28px 22px 18px}.saved-renq-toolbar{padding:0 16px 20px;gap:7px}}
+@media(max-width:680px){.saved-renq-hero{min-height:430px;border-radius:19px 19px 0 0}.saved-renq-hero-copy{padding:28px 22px 18px}.saved-renq-toolbar{padding:0 16px 20px;gap:7px}}
 
 .saved-renq-row.is-top-1{border-color:#edbd76;background:linear-gradient(100deg,#fff0df,#fffaf4 78%)}
 .saved-renq-row.is-top-1 .saved-renq-position{color:#e9822c!important}
