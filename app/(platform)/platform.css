@@ -204,3 +204,16 @@
 .review-title-field.is-invalid .title-input-invalid{border:2px solid #d95745!important;box-shadow:0 0 0 4px #d9574528!important}
 .sport-picker-count{display:none!important}
 @media(max-width:680px){.renq-sort-row.is-final-row{grid-template-columns:22px 38px minmax(0,1fr) 36px;gap:7px}.renq-sort-row.is-final-row .renq-final-actions{grid-column:3;justify-content:end}.renq-sort-row.is-final-row .renq-medal-slot{grid-column:4;grid-row:1}.renq-final-actions .renq-music-actions{grid-template-columns:repeat(3,34px);gap:4px}.renq-final-actions .music-action{min-width:32px;min-height:32px;padding:6px}.renq-sort-row.is-final-row .renq-sort-copy{grid-column:3}.renq-sort-row.is-final-row .renq-final-actions{grid-row:2;grid-column:2/4;justify-content:start}}
+
+/* Final action buttons and clean title validation */
+.preview-action{width:34px;height:34px;padding:0;min-width:34px}
+.preview-action svg{width:16px;height:16px}
+.title-error-inline{display:grid;gap:3px;margin-top:10px;padding:10px 0 0;border-top:1px solid #e7b8ae;color:#a63c31}
+.title-error-inline strong{font-size:12px;font-weight:800}.title-error-inline small{font-size:11px;color:#88736d}
+.review-title-field.is-invalid .title-input-invalid{border-color:#d46b58!important;box-shadow:0 0 0 2px #d46b5822!important}
+.renq-battle-tie-button{display:flex;align-items:center;justify-content:center;gap:8px;margin:18px auto 0;padding:12px 18px;border:1px solid #d9cdef;border-radius:12px;background:#f7f3ff;color:#7056ad;font-size:12px;font-weight:800;cursor:pointer}
+.renq-finish-actions{display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:wrap;margin:24px auto 0}
+.renq-finish-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:10px 14px;border:1px solid #e7dfd6;border-radius:11px;background:#fff;color:#63564a;font-size:11px;font-weight:800;cursor:pointer}
+.renq-finish-actions .renq-save-button{background:#302820;border-color:#302820;color:white}
+.renq-finish-actions .renq-cancel-button{color:#b65c50}
+@media(max-width:600px){.renq-finish-actions{display:grid;grid-template-columns:1fr;width:100%}.renq-finish-actions button{width:100%}}
