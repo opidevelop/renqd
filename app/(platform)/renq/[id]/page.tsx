@@ -11,7 +11,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) notFound();
 
-  const { data: ranking } = await supabase.from("rankings").select("*").eq("id", id).eq("user_id", user.id).single();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);\n  const { data: ranking } = isUuid\n    ? await supabase.from("rankings").select("*").eq("id", id).eq("user_id", user.id).single()\n    : await supabase.from("rankings").select("*").eq("public_slug", id).eq("user_id", user.id).single();
   if (!ranking) notFound();
 
   const settings = (ranking.settings ?? {}) as Record<string, unknown>;
@@ -28,7 +28,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
       supabase.from("ranking_likes").select("user_id", { count: "exact", head: true }).eq("ranking_id", id)
     ]);
     return <SavedRenqDetail
-      ranking={{ id: ranking.id, title: ranking.title, mode: ranking.mode, settings, created_at: ranking.created_at }}
+      ranking={{ id: ranking.id, public_slug: ranking.public_slug, title: ranking.title, mode: ranking.mode, settings, created_at: ranking.created_at }}
       items={savedSnapshot?.items ?? []}
       coverImageUrl={resolvedCoverImageUrl}
       coverImagePath={coverImagePath}
