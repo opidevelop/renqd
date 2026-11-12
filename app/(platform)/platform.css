@@ -330,3 +330,25 @@
 .saved-renq-row.is-top-1 .saved-renq-position{color:#e9822c!important}
 
 .renq-sort-row.is-final-row .renq-position{color:#e9822c!important}
+
+
+/* My Renqs — compact artwork thumbnail */
+.my-renq-card{padding:0;overflow:hidden}
+.my-renq-card-art{position:relative;height:142px;overflow:hidden;background:linear-gradient(135deg,#3c2b20,#171411)}
+.my-renq-card-art>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.9);transition:transform .45s ease}
+.my-renq-card:hover .my-renq-card-art>img{transform:scale(1.045)}
+.my-renq-card-art>span{position:absolute;inset:0;display:grid;place-items:center;color:#f1a15e}
+.my-renq-card-art-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,12,10,.08),rgba(15,12,10,.42))}
+.my-renq-card-art .my-renq-card-top{position:absolute;left:18px;right:18px;bottom:15px;z-index:1}
+.my-renq-card-art .my-renq-category{color:#fff;text-shadow:0 1px 8px #0008}
+.my-renq-card-art .my-renq-mode{background:#ffffffdf;color:#55483d;backdrop-filter:blur(10px)}
+.my-renq-card h2,.my-renq-card-meta,.my-renq-preview,.my-renq-card-bottom{margin-left:20px;margin-right:20px}
+.my-renq-card h2{margin-top:17px}
+.my-renq-card-bottom{margin-bottom:18px}
+.title-error-inline{display:flex;align-items:center;gap:11px;margin-top:11px;padding:11px 13px;border:1px solid rgba(219,151,91,.2);border-radius:13px;background:linear-gradient(110deg,#fff8f0,#fffdf9);color:#76583f}
+.title-error-inline>span:last-child{display:grid;gap:3px}
+.title-error-inline strong{font-size:11px;font-weight:750;letter-spacing:-.01em}
+.title-error-inline small{font-size:10px;color:#9b8877}
+.title-error-symbol{display:grid;place-items:center;width:25px;height:25px;flex:none;border-radius:50%;background:#f7e6d5;color:#b76b2e;font-size:14px;font-weight:800}
+.review-title-field.is-invalid .title-input-invalid{border-color:#e2b88f!important;box-shadow:0 0 0 3px rgba(226,184,143,.17)!important}
+@media(max-width:680px){.my-renq-card-art{height:132px}}
