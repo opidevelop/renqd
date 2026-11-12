@@ -175,3 +175,16 @@
 .catalog-result-copy small{color:var(--muted);font-size:9px}
 .review-item-art{width:38px;height:38px;border-radius:7px}
 @media(max-width:680px){.catalog-results{max-height:216px}.catalog-results button{padding:7px 8px}.catalog-result-art{width:44px;height:44px}}
+
+/* Music catalog external listening links and 30-second previews. */
+.catalog-results{display:grid;gap:7px}
+.catalog-result-row{display:flex;align-items:center;gap:8px;min-width:0}
+.catalog-result-row .catalog-result-main{display:flex;align-items:center;flex:1;min-width:0;height:68px;min-height:68px;gap:12px;padding:8px 11px;border:1px solid #eee8e1;border-radius:11px;background:#fff;color:var(--ink);text-align:left;cursor:pointer}
+.catalog-result-row .catalog-result-main.is-selected{border-color:#efb17c;background:#fff8f1}
+.catalog-spotify-link,.review-external-link{display:inline-flex;align-items:center;justify-content:center;flex:none;padding:7px 9px;border:1px solid #e8e2dc;border-radius:8px;background:#fff;color:#62584f;font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap}
+.catalog-spotify-link:hover,.review-external-link:hover{border-color:#c9b7a5;background:#faf7f3}
+.review-item-links{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto;max-width:310px}
+.review-item-audio{width:190px;height:30px;max-width:100%}
+.review-external-link.spotify{color:#167b45;border-color:#cce7d7}
+.review-external-link.apple{color:#9b3c67;border-color:#efd6e1}
+@media(max-width:760px){.review-item-links{order:5;width:100%;max-width:none;margin:8px 0 0 34px}.review-item-audio{width:min(220px,100%)}.catalog-result-row .catalog-result-main{gap:8px;padding:7px 8px}.catalog-spotify-link{padding:7px 8px}}
