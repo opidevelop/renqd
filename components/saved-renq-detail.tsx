@@ -19,6 +19,7 @@ type Props = {
   ranking: { id: string; title: string; mode: string; settings: Record<string, unknown>; created_at: string };
   items: SavedItem[];
   coverImageUrl: string | null;
+  coverImagePath: string | null;
   defaultCoverImageUrl: string | null;
   comments: CommentItem[];
   commentCount: number;
@@ -28,7 +29,7 @@ type Props = {
 
 const modeLabels: Record<string, string> = { RENQ: "Renq", BATTLE_RENQ: "Battle Renq", SPEED_RENQ: "Speed Renq" };
 
-export function SavedRenqDetail({ ranking, items, coverImageUrl, defaultCoverImageUrl, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount }: Props) {
+export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount }: Props) {
   const router = useRouter();
   const [comments, setComments] = useState(initialComments);
   const [commentCount, setCommentCount] = useState(initialCommentCount);
@@ -36,6 +37,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, defaultCoverIma
   const [liked, setLiked] = useState(initialLiked);
   const [likes, setLikes] = useState(initialLikeCount);
   const [currentCoverUrl, setCurrentCoverUrl] = useState(coverImageUrl);
+  const [currentCoverPath, setCurrentCoverPath] = useState(coverImagePath);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -95,12 +97,13 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, defaultCoverIma
       if (e instanceof Error && e.name !== "AbortError") setError("Non è stato possibile condividere il Renq.");
     }
   }
-  async function saveCover(url: string | null) {
+  async function saveCover(path: string | null, previewUrl: string | null) {
     if (busy) return;
     setBusy(true); setError("");
     try {
-      await post({ action: "update-cover", rankingId: ranking.id, coverImageUrl: url });
-      setCurrentCoverUrl(url);
+      await post({ action: "update-cover", rankingId: ranking.id, coverImagePath: path });
+      setCurrentCoverPath(path);
+      setCurrentCoverUrl(previewUrl ?? defaultCoverImageUrl);
       setError("Copertina aggiornata.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Non è stato possibile aggiornare la copertina.");
@@ -129,7 +132,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, defaultCoverIma
         <button type="button" onClick={() => void editRanking()} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
-        <RenqCoverPicker value={currentCoverUrl ?? defaultCoverImageUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={url => void saveCover(url)} onReset={() => void saveCover(null)} canReset={Boolean(currentCoverUrl && currentCoverUrl !== defaultCoverImageUrl)} variant="overlay"/>
+        <RenqCoverPicker value={currentCoverUrl ?? defaultCoverImageUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={(path,url) => void saveCover(path,url)} onReset={() => void saveCover(null,null)} canReset={Boolean(currentCoverPath)} variant="overlay"/>
         </div>
       </section>
 
