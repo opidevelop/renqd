@@ -10,7 +10,7 @@ export async function POST(request:Request){
  const body=await request.json().catch(()=>null);if(!body)return jsonError("Richiesta non valida.");
  if(body.action==="start-battle"){
   const {rankingId,pairs,difficulty}=body as {rankingId:string;pairs:{a:string;b:string}[];difficulty:string};
-  const {data:ranking,error:rankingError}=await supabase.from("rankings").select("id,mode,user_id").eq("id",rankingId).eq("user_id",user.id).single();
+  const {data:ranking,error:rankingError}=await supabase.from("rankings").select("id,mode,user_id,allow_ties").eq("id",rankingId).eq("user_id",user.id).single();
   if(rankingError||!ranking||ranking.mode!=="BATTLE_RENQ")return jsonError("Battle Renq non trovato.",404);
   const {data:items,error:itemsError}=await supabase.from("ranking_items").select("id").eq("ranking_id",rankingId);
   if(itemsError||!items||items.length<2)return jsonError("Servono almeno due elementi per avviare un Battle Renq.");
@@ -35,9 +35,11 @@ export async function POST(request:Request){
   if(updateError)return jsonError(updateError.message,500);
   if(completed){
    const ordered=Object.entries(state.wins).sort((a,b)=>b[1]-a[1]).map(([id])=>id);
+   const {data:rankingTieSetting}=await supabase.from("rankings").select("allow_ties").eq("id",session.ranking_id).single();const rankingAllowsTies=Boolean(rankingTieSetting?.allow_ties);
    const {data:allItems}=await supabase.from("ranking_items").select("id").eq("ranking_id",session.ranking_id);
    const remainder=(allItems??[]).map(x=>x.id).filter(id=>!ordered.includes(id));ordered.push(...remainder);
-   for(let i=0;i<ordered.length;i++)await supabase.from("ranking_items").update({rank_position:i+1}).eq("id",ordered[i]);
+   const tieIds=new Map<string,string>();if(rankingAllowsTies){const byWins=new Map<number,string[]>();for(const [id,wins] of Object.entries(state.wins)){const group=byWins.get(wins)??[];group.push(id);byWins.set(wins,group);}for(const group of byWins.values())if(group.length>1){const groupId=crypto.randomUUID();for(const id of group)tieIds.set(id,groupId);}}
+   let position=0;let previousWins:number|null=null;for(let i=0;i<ordered.length;i++){const id=ordered[i];const wins=state.wins[id]??0;if(!tieIds.has(id)||wins!==previousWins)position=i+1-[...tieIds.entries()].filter(([member])=>ordered.indexOf(member)<i&&state.wins[member]===wins).length;previousWins=wins;await supabase.from("ranking_items").update({rank_position:position,tie_group_id:tieIds.get(id)??null}).eq("id",id);}
    await supabase.from("rankings").update({status:"COMPLETED",completed_at:new Date().toISOString()}).eq("id",session.ranking_id);
   }
   return NextResponse.json({completed,cursor:state.cursor,total:state.pairs.length,wins:state.wins});
@@ -66,31 +68,26 @@ export async function POST(request:Request){
   return NextResponse.json({timedOut});
  }
  if(body.action==="finish-renq"){
-  const {rankingId,orderedIds}=body as {rankingId:string;orderedIds:string[]};
-  const {data:ranking}=await supabase.from("rankings").select("id,status,mode").eq("id",rankingId).eq("user_id",user.id).single();
+  const {rankingId,orderedIds,tieMap={}}=body as {rankingId:string;orderedIds:string[];tieMap?:Record<string,string>};
+  const {data:ranking}=await supabase.from("rankings").select("id,status,mode,allow_ties").eq("id",rankingId).eq("user_id",user.id).single();
   if(!ranking||ranking.mode!=="RENQ")return jsonError("Renq non trovato.",404);
   if(ranking.status==="COMPLETED")return NextResponse.json({ok:true});
   const {data:rows,error}=await supabase.from("ranking_items").select("id").eq("ranking_id",rankingId);
   const valid=new Set((rows??[]).map(x=>x.id));if(error||!Array.isArray(orderedIds)||orderedIds.length!==valid.size||new Set(orderedIds).size!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
-  for(let i=0;i<orderedIds.length;i++){const {error:positionError}=await supabase.from("ranking_items").update({rank_position:i+1}).eq("id",orderedIds[i]);if(positionError)return jsonError(positionError.message,500);}
+  const firstPosition=new Map<string,number>();let position=0;for(let i=0;i<orderedIds.length;i++){const id=orderedIds[i];const group=ranking.allow_ties?tieMap[id]:undefined;let rank:number;if(group&&firstPosition.has(group)){rank=firstPosition.get(group)!;}else{position++;rank=position;if(group)firstPosition.set(group,rank);}const {error:positionError}=await supabase.from("ranking_items").update({rank_position:rank,tie_group_id:group??null}).eq("id",id);if(positionError)return jsonError(positionError.message,500);}
   const {error:completeError}=await supabase.from("rankings").update({status:"COMPLETED",completed_at:new Date().toISOString()}).eq("id",rankingId);
   if(completeError)return jsonError(completeError.message,500);
   return NextResponse.json({ok:true});
  }
  if(body.action==="reorder"){
-  const {rankingId,orderedIds}=body as {rankingId:string;orderedIds:string[]};
-  const {data:ranking}=await supabase.from("rankings").select("id,status").eq("id",rankingId).eq("user_id",user.id).single();
+  const {rankingId,orderedIds,tieMap={}}=body as {rankingId:string;orderedIds:string[];tieMap?:Record<string,string>};
+  const {data:ranking}=await supabase.from("rankings").select("id,status,allow_ties").eq("id",rankingId).eq("user_id",user.id).single();
   if(!ranking||ranking.status==="COMPLETED")return jsonError("Questa classifica non è modificabile.",404);
   const {data:items}=await supabase.from("ranking_items").select("id").eq("ranking_id",rankingId);
   const valid=new Set((items??[]).map(x=>x.id));if(!Array.isArray(orderedIds)||orderedIds.length!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
-  const {data:currentRows,error:currentError}=await supabase.from("ranking_items").select("id,sort_order").eq("ranking_id",rankingId);
-  if(currentError||!currentRows)return jsonError(currentError?.message??"Impossibile leggere la lista.",500);
-  // sort_order is immutable creation order; rank_position is the mutable order and allows ties.
+  // sort_order is immutable creation order; only rank_position and tie_group_id are mutable.
   if(new Set(orderedIds).size!==valid.size)return jsonError("La lista contiene elementi duplicati.");
-  for(let i=0;i<orderedIds.length;i++){
-   const {error}=await supabase.from("ranking_items").update({rank_position:i+1}).eq("id",orderedIds[i]);
-   if(error)return jsonError(error.message,500);
-  }
+  const firstPosition=new Map<string,number>();let position=0;for(let i=0;i<orderedIds.length;i++){const id=orderedIds[i];const group=ranking.allow_ties?tieMap[id]:undefined;let rank:number;if(group&&firstPosition.has(group)){rank=firstPosition.get(group)!;}else{position++;rank=position;if(group)firstPosition.set(group,rank);}const {error}=await supabase.from("ranking_items").update({rank_position:rank,tie_group_id:group??null}).eq("id",id);if(error)return jsonError(error.message,500);}
   return NextResponse.json({ok:true});
  }
  const {title,mode,category,contentType,sportDiscipline,participation,collaborators,visibility,access,allowTies,duration,battleDepth,items}=body as {title:string;mode:string;category:string;contentType:string;sportDiscipline?:string;participation:string;collaborators:number;visibility:string;access:string;allowTies:boolean;duration:number;battleDepth:string;items:ItemInput[]};

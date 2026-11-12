@@ -183,3 +183,24 @@
 
 /* Touch drag: initiate only from the handle, preserve vertical page scrolling elsewhere. */
 .renq-drag-handle{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}.renq-drag-handle:active{cursor:grabbing;background:#f9eadc;color:#c77d45}
+
+/* Renq final result: fixed social columns and permanent medal slot. */
+.renq-sort-row.is-final-row{display:grid;grid-template-columns:28px 46px minmax(120px,1fr) minmax(0,auto) 36px;align-items:center;gap:9px}
+.renq-final-actions{display:flex;justify-content:flex-end;min-width:0}
+.renq-final-actions .renq-music-actions{display:grid;grid-template-columns:repeat(3,auto);align-items:center;justify-content:end;gap:6px}
+.renq-final-actions .music-action{min-width:34px;padding:7px}
+.renq-final-actions .music-action span:not(.music-brand-dot){display:none}
+.music-action svg{width:16px;height:16px;display:block}
+.renq-final-actions .preview-action span{display:inline!important}
+.renq-medal-slot{display:grid;place-items:center;width:36px;min-height:36px}
+.renq-medal-slot:empty{visibility:hidden}
+.renq-medal-slot .renq-medal{grid-column:auto}
+.renq-final-actions .renq-music-actions{grid-template-columns:repeat(3,38px)}
+.renq-sort-actions button.is-tied{background:#f1ecff;border-color:#9c8add;color:#7058bd;font-weight:900}
+.renq-sort-row:not(.is-final-row) .renq-sort-actions button{font-size:15px}
+.spotify-action{color:#1db954!important}.apple-action{color:#fa4b72!important}
+.spotify-action svg,.apple-action svg{width:18px;height:18px;display:block}
+.title-required-error{padding:9px 11px!important;margin-top:9px!important;border:1px solid #d95745;border-radius:9px;background:#fff0ed;color:#a52e21!important;font-size:12px!important;font-weight:850!important;box-shadow:0 3px 10px #b94f3d16}
+.review-title-field.is-invalid .title-input-invalid{border:2px solid #d95745!important;box-shadow:0 0 0 4px #d9574528!important}
+.sport-picker-count{display:none!important}
+@media(max-width:680px){.renq-sort-row.is-final-row{grid-template-columns:22px 38px minmax(0,1fr) 36px;gap:7px}.renq-sort-row.is-final-row .renq-final-actions{grid-column:3;justify-content:end}.renq-sort-row.is-final-row .renq-medal-slot{grid-column:4;grid-row:1}.renq-final-actions .renq-music-actions{grid-template-columns:repeat(3,34px);gap:4px}.renq-final-actions .music-action{min-width:32px;min-height:32px;padding:6px}.renq-sort-row.is-final-row .renq-sort-copy{grid-column:3}.renq-sort-row.is-final-row .renq-final-actions{grid-row:2;grid-column:2/4;justify-content:start}}
