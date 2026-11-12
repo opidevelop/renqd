@@ -34,10 +34,9 @@ export async function POST(request:Request){
   const {error:updateError}=await supabase.from("ranking_battle_sessions").update({completed_pairs:state.cursor,comparison_state:state,status:completed?"COMPLETED":"ACTIVE",completed_at:completed?new Date().toISOString():null}).eq("id",sessionId);
   if(updateError)return jsonError(updateError.message,500);
   if(completed){
-   const ordered=Object.entries(state.wins).sort((a,b)=>b[1]-a[1]).map(([id])=>id);
    const {data:rankingTieSetting}=await supabase.from("rankings").select("allow_ties").eq("id",session.ranking_id).single();const rankingAllowsTies=Boolean(rankingTieSetting?.allow_ties);
    const {data:allItems}=await supabase.from("ranking_items").select("id").eq("ranking_id",session.ranking_id);
-   const remainder=(allItems??[]).map(x=>x.id).filter(id=>!ordered.includes(id));ordered.push(...remainder);
+   const ordered=(allItems??[]).map(x=>x.id).sort((a,b)=>(state.wins[b]??0)-(state.wins[a]??0));
    const tieIds=new Map<string,string>();if(rankingAllowsTies){const byWins=new Map<number,string[]>();for(const [id,wins] of Object.entries(state.wins)){const group=byWins.get(wins)??[];group.push(id);byWins.set(wins,group);}for(const group of byWins.values())if(group.length>1){const groupId=crypto.randomUUID();for(const id of group)tieIds.set(id,groupId);}}
    let position=0;let previousWins:number|null=null;for(let i=0;i<ordered.length;i++){const id=ordered[i];const wins=state.wins[id]??0;if(!tieIds.has(id)||wins!==previousWins)position=i+1-[...tieIds.entries()].filter(([member])=>ordered.indexOf(member)<i&&state.wins[member]===wins).length;previousWins=wins;await supabase.from("ranking_items").update({rank_position:position,tie_group_id:tieIds.get(id)??null}).eq("id",id);}
    await supabase.from("rankings").update({status:"COMPLETED",completed_at:new Date().toISOString()}).eq("id",session.ranking_id);
@@ -56,12 +55,13 @@ export async function POST(request:Request){
   return NextResponse.json({session});
  }
  if(body.action==="complete-speed"){
-  const {sessionId,rankingId,orderedIds}=body as {sessionId:string;rankingId:string;orderedIds:string[]};
+  const {sessionId,rankingId,orderedIds,tieMap={}}=body as {sessionId:string;rankingId:string;orderedIds:string[];tieMap?:Record<string,string>};
   const {data:session}=await supabase.from("ranking_speed_sessions").select("*").eq("id",sessionId).eq("ranking_id",rankingId).eq("user_id",user.id).single();
   if(!session||session.status!=="ACTIVE")return jsonError("Sessione Speed non disponibile.",404);
   const {data:items}=await supabase.from("ranking_items").select("id").eq("ranking_id",rankingId);
+  const {data:ranking}=await supabase.from("rankings").select("allow_ties").eq("id",rankingId).eq("user_id",user.id).single();
   const valid=new Set((items??[]).map(x=>x.id));if(!Array.isArray(orderedIds)||orderedIds.length!==valid.size||new Set(orderedIds).size!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
-  for(let i=0;i<orderedIds.length;i++)await supabase.from("ranking_items").update({rank_position:i+1}).eq("id",orderedIds[i]);
+  const firstPosition=new Map<string,number>();let position=0;for(let i=0;i<orderedIds.length;i++){const id=orderedIds[i];const group=ranking?.allow_ties?tieMap[id]:undefined;let rank:number;if(group&&firstPosition.has(group)){rank=firstPosition.get(group)!;}else{position++;rank=position;if(group)firstPosition.set(group,rank);}const {error:positionError}=await supabase.from("ranking_items").update({rank_position:rank,tie_group_id:group??null}).eq("id",id);if(positionError)return jsonError(positionError.message,500);}
   const timedOut=Date.now()>new Date(session.deadline_at).getTime();
   await supabase.from("ranking_speed_sessions").update({status:timedOut?"TIMED_OUT":"COMPLETED",completed_at:new Date().toISOString(),result_snapshot:{orderedIds}}).eq("id",sessionId);
   await supabase.from("rankings").update({status:"COMPLETED",completed_at:new Date().toISOString()}).eq("id",rankingId);
