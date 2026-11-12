@@ -85,7 +85,7 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
         id: String(entry.collectionId),
         title: entry.collectionName,
         subtitle: [artist, year].filter(Boolean).join(" · "),
-        imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100 : undefined,
+        imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : undefined,
         provider: "itunes" as const,
         payload: { collectionId: entry.collectionId, artistId: entry.artistId, artistName: artist },
       }];
@@ -141,7 +141,7 @@ async function loadItunesItems(payload: Record<string, unknown>, contentType: st
     }
     if (entry.wrapperType !== "collection" || typeof entry.collectionName !== "string") return [];
     const year = typeof entry.releaseDate === "string" ? entry.releaseDate.slice(0, 4) : "";
-    return [{ id: String(entry.collectionId ?? entry.collectionName), title: entry.collectionName, subtitle: year || undefined, imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : (typeof payload.artistImageUrl === "string" ? payload.artistImageUrl : undefined) }];
+    return [{ id: String(entry.collectionId ?? entry.collectionName), title: entry.collectionName, subtitle: year || undefined, imageUrl: typeof payload.artistImageUrl === "string" ? payload.artistImageUrl : (typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : undefined) }];
   });
 }
 
