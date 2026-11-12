@@ -214,3 +214,12 @@
 .artist-selected-row>span:nth-child(2){flex:1;min-width:0;overflow:hidden;color:var(--ink);font-size:10px;font-weight:750;text-overflow:ellipsis;white-space:nowrap}
 .artist-selected-row>button{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:50%;background:#f8f4ef;color:#9a7760;cursor:pointer}
 .artist-selected-row>button:hover{background:#f2e7dc;color:#9c4f23}
+
+.catalog-selected-entity{display:flex;align-items:center;gap:11px;margin-top:12px;padding:10px 12px;border:1px solid #e9dfd4;border-radius:12px;background:#fff}
+.catalog-selected-entity>.catalog-result-art{display:grid;place-items:center;width:44px;height:44px;flex:none;overflow:hidden;border-radius:9px;background:#f3eee8}
+.catalog-selected-entity>.catalog-result-art img{width:100%;height:100%;object-fit:cover}
+.catalog-selected-entity>span:nth-child(2){display:grid;gap:3px;flex:1;min-width:0}
+.catalog-selected-entity>span:nth-child(2)>strong{overflow:hidden;color:var(--ink);font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+.catalog-selected-entity>span:nth-child(2)>small{color:#938477;font-size:9px}
+.catalog-selected-entity>button{flex:none;padding:8px 10px;border:1px solid #e9dfd4;border-radius:8px;background:#faf7f3;color:#74563f;font-size:9px;font-weight:750;cursor:pointer}
+@media(max-width:560px){.catalog-selected-entity{gap:8px;padding:9px}.catalog-selected-entity>button{padding:7px 8px;font-size:8px}}
