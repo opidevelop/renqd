@@ -28,6 +28,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
       ranking={{ id: ranking.id, title: ranking.title, mode: ranking.mode, settings, created_at: ranking.created_at }}
       items={savedSnapshot?.items ?? []}
       coverImageUrl={typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null}
+      defaultCoverImageUrl={typeof settings.defaultCoverImageUrl === "string" ? settings.defaultCoverImageUrl : null}
       comments={comments ?? []}
       commentCount={commentCount ?? 0}
       initialLiked={Boolean(liked)}
