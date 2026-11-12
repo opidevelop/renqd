@@ -1,8 +1,8 @@
 import type { CatalogCategory, CatalogEntity, CatalogItem, CatalogProvider } from "./types";
 
-async function requestMusicCatalog<T>(provider: string, action: "search" | "items", contentType: string, values: Record<string, string>): Promise<T> {
+async function requestCatalog<T>(path: string, provider: string, action: "search" | "items", contentType: string, values: Record<string, string>): Promise<T> {
   const params = new URLSearchParams({ provider, action, contentType, ...values });
-  const response = await fetch(`/api/catalog/music?${params.toString()}`);
+  const response = await fetch(path + "?" + params.toString());
   if (!response.ok) {
     const body = await response.json().catch(() => null) as { error?: string } | null;
     throw new Error(body?.error ?? `Catalog request failed (${response.status})`);
@@ -15,25 +15,38 @@ function musicProvider(id: "itunes" | "musicbrainz"): CatalogProvider {
     id,
     supports: (category, contentType) => category === "music" && ["Album", "Artisti", "Discografie"].includes(contentType),
     async search(query, _category, contentType) {
-      const result = await requestMusicCatalog<{ entities: CatalogEntity[] }>(id, "search", contentType, { query });
+      const result = await requestCatalog<{ entities: CatalogEntity[] }>("/api/catalog/music", id, "search", contentType, { query });
       return result.entities;
     },
     async getItems(entity, _category, contentType) {
-      const result = await requestMusicCatalog<{ items: Omit<CatalogItem, "selected" | "source">[] }>(
-        id,
-        "items",
-        contentType,
-        { payload: JSON.stringify(entity.payload ?? {}) },
+      const result = await requestCatalog<{ items: Omit<CatalogItem, "selected" | "source">[] }>(
+        "/api/catalog/music", id, "items", contentType, { payload: JSON.stringify(entity.payload ?? {}) },
       );
       return result.items;
     },
   };
 }
 
+const gamesProvider: CatalogProvider = {
+  id: "igdb",
+  supports: (category, contentType) => category === "games" && ["Giochi", "Saghe", "Franchise", "Personaggi"].includes(contentType),
+  async search(query, _category, contentType) {
+    const result = await requestCatalog<{ entities: CatalogEntity[] }>("/api/catalog/games", "igdb", "search", contentType, { query });
+    return result.entities;
+  },
+  async getItems(entity, _category, contentType) {
+    const result = await requestCatalog<{ items: Omit<CatalogItem, "selected" | "source">[] }>(
+      "/api/catalog/games", "igdb", "items", contentType, { payload: JSON.stringify(entity.payload ?? {}) },
+    );
+    return result.items;
+  },
+};
+
+const providers: CatalogProvider[] = [musicProvider("itunes"), musicProvider("musicbrainz"), gamesProvider];
+
 export async function searchCatalog(query: string, category: CatalogCategory, contentType: string) {
   const matching = providers.filter((provider) => provider.supports(category, contentType));
   if (!matching.length) return { status: "unavailable" as const, entities: [] as CatalogEntity[] };
-
   const results = await Promise.allSettled(matching.map((provider) => provider.search(query, category, contentType)));
   const entities = results.flatMap((result) => result.status === "fulfilled" ? result.value : []);
   const allFailed = results.every((result) => result.status === "rejected");
