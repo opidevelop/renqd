@@ -18,7 +18,7 @@ const API = "https://openlibrary.org";
 const COVER = "https://covers.openlibrary.org";
 function clean(value: string) { return value.replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, 100); }
 function workId(key: string) { return key.split("/").filter(Boolean).at(-1) ?? key; }
-function coverUrl(id?: number) { return id ? `${COVER}/b/id/${id}-M.jpg` : undefined; }
+function coverUrl(id?: number) { return id && id > 0 ? `${COVER}/b/id/${id}-M.jpg` : undefined; }
 function bookEntity(doc: SearchDoc): CatalogEntity {
   return {
     id: workId(doc.key), title: doc.title,
