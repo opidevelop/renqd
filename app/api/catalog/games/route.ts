@@ -132,7 +132,7 @@ function entityFromCollection(entity: IgdbEntity) {
 }
 function entityFromFranchise(entity: IgdbEntity) {
   const firstGame = entity.games?.find((game) => game.cover?.image_id);
-  return { id: String(entity.id), title: entity.name, subtitle: `Franchise · ${entity.games?.length ?? 0} titoli`, imageUrl: imageUrl(firstGame?.cover?.image_id), provider: "igdb", payload: { igdbId: entity.id } };
+  return { id: String(entity.id), title: entity.name, subtitle: "Franchise videoludica", imageUrl: imageUrl(firstGame?.cover?.image_id), provider: "igdb", payload: { igdbId: entity.id } };
 }
 function entityFromCharacter(entity: IgdbEntity) {
   const games = (entity.games ?? []).map((game) => game.name).filter(Boolean);
