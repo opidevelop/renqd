@@ -16,7 +16,7 @@ function musicProvider(id: "itunes" | "musicbrainz"): CatalogProvider {
     supports: (category, contentType) => category === "music" && ["Album", "Artisti", "Discografie"].includes(contentType),
     async search(query, _category, contentType) {
       const result = await requestCatalog<{ entities: CatalogEntity[] }>("/api/catalog/music", id, "search", contentType, { query });
-      return result.entities;
+      return { entities: result.entities };
     },
     async getItems(entity, _category, contentType) {
       const result = await requestCatalog<{ items: Omit<CatalogItem, "selected" | "source">[] }>(
@@ -30,9 +30,8 @@ function musicProvider(id: "itunes" | "musicbrainz"): CatalogProvider {
 const gamesProvider: CatalogProvider = {
   id: "igdb",
   supports: (category, contentType) => category === "games" && ["Giochi", "Saghe", "Franchise", "Personaggi"].includes(contentType),
-  async search(query, _category, contentType) {
-    const result = await requestCatalog<{ entities: CatalogEntity[] }>("/api/catalog/games", "igdb", "search", contentType, { query });
-    return result.entities;
+  async search(query, _category, contentType, offset = 0) {
+    return requestCatalog<{ entities: CatalogEntity[]; hasMore?: boolean; nextOffset?: number }>("/api/catalog/games", "igdb", "search", contentType, { query, offset: String(offset) });
   },
   async getItems(entity, _category, contentType) {
     const result = await requestCatalog<{ items: Omit<CatalogItem, "selected" | "source">[] }>(
@@ -44,11 +43,13 @@ const gamesProvider: CatalogProvider = {
 
 const providers: CatalogProvider[] = [musicProvider("itunes"), musicProvider("musicbrainz"), gamesProvider];
 
-export async function searchCatalog(query: string, category: CatalogCategory, contentType: string) {
+export async function searchCatalog(query: string, category: CatalogCategory, contentType: string, offset = 0) {
   const matching = providers.filter((provider) => provider.supports(category, contentType));
   if (!matching.length) return { status: "unavailable" as const, entities: [] as CatalogEntity[] };
-  const results = await Promise.allSettled(matching.map((provider) => provider.search(query, category, contentType)));
-  const entities = results.flatMap((result) => result.status === "fulfilled" ? result.value : []);
+  const results = await Promise.allSettled(matching.map((provider) => provider.search(query, category, contentType, offset)));
+  const entities = results.flatMap((result) => result.status === "fulfilled" ? result.value.entities : []);
+  const hasMore = results.some((result) => result.status === "fulfilled" && Boolean(result.value.hasMore));
+  const nextOffset = Math.max(offset, ...results.flatMap((result) => result.status === "fulfilled" ? [result.value.nextOffset ?? 0] : []));
   const allFailed = results.every((result) => result.status === "rejected");
   const unique = new Map<string, CatalogEntity>();
   for (const entity of entities) {
@@ -58,6 +59,8 @@ export async function searchCatalog(query: string, category: CatalogCategory, co
   return {
     status: unique.size ? "ready" as const : allFailed ? "error" as const : "ready" as const,
     entities: [...unique.values()],
+    hasMore,
+    nextOffset,
   };
 }
 
