@@ -137,11 +137,11 @@ async function loadItunesItems(payload: Record<string, unknown>, contentType: st
   return (data.results ?? []).flatMap((entry) => {
     if (contentType === "Album") {
       if (entry.wrapperType !== "track" || typeof entry.trackName !== "string") return [];
-      return [{ id: String(entry.trackId ?? entry.trackName), title: entry.trackName, subtitle: typeof entry.artistName === "string" ? entry.artistName : undefined }];
+      return [{ id: String(entry.trackId ?? entry.trackName), title: entry.trackName, subtitle: typeof entry.artistName === "string" ? entry.artistName : undefined, imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : undefined }];
     }
     if (entry.wrapperType !== "collection" || typeof entry.collectionName !== "string") return [];
     const year = typeof entry.releaseDate === "string" ? entry.releaseDate.slice(0, 4) : "";
-    return [{ id: String(entry.collectionId ?? entry.collectionName), title: entry.collectionName, subtitle: year || undefined }];
+    return [{ id: String(entry.collectionId ?? entry.collectionName), title: entry.collectionName, subtitle: year || undefined, imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : (typeof payload.artistImageUrl === "string" ? payload.artistImageUrl : undefined) }];
   });
 }
 
@@ -155,7 +155,7 @@ async function loadMusicBrainzItems(payload: Record<string, unknown>, contentTyp
     return tracks.flatMap((track) => {
       const title = track.recording?.title ?? track.title;
       if (!title) return [];
-      return [{ id: track.recording?.id ?? track.id ?? `${track.position}-${title}`, title, subtitle: track.position ? `Traccia ${track.position}` : undefined }];
+      return [{ id: track.recording?.id ?? track.id ?? `${track.position}-${title}`, title, subtitle: track.position ? `Traccia ${track.position}` : undefined, imageUrl: typeof payload.imageUrl === "string" ? payload.imageUrl : undefined }];
     });
   }
   const id = payload.artistId;
@@ -166,6 +166,7 @@ async function loadMusicBrainzItems(payload: Record<string, unknown>, contentTyp
     id: group.id,
     title: group.title,
     subtitle: [group["primary-type"], group["first-release-date"]].filter(Boolean).join(" · ") || undefined,
+    imageUrl: typeof payload.artistImageUrl === "string" ? payload.artistImageUrl : undefined,
   }));
 }
 
