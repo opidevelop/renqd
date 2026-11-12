@@ -132,7 +132,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         <button type="button" onClick={() => void editRanking()} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
-        <RenqCoverPicker value={currentCoverUrl ?? defaultCoverImageUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={(path,url) => void saveCover(path,url)} onFocusChange={position => void saveCover(currentCoverPath,currentCoverUrl,position)} focusPosition={currentCoverPosition} onReset={() => void saveCover(null,null,{x:50,y:50})} canReset={Boolean(currentCoverPath)||currentCoverPosition.x!==50||currentCoverPosition.y!==50} variant="overlay"/>
+        <RenqCoverPicker key={currentCoverPosition.x+"-"+currentCoverPosition.y} value={currentCoverUrl ?? defaultCoverImageUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={(path,url) => void saveCover(path,url)} onFocusChange={position => void saveCover(currentCoverPath,currentCoverUrl,position)} focusPosition={currentCoverPosition} onReset={() => void saveCover(null,null,{x:50,y:50})} canReset={Boolean(currentCoverPath)||currentCoverPosition.x!==50||currentCoverPosition.y!==50} variant="overlay"/>
         </div>
       </section>
 
