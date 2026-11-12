@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Heart, MessageCircle, Pencil, Send, Share2, Trophy } from "lucide-react";
-import { RenqCoverPicker } from "@/components/renq-cover-picker";
+import { RenqCoverPicker } from "@/components/renq-cover-picker";\nimport { highQualityImageUrl } from "@/lib/image-quality";
 
 type SavedItem = {
   id: string;
@@ -20,7 +20,7 @@ type Props = {
   items: SavedItem[];
   coverImageUrl: string | null;
   coverImagePath: string | null;
-  defaultCoverImageUrl: string | null;
+  defaultCoverImageUrl: string | null;\n  coverPosition: { x: number; y: number };
   comments: CommentItem[];
   commentCount: number;
   initialLiked: boolean;
@@ -29,7 +29,7 @@ type Props = {
 
 const modeLabels: Record<string, string> = { RENQ: "Renq", BATTLE_RENQ: "Battle Renq", SPEED_RENQ: "Speed Renq" };
 
-export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount }: Props) {
+export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, coverPosition: initialCoverPosition, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount }: Props) {
   const router = useRouter();
   const [comments, setComments] = useState(initialComments);
   const [commentCount, setCommentCount] = useState(initialCommentCount);
@@ -37,7 +37,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const [liked, setLiked] = useState(initialLiked);
   const [likes, setLikes] = useState(initialLikeCount);
   const [currentCoverUrl, setCurrentCoverUrl] = useState(coverImageUrl);
-  const [currentCoverPath, setCurrentCoverPath] = useState(coverImagePath);
+  const [currentCoverPath, setCurrentCoverPath] = useState(coverImagePath);\n  const [currentCoverPosition, setCurrentCoverPosition] = useState(initialCoverPosition);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -97,7 +97,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
       if (e instanceof Error && e.name !== "AbortError") setError("Non è stato possibile condividere il Renq.");
     }
   }
-  async function saveCover(path: string | null, previewUrl: string | null) {
+  async function saveCover(path: string | null, previewUrl: string | null, position = currentCoverPosition) {
     if (busy) return;
     setBusy(true); setError("");
     try {
@@ -121,7 +121,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     <main className="saved-renq-page">
       <button className="saved-renq-back" type="button" onClick={() => router.push("/rankings")}><ArrowLeft size={17} /> I miei Renq</button>
       <section className="saved-renq-hero">
-        {cover ? <img className="saved-renq-cover" src={cover} alt="" /> : <div className="saved-renq-cover saved-renq-cover-empty"><Trophy size={58} /></div>}
+        {cover ? <img className="saved-renq-cover" src={cover} alt="" style={{ objectPosition: `${currentCoverPosition.x}% ${currentCoverPosition.y}%` }} /> : <div className="saved-renq-cover saved-renq-cover-empty"><Trophy size={58} /></div>}
         <div className="saved-renq-cover-shade" />
         <div className="saved-renq-hero-copy">
           <span>{modeLabels[ranking.mode] ?? "Renq"} · {category} · {contentType}</span>
@@ -132,7 +132,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         <button type="button" onClick={() => void editRanking()} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
-        <RenqCoverPicker value={currentCoverUrl ?? defaultCoverImageUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={(path,url) => void saveCover(path,url)} onReset={() => void saveCover(null,null)} canReset={Boolean(currentCoverPath)} variant="overlay"/>
+        <RenqCoverPicker value={currentCoverUrl ?? defaultCoverImageUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={(path,url) => void saveCover(path,url)} onFocusChange={position => void saveCover(currentCoverPath,currentCoverUrl,position)} focusPosition={currentCoverPosition} onReset={() => void saveCover(null,null,{x:50,y:50})} canReset={Boolean(currentCoverPath)||currentCoverPosition.x!==50||currentCoverPosition.y!==50} variant="overlay"/>
         </div>
       </section>
 
@@ -144,7 +144,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
             const medal = position <= 3 ? ["🥇", "🥈", "🥉"][position - 1] : null;
             return <article className={"saved-renq-row" + (position <= 3 ? " is-top-" + position : "")} key={item.id}>
               <span className="saved-renq-position">{String(position).padStart(2, "0")}</span>
-              {item.image_url ? <img src={item.image_url} alt="" loading="lazy" /> : <span className="saved-renq-item-placeholder"><Trophy size={19} /></span>}
+              {item.image_url ? <img src={highQualityImageUrl(item.image_url) ?? item.image_url} alt="" loading="lazy" /> : <span className="saved-renq-item-placeholder"><Trophy size={19} /></span>}
               <div className="saved-renq-item-copy"><strong>{item.title}</strong>{item.description && <small>{item.description}</small>}</div>
               {medal && <span className={"saved-renq-medal medal-" + position} aria-label={"Posizione " + position}>{medal}</span>}
             </article>;
