@@ -5,6 +5,7 @@ type MusicEntity = {
   title: string;
   subtitle?: string;
   imageUrl?: string;
+  spotifyUrl?: string;
   provider: "itunes" | "musicbrainz";
   payload?: Record<string, unknown>;
 };
@@ -139,7 +140,7 @@ async function searchMusicBrainz(query: string, contentType: string): Promise<Mu
       id: artist.id as string, title: artist.name as string,
       subtitle: [disambiguation, country].filter(Boolean).join(" · ") || "Artista",
       imageUrl, provider: "musicbrainz" as const,
-      payload: { artistId: artist.id, artistImageUrl: imageUrl },
+      payload: { artistId: artist.id, artistImageUrl: imageUrl, artistName: artist.name },
       spotifyUrl: spotifySearchUrl(artist.name),
     }))];
   }));
