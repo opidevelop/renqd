@@ -80,13 +80,15 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
   const results = data.results ?? [];
   if (!isAlbum) {
     return Promise.all(results.flatMap((entry) => {
-      if (typeof entry.artistId !== "number" || typeof entry.artistName !== "string") return [];
-      return [resolveArtistImage(entry.artistName).then((imageUrl) => ({
-        id: String(entry.artistId), title: entry.artistName as string,
+      const artistId = entry.artistId;
+      const artistName = entry.artistName;
+      if (typeof artistId !== "number" || typeof artistName !== "string") return [];
+      return [resolveArtistImage(artistName).then((imageUrl) => ({
+        id: String(artistId), title: artistName,
         subtitle: typeof entry.primaryGenreName === "string" ? entry.primaryGenreName : "Artista",
         imageUrl, provider: "itunes" as const,
-        payload: { artistId: entry.artistId, artistImageUrl: imageUrl },
-        spotifyUrl: spotifySearchUrl(entry.artistName),
+        payload: { artistId, artistImageUrl: imageUrl },
+        spotifyUrl: spotifySearchUrl(artistName),
       }))];
     }));
   }
@@ -133,15 +135,17 @@ async function searchMusicBrainz(query: string, contentType: string): Promise<Mu
   }
   const artists = (data.artists ?? []) as Array<Record<string, unknown>>;
   return Promise.all(artists.flatMap((artist) => {
-    if (typeof artist.id !== "string" || typeof artist.name !== "string") return [];
+    const artistId = artist.id;
+    const artistName = artist.name;
+    if (typeof artistId !== "string" || typeof artistName !== "string") return [];
     const disambiguation = typeof artist.disambiguation === "string" ? artist.disambiguation : "";
     const country = typeof artist.country === "string" ? artist.country : "";
-    return [resolveArtistImage(artist.name).then((imageUrl) => ({
-      id: artist.id as string, title: artist.name as string,
+    return [resolveArtistImage(artistName).then((imageUrl) => ({
+      id: artistId, title: artistName,
       subtitle: [disambiguation, country].filter(Boolean).join(" · ") || "Artista",
       imageUrl, provider: "musicbrainz" as const,
-      payload: { artistId: artist.id, artistImageUrl: imageUrl, artistName: artist.name },
-      spotifyUrl: spotifySearchUrl(artist.name),
+      payload: { artistId, artistImageUrl: imageUrl, artistName },
+      spotifyUrl: spotifySearchUrl(artistName),
     }))];
   }));
 }
