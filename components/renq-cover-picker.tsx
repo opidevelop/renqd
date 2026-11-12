@@ -12,10 +12,10 @@ type Props = {
   variant?: "panel" | "overlay";
 };
 
-export function RenqCoverPicker({ value, onChange, onReset, canReset = false, variant = "panel" }: Props) {
+export function RenqCoverPicker({ value, onChange, onReset, canReset = false, focusPosition = { x: 50, y: 50 }, onFocusChange, variant = "panel" }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState("");\n  const [focus, setFocus] = useState(focusPosition);\n\n  function changeFocus(axis: "x" | "y", value: number) { setFocus(current => ({ ...current, [axis]: value })); }\n  function commitFocus() { onFocusChange?.(focus); }
 
   async function upload(file?: File) {
     if (!file) return;
@@ -55,14 +55,14 @@ export function RenqCoverPicker({ value, onChange, onReset, canReset = false, va
   return (
     <div className={"renq-cover-picker " + (variant === "overlay" ? "is-overlay" : "is-panel")}>
       {variant === "panel" && <div className="renq-cover-picker-preview">
-        {value ? <img src={value} alt="Anteprima copertina" /> : <span><ImagePlus size={22} /></span>}
+        {value ? <img src={value} alt="Anteprima copertina" style={{ objectPosition: `${focus.x}% ${focus.y}%` }} /> : <span><ImagePlus size={22} /></span>}
       </div>}
       <div className="renq-cover-picker-actions">
         <button type="button" className="renq-cover-picker-button" onClick={() => inputRef.current?.click()} disabled={uploading}>
           {uploading ? <LoaderCircle size={16} className="spin" /> : <ImagePlus size={16} />}
           <span>{uploading ? "Caricamento…" : value ? "Cambia copertina" : "Carica copertina"}</span>
         </button>
-        {canReset && onReset && <button type="button" className="renq-cover-reset" onClick={onReset} disabled={uploading}><RotateCcw size={14} /> Ripristina automatica</button>}
+        {variant === "overlay" && <div className="renq-cover-focus-controls"><label><span>Orizzontale</span><input aria-label="Fuoco orizzontale copertina" type="range" min="0" max="100" value={focus.x} onChange={event => changeFocus("x", Number(event.target.value))} onPointerUp={commitFocus} onKeyUp={commitFocus} disabled={uploading} /></label><label><span>Verticale</span><input aria-label="Fuoco verticale copertina" type="range" min="0" max="100" value={focus.y} onChange={event => changeFocus("y", Number(event.target.value))} onPointerUp={commitFocus} onKeyUp={commitFocus} disabled={uploading} /></label></div>}\n        {canReset && onReset && <button type="button" className="renq-cover-reset" onClick={onReset} disabled={uploading}><RotateCcw size={14} /> Ripristina originale</button>}
       </div>
       <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={event => void upload(event.target.files?.[0])} />
       {error && <p className="renq-cover-error" role="alert">{error}</p>}
