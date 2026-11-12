@@ -250,6 +250,8 @@
 /* Renqd review hierarchy and primary action */
 .renq-finish-actions .renq-save-button{background:#e98a3a;border-color:#e98a3a;color:#fff;box-shadow:0 5px 14px #e98a3a30}
 .renq-finish-actions .renq-save-button:hover{background:#d9772b;border-color:#d9772b}
-.renq-sort-row.is-final-row:has(.renq-medal-1){background:linear-gradient(100deg,#fff0df 0%,#fff8f0 72%,#fff 100%);border-color:#edb477;box-shadow:0 5px 18px #d9863a16}
+.renq-sort-row.is-final-row:has(.renq-medal.medal-1){background:linear-gradient(100deg,#fff0df 0%,#fff8f0 72%,#fff 100%);border-color:#edb477;box-shadow:0 5px 18px #d9863a16}
 .renq-sort-row.is-final-row:has(.renq-medal-1) .renq-position{color:#c76b24;font-weight:900}
 .renq-medal.medal-1{background:#f9dfc2;color:#a95416;box-shadow:0 0 0 3px #f9dfc255}
+
+.renqd-wordmark{display:inline-flex;align-items:baseline;font-family:inherit;font-style:normal;font-weight:900;letter-spacing:-.075em;color:#302820}.renqd-wordmark>span{color:#e98a3a}
