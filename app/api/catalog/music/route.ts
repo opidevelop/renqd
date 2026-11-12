@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 type MusicEntity = {
   id: string;
@@ -55,7 +55,7 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
     country: "IT",
   });
   const data = await itunesJson<{ results?: Array<Record<string, unknown>> }>(`${ITUNES}/search?${params}`);
-  return (data.results ?? []).flatMap((entry) => {
+  return (data.results ?? []).flatMap<MusicEntity>((entry) => {
     if (isAlbum) {
       if (typeof entry.collectionId !== "number" || typeof entry.collectionName !== "string") return [];
       const artist = typeof entry.artistName === "string" ? entry.artistName : "Artista sconosciuto";
@@ -84,11 +84,10 @@ async function searchMusicBrainz(query: string, contentType: string): Promise<Mu
   const isAlbum = contentType === "Album";
   const resource = isAlbum ? "release-group" : "artist";
   const params = new URLSearchParams({ query, fmt: "json", limit: "25" });
-  if (isAlbum) params.set("type", "album");
   const data = await musicBrainzJson<Record<string, unknown>>(`${MUSICBRAINZ}/${resource}?${params}`);
   if (isAlbum) {
-    const groups = (data["release-groups"] ?? []) as Array<Record<string, unknown>>;
-    return groups.flatMap((group) => {
+    const groups = ((data["release-groups"] ?? []) as Array<Record<string, unknown>>).filter((group) => group["primary-type"] === "Album");
+    return groups.flatMap<MusicEntity>((group) => {
       if (typeof group.id !== "string" || typeof group.title !== "string") return [];
       const credits = group["artist-credit"] as Array<{ name?: string; artist?: { name?: string } }> | undefined;
       const date = typeof group["first-release-date"] === "string" ? group["first-release-date"] : "";
@@ -102,7 +101,7 @@ async function searchMusicBrainz(query: string, contentType: string): Promise<Mu
     });
   }
   const artists = (data.artists ?? []) as Array<Record<string, unknown>>;
-  return artists.flatMap((artist) => {
+  return artists.flatMap<MusicEntity>((artist) => {
     if (typeof artist.id !== "string" || typeof artist.name !== "string") return [];
     const disambiguation = typeof artist.disambiguation === "string" ? artist.disambiguation : "";
     const country = typeof artist.country === "string" ? artist.country : "";
