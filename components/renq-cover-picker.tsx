@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type Props = {
   value: string | null;
-  onChange: (url: string) => void;
+  onChange: (path: string, previewUrl: string) => void;
   onReset?: () => void;
   canReset?: boolean;
   variant?: "panel" | "overlay";
@@ -41,8 +41,9 @@ export function RenqCoverPicker({ value, onChange, onReset, canReset = false, va
         upsert: false
       });
       if (uploadError) throw uploadError;
-      const { data } = supabase.storage.from("renq-covers").getPublicUrl(path);
-      onChange(data.publicUrl);
+      const { data: signed, error: signedError } = await supabase.storage.from("renq-covers").createSignedUrl(path, 60 * 60 * 24 * 7);
+      if (signedError || !signed?.signedUrl) throw signedError ?? new Error("Anteprima della copertina non disponibile.");
+      onChange(path, signed.signedUrl);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Non è stato possibile caricare la copertina.");
     } finally {
