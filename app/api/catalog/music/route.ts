@@ -187,7 +187,7 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: "Unsupported catalog action." }, { status: 400 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Catalog provider error";
-    const status = message.includes("returned 503") ? 503 : 502;
+    const upstreamStatus = Number(message.match(/returned (\\d{3})/)?.[1] ?? 0);\n    const status = [403, 429, 503].includes(upstreamStatus) ? 503 : 502;
     return Response.json({ error: message }, { status });
   }
 }
