@@ -23,6 +23,6 @@ export type CatalogItem = {
 export interface CatalogProvider {
   id: string;
   supports(category: CatalogCategory, contentType: string): boolean;
-  search(query: string, category: CatalogCategory, contentType: string): Promise<CatalogEntity[]>;
+  search(query: string, category: CatalogCategory, contentType: string, offset?: number): Promise<{ entities: CatalogEntity[]; hasMore?: boolean; nextOffset?: number }>;
   getItems(entity: CatalogEntity, category: CatalogCategory, contentType: string): Promise<Omit<CatalogItem, "selected" | "source">[]>;
 }
