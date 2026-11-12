@@ -19,7 +19,7 @@ function MusicActions({item}:{item:Item}){
 }
 function RankHeading({ranking,items}:{ranking:Ranking;items:Item[]}){
  const settings=ranking.settings??{};
- const cover=highQualityImageUrl(typeof settings.coverImageUrl==="string"?settings.coverImageUrl:null);
+ const cover=highQualityImageUrl(typeof settings.coverImageUrl==="string"?settings.coverImageUrl:items.find(item=>item.image_url)?.image_url);
  return <div className={"renq-card-heading"+(cover?" has-cover":"")}>
   {cover&&<div className="renq-card-cover"><img src={cover} alt="" /><span/></div>}
   <div className="renq-card-heading-copy"><h1>{ranking.title}</h1><p>{String(settings.category??"custom").toUpperCase()} · {String(settings.contentType??"Lista personalizzata")} · {items.length} elementi</p><div className="renq-meta-chips"><span>{ranking.participation_mode==="COLLAB"?"Collaborativa":"Solo"}</span><span>{ranking.visibility==="LIVE"?"Live":"Reveal"}</span><span>{ranking.allow_ties?"Ex aequo":"Senza ex aequo"}</span></div></div>
