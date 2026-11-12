@@ -93,7 +93,7 @@ export function RenqReveal({ title, mode, category, contentType, coverImageUrl, 
 
       <div className="renq-reveal-stage">
         <AnimatePresence mode="wait">
-          <motion.section key={step} className={"renq-reveal-slide is-" + currentSlide.type}
+          <motion.section key={step} className={"renq-reveal-slide is-" + currentSlide.type + (currentSlide.type === "item" && currentSlide.position === 1 ? " is-winner" : "")}
             initial={{ opacity: 0, y: 30, scale: .965, rotateX: 2 }}
             animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
             exit={{ opacity: 0, y: -22, scale: .975, rotateX: -1 }}
