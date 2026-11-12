@@ -11,6 +11,7 @@ export type CatalogItem = {
   id: string;
   title: string;
   subtitle?: string;
+  imageUrl?: string;
   selected: boolean;
   source: "catalog" | "manual";
   payload?: unknown;
