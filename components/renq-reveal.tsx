@@ -44,11 +44,12 @@ export function RenqReveal({ title, mode, category, contentType, coverImageUrl, 
   function previous() { setStep(value => Math.max(0, value - 1)); }
   function onTouchStart(event: TouchEvent<HTMLElement>) { touchStart.current = event.touches[0]?.clientX ?? null; }
   function onTouchEnd(event: TouchEvent<HTMLElement>) {
-    if (touchStart.current === null) return;
+    const startX = touchStart.current;
+    if (startX === null) return;
     const currentX = event.changedTouches[0]?.clientX;
     touchStart.current = null;
     if (currentX === undefined) return;
-    const delta = currentX - touchStart.current;
+    const delta = currentX - startX;
     if (delta < -55) next();
     if (delta > 55) previous();
   }
