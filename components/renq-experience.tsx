@@ -3,6 +3,7 @@ import {useEffect,useMemo,useRef,useState} from "react";
 import {useRouter} from "next/navigation";
 import {ArrowRight,Check,ChevronDown,ChevronUp,Clock3,Layers3,Pause,Play,Swords,Timer,Trophy,Music2} from "lucide-react";
 import { RenqReveal } from "@/components/renq-reveal";
+import { highQualityImageUrl } from "@/lib/image-quality";
 
 type Item={id:string;title:string;title_snapshot:string;sort_order:number;rank_position:number|null;tie_group_id?:string|null;image_url:string|null;description:string|null;preview_url?:string|null;apple_music_url?:string|null;spotify_url?:string|null};
 type Ranking={id:string;title:string;mode:string;status:string;visibility:string;participation_mode:string;allow_ties:boolean;settings:Record<string,unknown>;created_at:string};
@@ -18,7 +19,11 @@ function MusicActions({item}:{item:Item}){
 }
 function RankHeading({ranking,items}:{ranking:Ranking;items:Item[]}){
  const settings=ranking.settings??{};
- return <div className="renq-card-heading"><div><h1>{ranking.title}</h1><p>{String(settings.category??"custom").toUpperCase()} · {String(settings.contentType??"Lista personalizzata")} · {items.length} elementi</p><div className="renq-meta-chips"><span>{ranking.participation_mode==="COLLAB"?"Collaborativa":"Solo"}</span><span>{ranking.visibility==="LIVE"?"Live":"Reveal"}</span><span>{ranking.allow_ties?"Ex aequo":"Senza ex aequo"}</span></div></div></div>;
+ const cover=highQualityImageUrl(typeof settings.coverImageUrl==="string"?settings.coverImageUrl:null);
+ return <div className={"renq-card-heading"+(cover?" has-cover":"")}>
+  {cover&&<div className="renq-card-cover"><img src={cover} alt="" /><span/></div>}
+  <div className="renq-card-heading-copy"><h1>{ranking.title}</h1><p>{String(settings.category??"custom").toUpperCase()} · {String(settings.contentType??"Lista personalizzata")} · {items.length} elementi</p><div className="renq-meta-chips"><span>{ranking.participation_mode==="COLLAB"?"Collaborativa":"Solo"}</span><span>{ranking.visibility==="LIVE"?"Live":"Reveal"}</span><span>{ranking.allow_ties?"Ex aequo":"Senza ex aequo"}</span></div></div>
+ </div>;
 }
 function getRankPositions(items:Item[],tieMap:Record<string,string>={}){const positions:Record<string,number>={};const groupRanks=new Map<string,number>();let skipped=0;for(let i=0;i<items.length;i++){const item=items[i];const group=tieMap[item.id]??item.tie_group_id??null;if(group){if(!groupRanks.has(group))groupRanks.set(group,i+1-skipped);else skipped++;positions[item.id]=groupRanks.get(group)!;}else positions[item.id]=i+1-skipped;}return positions;}
 function FinalRankList({items}:{items:Item[]}){const positions=getRankPositions(items);
@@ -30,7 +35,7 @@ function FinalRankList({items}:{items:Item[]}){const positions=getRankPositions(
  </article>)}</div>;
 }
 export function RenqExperience({ranking,items:initialItems}:{ranking:Ranking;items:Item[]}){
- const router=useRouter();const [items,setItems]=useState(initialItems);const [busy,setBusy]=useState(false);const [error,setError]=useState("");const [sessionId,setSessionId]=useState("");const [deadline,setDeadline]=useState(0);const [remaining,setRemaining]=useState(0);const [speedStarted,setSpeedStarted]=useState(false);const [timerExpired,setTimerExpired]=useState(false);const [finished,setFinished]=useState(ranking.status==="COMPLETED");const [battlePairs,setBattlePairs]=useState<{a:string;b:string}[]>([]);const [battleIndex,setBattleIndex]=useState(0);const [battleWins,setBattleWins]=useState<Record<string,number>>({});const [battleTiePairs,setBattleTiePairs]=useState<{a:string;b:string}[]>([]);const [dragIndex,setDragIndex]=useState<number|null>(null);const [tieMap,setTieMap]=useState<Record<string,string>>(()=>Object.fromEntries(initialItems.filter(x=>x.tie_group_id).map(x=>[x.id,x.tie_group_id as string])));
+ const router=useRouter();const [items,setItems]=useState(initialItems.map(item=>({...item,image_url:highQualityImageUrl(item.image_url)})));const [busy,setBusy]=useState(false);const [error,setError]=useState("");const [sessionId,setSessionId]=useState("");const [deadline,setDeadline]=useState(0);const [remaining,setRemaining]=useState(0);const [speedStarted,setSpeedStarted]=useState(false);const [timerExpired,setTimerExpired]=useState(false);const [finished,setFinished]=useState(ranking.status==="COMPLETED");const [battlePairs,setBattlePairs]=useState<{a:string;b:string}[]>([]);const [battleIndex,setBattleIndex]=useState(0);const [battleWins,setBattleWins]=useState<Record<string,number>>({});const [battleTiePairs,setBattleTiePairs]=useState<{a:string;b:string}[]>([]);const [dragIndex,setDragIndex]=useState<number|null>(null);const [tieMap,setTieMap]=useState<Record<string,string>>(()=>Object.fromEntries(initialItems.filter(x=>x.tie_group_id).map(x=>[x.id,x.tie_group_id as string])));
  const dragStartRef=useRef<number|null>(null);const latestItemsRef=useRef(items);const persistQueueRef=useRef<Promise<void>>(Promise.resolve());
  useEffect(()=>{latestItemsRef.current=items;},[items]);
  const settings=ranking.settings??{};const mode=ranking.mode;const duration=Number(settings.durationSeconds??60);
