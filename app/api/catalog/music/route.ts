@@ -109,24 +109,24 @@ async function searchMusicBrainz(query: string, contentType: string): Promise<Mu
         id: group.id,
         title: group.title,
         subtitle: [artistCredit(credits), date].filter(Boolean).join(" · "),
+        imageUrl: "https://coverartarchive.org/release-group/" + group.id + "/front-250",
         provider: "musicbrainz" as const,
-        payload: { releaseGroupId: group.id },
+        payload: { releaseGroupId: group.id, imageUrl: "https://coverartarchive.org/release-group/" + group.id + "/front-250" },
       }];
     });
   }
   const artists = (data.artists ?? []) as Array<Record<string, unknown>>;
-  return artists.flatMap<MusicEntity>((artist) => {
+  return Promise.all(artists.flatMap((artist) => {
     if (typeof artist.id !== "string" || typeof artist.name !== "string") return [];
     const disambiguation = typeof artist.disambiguation === "string" ? artist.disambiguation : "";
     const country = typeof artist.country === "string" ? artist.country : "";
-    return [{
-      id: artist.id,
-      title: artist.name,
+    return [resolveArtistImage(artist.name).then((imageUrl) => ({
+      id: artist.id as string, title: artist.name as string,
       subtitle: [disambiguation, country].filter(Boolean).join(" · ") || "Artista",
-      provider: "musicbrainz" as const,
-      payload: { artistId: artist.id },
-    }];
-  });
+      imageUrl, provider: "musicbrainz" as const,
+      payload: { artistId: artist.id, artistImageUrl: imageUrl },
+    }))];
+  }));
 }
 
 async function loadItunesItems(payload: Record<string, unknown>, contentType: string): Promise<MusicItem[]> {
