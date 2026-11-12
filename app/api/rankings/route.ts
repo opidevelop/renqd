@@ -140,6 +140,20 @@ export async function POST(request:Request){
   if(error||!comment)return jsonError(error?.message??"Impossibile pubblicare il commento.",500);
   return NextResponse.json({comment});
  }
+ if(body.action==="update-cover"){
+  const {rankingId,coverImageUrl}=body as {rankingId:string;coverImageUrl:string|null};
+  const {data:ranking}=await supabase.from("rankings").select("id,status,settings").eq("id",rankingId).eq("user_id",user.id).single();
+  if(!ranking||ranking.status!=="COMPLETED"||!(ranking.settings as Record<string,unknown>|null)?.savedAt)return jsonError("Renq salvato non trovato.",404);
+  if(coverImageUrl!==null){
+   if(typeof coverImageUrl!=="string"||!process.env.NEXT_PUBLIC_SUPABASE_URL)return jsonError("Copertina non valida.");
+   const expected=process.env.NEXT_PUBLIC_SUPABASE_URL+"/storage/v1/object/public/renq-covers/"+user.id+"/";
+   if(!coverImageUrl.startsWith(expected))return jsonError("La copertina deve essere caricata nel tuo spazio Renqd.");
+  }
+  const settings={...(ranking.settings as Record<string,unknown>),coverImageUrl};
+  const {error}=await supabase.from("rankings").update({settings}).eq("id",rankingId).eq("user_id",user.id);
+  if(error)return jsonError(error.message,500);
+  return NextResponse.json({ok:true});
+ }
  if(body.action==="edit-saved-renq"){
   const {rankingId}=body as {rankingId:string};
   const {data:ranking}=await supabase.from("rankings").select("id,status,settings").eq("id",rankingId).eq("user_id",user.id).single();
