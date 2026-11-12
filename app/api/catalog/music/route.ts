@@ -9,7 +9,7 @@ type MusicEntity = {
   payload?: Record<string, unknown>;
 };
 
-type MusicItem = { id: string; title: string; subtitle?: string };
+type MusicItem = { id: string; title: string; subtitle?: string; imageUrl?: string };
 
 const ITUNES = "https://itunes.apple.com";
 const MUSICBRAINZ = "https://musicbrainz.org/ws/2";
@@ -46,6 +46,15 @@ function artistCredit(credits?: Array<{ name?: string; artist?: { name?: string 
   return (credits ?? []).map((credit) => credit.name ?? credit.artist?.name).filter(Boolean).join(", ");
 }
 
+async function resolveArtistImage(name: string): Promise<string | undefined> {
+  const params = new URLSearchParams({ action: "query", generator: "search", gsrsearch: name, gsrnamespace: "0", gsrlimit: "5", prop: "pageimages", piprop: "thumbnail", pithumbsize: "400", format: "json" });
+  try {
+    const response = await fetch("https://en.wikipedia.org/w/api.php?" + params, { headers: { Accept: "application/json", "User-Agent": USER_AGENT }, next: { revalidate: 86400 } });
+    if (!response.ok) return undefined;
+    const data = await response.json() as { query?: { pages?: Record<string, { thumbnail?: { source?: string } }> } };
+    return Object.values(data.query?.pages ?? {}).find((page) => page.thumbnail?.source)?.thumbnail?.source;
+  } catch { return undefined; }
+}
 async function searchItunes(query: string, contentType: string): Promise<MusicEntity[]> {
   const isAlbum = contentType === "Album";
   const params = new URLSearchParams({
