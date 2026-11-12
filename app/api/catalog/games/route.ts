@@ -13,6 +13,8 @@ type IgdbGame = {
   games?: Array<{ id?: number; name?: string; cover?: IgdbImage; first_release_date?: number; platforms?: IgdbPlatform[] }>;
   mug_shot?: IgdbImage;
   slug?: string;
+  franchises?: Array<{ id?: number }>;
+  collections?: Array<{ id?: number }>;
 };
 type IgdbEntity = { id: number; name: string; games?: IgdbGame[]; mug_shot?: IgdbImage };
 
@@ -62,16 +64,33 @@ async function igdbRequest<T>(endpoint: string, query: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 async function searchGames(query: string) {
-  return igdbRequest<IgdbGame[]>("games", `search "${safeSearch(query)}"; fields id,name,cover.image_id,first_release_date,platforms.name,genres.name,slug; where version_parent = null; limit 12;`);
+  return igdbRequest<IgdbGame[]>("games", `search "${safeSearch(query)}"; fields id,name,cover.image_id,first_release_date,platforms.name,genres.name,slug,franchises.id,collections.id; where version_parent = null; limit 50;`);
+}
+function searchAliases(query: string) {
+  const normalized = query.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  if (normalized === "pokemon") return [query, "Pokémon"];
+  return [query];
 }
 async function searchCollections(query: string) {
-  return igdbRequest<IgdbEntity[]>("collections", `search "${safeSearch(query)}"; fields id,name,games.name,games.cover.image_id; limit 10;`);
+  const results = await Promise.all(searchAliases(query).map((term) => igdbRequest<IgdbEntity[]>("collections", `search "${safeSearch(term)}"; fields id,name,games.name,games.cover.image_id; limit 20;`)));
+  return [...new Map(results.flat().map((entity) => [entity.id, entity])).values()].filter((entity) => (entity.games?.length ?? 0) > 0);
 }
 async function searchFranchises(query: string) {
-  return igdbRequest<IgdbEntity[]>("franchises", `where name ~ *"${safeSearch(query)}"*; fields id,name,games.name,games.cover.image_id; limit 10;`);
+  const results = await Promise.all(searchAliases(query).map((term) => igdbRequest<IgdbEntity[]>("franchises", `where name ~ *"${safeSearch(term)}"*; fields id,name,games.name,games.cover.image_id; limit 30;`)));
+  return [...new Map(results.flat().map((entity) => [entity.id, entity])).values()].filter((entity) => (entity.games?.length ?? 0) > 0);
 }
 async function searchCharacters(query: string) {
-  return igdbRequest<IgdbEntity[]>("characters", `search "${safeSearch(query)}"; fields id,name,mug_shot.image_id,games.name; limit 12;`);
+  const direct = await igdbRequest<IgdbEntity[]>("characters", `search "${safeSearch(query)}"; fields id,name,mug_shot.image_id,games.name; limit 50;`);
+  const isPokemonSearch = searchAliases(query).some((term) => term === "Pokémon");
+  if (!isPokemonSearch) return direct;
+  const franchises = await searchFranchises("Pokémon");
+  const franchiseIds = franchises.map((entity) => entity.id).filter(Number.isSafeInteger);
+  if (!franchiseIds.length) return direct;
+  const games = await igdbRequest<IgdbGame[]>("games", `fields id; where franchises = (${franchiseIds.join(",")}); limit 500;`);
+  const gameIds = games.map((game) => game.id).filter(Number.isSafeInteger);
+  if (!gameIds.length) return direct;
+  const related = await igdbRequest<IgdbEntity[]>("characters", `fields id,name,mug_shot.image_id,games.name; where games = (${gameIds.join(",")}); limit 100;`);
+  return [...new Map([...direct, ...related].map((entity) => [entity.id, entity])).values()];
 }
 function entityFromGame(game: IgdbGame) {
   return { id: String(game.id), title: game.name, subtitle: gameSubtitle(game), imageUrl: imageUrl(game.cover?.image_id), provider: "igdb", payload: { igdbId: game.id, slug: game.slug } };
@@ -100,8 +119,10 @@ async function loadRelatedGames(payload: Record<string, unknown>, contentType: s
   if (!Number.isSafeInteger(id) || id <= 0) throw new Error("Invalid IGDB entity identifier");
   const relation = contentType === "Saghe" ? "collections" : contentType === "Franchise" ? "franchises" : null;
   if (!relation) throw new Error("Unsupported videogame catalog action");
-  const games = await igdbRequest<IgdbGame[]>("games", `fields id,name,cover.image_id,first_release_date,platforms.name,genres.name,slug; where ${relation} = ${id}; sort first_release_date asc; limit 100;`);
-  return games.map(gameItem);
+  const relationField = relation === "franchises" ? "franchises" : "collections";
+  const games = await igdbRequest<IgdbGame[]>("games", `fields id,name,cover.image_id,first_release_date,platforms.name,genres.name,slug,${relationField}.id; where ${relationField} = ${id}; sort first_release_date asc; limit 500;`);
+  const related = games.filter((game) => (game[relationField] ?? []).some((entry) => entry.id === id));
+  return [...new Map(related.map((game) => [game.id, game])).values()].map(gameItem);
 }
 
 export async function GET(request: NextRequest) {
