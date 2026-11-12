@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import type { CatalogItem } from "@/lib/catalog/types";
+import type { CatalogEntity, CatalogItem } from "@/lib/catalog/types";
 
 type IgdbImage = { image_id?: string };
 type IgdbPlatform = { name?: string };
@@ -116,7 +116,7 @@ async function searchCharacters(query: string, offset: number) {
   }
   const direct = await igdbRequest<IgdbEntity[]>("characters", `search "${safeSearch(query)}"; fields id,name,mug_shot.image_id,games.name; limit 50;`);
   const igdbEntities = direct.map(entityFromCharacter);
-  const unique = new Map<string, (typeof pokemonEntities)[number]>();
+  const unique = new Map<string, CatalogEntity>();
   for (const entity of [...igdbEntities, ...pokemonEntities]) {
     const key = entity.title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     if (!unique.has(key)) unique.set(key, entity);
