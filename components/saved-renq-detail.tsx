@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Heart, MessageCircle, Pencil, Send, Share2, Trophy } from "lucide-react";
+import { RenqCoverPicker } from "@/components/renq-cover-picker";
 
 type SavedItem = {
   id: string;
@@ -33,6 +34,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, comments: initi
   const [comment, setComment] = useState("");
   const [liked, setLiked] = useState(initialLiked);
   const [likes, setLikes] = useState(initialLikeCount);
+  const [currentCoverUrl, setCurrentCoverUrl] = useState(coverImageUrl);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -92,11 +94,23 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, comments: initi
       if (e instanceof Error && e.name !== "AbortError") setError("Non è stato possibile condividere il Renq.");
     }
   }
+  async function saveCover(url: string | null) {
+    if (busy) return;
+    setBusy(true); setError("");
+    try {
+      await post({ action: "update-cover", rankingId: ranking.id, coverImageUrl: url });
+      setCurrentCoverUrl(url);
+      setError("Copertina aggiornata.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Non è stato possibile aggiornare la copertina.");
+    } finally { setBusy(false); }
+  }
+
 
   const settings = ranking.settings ?? {};
   const category = String(settings.category ?? "custom").replaceAll("_", " ");
   const contentType = String(settings.contentType ?? "Lista personalizzata");
-  const rawCover = coverImageUrl || items.find(item => item.image_url)?.image_url || null;
+  const rawCover = currentCoverUrl || items.find(item => item.image_url)?.image_url || null;
   const cover = rawCover ? rawCover.replace(/\/(?:100|150|300|400|600)x(?:100|150|300|400|600)bb\.(jpg|jpeg|png|webp)/i, "/1200x1200bb.$1").replace(/\/t\/p\/w500\//i, "/t/p/original/").replace(/ab67616d0000b273/gi, "ab67616d00001e02") : null;
 
   return (
@@ -114,6 +128,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, comments: initi
         <button type="button" onClick={() => void editRanking()} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
+        <RenqCoverPicker value={currentCoverUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={url => void saveCover(url)} onReset={() => void saveCover(null)} canReset={Boolean(currentCoverUrl)} variant="overlay"/>
         </div>
       </section>
 
