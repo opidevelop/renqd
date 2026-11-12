@@ -68,7 +68,7 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
   const params = new URLSearchParams({
     term: query,
     entity: isAlbum ? "album" : "musicArtist",
-    limit: "25",
+    limit: "8",
     country: "IT",
   });
   const data = await itunesJson<{ results?: Array<Record<string, unknown>> }>(`${ITUNES}/search?${params}`);
