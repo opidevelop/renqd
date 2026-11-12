@@ -245,3 +245,11 @@
 .my-renqs-empty p{max-width:380px;margin:0;color:#8b8178;font-size:12px;line-height:1.6}
 .my-renqs-empty a{display:inline-flex;align-items:center;gap:6px;margin-top:18px;color:#a66e43;font-size:12px;font-weight:850;text-decoration:none}
 @media(max-width:680px){.my-renqs-page{padding-top:8px}.my-renqs-header{align-items:flex-start;flex-direction:column;margin-bottom:20px}.my-renqs-create{width:100%;justify-content:center}.my-renqs-grid{grid-template-columns:1fr}.my-renqs-summary{align-items:flex-start;flex-direction:column;gap:8px}}
+
+
+/* Renqd review hierarchy and primary action */
+.renq-finish-actions .renq-save-button{background:#e98a3a;border-color:#e98a3a;color:#fff;box-shadow:0 5px 14px #e98a3a30}
+.renq-finish-actions .renq-save-button:hover{background:#d9772b;border-color:#d9772b}
+.renq-sort-row.is-final-row:has(.renq-medal-1){background:linear-gradient(100deg,#fff0df 0%,#fff8f0 72%,#fff 100%);border-color:#edb477;box-shadow:0 5px 18px #d9863a16}
+.renq-sort-row.is-final-row:has(.renq-medal-1) .renq-position{color:#c76b24;font-weight:900}
+.renq-medal.medal-1{background:#f9dfc2;color:#a95416;box-shadow:0 0 0 3px #f9dfc255}
