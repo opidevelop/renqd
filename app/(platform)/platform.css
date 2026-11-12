@@ -467,7 +467,7 @@
 .renq-cover-focus-controls{display:grid;gap:8px;flex-basis:100%;min-width:170px;padding:10px 12px;border:1px solid #ffffff40;border-radius:11px;background:rgba(28,21,17,.68);backdrop-filter:blur(12px)}
 .renq-cover-focus-controls label{display:grid;grid-template-columns:82px minmax(80px,1fr);align-items:center;gap:9px;color:#fff;font-size:9px;font-weight:750}
 .renq-cover-focus-controls input{width:100%;accent-color:#e9822c}
-.saved-renq-toolbar .renq-cover-picker.is-overlay{align-items:flex-start;flex-wrap:wrap}
+.saved-renq-toolbar .renq-cover-picker.is-overlay{display:flex;flex-direction:column;align-items:flex-start;flex-wrap:wrap;max-width:260px}.saved-renq-toolbar .renq-cover-picker.is-overlay .renq-cover-picker-actions{width:100%;display:grid;grid-template-columns:1fr;align-items:start}
 .saved-renq-toolbar .renq-cover-picker.is-overlay .renq-cover-picker-actions{align-items:flex-start}
 .saved-renq-toolbar .renq-cover-picker.is-overlay .renq-cover-reset{color:#fff}
 .renq-reveal-slide.is-cover{align-items:flex-end;justify-content:flex-start}
