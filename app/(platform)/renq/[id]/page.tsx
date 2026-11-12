@@ -27,7 +27,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
 
   if (isSaved) {
     const [{ data: comments, count: commentCount }, { data: liked }, { count: likeCount }] = await Promise.all([
-      supabase.from("ranking_comments").select("id,body,created_at,author_id", { count: "exact" }).eq("ranking_id", id).is("deleted_at", null).order("created_at", { ascending: true }),
+      supabase.from("ranking_comments").select("id,body,created_at,author_id", { count: "exact" }).eq("ranking_id", ranking.id).is("deleted_at", null).order("created_at", { ascending: true }),
       supabase.from("ranking_likes").select("user_id").eq("ranking_id", id).eq("user_id", user.id).maybeSingle(),
       supabase.from("ranking_likes").select("user_id", { count: "exact", head: true }).eq("ranking_id", id)
     ]);
