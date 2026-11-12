@@ -328,3 +328,5 @@
 
 .saved-renq-row.is-top-1{border-color:#edbd76;background:linear-gradient(100deg,#fff0df,#fffaf4 78%)}
 .saved-renq-row.is-top-1 .saved-renq-position{color:#e9822c!important}
+
+.renq-sort-row.is-final-row .renq-position{color:#e9822c!important}
