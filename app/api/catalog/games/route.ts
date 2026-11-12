@@ -17,7 +17,6 @@ type IgdbGame = {
   collections?: Array<{ id?: number }>;
 };
 type IgdbEntity = { id: number; name: string; games?: IgdbGame[]; mug_shot?: IgdbImage };
-type CatalogSearchResult = { entities: ReturnType<typeof entityFromGame>[]; hasMore: boolean; nextOffset: number };
 
 const IGDB = "https://api.igdb.com/v4";
 let cachedAccessToken: string | undefined;
@@ -94,7 +93,7 @@ function formatPokemonName(value: string) {
   return value.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
 }
 function pokemonEntity(species: PokemonSpecies) {
-  const id = Number(species.url.match(/\\/(\\d+)\\/?$/)?.[1] ?? 0);
+  const id = Number(species.url.match(/\/(\d+)\/?$/)?.[1] ?? 0);
   return {
     id: `pokemon:${id}`,
     title: formatPokemonName(species.name),
