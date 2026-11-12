@@ -58,7 +58,7 @@ export async function POST(request:Request){
   const {data:session}=await supabase.from("ranking_speed_sessions").select("*").eq("id",sessionId).eq("ranking_id",rankingId).eq("user_id",user.id).single();
   if(!session||session.status!=="ACTIVE")return jsonError("Sessione Speed non disponibile.",404);
   const {data:items}=await supabase.from("ranking_items").select("id").eq("ranking_id",rankingId);
-  const valid=new Set((items??[]).map(x=>x.id));if(!Array.isArray(orderedIds)||orderedIds.length!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
+  const valid=new Set((items??[]).map(x=>x.id));if(!Array.isArray(orderedIds)||orderedIds.length!==valid.size||new Set(orderedIds).size!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
   for(let i=0;i<orderedIds.length;i++)await supabase.from("ranking_items").update({rank_position:i+1}).eq("id",orderedIds[i]);
   const timedOut=Date.now()>new Date(session.deadline_at).getTime();
   await supabase.from("ranking_speed_sessions").update({status:timedOut?"TIMED_OUT":"COMPLETED",completed_at:new Date().toISOString(),result_snapshot:{orderedIds}}).eq("id",sessionId);
@@ -71,7 +71,7 @@ export async function POST(request:Request){
   if(!ranking||ranking.mode!=="RENQ")return jsonError("Renq non trovato.",404);
   if(ranking.status==="COMPLETED")return NextResponse.json({ok:true});
   const {data:rows,error}=await supabase.from("ranking_items").select("id").eq("ranking_id",rankingId);
-  const valid=new Set((rows??[]).map(x=>x.id));if(error||!Array.isArray(orderedIds)||orderedIds.length!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
+  const valid=new Set((rows??[]).map(x=>x.id));if(error||!Array.isArray(orderedIds)||orderedIds.length!==valid.size||new Set(orderedIds).size!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
   for(let i=0;i<orderedIds.length;i++){const {error:positionError}=await supabase.from("ranking_items").update({rank_position:i+1}).eq("id",orderedIds[i]);if(positionError)return jsonError(positionError.message,500);}
   const {error:completeError}=await supabase.from("rankings").update({status:"COMPLETED",completed_at:new Date().toISOString()}).eq("id",rankingId);
   if(completeError)return jsonError(completeError.message,500);
@@ -85,10 +85,12 @@ export async function POST(request:Request){
   const valid=new Set((items??[]).map(x=>x.id));if(!Array.isArray(orderedIds)||orderedIds.length!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
   const {data:currentRows,error:currentError}=await supabase.from("ranking_items").select("id,sort_order").eq("ranking_id",rankingId);
   if(currentError||!currentRows)return jsonError(currentError?.message??"Impossibile leggere la lista.",500);
-  // Use a disjoint temporary range to avoid transient unique-index collisions.
-  const maxOrder=Math.max(0,...currentRows.map(row=>Number(row.sort_order)||0));
-  for(let i=0;i<orderedIds.length;i++){const {error}=await supabase.from("ranking_items").update({sort_order:maxOrder+1000+i}).eq("id",orderedIds[i]);if(error)return jsonError(error.message,500);}
-  for(let i=0;i<orderedIds.length;i++){const {error}=await supabase.from("ranking_items").update({sort_order:i+1,rank_position:i+1}).eq("id",orderedIds[i]);if(error)return jsonError(error.message,500);}
+  // sort_order is immutable creation order; rank_position is the mutable order and allows ties.
+  if(new Set(orderedIds).size!==valid.size)return jsonError("La lista contiene elementi duplicati.");
+  for(let i=0;i<orderedIds.length;i++){
+   const {error}=await supabase.from("ranking_items").update({rank_position:i+1}).eq("id",orderedIds[i]);
+   if(error)return jsonError(error.message,500);
+  }
   return NextResponse.json({ok:true});
  }
  const {title,mode,category,contentType,sportDiscipline,participation,collaborators,visibility,access,allowTies,duration,battleDepth,items}=body as {title:string;mode:string;category:string;contentType:string;sportDiscipline?:string;participation:string;collaborators:number;visibility:string;access:string;allowTies:boolean;duration:number;battleDepth:string;items:ItemInput[]};
