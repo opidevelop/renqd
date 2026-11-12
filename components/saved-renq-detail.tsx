@@ -19,6 +19,7 @@ type Props = {
   ranking: { id: string; title: string; mode: string; settings: Record<string, unknown>; created_at: string };
   items: SavedItem[];
   coverImageUrl: string | null;
+  defaultCoverImageUrl: string | null;
   comments: CommentItem[];
   commentCount: number;
   initialLiked: boolean;
@@ -27,7 +28,7 @@ type Props = {
 
 const modeLabels: Record<string, string> = { RENQ: "Renq", BATTLE_RENQ: "Battle Renq", SPEED_RENQ: "Speed Renq" };
 
-export function SavedRenqDetail({ ranking, items, coverImageUrl, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount }: Props) {
+export function SavedRenqDetail({ ranking, items, coverImageUrl, defaultCoverImageUrl, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount }: Props) {
   const router = useRouter();
   const [comments, setComments] = useState(initialComments);
   const [commentCount, setCommentCount] = useState(initialCommentCount);
@@ -110,7 +111,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, comments: initi
   const settings = ranking.settings ?? {};
   const category = String(settings.category ?? "custom").replaceAll("_", " ");
   const contentType = String(settings.contentType ?? "Lista personalizzata");
-  const rawCover = currentCoverUrl || items.find(item => item.image_url)?.image_url || null;
+  const rawCover = currentCoverUrl || defaultCoverImageUrl || items.find(item => item.image_url)?.image_url || null;
   const cover = rawCover ? rawCover.replace(/\/(?:100|150|300|400|600)x(?:100|150|300|400|600)bb\.(jpg|jpeg|png|webp)/i, "/1200x1200bb.$1").replace(/\/t\/p\/w500\//i, "/t/p/original/").replace(/ab67616d0000b273/gi, "ab67616d00001e02") : null;
 
   return (
@@ -128,7 +129,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, comments: initi
         <button type="button" onClick={() => void editRanking()} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
-        <RenqCoverPicker value={currentCoverUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={url => void saveCover(url)} onReset={() => void saveCover(null)} canReset={Boolean(currentCoverUrl)} variant="overlay"/>
+        <RenqCoverPicker value={currentCoverUrl ?? defaultCoverImageUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={url => void saveCover(url)} onReset={() => void saveCover(null)} canReset={Boolean(currentCoverUrl && currentCoverUrl !== defaultCoverImageUrl)} variant="overlay"/>
         </div>
       </section>
 
