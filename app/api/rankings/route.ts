@@ -145,7 +145,7 @@ export async function POST(request:Request){
   const {data:ranking}=await supabase.from("rankings").select("id,status,settings").eq("id",rankingId).eq("user_id",user.id).single();
   if(!ranking||ranking.status!=="COMPLETED"||!(ranking.settings as Record<string,unknown>|null)?.savedAt)return jsonError("Renq salvato non trovato.",404);
   if(coverImagePath!==null&&(typeof coverImagePath!=="string"||!new RegExp("^"+user.id+"/[a-f0-9-]{36}\\.(jpg|png|webp)$","i").test(coverImagePath)))return jsonError("La copertina non è valida o non appartiene al tuo spazio.");
-  const settings={...(ranking.settings as Record<string,unknown>),coverImagePath};
+  const rawPosition=(body as {coverPosition?:{x:number;y:number}}).coverPosition;\n  const coverPosition=rawPosition&&Number.isInteger(rawPosition.x)&&Number.isInteger(rawPosition.y)&&rawPosition.x>=0&&rawPosition.x<=100&&rawPosition.y>=0&&rawPosition.y<=100?rawPosition:{x:50,y:50};\n  const settings={...(ranking.settings as Record<string,unknown>),coverImagePath,coverPosition};
   const {error}=await supabase.from("rankings").update({settings}).eq("id",rankingId).eq("user_id",user.id);
   if(error)return jsonError(error.message,500);
   return NextResponse.json({ok:true});
