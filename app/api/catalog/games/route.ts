@@ -104,7 +104,7 @@ function pokemonEntity(species: PokemonSpecies) {
   };
 }
 async function searchCharacters(query: string, offset: number) {
-  const normalized = query.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  const normalized = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const species = await getPokemonSpecies();
   const pokemonUniverse = normalized === "pokemon";
   const matchingSpecies = pokemonUniverse ? species : species.filter((item) => item.name.replace(/-/g, " ").includes(normalized));
@@ -118,7 +118,7 @@ async function searchCharacters(query: string, offset: number) {
   const igdbEntities = direct.map(entityFromCharacter);
   const unique = new Map<string, (typeof pokemonEntities)[number]>();
   for (const entity of [...igdbEntities, ...pokemonEntities]) {
-    const key = entity.title.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+    const key = entity.title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     if (!unique.has(key)) unique.set(key, entity);
   }
   return { entities: [...unique.values()], hasMore: matchingSpecies.length > pageSize, nextOffset: pageSize };
