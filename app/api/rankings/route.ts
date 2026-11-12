@@ -141,15 +141,11 @@ export async function POST(request:Request){
   return NextResponse.json({comment});
  }
  if(body.action==="update-cover"){
-  const {rankingId,coverImageUrl}=body as {rankingId:string;coverImageUrl:string|null};
+  const {rankingId,coverImagePath}=body as {rankingId:string;coverImagePath:string|null};
   const {data:ranking}=await supabase.from("rankings").select("id,status,settings").eq("id",rankingId).eq("user_id",user.id).single();
   if(!ranking||ranking.status!=="COMPLETED"||!(ranking.settings as Record<string,unknown>|null)?.savedAt)return jsonError("Renq salvato non trovato.",404);
-  if(coverImageUrl!==null){
-   if(typeof coverImageUrl!=="string"||!process.env.NEXT_PUBLIC_SUPABASE_URL)return jsonError("Copertina non valida.");
-   const expected=process.env.NEXT_PUBLIC_SUPABASE_URL+"/storage/v1/object/public/renq-covers/"+user.id+"/";
-   if(!coverImageUrl.startsWith(expected))return jsonError("La copertina deve essere caricata nel tuo spazio Renqd.");
-  }
-  const settings={...(ranking.settings as Record<string,unknown>),coverImageUrl};
+  if(coverImagePath!==null&&(typeof coverImagePath!=="string"||!new RegExp("^"+user.id+"/[a-f0-9-]{36}\\.(jpg|png|webp)$","i").test(coverImagePath)))return jsonError("La copertina non è valida o non appartiene al tuo spazio.");
+  const settings={...(ranking.settings as Record<string,unknown>),coverImagePath};
   const {error}=await supabase.from("rankings").update({settings}).eq("id",rankingId).eq("user_id",user.id);
   if(error)return jsonError(error.message,500);
   return NextResponse.json({ok:true});
@@ -165,9 +161,9 @@ export async function POST(request:Request){
  if(body.action==="cancel-renq"){
   const {rankingId}=body as {rankingId:string};const {data:ranking}=await supabase.from("rankings").select("id").eq("id",rankingId).eq("user_id",user.id).single();if(!ranking)return jsonError("Renq non trovato.",404);const {error}=await supabase.from("rankings").update({status:"CANCELLED"}).eq("id",rankingId);if(error)return jsonError(error.message,500);return NextResponse.json({ok:true});
  }
- const {title,mode,category,contentType,sportDiscipline,coverImageUrl,defaultCoverImageUrl,coverTitle,participation,collaborators,visibility,access,allowTies,duration,battleDepth,items}=body as {title:string;mode:string;category:string;contentType:string;sportDiscipline?:string;coverImageUrl?:string|null;defaultCoverImageUrl?:string|null;coverTitle?:string;participation:string;collaborators:number;visibility:string;access:string;allowTies:boolean;duration:number;battleDepth:string;items:ItemInput[]};
+ const {title,mode,category,contentType,sportDiscipline,coverImageUrl,coverImagePath,defaultCoverImageUrl,coverTitle,participation,collaborators,visibility,access,allowTies,duration,battleDepth,items}=body as {title:string;mode:string;category:string;contentType:string;sportDiscipline?:string;coverImageUrl?:string|null;coverImagePath?:string|null;defaultCoverImageUrl?:string|null;coverTitle?:string;participation:string;collaborators:number;visibility:string;access:string;allowTies:boolean;duration:number;battleDepth:string;items:ItemInput[]};
  if(!title?.trim()||!modeMap[mode]||!Array.isArray(items)||items.length<1||items.length>100)return jsonError("Completa il titolo e inserisci da 1 a 100 elementi.");
- const settings={category,contentType,sportDiscipline:sportDiscipline??null,coverImageUrl:coverImageUrl??null,defaultCoverImageUrl:defaultCoverImageUrl??null,coverTitle:coverTitle??title.trim(),access,collaborators:participation==="collab"?collaborators:1,durationSeconds:mode==="speed"?duration:null,battleDepth};
+ const settings={category,contentType,sportDiscipline:sportDiscipline??null,coverImageUrl:coverImageUrl??null,coverImagePath:coverImagePath??null,defaultCoverImageUrl:defaultCoverImageUrl??null,coverTitle:coverTitle??title.trim(),access,collaborators:participation==="collab"?collaborators:1,durationSeconds:mode==="speed"?duration:null,battleDepth};
  const {data:ranking,error:rankingError}=await supabase.from("rankings").insert({user_id:user.id,title:title.trim(),album_id:null,album_title:null,mode:modeMap[mode],participation_mode:participation==="collab"?"COLLAB":"SOLO",visibility:visibility==="live"?"LIVE":"REVEAL",status:"DRAFT",allow_ties:Boolean(allowTies),settings}).select("id").single();
  if(rankingError||!ranking)return jsonError(rankingError?.message??"Impossibile creare il Renq.",500);
  const customRows=items.map(item=>({owner_id:user.id,category:categoryMap[category]??"CUSTOM",title:item.title.trim().slice(0,120),description:item.subtitle??null,image_url:item.imageUrl??null,is_reusable:false,metadata:{source:item.source??"manual",previewUrl:item.previewUrl??null,appleMusicUrl:item.appleMusicUrl??null,spotifyUrl:item.spotifyUrl??null,provider:item.payload&&typeof item.payload==="object"?(item.payload as Record<string,unknown>).provider??null:null,externalId:item.id??null,contentType}}));
