@@ -4,6 +4,7 @@ export type CatalogEntity = {
   title: string;
   subtitle?: string;
   imageUrl?: string;
+  spotifyUrl?: string;
   provider: string;
   payload?: unknown;
 };
@@ -12,6 +13,9 @@ export type CatalogItem = {
   title: string;
   subtitle?: string;
   imageUrl?: string;
+  previewUrl?: string;
+  appleMusicUrl?: string;
+  spotifyUrl?: string;
   selected: boolean;
   source: "catalog" | "manual";
   payload?: unknown;
