@@ -64,7 +64,19 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
     country: "IT",
   });
   const data = await itunesJson<{ results?: Array<Record<string, unknown>> }>(`${ITUNES}/search?${params}`);
-  return (data.results ?? []).flatMap<MusicEntity>((entry) => {
+  const results = data.results ?? [];
+  if (!isAlbum) {
+    return Promise.all(results.flatMap((entry) => {
+      if (typeof entry.artistId !== "number" || typeof entry.artistName !== "string") return [];
+      return [resolveArtistImage(entry.artistName).then((imageUrl) => ({
+        id: String(entry.artistId), title: entry.artistName as string,
+        subtitle: typeof entry.primaryGenreName === "string" ? entry.primaryGenreName : "Artista",
+        imageUrl, provider: "itunes" as const,
+        payload: { artistId: entry.artistId, artistImageUrl: imageUrl },
+      }))];
+    }));
+  }
+  return results.flatMap<MusicEntity>((entry) => {
     if (isAlbum) {
       if (typeof entry.collectionId !== "number" || typeof entry.collectionName !== "string") return [];
       const artist = typeof entry.artistName === "string" ? entry.artistName : "Artista sconosciuto";
@@ -78,14 +90,7 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
         payload: { collectionId: entry.collectionId, artistId: entry.artistId, artistName: artist },
       }];
     }
-    if (typeof entry.artistId !== "number" || typeof entry.artistName !== "string") return [];
-    return [{
-      id: String(entry.artistId),
-      title: entry.artistName,
-      subtitle: typeof entry.primaryGenreName === "string" ? entry.primaryGenreName : "Artista",
-      provider: "itunes" as const,
-      payload: { artistId: entry.artistId },
-    }];
+    return [];
   });
 }
 
