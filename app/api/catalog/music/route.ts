@@ -44,7 +44,7 @@ async function itunesJson<T>(url: string): Promise<T> {
 
 function spotifySearchUrl(query: string) { return `https://open.spotify.com/search/${encodeURIComponent(query)}`; }
 
-function normalizeMusicText(value: string) { return value.normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+function normalizeMusicText(value: string) { return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
 
 function artistCredit(credits?: Array<{ name?: string; artist?: { name?: string } }>) {
   return (credits ?? []).map((credit) => credit.name ?? credit.artist?.name).filter(Boolean).join(", ");
