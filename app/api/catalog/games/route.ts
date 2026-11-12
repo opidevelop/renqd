@@ -67,7 +67,7 @@ async function searchGames(query: string) {
   return igdbRequest<IgdbGame[]>("games", `search "${safeSearch(query)}"; fields id,name,cover.image_id,first_release_date,platforms.name,genres.name,slug,franchises.id,collections.id; where version_parent = null; limit 50;`);
 }
 function searchAliases(query: string) {
-  const normalized = query.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  const normalized = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   if (normalized === "pokemon") return [query, "Pokémon"];
   return [query];
 }
