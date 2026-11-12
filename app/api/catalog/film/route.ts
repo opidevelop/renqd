@@ -57,7 +57,7 @@ async function loadItems(payload:Record<string,unknown>,contentType:string){
   const credits=await tmdb<TmdbCredits>("/person/"+id+"/tv_credits");
   const shows=(credits.crew??[]).filter(item=>["Creator","Co-Creator","Series Creator"].includes(item.job??""));
   const unique=new Map<number,TmdbMovie>();for(const show of shows)unique.set(show.id,show);
-  return[...unique.values()].sort((a,b)=>(a.release_date??"").localeCompare(b.release_date??"")).map(item=>({id:String(item.id),title:(item as TmdbShow).name??item.title,subtitle:year((item as TmdbShow).first_air_date??item.release_date)||"Serie TV",imageUrl:image(item.poster_path),payload:{tmdbId:item.id,mediaType:"tv"}}));
+  return[...unique.values()].sort((a,b)=>(a.release_date??"").localeCompare(b.release_date??"")).map(item=>({id:String(item.id),title:(item as unknown as TmdbShow).name??item.title,subtitle:year((item as unknown as TmdbShow).first_air_date??item.release_date)||"Serie TV",imageUrl:image(item.poster_path),payload:{tmdbId:item.id,mediaType:"tv"}}));
  }
  throw new Error("Unsupported TMDB catalog action");
 }
