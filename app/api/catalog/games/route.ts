@@ -17,6 +17,7 @@ type IgdbGame = {
   collections?: Array<{ id?: number }>;
 };
 type IgdbEntity = { id: number; name: string; games?: IgdbGame[]; mug_shot?: IgdbImage };
+type CatalogSearchResult = { entities: ReturnType<typeof entityFromGame>[]; hasMore: boolean; nextOffset: number };
 
 const IGDB = "https://api.igdb.com/v4";
 let cachedAccessToken: string | undefined;
@@ -79,18 +80,49 @@ async function searchFranchises(query: string) {
   const results = await Promise.all(searchAliases(query).map((term) => igdbRequest<IgdbEntity[]>("franchises", `where name ~ *"${safeSearch(term)}"*; fields id,name,games.name,games.cover.image_id; limit 30;`)));
   return [...new Map(results.flat().map((entity) => [entity.id, entity])).values()].filter((entity) => (entity.games?.length ?? 0) > 0);
 }
-async function searchCharacters(query: string) {
+type PokemonSpecies = { name: string; url: string };
+let pokemonSpeciesCache: PokemonSpecies[] | undefined;
+async function getPokemonSpecies() {
+  if (pokemonSpeciesCache) return pokemonSpeciesCache;
+  const response = await fetch("https://pokeapi.co/api/v2/pokemon-species?limit=2000", { next: { revalidate: 86_400 } });
+  if (!response.ok) throw new Error(`PokéAPI returned ${response.status}`);
+  const data = await response.json() as { results?: PokemonSpecies[] };
+  pokemonSpeciesCache = data.results ?? [];
+  return pokemonSpeciesCache;
+}
+function formatPokemonName(value: string) {
+  return value.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
+}
+function pokemonEntity(species: PokemonSpecies) {
+  const id = Number(species.url.match(/\\/(\\d+)\\/?$/)?.[1] ?? 0);
+  return {
+    id: `pokemon:${id}`,
+    title: formatPokemonName(species.name),
+    subtitle: `Pokémon · #${String(id).padStart(4, "0")}`,
+    imageUrl: id ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png` : undefined,
+    provider: "igdb",
+    payload: { source: "pokeapi", pokemonId: id },
+  };
+}
+async function searchCharacters(query: string, offset: number) {
+  const normalized = query.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  const species = await getPokemonSpecies();
+  const pokemonUniverse = normalized === "pokemon";
+  const matchingSpecies = pokemonUniverse ? species : species.filter((item) => item.name.replace(/-/g, " ").includes(normalized));
+  const pageSize = 50;
+  const page = matchingSpecies.slice(offset, offset + pageSize);
+  const pokemonEntities = page.map(pokemonEntity);
+  if (pokemonUniverse || offset > 0) {
+    return { entities: pokemonEntities, hasMore: matchingSpecies.length > offset + pageSize, nextOffset: offset + pageSize };
+  }
   const direct = await igdbRequest<IgdbEntity[]>("characters", `search "${safeSearch(query)}"; fields id,name,mug_shot.image_id,games.name; limit 50;`);
-  const isPokemonSearch = searchAliases(query).some((term) => term === "Pokémon");
-  if (!isPokemonSearch) return direct;
-  const franchises = await searchFranchises("Pokémon");
-  const franchiseIds = franchises.map((entity) => entity.id).filter(Number.isSafeInteger);
-  if (!franchiseIds.length) return direct;
-  const games = await igdbRequest<IgdbGame[]>("games", `fields id; where franchises = (${franchiseIds.join(",")}); limit 500;`);
-  const gameIds = games.map((game) => game.id).filter(Number.isSafeInteger);
-  if (!gameIds.length) return direct;
-  const related = await igdbRequest<IgdbEntity[]>("characters", `fields id,name,mug_shot.image_id,games.name; where games = (${gameIds.join(",")}); limit 100;`);
-  return [...new Map([...direct, ...related].map((entity) => [entity.id, entity])).values()];
+  const igdbEntities = direct.map(entityFromCharacter);
+  const unique = new Map<string, (typeof pokemonEntities)[number]>();
+  for (const entity of [...igdbEntities, ...pokemonEntities]) {
+    const key = entity.title.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+    if (!unique.has(key)) unique.set(key, entity);
+  }
+  return { entities: [...unique.values()], hasMore: matchingSpecies.length > pageSize, nextOffset: pageSize };
 }
 function entityFromGame(game: IgdbGame) {
   return { id: String(game.id), title: game.name, subtitle: gameSubtitle(game), imageUrl: imageUrl(game.cover?.image_id), provider: "igdb", payload: { igdbId: game.id, slug: game.slug } };
@@ -107,11 +139,11 @@ function entityFromCharacter(entity: IgdbEntity) {
   const games = (entity.games ?? []).map((game) => game.name).filter(Boolean);
   return { id: String(entity.id), title: entity.name, subtitle: games.slice(0, 2).join(", ") || "Personaggio videoludico", imageUrl: imageUrl(entity.mug_shot?.image_id, "thumb"), provider: "igdb", payload: { igdbId: entity.id } };
 }
-async function searchEntities(query: string, contentType: string) {
-  if (contentType === "Giochi") return (await searchGames(query)).map(entityFromGame);
-  if (contentType === "Saghe") return (await searchCollections(query)).map(entityFromCollection);
-  if (contentType === "Franchise") return (await searchFranchises(query)).map(entityFromFranchise);
-  if (contentType === "Personaggi") return (await searchCharacters(query)).map(entityFromCharacter);
+async function searchEntities(query: string, contentType: string, offset: number): Promise<{ entities: unknown[]; hasMore: boolean; nextOffset: number }> {
+  if (contentType === "Giochi") return { entities: (await searchGames(query)).map(entityFromGame), hasMore: false, nextOffset: 0 };
+  if (contentType === "Saghe") return { entities: (await searchCollections(query)).map(entityFromCollection), hasMore: false, nextOffset: 0 };
+  if (contentType === "Franchise") return { entities: (await searchFranchises(query)).map(entityFromFranchise), hasMore: false, nextOffset: 0 };
+  if (contentType === "Personaggi") return searchCharacters(query, offset);
   throw new Error("Unsupported videogame content type");
 }
 async function loadRelatedGames(payload: Record<string, unknown>, contentType: string) {
@@ -136,8 +168,9 @@ export async function GET(request: NextRequest) {
     if (action === "search") {
       const query = params.get("query")?.trim() ?? "";
       if (query.length < 2 || query.length > 100) return Response.json({ error: "La ricerca deve contenere da 2 a 100 caratteri." }, { status: 400 });
-      const entities = await searchEntities(query, contentType!);
-      return Response.json({ entities }, { headers: { "Cache-Control": "private, max-age=300, stale-while-revalidate=600" } });
+      const offset = Math.max(0, Math.min(2000, Number(params.get("offset") ?? 0) || 0));
+      const result = await searchEntities(query, contentType!, offset);
+      return Response.json(result, { headers: { "Cache-Control": "private, max-age=300, stale-while-revalidate=600" } });
     }
     if (action === "items") {
       const rawPayload = params.get("payload");
