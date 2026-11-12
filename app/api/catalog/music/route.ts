@@ -105,7 +105,7 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
 async function searchMusicBrainz(query: string, contentType: string): Promise<MusicEntity[]> {
   const isAlbum = contentType === "Album";
   const resource = isAlbum ? "release-group" : "artist";
-  const params = new URLSearchParams({ query, fmt: "json", limit: "25" });
+  const params = new URLSearchParams({ query, fmt: "json", limit: "8" });
   const data = await musicBrainzJson<Record<string, unknown>>(`${MUSICBRAINZ}/${resource}?${params}`);
   if (isAlbum) {
     const groups = ((data["release-groups"] ?? []) as Array<Record<string, unknown>>).filter((group) => group["primary-type"] === "Album");
