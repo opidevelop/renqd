@@ -119,12 +119,41 @@ export async function POST(request:Request){
   const {rankingId}=body as {rankingId:string};const {data:ranking}=await supabase.from("rankings").select("id,mode,settings").eq("id",rankingId).eq("user_id",user.id).single();if(!ranking)return jsonError("Renq non trovato.",404);
   await supabase.from("ranking_battle_sessions").delete().eq("ranking_id",rankingId).eq("user_id",user.id);await supabase.from("ranking_speed_sessions").delete().eq("ranking_id",rankingId).eq("user_id",user.id);const {error}=await supabase.from("ranking_items").update({rank_position:null,tie_group_id:null}).eq("ranking_id",rankingId);if(error)return jsonError(error.message,500);const settings={...(ranking.settings??{})};delete settings.savedAt;delete settings.savedSnapshot;const {error:resetError}=await supabase.from("rankings").update({status:"DRAFT",started_at:null,completed_at:null,settings}).eq("id",rankingId);if(resetError)return jsonError(resetError.message,500);return NextResponse.json({ok:true});
  }
+ if(body.action==="toggle-like"){
+  const {rankingId}=body as {rankingId:string};
+  const {data:ranking}=await supabase.from("rankings").select("id").eq("id",rankingId).eq("user_id",user.id).single();
+  if(!ranking)return jsonError("Renq non trovato.",404);
+  const {data:existing}=await supabase.from("ranking_likes").select("user_id").eq("ranking_id",rankingId).eq("user_id",user.id).maybeSingle();
+  if(existing){const {error}=await supabase.from("ranking_likes").delete().eq("ranking_id",rankingId).eq("user_id",user.id);if(error)return jsonError(error.message,500);}
+  else{const {error}=await supabase.from("ranking_likes").insert({ranking_id:rankingId,user_id:user.id});if(error)return jsonError(error.message,500);}
+  const {count,error}=await supabase.from("ranking_likes").select("user_id",{count:"exact",head:true}).eq("ranking_id",rankingId);
+  if(error)return jsonError(error.message,500);
+  return NextResponse.json({liked:!existing,likeCount:count??0});
+ }
+ if(body.action==="add-comment"){
+  const {rankingId,body:commentBody}=body as {rankingId:string;body:string};
+  const clean=typeof commentBody==="string"?commentBody.trim():"";
+  if(!clean||clean.length>4000)return jsonError("Il commento deve contenere da 1 a 4000 caratteri.");
+  const {data:ranking}=await supabase.from("rankings").select("id").eq("id",rankingId).eq("user_id",user.id).single();
+  if(!ranking)return jsonError("Renq non trovato.",404);
+  const {data:comment,error}=await supabase.from("ranking_comments").insert({ranking_id:rankingId,author_id:user.id,body:clean}).select("id,body,created_at,author_id").single();
+  if(error||!comment)return jsonError(error?.message??"Impossibile pubblicare il commento.",500);
+  return NextResponse.json({comment});
+ }
+ if(body.action==="edit-saved-renq"){
+  const {rankingId}=body as {rankingId:string};
+  const {data:ranking}=await supabase.from("rankings").select("id,status,settings").eq("id",rankingId).eq("user_id",user.id).single();
+  if(!ranking||!(ranking.settings as Record<string,unknown>|null)?.savedAt)return jsonError("Renq salvato non trovato.",404);
+  const {error}=await supabase.from("rankings").update({status:"DRAFT",started_at:null,completed_at:null}).eq("id",rankingId).eq("user_id",user.id);
+  if(error)return jsonError(error.message,500);
+  return NextResponse.json({ok:true});
+ }
  if(body.action==="cancel-renq"){
   const {rankingId}=body as {rankingId:string};const {data:ranking}=await supabase.from("rankings").select("id").eq("id",rankingId).eq("user_id",user.id).single();if(!ranking)return jsonError("Renq non trovato.",404);const {error}=await supabase.from("rankings").update({status:"CANCELLED"}).eq("id",rankingId);if(error)return jsonError(error.message,500);return NextResponse.json({ok:true});
  }
- const {title,mode,category,contentType,sportDiscipline,participation,collaborators,visibility,access,allowTies,duration,battleDepth,items}=body as {title:string;mode:string;category:string;contentType:string;sportDiscipline?:string;participation:string;collaborators:number;visibility:string;access:string;allowTies:boolean;duration:number;battleDepth:string;items:ItemInput[]};
+ const {title,mode,category,contentType,sportDiscipline,coverImageUrl,coverTitle,participation,collaborators,visibility,access,allowTies,duration,battleDepth,items}=body as {title:string;mode:string;category:string;contentType:string;sportDiscipline?:string;coverImageUrl?:string|null;coverTitle?:string;participation:string;collaborators:number;visibility:string;access:string;allowTies:boolean;duration:number;battleDepth:string;items:ItemInput[]};
  if(!title?.trim()||!modeMap[mode]||!Array.isArray(items)||items.length<1||items.length>100)return jsonError("Completa il titolo e inserisci da 1 a 100 elementi.");
- const settings={category,contentType,sportDiscipline:sportDiscipline??null,access,collaborators:participation==="collab"?collaborators:1,durationSeconds:mode==="speed"?duration:null,battleDepth};
+ const settings={category,contentType,sportDiscipline:sportDiscipline??null,coverImageUrl:coverImageUrl??null,coverTitle:coverTitle??title.trim(),access,collaborators:participation==="collab"?collaborators:1,durationSeconds:mode==="speed"?duration:null,battleDepth};
  const {data:ranking,error:rankingError}=await supabase.from("rankings").insert({user_id:user.id,title:title.trim(),album_id:null,album_title:null,mode:modeMap[mode],participation_mode:participation==="collab"?"COLLAB":"SOLO",visibility:visibility==="live"?"LIVE":"REVEAL",status:"DRAFT",allow_ties:Boolean(allowTies),settings}).select("id").single();
  if(rankingError||!ranking)return jsonError(rankingError?.message??"Impossibile creare il Renq.",500);
  const customRows=items.map(item=>({owner_id:user.id,category:categoryMap[category]??"CUSTOM",title:item.title.trim().slice(0,120),description:item.subtitle??null,image_url:item.imageUrl??null,is_reusable:false,metadata:{source:item.source??"manual",previewUrl:item.previewUrl??null,appleMusicUrl:item.appleMusicUrl??null,spotifyUrl:item.spotifyUrl??null,provider:item.payload&&typeof item.payload==="object"?(item.payload as Record<string,unknown>).provider??null:null,externalId:item.id??null,contentType}}));
