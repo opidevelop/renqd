@@ -309,3 +309,19 @@
 .saved-renq-hero{overflow:hidden}
 .saved-renq-hero:after{content:"";position:absolute;z-index:0;left:0;right:0;bottom:0;height:112px;background:linear-gradient(180deg,transparent,var(--canvas));pointer-events:none}
 .saved-renq-hero-copy{position:relative;z-index:1}
+
+
+/* Saved Renq — podium metals, warm ranking numerals and full-bleed cover */
+.saved-renq-hero{min-height:480px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-end}
+.saved-renq-cover{transform:none;filter:saturate(.9);image-rendering:auto}
+.saved-renq-cover-shade{background:linear-gradient(180deg,rgba(15,12,10,.04) 0%,rgba(15,12,10,.16) 34%,rgba(15,12,10,.62) 66%,rgba(15,12,10,.88) 100%)}
+.saved-renq-hero-copy{padding:42px 38px 22px}
+.saved-renq-toolbar{position:relative;z-index:2;margin:0;padding:0 38px 28px;gap:10px}
+.saved-renq-toolbar button{background:rgba(255,255,255,.9);border-color:rgba(255,255,255,.7);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.saved-renq-position,.saved-renq-row .saved-renq-position{color:#e9822c!important}
+.saved-renq-medal{display:grid;place-items:center;width:35px;height:35px;flex:none;border:2px solid transparent;border-radius:50%;font-size:18px;line-height:1;background:rgba(255,255,255,.55);box-shadow:0 2px 9px rgba(45,30,15,.08)}
+.saved-renq-medal.medal-1{border-color:#d7a83e;background:linear-gradient(145deg,#fff8dc,#f5d987);box-shadow:0 0 0 3px rgba(215,168,62,.13),0 3px 10px rgba(120,83,19,.14)}
+.saved-renq-medal.medal-2{border-color:#aeb8c3;background:linear-gradient(145deg,#fff,#dce3e9);box-shadow:0 0 0 3px rgba(156,170,184,.16),0 3px 10px rgba(67,80,94,.12)}
+.saved-renq-medal.medal-3{border-color:#b8794e;background:linear-gradient(145deg,#fbe2ce,#d69a70);box-shadow:0 0 0 3px rgba(184,121,78,.15),0 3px 10px rgba(105,62,34,.13)}
+.renq-finish>svg:first-child{color:#e9822c!important;stroke:#e9822c!important}
+@media(max-width:680px){.saved-renq-hero{min-height:430px}.saved-renq-hero-copy{padding:28px 22px 18px}.saved-renq-toolbar{padding:0 16px 20px;gap:7px}}
