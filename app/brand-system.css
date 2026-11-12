@@ -223,3 +223,155 @@
 .catalog-selected-entity>span:nth-child(2)>small{color:#938477;font-size:9px}
 .catalog-selected-entity>button{flex:none;padding:8px 10px;border:1px solid #e9dfd4;border-radius:8px;background:#faf7f3;color:#74563f;font-size:9px;font-weight:750;cursor:pointer}
 @media(max-width:560px){.catalog-selected-entity{gap:8px;padding:9px}.catalog-selected-entity>button{padding:7px 8px;font-size:8px}}
+
+
+/* Sport discipline picker */
+.sport-discipline-picker {
+  margin: 28px 0 30px;
+  padding: clamp(20px, 3vw, 30px);
+  border: 1px solid #e9e5df;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 92% 0%, rgba(215, 207, 244, .24), transparent 38%),
+    linear-gradient(145deg, #fffefa 0%, #f8f6f2 100%);
+  box-shadow: 0 12px 35px rgba(39, 35, 29, .045);
+}
+.sport-picker-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.sport-picker-kicker {
+  display: block;
+  margin-bottom: 8px;
+  color: #8b7bb8;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+.sport-picker-heading h3 {
+  margin: 0;
+  color: #262421;
+  font-size: clamp(21px, 2.5vw, 27px);
+  font-weight: 650;
+  letter-spacing: -.055em;
+}
+.sport-picker-heading p {
+  margin: 6px 0 0;
+  color: #858078;
+  font-size: 12px;
+}
+.sport-picker-count {
+  padding-bottom: 3px;
+  color: #39352f;
+  font-size: 17px;
+  font-weight: 750;
+  letter-spacing: -.04em;
+}
+.sport-picker-count i {
+  color: #aaa49b;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+}
+.sport-discipline-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.sport-discipline-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 174px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 15px 16px 17px;
+  overflow: hidden;
+  border: 1px solid #e9e5df;
+  border-radius: 16px;
+  background: rgba(255,255,255,.82);
+  color: #292722;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.sport-discipline-card::after {
+  position: absolute;
+  right: -27px;
+  bottom: -42px;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: var(--sport-tint);
+  content: "";
+  opacity: .7;
+  transition: transform .25s ease;
+}
+.sport-discipline-card:hover {
+  transform: translateY(-3px);
+  border-color: #cfc8df;
+  box-shadow: 0 12px 25px rgba(40,35,30,.08);
+}
+.sport-discipline-card:hover::after { transform: scale(1.2); }
+.sport-discipline-card.is-active {
+  border-color: var(--sport-accent);
+  background: linear-gradient(145deg, #fff 0%, var(--sport-tint) 150%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--sport-accent) 16%, transparent), 0 12px 24px rgba(40,35,30,.07);
+}
+.sport-football { --sport-accent: #4f8b68; --sport-tint: #edf5ef; }
+.sport-tennis { --sport-accent: #b19b39; --sport-tint: #f7f4df; }
+.sport-volleyball { --sport-accent: #bd7655; --sport-tint: #f8eee8; }
+.sport-formula { --sport-accent: #a45e64; --sport-tint: #f7ebec; }
+.sport-card-top {
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+.sport-card-number {
+  color: #a7a198;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: .1em;
+}
+.sport-card-arrow { color: #aaa49b; font-size: 17px; line-height: 1; }
+.sport-discipline-card.is-active .sport-card-top > svg { color: var(--sport-accent); }
+.sport-card-icon {
+  z-index: 1;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin: 13px 0 12px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--sport-accent) 18%, white);
+  border-radius: 14px;
+  background: var(--sport-tint);
+  color: var(--sport-accent);
+}
+.sport-card-name {
+  z-index: 1;
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: -.025em;
+}
+.sport-card-subtitle {
+  z-index: 1;
+  margin-top: 4px;
+  color: #89837b;
+  font-size: 10px;
+  line-height: 1.4;
+}
+@media (max-width: 760px) {
+  .sport-discipline-picker { padding: 19px 16px; border-radius: 18px; }
+  .sport-discipline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .sport-discipline-card { min-height: 158px; padding: 13px; }
+  .sport-card-icon { width: 43px; height: 43px; margin: 10px 0; }
+}
+@media (max-width: 360px) {
+  .sport-discipline-card { min-height: 150px; }
+  .sport-card-subtitle { font-size: 9px; }
+}
