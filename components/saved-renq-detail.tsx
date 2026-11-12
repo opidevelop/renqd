@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, Heart, MessageCircle, Pencil, Send, Share2, Trophy } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Pencil, Send, Share2, Trophy } from "lucide-react";
 
 type SavedItem = {
   id: string;
@@ -54,7 +55,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, comments: initi
     } finally { setBusy(false); }
   }
 
-  async function addComment(event: React.FormEvent<HTMLFormElement>) {
+  async function addComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const body = comment.trim();
     if (!body || busy) return;
