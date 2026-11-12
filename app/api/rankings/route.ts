@@ -37,7 +37,7 @@ export async function POST(request:Request){
    const {data:rankingTieSetting}=await supabase.from("rankings").select("allow_ties").eq("id",session.ranking_id).single();const rankingAllowsTies=Boolean(rankingTieSetting?.allow_ties);
    const {data:allItems}=await supabase.from("ranking_items").select("id").eq("ranking_id",session.ranking_id);
    const ordered=(allItems??[]).map(x=>x.id).sort((a,b)=>(state.wins[b]??0)-(state.wins[a]??0));
-   const tieIds=new Map<string,string>();if(rankingAllowsTies){const byWins=new Map<number,string[]>();for(const [id,wins] of Object.entries(state.wins)){const group=byWins.get(wins)??[];group.push(id);byWins.set(wins,group);}for(const group of byWins.values())if(group.length>1){const groupId=crypto.randomUUID();for(const id of group)tieIds.set(id,groupId);}}
+   const tieIds=new Map<string,string>();if(rankingAllowsTies){const byWins=new Map<number,string[]>();for(const id of ordered){const wins=state.wins[id]??0;const group=byWins.get(wins)??[];group.push(id);byWins.set(wins,group);}for(const group of byWins.values())if(group.length>1){const groupId=crypto.randomUUID();for(const id of group)tieIds.set(id,groupId);}}
    let position=0;let previousWins:number|null=null;for(let i=0;i<ordered.length;i++){const id=ordered[i];const wins=state.wins[id]??0;if(!tieIds.has(id)||wins!==previousWins)position=i+1-[...tieIds.entries()].filter(([member])=>ordered.indexOf(member)<i&&state.wins[member]===wins).length;previousWins=wins;await supabase.from("ranking_items").update({rank_position:position,tie_group_id:tieIds.get(id)??null}).eq("id",id);}
    await supabase.from("rankings").update({status:"COMPLETED",completed_at:new Date().toISOString()}).eq("id",session.ranking_id);
   }
