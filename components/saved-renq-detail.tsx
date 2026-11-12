@@ -4,7 +4,8 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Heart, MessageCircle, Pencil, Send, Share2, Trophy } from "lucide-react";
-import { RenqCoverPicker } from "@/components/renq-cover-picker";\nimport { highQualityImageUrl } from "@/lib/image-quality";
+import { RenqCoverPicker } from "@/components/renq-cover-picker";
+import { highQualityImageUrl } from "@/lib/image-quality";
 
 type SavedItem = {
   id: string;
@@ -20,7 +21,8 @@ type Props = {
   items: SavedItem[];
   coverImageUrl: string | null;
   coverImagePath: string | null;
-  defaultCoverImageUrl: string | null;\n  coverPosition: { x: number; y: number };
+  defaultCoverImageUrl: string | null;
+  coverPosition: { x: number; y: number };
   comments: CommentItem[];
   commentCount: number;
   initialLiked: boolean;
@@ -37,7 +39,8 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const [liked, setLiked] = useState(initialLiked);
   const [likes, setLikes] = useState(initialLikeCount);
   const [currentCoverUrl, setCurrentCoverUrl] = useState(coverImageUrl);
-  const [currentCoverPath, setCurrentCoverPath] = useState(coverImagePath);\n  const [currentCoverPosition, setCurrentCoverPosition] = useState(initialCoverPosition);
+  const [currentCoverPath, setCurrentCoverPath] = useState(coverImagePath);
+  const [currentCoverPosition, setCurrentCoverPosition] = useState(initialCoverPosition);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -101,8 +104,9 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     if (busy) return;
     setBusy(true); setError("");
     try {
-      await post({ action: "update-cover", rankingId: ranking.id, coverImagePath: path });
+      await post({ action: "update-cover", rankingId: ranking.id, coverImagePath: path, coverPosition: position });
       setCurrentCoverPath(path);
+      setCurrentCoverPosition(position);
       setCurrentCoverUrl(previewUrl ?? defaultCoverImageUrl);
       setError("Copertina aggiornata.");
     } catch (e) {
