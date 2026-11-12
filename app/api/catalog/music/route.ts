@@ -6,7 +6,7 @@ type MusicEntity = {
   subtitle?: string;
   imageUrl?: string;
   spotifyUrl?: string;
-  provider: "itunes" | "musicbrainz";
+  provider: "itunes" | "musicbrainz" | "spotify";
   payload?: Record<string, unknown>;
 };
 
