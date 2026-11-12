@@ -19,6 +19,7 @@ function MusicActions({item}:{item:Item}){
 }
 function RankHeading({ranking,items}:{ranking:Ranking;items:Item[]}){
  const settings=ranking.settings??{};
+ const rawPosition=settings.coverPosition as {x?:unknown;y?:unknown}|null;const coverPosition={x:typeof rawPosition?.x==="number"?rawPosition.x:50,y:typeof rawPosition?.y==="number"?rawPosition.y:50};
  const cover=highQualityImageUrl(typeof settings.coverImageUrl==="string"?settings.coverImageUrl:items.find(item=>item.image_url)?.image_url);
  return <div className={"renq-card-heading"+(cover?" has-cover":"")}>
   {cover&&<div className="renq-card-cover"><img src={cover} alt="" style={{objectPosition:coverPosition.x+"% "+coverPosition.y+"%"}} /><span/></div>}
