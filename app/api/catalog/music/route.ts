@@ -6,7 +6,7 @@ type MusicEntity = {
   subtitle?: string;
   imageUrl?: string;
   spotifyUrl?: string;
-  provider: "itunes" | "musicbrainz" | "spotify";
+  provider: "itunes" | "musicbrainz";
   payload?: Record<string, unknown>;
 };
 
@@ -17,7 +17,6 @@ const MUSICBRAINZ = "https://musicbrainz.org/ws/2";
 const USER_AGENT = "Renqd/0.1.0 (https://renqd.it)";
 let lastMusicBrainzRequest = 0;
 let musicBrainzQueue: Promise<unknown> = Promise.resolve();
-let spotifyToken: { value: string; expiresAt: number } | null = null;
 
 async function musicBrainzJson<T>(url: string): Promise<T> {
   const task = musicBrainzQueue.then(async () => {
@@ -33,78 +32,6 @@ async function musicBrainzJson<T>(url: string): Promise<T> {
   });
   musicBrainzQueue = task.then(() => undefined, () => undefined);
   return task;
-}
-
-
-async function spotifyAccessToken(): Promise<string> {
-  if (spotifyToken && spotifyToken.expiresAt > Date.now() + 60_000) return spotifyToken.value;
-  const clientId = process.env.SPOTIFY_CLIENT_ID;
-  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-  if (!clientId || !clientSecret) throw new Error("Spotify non configurato: aggiungi SPOTIFY_CLIENT_ID e SPOTIFY_CLIENT_SECRET nelle variabili Production di Vercel.");
-  const credentials = Buffer.from(clientId + ":" + clientSecret).toString("base64");
-  const response = await fetch("https://accounts.spotify.com/api/token", {
-    method: "POST",
-    headers: { Authorization: "Basic " + credentials, "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ grant_type: "client_credentials" }),
-    cache: "no-store",
-  });
-  if (!response.ok) throw new Error("Spotify OAuth returned " + response.status);
-  const data = await response.json() as { access_token: string; expires_in: number };
-  spotifyToken = { value: data.access_token, expiresAt: Date.now() + data.expires_in * 1000 };
-  return data.access_token;
-}
-
-async function spotifyJson<T>(path: string): Promise<T> {
-  const token = await spotifyAccessToken();
-  const response = await fetch("https://api.spotify.com/v1" + path, {
-    headers: { Authorization: "Bearer " + token, Accept: "application/json" },
-    next: { revalidate: 900 },
-  });
-  if (!response.ok) throw new Error("Spotify returned " + response.status);
-  return response.json() as Promise<T>;
-}
-
-async function searchSpotifyPlaylists(query: string): Promise<MusicEntity[]> {
-  const params = new URLSearchParams({ q: query, type: "playlist", market: "IT", limit: "8" });
-  const data = await spotifyJson<{ playlists?: { items?: Array<{ id: string; name: string; description?: string; images?: Array<{ url: string }>; owner?: { display_name?: string }; items?: { total?: number }; tracks?: { total?: number }; external_urls?: { spotify?: string } }> } }>("/search?" + params);
-  return (data.playlists?.items ?? []).flatMap((playlist) => {
-    if (!playlist.id || !playlist.name) return [];
-    const imageUrl = playlist.images?.[0]?.url;
-    const total = playlist.items?.total ?? playlist.tracks?.total;
-    return [{
-      id: playlist.id, title: playlist.name,
-      subtitle: [playlist.owner?.display_name, typeof total === "number" ? total + " brani" : ""].filter(Boolean).join(" · "),
-      imageUrl, provider: "spotify" as const,
-      spotifyUrl: playlist.external_urls?.spotify ?? "https://open.spotify.com/playlist/" + playlist.id,
-      payload: { playlistId: playlist.id, spotifyUrl: playlist.external_urls?.spotify ?? "https://open.spotify.com/playlist/" + playlist.id },
-    }];
-  });
-}
-
-async function loadSpotifyPlaylistItems(payload: Record<string, unknown>): Promise<MusicItem[]> {
-  const playlistId = payload.playlistId;
-  if (typeof playlistId !== "string" || !/^[A-Za-z0-9]{10,40}$/.test(playlistId)) throw new Error("Invalid Spotify playlist identifier");
-  const results: MusicItem[] = [];
-  for (let offset = 0; offset < 1000; offset += 100) {
-    const params = new URLSearchParams({ market: "IT", limit: "100", offset: String(offset) });
-    const data = await spotifyJson<{ items?: Array<{ item?: Record<string, unknown> | null; track?: Record<string, unknown> | null }>; next?: string | null }>("/playlists/" + playlistId + "/items?" + params);
-    const entries = data.items ?? [];
-    for (const entry of entries) {
-      const track = entry.item ?? entry.track;
-      if (!track || track.type !== "track" || typeof track.name !== "string") continue;
-      const album = track.album as { name?: string; images?: Array<{ url?: string }> } | undefined;
-      const artists = track.artists as Array<{ name?: string }> | undefined;
-      const artistNames = (artists ?? []).map((artist) => artist.name).filter(Boolean).join(", ");
-      const external = track.external_urls as { spotify?: string } | undefined;
-      const id = typeof track.id === "string" ? track.id : artistNames + "-" + track.name;
-      results.push({
-        id, title: track.name, subtitle: [artistNames, album?.name].filter(Boolean).join(" · ") || undefined,
-        imageUrl: album?.images?.[0]?.url, spotifyUrl: external?.spotify,
-      });
-    }
-    if (!data.next || entries.length < 100) break;
-  }
-  return results;
 }
 
 async function itunesJson<T>(url: string): Promise<T> {
@@ -289,7 +216,7 @@ export async function GET(request: NextRequest) {
   const action = params.get("action");
   const provider = params.get("provider");
   const contentType = params.get("contentType");
-  if (!["itunes", "musicbrainz", "spotify"].includes(provider ?? "") || !["Album", "Artisti", "Discografie", "Playlist"].includes(contentType ?? "") || (provider === "spotify" && contentType !== "Playlist") || (provider !== "spotify" && contentType === "Playlist")) {
+  if (!["itunes", "musicbrainz"].includes(provider ?? "") || !["Album", "Artisti", "Discografie"].includes(contentType ?? "")) {
     return Response.json({ error: "Unsupported music catalog request." }, { status: 400 });
   }
 
@@ -297,9 +224,7 @@ export async function GET(request: NextRequest) {
     if (action === "search") {
       const query = params.get("query")?.trim() ?? "";
       if (query.length < 2 || query.length > 100) return Response.json({ error: "La ricerca deve contenere da 2 a 100 caratteri." }, { status: 400 });
-      const entities = provider === "spotify" ? await searchSpotifyPlaylists(query) : provider === "itunes"
-        ? await searchItunes(query, contentType!)
-        : await searchMusicBrainz(query, contentType!);
+      const entities = provider === "itunes" ? await searchItunes(query, contentType!) : await searchMusicBrainz(query, contentType!);
       return Response.json({ entities });
     }
 
@@ -307,9 +232,7 @@ export async function GET(request: NextRequest) {
       const rawPayload = params.get("payload");
       if (!rawPayload || rawPayload.length > 2000) return Response.json({ error: "Catalog item payload is missing or invalid." }, { status: 400 });
       const payload = JSON.parse(rawPayload) as Record<string, unknown>;
-      const items = provider === "spotify" ? await loadSpotifyPlaylistItems(payload) : provider === "itunes"
-        ? await loadItunesItems(payload, contentType!)
-        : await loadMusicBrainzItems(payload, contentType!);
+      const items = provider === "itunes" ? await loadItunesItems(payload, contentType!) : await loadMusicBrainzItems(payload, contentType!);
       return Response.json({ items });
     }
 
