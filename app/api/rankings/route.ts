@@ -167,7 +167,7 @@ export async function POST(request:Request){
  if(!title?.trim()||!modeMap[mode]||!Array.isArray(items)||items.length<1||items.length>100)return jsonError("Completa il titolo e inserisci da 1 a 100 elementi.");
  if(coverImagePath!==undefined&&coverImagePath!==null&&(typeof coverImagePath!=="string"||!new RegExp("^"+user.id+"/[a-f0-9-]{36}\\.(jpg|png|webp)$","i").test(coverImagePath)))return jsonError("La copertina caricata non è valida.");
  const slugBase=title.normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"renq";
- const publicSlug=slugBase+"-"+crypto.randomUUID().replace(/-/g,"").slice(0,5);
+ const publicSlug=slugBase+"-"+crypto.randomUUID().replace(/-/g,"").slice(0,6);
  const settings={category,contentType,sportDiscipline:sportDiscipline??null,coverImageUrl:coverImageUrl??null,coverImagePath:coverImagePath??null,defaultCoverImageUrl:defaultCoverImageUrl??null,coverTitle:coverTitle??title.trim(),access,collaborators:participation==="collab"?collaborators:1,durationSeconds:mode==="speed"?duration:null,battleDepth};
  const {data:ranking,error:rankingError}=await supabase.from("rankings").insert({user_id:user.id,public_slug:publicSlug,title:title.trim(),album_id:null,album_title:null,mode:modeMap[mode],participation_mode:participation==="collab"?"COLLAB":"SOLO",visibility:visibility==="live"?"LIVE":"REVEAL",status:"DRAFT",allow_ties:Boolean(allowTies),settings}).select("id").single();
  if(rankingError||!ranking)return jsonError(rankingError?.message??"Impossibile creare il Renq.",500);
