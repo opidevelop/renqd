@@ -188,3 +188,18 @@
 .review-external-link.spotify{color:#167b45;border-color:#cce7d7}
 .review-external-link.apple{color:#9b3c67;border-color:#efd6e1}
 @media(max-width:760px){.review-item-links{order:5;width:100%;max-width:none;margin:8px 0 0 34px}.review-item-audio{width:min(220px,100%)}.catalog-result-row .catalog-result-main{gap:8px;padding:7px 8px}.catalog-spotify-link{padding:7px 8px}}
+
+
+/* Compact circular music controls in the Builder. Spotify URLs stay in item metadata
+   for the future ranking view; they are intentionally not exposed during selection. */
+.review-item-links{display:flex;align-items:center;gap:9px;flex:none;margin-left:auto;max-width:none}
+.review-item-audio-hidden{display:none!important}
+.music-action-button{display:inline-flex;align-items:center;justify-content:center;flex:none;width:38px;height:38px;padding:0;border:1px solid #eee4dc;border-radius:50%;background:#fff;color:#4d443d;text-decoration:none;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.music-action-button:hover{transform:translateY(-1px);border-color:#e2c9b3;box-shadow:0 4px 12px #3d2a190f}
+.music-action-button.apple{color:#b84d78;background:linear-gradient(145deg,#fff7fb,#fff);border-color:#f0dce6}
+.music-action-button.preview{color:#fff;background:#24211f;border-color:#24211f}
+.music-action-button.preview.is-playing{background:#c66a2a;border-color:#c66a2a}
+.catalog-validation-hint{margin:12px 0 0;padding:11px 13px;border:1px solid #f0ddc9;border-radius:10px;background:#fff8f1;color:#99643c;font-size:10px;line-height:1.5}
+.catalog-panel-heading>div>small{display:block;margin-top:5px;color:#8d8175;font-size:9px;line-height:1.5}
+.builder-next:disabled{opacity:.42;cursor:not-allowed;box-shadow:none;transform:none}
+@media(max-width:760px){.review-item-links{order:5;width:auto;max-width:none;margin:7px 0 0 34px;gap:8px}.music-action-button{width:40px;height:40px}.review-item{flex-wrap:wrap}.review-item-actions{margin-left:auto}}
