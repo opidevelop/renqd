@@ -488,3 +488,9 @@
 .renq-reveal-interlude p{max-width:420px;margin:23px auto 0;color:#d6c8bb;font-size:13px;line-height:1.7}
 .renq-reveal-interlude.is-winner-interlude h2 em{color:#ffd28b}
 @media(max-width:680px){.renq-reveal-details-content{padding:28px 20px}.renq-reveal-metadata{gap:7px}.renq-reveal-metadata>span{padding:10px}.renq-reveal-metadata strong{font-size:10px}.renq-reveal-interlude{padding:28px 18px}.saved-renq-toolbar .renq-cover-picker.is-overlay .renq-cover-focus-controls{min-width:100%}}
+
+@media(max-width:680px){
+ .saved-renq-toolbar{flex-wrap:wrap}
+ .saved-renq-toolbar .renq-cover-picker.is-overlay{flex:1 1 100%;max-width:100%}
+ .saved-renq-toolbar .renq-cover-picker.is-overlay .renq-cover-picker-actions{width:100%}
+}
