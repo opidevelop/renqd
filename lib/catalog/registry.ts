@@ -52,7 +52,18 @@ const filmProvider: CatalogProvider = {
     return result.items;
   },
 };
-const providers: CatalogProvider[] = [musicProvider("itunes"), musicProvider("musicbrainz"), gamesProvider, filmProvider];
+const booksProvider: CatalogProvider = {
+  id: "openlibrary",
+  supports: (category, contentType) => category === "books" && ["Libri", "Autori"].includes(contentType),
+  async search(query, _category, contentType, offset = 0) {
+    return requestCatalog<{ entities: CatalogEntity[]; hasMore?: boolean; nextOffset?: number }>("/api/catalog/books", "openlibrary", "search", contentType, { query, offset: String(offset) });
+  },
+  async getItems(entity, _category, contentType) {
+    const result = await requestCatalog<{ items: Omit<CatalogItem, "selected" | "source">[] }>("/api/catalog/books", "openlibrary", "items", contentType, { payload: JSON.stringify(entity.payload ?? {}) });
+    return result.items;
+  },
+};
+const providers: CatalogProvider[] = [musicProvider("itunes"), musicProvider("musicbrainz"), gamesProvider, filmProvider, booksProvider];
 
 export async function searchCatalog(query: string, category: CatalogCategory, contentType: string, offset = 0) {
   const matching = providers.filter((provider) => provider.supports(category, contentType));
