@@ -16,7 +16,7 @@ type SavedItem = {
 };
 type CommentItem = { id: string; body: string; created_at: string; author_id: string };
 type Props = {
-  ranking: { id: string; title: string; mode: string; settings: Record<string, unknown>; created_at: string };
+  ranking: { id: string; public_slug?: string; title: string; mode: string; settings: Record<string, unknown>; created_at: string };
   items: SavedItem[];
   coverImageUrl: string | null;
   coverImagePath: string | null;
@@ -80,7 +80,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     setBusy(true); setError("");
     try {
       await post({ action: "edit-saved-renq", rankingId: ranking.id });
-      router.push("/renq/" + ranking.id);
+      router.push("/renq/" + (ranking.public_slug ?? ranking.id));
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Non è stato possibile modificare il Renq.");
