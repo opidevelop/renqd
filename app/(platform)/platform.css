@@ -304,3 +304,8 @@
 .saved-renq-footer-mark{margin-top:42px;text-align:center;color:#b7aaa0;font-size:20px;font-weight:900;letter-spacing:-1.4px}
 .saved-renq-footer-mark span{color:#f08a35}
 @media(max-width:680px){.saved-renq-page{padding:0 0 35px}.saved-renq-hero{min-height:320px;margin-top:10px;border-radius:19px}.saved-renq-hero-copy{padding:27px 22px 24px}.saved-renq-hero-copy h1{font-size:36px;letter-spacing:-1.6px}.saved-renq-toolbar{gap:7px;margin:13px 0 27px}.saved-renq-toolbar button{flex:1;justify-content:center;gap:6px;padding:0 8px;font-size:10px}.saved-renq-row{gap:10px;min-height:67px;padding:9px}.saved-renq-row>img,.saved-renq-item-placeholder{width:42px;height:42px}.saved-renq-section-heading h2{font-size:21px}}
+
+/* Smooth cover-to-ranking transition, inspired by full-bleed music artwork */
+.saved-renq-hero{overflow:hidden}
+.saved-renq-hero:after{content:"";position:absolute;z-index:0;left:0;right:0;bottom:0;height:112px;background:linear-gradient(180deg,transparent,var(--canvas));pointer-events:none}
+.saved-renq-hero-copy{position:relative;z-index:1}
