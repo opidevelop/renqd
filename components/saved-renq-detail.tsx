@@ -96,7 +96,8 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, comments: initi
   const settings = ranking.settings ?? {};
   const category = String(settings.category ?? "custom").replaceAll("_", " ");
   const contentType = String(settings.contentType ?? "Lista personalizzata");
-  const cover = coverImageUrl || items.find(item => item.image_url)?.image_url || null;
+  const rawCover = coverImageUrl || items.find(item => item.image_url)?.image_url || null;
+  const cover = rawCover ? rawCover.replace(/\\/(?:100|150|300|400|600)x(?:100|150|300|400|600)bb\\.(jpg|jpeg|png|webp)/i, "/1200x1200bb.$1").replace(/\\/t\\/p\\/w500\\//i, "/t/p/original/").replace(/ab67616d0000b273/gi, "ab67616d00001e02") : null;
 
   return (
     <main className="saved-renq-page">
@@ -109,13 +110,12 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, comments: initi
           <h1>{ranking.title}</h1>
           <p>{items.length} elementi · Salvato il {new Date(String(settings.savedAt ?? ranking.created_at)).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}</p>
         </div>
-      </section>
-
-      <div className="saved-renq-toolbar">
+        <div className="saved-renq-toolbar">
         <button type="button" onClick={() => void editRanking()} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
-      </div>
+        </div>
+      </section>
 
       <section className="saved-renq-ranking">
         <div className="saved-renq-section-heading"><div><span>IL RISULTATO</span><h2>La tua classifica</h2></div><Trophy size={21} /></div>
@@ -123,11 +123,11 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, comments: initi
           {items.map((item, index) => {
             const position = item.rank_position ?? index + 1;
             const medal = position <= 3 ? ["🥇", "🥈", "🥉"][position - 1] : null;
-            return <article className={"saved-renq-row" + (position === 1 ? " is-first" : "")} key={item.id}>
+            return <article className={"saved-renq-row" + (position <= 3 ? " is-top-" + position : "")} key={item.id}>
               <span className="saved-renq-position">{String(position).padStart(2, "0")}</span>
               {item.image_url ? <img src={item.image_url} alt="" loading="lazy" /> : <span className="saved-renq-item-placeholder"><Trophy size={19} /></span>}
               <div className="saved-renq-item-copy"><strong>{item.title}</strong>{item.description && <small>{item.description}</small>}</div>
-              {medal && <span className="saved-renq-medal" aria-label={"Posizione " + position}>{medal}</span>}
+              {medal && <span className={"saved-renq-medal medal-" + position} aria-label={"Posizione " + position}>{medal}</span>}
             </article>;
           })}
         </div>
