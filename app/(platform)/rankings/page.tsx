@@ -11,7 +11,7 @@ const categoryIcons:Record<string,typeof Music2>={music:Music2,games:Gamepad2,fi
 export default async function MyRenqsPage(){
  const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();
  if(!user)return null;
- const {data:rankings,error}=await supabase.from("rankings").select("id,title,mode,status,settings,created_at,completed_at").eq("user_id",user.id).eq("status","COMPLETED").order("completed_at",{ascending:false});
+ const {data:rankings,error}=await supabase.from("rankings").select("id,title,mode,status,settings,created_at,completed_at").eq("user_id",user.id).in("status",["COMPLETED","DRAFT"]).order("completed_at",{ascending:false});
  const saved=(rankings??[]).filter(x=>Boolean((x.settings as Record<string,unknown>|null)?.savedAt)).map(ranking=>({ranking,result:{id:ranking.id,created_at:String((ranking.settings as Record<string,unknown>).savedAt)}}));
  return <div className="my-renqs-page">
   <header className="my-renqs-header"><div><span className="page-eyebrow"><Trophy size={14}/> LA TUA COLLEZIONE</span><h1>I miei <span className="renqd-wordmark">renqd<span>.</span></span></h1><p>Le classifiche che hai deciso di conservare, tutte in un unico posto.</p></div><Link href="/create" className="my-renqs-create"><Plus size={17}/> Crea un Renq</Link></header>
