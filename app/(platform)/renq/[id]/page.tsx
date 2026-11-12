@@ -15,6 +15,9 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   if (!ranking) notFound();
 
   const settings = (ranking.settings ?? {}) as Record<string, unknown>;
+  const coverImagePath = typeof settings.coverImagePath === "string" ? settings.coverImagePath : null;
+  const { data: signedCover } = coverImagePath ? await supabase.storage.from("renq-covers").createSignedUrl(coverImagePath, 60 * 60 * 24 * 7) : { data: null };
+  const resolvedCoverImageUrl = signedCover?.signedUrl ?? (typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null);
   const savedSnapshot = settings.savedSnapshot as { items?: Array<{ id: string; title: string; image_url?: string | null; description?: string | null; rank_position?: number | null; tie_group_id?: string | null }> } | undefined;
   const isSaved = ranking.status === "COMPLETED" && Boolean(settings.savedAt) && Array.isArray(savedSnapshot?.items);
 
@@ -27,7 +30,8 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     return <SavedRenqDetail
       ranking={{ id: ranking.id, title: ranking.title, mode: ranking.mode, settings, created_at: ranking.created_at }}
       items={savedSnapshot?.items ?? []}
-      coverImageUrl={typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null}
+      coverImageUrl={resolvedCoverImageUrl}
+      coverImagePath={coverImagePath}
       defaultCoverImageUrl={typeof settings.defaultCoverImageUrl === "string" ? settings.defaultCoverImageUrl : null}
       comments={comments ?? []}
       commentCount={commentCount ?? 0}
@@ -49,5 +53,5 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     apple_music_url: (lookup.get(x.custom_item_id)?.metadata as Record<string, unknown> | undefined)?.appleMusicUrl as string | null,
     spotify_url: (lookup.get(x.custom_item_id)?.metadata as Record<string, unknown> | undefined)?.spotifyUrl as string | null
   }));
-  return <RenqExperience ranking={ranking} items={hydrated} />;
+  return <RenqExperience ranking={{ ...ranking, settings: { ...settings, coverImageUrl: resolvedCoverImageUrl } }} items={hydrated} />;
 }
