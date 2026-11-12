@@ -28,8 +28,8 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   if (isSaved) {
     const [{ data: comments, count: commentCount }, { data: liked }, { count: likeCount }] = await Promise.all([
       supabase.from("ranking_comments").select("id,body,created_at,author_id", { count: "exact" }).eq("ranking_id", ranking.id).is("deleted_at", null).order("created_at", { ascending: true }),
-      supabase.from("ranking_likes").select("user_id").eq("ranking_id", id).eq("user_id", user.id).maybeSingle(),
-      supabase.from("ranking_likes").select("user_id", { count: "exact", head: true }).eq("ranking_id", id)
+      supabase.from("ranking_likes").select("user_id").eq("ranking_id", ranking.id).eq("user_id", user.id).maybeSingle(),
+      supabase.from("ranking_likes").select("user_id", { count: "exact", head: true }).eq("ranking_id", ranking.id)
     ]);
     return <SavedRenqDetail
       ranking={{ id: ranking.id, public_slug: ranking.public_slug, title: ranking.title, mode: ranking.mode, settings, created_at: ranking.created_at }}
@@ -45,7 +45,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     />;
   }
 
-  const { data: items } = await supabase.from("ranking_items").select("id,title_snapshot,sort_order,rank_position,tie_group_id,custom_item_id").eq("ranking_id", id).order("rank_position", { ascending: true, nullsFirst: false }).order("sort_order");
+  const { data: items } = await supabase.from("ranking_items").select("id,title_snapshot,sort_order,rank_position,tie_group_id,custom_item_id").eq("ranking_id", ranking.id).order("rank_position", { ascending: true, nullsFirst: false }).order("sort_order");
   const customIds = (items ?? []).map(x => x.custom_item_id).filter(Boolean) as string[];
   const { data: custom } = customIds.length ? await supabase.from("custom_items").select("id,title,image_url,description,metadata").in("id", customIds) : { data: [] };
   const lookup = new Map((custom ?? []).map(x => [x.id, x]));
