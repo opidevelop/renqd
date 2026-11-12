@@ -203,3 +203,14 @@
 .catalog-panel-heading>div>small{display:block;margin-top:5px;color:#8d8175;font-size:9px;line-height:1.5}
 .builder-next:disabled{opacity:.42;cursor:not-allowed;box-shadow:none;transform:none}
 @media(max-width:760px){.review-item-links{order:5;width:auto;max-width:none;margin:7px 0 0 34px;gap:8px}.music-action-button{width:40px;height:40px}.review-item{flex-wrap:wrap}.review-item-actions{margin-left:auto}}
+
+/* Artist selection summary shown in the catalog step. */
+.artist-selected-list{display:grid;gap:7px;margin-top:13px;padding:13px;border:1px solid #eee5dc;border-radius:13px;background:#fff}
+.artist-selected-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 2px 5px}
+.artist-selected-heading>span{color:#a16b42;font-size:8px;font-weight:850;letter-spacing:1px}
+.artist-selected-heading>strong{color:#8c7d70;font-size:9px;font-weight:750}
+.artist-selected-row{display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 8px;border:1px solid #f0ebe5;border-radius:9px;background:#fff}
+.artist-selected-row>img,.artist-selected-placeholder{display:grid;place-items:center;width:36px;height:36px;flex:none;overflow:hidden;border-radius:8px;background:#f2ece5;object-fit:cover;color:#b38a69}
+.artist-selected-row>span:nth-child(2){flex:1;min-width:0;overflow:hidden;color:var(--ink);font-size:10px;font-weight:750;text-overflow:ellipsis;white-space:nowrap}
+.artist-selected-row>button{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:50%;background:#f8f4ef;color:#9a7760;cursor:pointer}
+.artist-selected-row>button:hover{background:#f2e7dc;color:#9c4f23}
