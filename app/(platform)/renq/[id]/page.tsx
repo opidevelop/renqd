@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { RenqExperience } from "@/components/renq-experience";
-import { SavedRenqDetail } from "@/components/saved-renq-detail";
+import { SavedRenqDetail } from "@/components/saved-renq-detail";\nimport { highQualityImageUrl } from "@/lib/image-quality";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +32,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
       items={savedSnapshot?.items ?? []}
       coverImageUrl={resolvedCoverImageUrl}
       coverImagePath={coverImagePath}
-      defaultCoverImageUrl={typeof settings.defaultCoverImageUrl === "string" ? settings.defaultCoverImageUrl : null}
+      defaultCoverImageUrl={typeof settings.defaultCoverImageUrl === "string" ? settings.defaultCoverImageUrl : null}\n      coverPosition={settings.coverPosition && typeof settings.coverPosition === "object" ? settings.coverPosition as {x:number;y:number} : {x:50,y:50}}
       comments={comments ?? []}
       commentCount={commentCount ?? 0}
       initialLiked={Boolean(liked)}
@@ -47,11 +47,11 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   const hydrated = (items ?? []).map(x => ({
     ...x,
     title: lookup.get(x.custom_item_id)?.title ?? x.title_snapshot,
-    image_url: lookup.get(x.custom_item_id)?.image_url ?? null,
+    image_url: highQualityImageUrl(lookup.get(x.custom_item_id)?.image_url ?? null),
     description: lookup.get(x.custom_item_id)?.description ?? null,
     preview_url: (lookup.get(x.custom_item_id)?.metadata as Record<string, unknown> | undefined)?.previewUrl as string | null,
     apple_music_url: (lookup.get(x.custom_item_id)?.metadata as Record<string, unknown> | undefined)?.appleMusicUrl as string | null,
     spotify_url: (lookup.get(x.custom_item_id)?.metadata as Record<string, unknown> | undefined)?.spotifyUrl as string | null
   }));
-  return <RenqExperience ranking={{ ...ranking, settings: { ...settings, coverImageUrl: resolvedCoverImageUrl } }} items={hydrated} />;
+  return <RenqExperience ranking={{ ...ranking, settings: { ...settings, coverImageUrl: highQualityImageUrl(resolvedCoverImageUrl), coverPosition: settings.coverPosition ?? {x:50,y:50} } }} items={hydrated} />;
 }
