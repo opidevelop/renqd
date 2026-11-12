@@ -65,6 +65,18 @@ export async function POST(request:Request){
   await supabase.from("rankings").update({status:"COMPLETED",completed_at:new Date().toISOString()}).eq("id",rankingId);
   return NextResponse.json({timedOut});
  }
+ if(body.action==="finish-renq"){
+  const {rankingId,orderedIds}=body as {rankingId:string;orderedIds:string[]};
+  const {data:ranking}=await supabase.from("rankings").select("id,status,mode").eq("id",rankingId).eq("user_id",user.id).single();
+  if(!ranking||ranking.mode!=="RENQ")return jsonError("Renq non trovato.",404);
+  if(ranking.status==="COMPLETED")return NextResponse.json({ok:true});
+  const {data:rows,error}=await supabase.from("ranking_items").select("id").eq("ranking_id",rankingId);
+  const valid=new Set((rows??[]).map(x=>x.id));if(error||!Array.isArray(orderedIds)||orderedIds.length!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
+  for(let i=0;i<orderedIds.length;i++){const {error:positionError}=await supabase.from("ranking_items").update({rank_position:i+1}).eq("id",orderedIds[i]);if(positionError)return jsonError(positionError.message,500);}
+  const {error:completeError}=await supabase.from("rankings").update({status:"COMPLETED",completed_at:new Date().toISOString()}).eq("id",rankingId);
+  if(completeError)return jsonError(completeError.message,500);
+  return NextResponse.json({ok:true});
+ }
  if(body.action==="reorder"){
   const {rankingId,orderedIds}=body as {rankingId:string;orderedIds:string[]};
   const {data:ranking}=await supabase.from("rankings").select("id,status").eq("id",rankingId).eq("user_id",user.id).single();
@@ -73,25 +85,10 @@ export async function POST(request:Request){
   const valid=new Set((items??[]).map(x=>x.id));if(!Array.isArray(orderedIds)||orderedIds.length!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
   const {data:currentRows,error:currentError}=await supabase.from("ranking_items").select("id,sort_order").eq("ranking_id",rankingId);
   if(currentError||!currentRows)return jsonError(currentError?.message??"Impossibile leggere la lista.",500);
-  if(currentRows.length>=100)return jsonError("Per riordinare una lista da 100 elementi occorre una sessione dedicata.");
-  const positions=new Map(currentRows.map(row=>[row.id,row.sort_order]));
-  const pending=new Map(orderedIds.map((id,index)=>[id,index+1]));
-  while(pending.size){
-   let progressed=false;
-   for(const [id,target] of pending){
-    const occupant=[...positions.entries()].find(([otherId,pos])=>otherId!==id&&pos===target)?.[0];
-    if(!occupant||!pending.has(occupant)){
-     const {error}=await supabase.from("ranking_items").update({sort_order:target,rank_position:target}).eq("id",id);
-     if(error)return jsonError(error.message,500);
-     positions.set(id,target);pending.delete(id);progressed=true;break;
-    }
-   }
-   if(progressed)continue;
-   const [cycleId]=pending.keys();
-   const {error}=await supabase.from("ranking_items").update({sort_order:100}).eq("id",cycleId);
-   if(error)return jsonError(error.message,500);
-   positions.set(cycleId,100);
-  }
+  // Use a disjoint temporary range to avoid transient unique-index collisions.
+  const maxOrder=Math.max(0,...currentRows.map(row=>Number(row.sort_order)||0));
+  for(let i=0;i<orderedIds.length;i++){const {error}=await supabase.from("ranking_items").update({sort_order:maxOrder+1000+i}).eq("id",orderedIds[i]);if(error)return jsonError(error.message,500);}
+  for(let i=0;i<orderedIds.length;i++){const {error}=await supabase.from("ranking_items").update({sort_order:i+1,rank_position:i+1}).eq("id",orderedIds[i]);if(error)return jsonError(error.message,500);}
   return NextResponse.json({ok:true});
  }
  const {title,mode,category,contentType,sportDiscipline,participation,collaborators,visibility,access,allowTies,duration,battleDepth,items}=body as {title:string;mode:string;category:string;contentType:string;sportDiscipline?:string;participation:string;collaborators:number;visibility:string;access:string;allowTies:boolean;duration:number;battleDepth:string;items:ItemInput[]};

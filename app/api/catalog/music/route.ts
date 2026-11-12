@@ -164,7 +164,7 @@ async function loadItunesItems(payload: Record<string, unknown>, contentType: st
     if (entry.wrapperType !== "collection" || typeof entry.collectionName !== "string") return [];
     const year = typeof entry.releaseDate === "string" ? entry.releaseDate.slice(0, 4) : "";
     const artist = typeof payload.artistName === "string" ? payload.artistName : "";
-    return [{ id: String(entry.collectionId ?? entry.collectionName), title: entry.collectionName, subtitle: year || undefined, imageUrl: typeof payload.artistImageUrl === "string" ? payload.artistImageUrl : (typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : undefined), spotifyUrl: spotifySearchUrl(`${artist} ${entry.collectionName}`) }];
+    return [{ id: String(entry.collectionId ?? entry.collectionName), title: entry.collectionName, subtitle: year || undefined, imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace("100x100", "300x300") : undefined, spotifyUrl: spotifySearchUrl(`${artist} ${entry.collectionName}`) }];
   });
 }
 
@@ -209,7 +209,7 @@ async function loadMusicBrainzItems(payload: Record<string, unknown>, contentTyp
   const params = new URLSearchParams({ artist: id, type: "album|ep", fmt: "json", limit: "100" });
   const data = await musicBrainzJson<{ "release-groups"?: Array<{ id: string; title: string; "first-release-date"?: string; "primary-type"?: string }> }>(`${MUSICBRAINZ}/release-group?${params}`);
   const artistName = typeof payload.artistName === "string" ? payload.artistName : "";
-  return (data["release-groups"] ?? []).map((group) => ({ id: group.id, title: group.title, subtitle: [group["primary-type"], group["first-release-date"]].filter(Boolean).join(" · ") || undefined, imageUrl: typeof payload.artistImageUrl === "string" ? payload.artistImageUrl : undefined, spotifyUrl: spotifySearchUrl(`${artistName} ${group.title}`) }));
+  return (data["release-groups"] ?? []).map((group) => ({ id: group.id, title: group.title, subtitle: [group["primary-type"], group["first-release-date"]].filter(Boolean).join(" · ") || undefined, imageUrl: "https://coverartarchive.org/release-group/" + group.id + "/front-250", spotifyUrl: spotifySearchUrl(`${artistName} ${group.title}`) }));
 }
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
