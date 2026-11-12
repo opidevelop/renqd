@@ -30,7 +30,22 @@ function musicProvider(id: "itunes" | "musicbrainz"): CatalogProvider {
   };
 }
 
-const providers: CatalogProvider[] = [musicProvider("itunes"), musicProvider("musicbrainz")];
+const spotifyProvider: CatalogProvider = {
+  id: "spotify",
+  supports: (category, contentType) => category === "music" && contentType === "Playlist",
+  async search(query, _category, contentType) {
+    const result = await requestMusicCatalog<{ entities: CatalogEntity[] }>("spotify", "search", contentType, { query });
+    return result.entities;
+  },
+  async getItems(entity, _category, contentType) {
+    const result = await requestMusicCatalog<{ items: Omit<CatalogItem, "selected" | "source">[] }>(
+      "spotify", "items", contentType, { payload: JSON.stringify(entity.payload ?? {}) },
+    );
+    return result.items;
+  },
+};
+
+const providers: CatalogProvider[] = [musicProvider("itunes"), musicProvider("musicbrainz"), spotifyProvider];
 
 export async function searchCatalog(query: string, category: CatalogCategory, contentType: string) {
   const matching = providers.filter((provider) => provider.supports(category, contentType));
