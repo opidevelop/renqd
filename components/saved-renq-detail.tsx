@@ -97,7 +97,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, comments: initi
   const category = String(settings.category ?? "custom").replaceAll("_", " ");
   const contentType = String(settings.contentType ?? "Lista personalizzata");
   const rawCover = coverImageUrl || items.find(item => item.image_url)?.image_url || null;
-  const cover = rawCover ? rawCover.replace(/\\/(?:100|150|300|400|600)x(?:100|150|300|400|600)bb\\.(jpg|jpeg|png|webp)/i, "/1200x1200bb.$1").replace(/\\/t\\/p\\/w500\\//i, "/t/p/original/").replace(/ab67616d0000b273/gi, "ab67616d00001e02") : null;
+  const cover = rawCover ? rawCover.replace(/\/(?:100|150|300|400|600)x(?:100|150|300|400|600)bb\.(jpg|jpeg|png|webp)/i, "/1200x1200bb.$1").replace(/\/t\/p\/w500\//i, "/t/p/original/").replace(/ab67616d0000b273/gi, "ab67616d00001e02") : null;
 
   return (
     <main className="saved-renq-page">
