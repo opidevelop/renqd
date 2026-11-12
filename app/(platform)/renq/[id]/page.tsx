@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { RenqExperience } from "@/components/renq-experience";
-import { SavedRenqDetail } from "@/components/saved-renq-detail";\nimport { highQualityImageUrl } from "@/lib/image-quality";
+import { SavedRenqDetail } from "@/components/saved-renq-detail";
+import { highQualityImageUrl } from "@/lib/image-quality";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,10 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) notFound();
 
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);\n  const { data: ranking } = isUuid\n    ? await supabase.from("rankings").select("*").eq("id", id).eq("user_id", user.id).single()\n    : await supabase.from("rankings").select("*").eq("public_slug", id).eq("user_id", user.id).single();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  const { data: ranking } = isUuid
+    ? await supabase.from("rankings").select("*").eq("id", id).eq("user_id", user.id).single()
+    : await supabase.from("rankings").select("*").eq("public_slug", id).eq("user_id", user.id).single();
   if (!ranking) notFound();
 
   const settings = (ranking.settings ?? {}) as Record<string, unknown>;
@@ -32,7 +36,8 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
       items={savedSnapshot?.items ?? []}
       coverImageUrl={resolvedCoverImageUrl}
       coverImagePath={coverImagePath}
-      defaultCoverImageUrl={typeof settings.defaultCoverImageUrl === "string" ? settings.defaultCoverImageUrl : null}\n      coverPosition={settings.coverPosition && typeof settings.coverPosition === "object" ? settings.coverPosition as {x:number;y:number} : {x:50,y:50}}
+      defaultCoverImageUrl={typeof settings.defaultCoverImageUrl === "string" ? settings.defaultCoverImageUrl : null}
+      coverPosition={settings.coverPosition && typeof settings.coverPosition === "object" ? settings.coverPosition as {x:number;y:number} : {x:50,y:50}}
       comments={comments ?? []}
       commentCount={commentCount ?? 0}
       initialLiked={Boolean(liked)}
