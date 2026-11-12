@@ -163,3 +163,15 @@
 .speed-custom-duration input{height:42px;padding:0 12px;border:1px solid #eadfd4;border-radius:10px;background:#fff;color:var(--ink);font:inherit;font-size:12px}
 .public-home-footer{display:grid!important;place-items:center!important;justify-content:center!important;min-height:88px!important}
 .public-home-footer .public-home-logo{margin:0!important}
+
+/* Music catalog artwork and compact, scrollable search results. */
+.catalog-results{grid-auto-rows:68px;max-height:216px;overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:#d8c4b2 transparent}
+.catalog-results button{height:68px;min-height:68px;gap:12px;padding:8px 11px}
+.catalog-result-art,.review-item-art{display:grid;place-items:center;flex:none;width:48px;height:48px;overflow:hidden;border-radius:9px;background:#f2ece5;color:#b38a69}
+.catalog-result-art img,.review-item-art img{display:block;width:100%;height:100%;object-fit:cover}
+.catalog-result-copy{display:grid;gap:5px;flex:1;min-width:0}
+.catalog-result-copy strong,.catalog-result-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.catalog-result-copy strong{font-size:11px}
+.catalog-result-copy small{color:var(--muted);font-size:9px}
+.review-item-art{width:38px;height:38px;border-radius:7px}
+@media(max-width:680px){.catalog-results{max-height:216px}.catalog-results button{padding:7px 8px}.catalog-result-art{width:44px;height:44px}}
