@@ -37,7 +37,7 @@ export async function POST(request:Request){
    const ordered=Object.entries(state.wins).sort((a,b)=>b[1]-a[1]).map(([id])=>id);
    const {data:allItems}=await supabase.from("ranking_items").select("id").eq("ranking_id",session.ranking_id);
    const remainder=(allItems??[]).map(x=>x.id).filter(id=>!ordered.includes(id));ordered.push(...remainder);
-   for(let i=0;i<ordered.length;i++)await supabase.from("ranking_items").update({rank_position:i+1,sort_order:i+1}).eq("id",ordered[i]);
+   for(let i=0;i<ordered.length;i++)await supabase.from("ranking_items").update({rank_position:i+1}).eq("id",ordered[i]);
    await supabase.from("rankings").update({status:"COMPLETED",completed_at:new Date().toISOString()}).eq("id",session.ranking_id);
   }
   return NextResponse.json({completed,cursor:state.cursor,total:state.pairs.length,wins:state.wins});
@@ -59,7 +59,7 @@ export async function POST(request:Request){
   if(!session||session.status!=="ACTIVE")return jsonError("Sessione Speed non disponibile.",404);
   const {data:items}=await supabase.from("ranking_items").select("id").eq("ranking_id",rankingId);
   const valid=new Set((items??[]).map(x=>x.id));if(!Array.isArray(orderedIds)||orderedIds.length!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
-  for(let i=0;i<orderedIds.length;i++)await supabase.from("ranking_items").update({rank_position:i+1,sort_order:i+1}).eq("id",orderedIds[i]);
+  for(let i=0;i<orderedIds.length;i++)await supabase.from("ranking_items").update({rank_position:i+1}).eq("id",orderedIds[i]);
   const timedOut=Date.now()>new Date(session.deadline_at).getTime();
   await supabase.from("ranking_speed_sessions").update({status:timedOut?"TIMED_OUT":"COMPLETED",completed_at:new Date().toISOString(),result_snapshot:{orderedIds}}).eq("id",sessionId);
   await supabase.from("rankings").update({status:"COMPLETED",completed_at:new Date().toISOString()}).eq("id",rankingId);
@@ -71,7 +71,27 @@ export async function POST(request:Request){
   if(!ranking||ranking.status==="COMPLETED")return jsonError("Questa classifica non è modificabile.",404);
   const {data:items}=await supabase.from("ranking_items").select("id").eq("ranking_id",rankingId);
   const valid=new Set((items??[]).map(x=>x.id));if(!Array.isArray(orderedIds)||orderedIds.length!==valid.size||orderedIds.some(id=>!valid.has(id)))return jsonError("Ordine degli elementi non valido.");
-  for(let i=0;i<orderedIds.length;i++){const {error}=await supabase.from("ranking_items").update({sort_order:i+1,rank_position:i+1}).eq("id",orderedIds[i]);if(error)return jsonError(error.message,500);}
+  const {data:currentRows,error:currentError}=await supabase.from("ranking_items").select("id,sort_order").eq("ranking_id",rankingId);
+  if(currentError||!currentRows)return jsonError(currentError?.message??"Impossibile leggere la lista.",500);
+  if(currentRows.length>=100)return jsonError("Per riordinare una lista da 100 elementi occorre una sessione dedicata.");
+  const positions=new Map(currentRows.map(row=>[row.id,row.sort_order]));
+  const pending=new Map(orderedIds.map((id,index)=>[id,index+1]));
+  while(pending.size){
+   let progressed=false;
+   for(const [id,target] of pending){
+    const occupant=[...positions.entries()].find(([otherId,pos])=>otherId!==id&&pos===target)?.[0];
+    if(!occupant||!pending.has(occupant)){
+     const {error}=await supabase.from("ranking_items").update({sort_order:target,rank_position:target}).eq("id",id);
+     if(error)return jsonError(error.message,500);
+     positions.set(id,target);pending.delete(id);progressed=true;break;
+    }
+   }
+   if(progressed)continue;
+   const [cycleId]=pending.keys();
+   const {error}=await supabase.from("ranking_items").update({sort_order:100}).eq("id",cycleId);
+   if(error)return jsonError(error.message,500);
+   positions.set(cycleId,100);
+  }
   return NextResponse.json({ok:true});
  }
  const {title,mode,category,contentType,sportDiscipline,participation,collaborators,visibility,access,allowTies,duration,battleDepth,items}=body as {title:string;mode:string;category:string;contentType:string;sportDiscipline?:string;participation:string;collaborators:number;visibility:string;access:string;allowTies:boolean;duration:number;battleDepth:string;items:ItemInput[]};
