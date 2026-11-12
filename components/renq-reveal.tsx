@@ -24,6 +24,7 @@ type Props = {
 };
 
 const modeLabels: Record<string, string> = { RENQ: "Renq", BATTLE_RENQ: "Battle Renq", SPEED_RENQ: "Speed Renq" };
+const categoryLabels: Record<string, string> = { music: "Musica", games: "Videogiochi", film: "Film e serie", books: "Libri", sport: "Sport", custom: "Personalizzato" };
 
 export function RenqReveal({ title, mode, category, contentType, coverImageUrl, items, actions }: Props) {
   const [step, setStep] = useState(0);
@@ -75,7 +76,7 @@ export function RenqReveal({ title, mode, category, contentType, coverImageUrl, 
               {cover && <img className="renq-reveal-cover" src={cover} alt="" />}
               <div className="renq-reveal-cover-shade" />
               <div className="renq-reveal-intro-copy">
-                <span>{modeLabels[mode] ?? "Renq"} · {category} · {contentType}</span>
+                <span>{modeLabels[mode] ?? "Renq"} · {categoryLabels[category] ?? category} · {contentType}</span>
                 <p>È arrivato il momento.</p>
                 <h1>{title}</h1>
                 <small>Una classifica. Le tue scelte. Il tuo risultato.</small>
