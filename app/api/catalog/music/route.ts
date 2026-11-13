@@ -69,44 +69,146 @@ async function resolveArtistImage(name: string): Promise<string | undefined> {
   } catch { return undefined; }
 }
 async function searchItunes(query: string, contentType: string): Promise<MusicEntity[]> {
- const isAlbum=contentType==="Album";
- const responses=await Promise.allSettled(["IT","US","GB"].map(async country=>{
-  const params=new URLSearchParams({term:query,entity:isAlbum?"album":"musicArtist",limit:"50",country});
-  const data=await itunesJson<{results?:Array<Record<string,unknown>>}>(`${ITUNES}/search?${params}`);
-  return data.results??[];
- }));
- const merged=responses.flatMap(r=>r.status==="fulfilled"?r.value:[]);
- const unique=new Map<string,Record<string,unknown>>();
- for(const entry of merged){const id=isAlbum?entry.collectionId:entry.artistId;if(typeof id==="number"&&!unique.has(String(id)))unique.set(String(id),entry);}
- const results=[...unique.values()];
- if(!isAlbum)return Promise.all(results.slice(0,25).flatMap(entry=>{
-  const artistId=entry.artistId,artistName=entry.artistName;if(typeof artistId!=="number"||typeof artistName!=="string")return[];
-  return[resolveArtistImage(artistName).then(imageUrl=>({id:String(artistId),title:artistName,subtitle:typeof entry.primaryGenreName==="string"?entry.primaryGenreName:"Artista",imageUrl,provider:"itunes" as const,payload:{artistId,artistImageUrl:imageUrl,artistName},spotifyUrl:spotifySearchUrl(artistName)}))];
- }));
- return results.flatMap<MusicEntity>(entry=>{
-  if(typeof entry.collectionId!=="number"||typeof entry.collectionName!=="string")return[];
-  const artist=typeof entry.artistName==="string"?entry.artistName:"Artista sconosciuto",year=typeof entry.releaseDate==="string"?entry.releaseDate.slice(0,4):"";
-  return[{id:String(entry.collectionId),title:entry.collectionName,subtitle:[artist,year].filter(Boolean).join(" · "),imageUrl:typeof entry.artworkUrl100==="string"?entry.artworkUrl100.replace(/\\d+x\\d+bb\\./,"600x600bb."):undefined,provider:"itunes" as const,payload:{collectionId:entry.collectionId,artistId:entry.artistId,artistName:artist},spotifyUrl:spotifySearchUrl(`${artist} ${entry.collectionName}`)}];
- });
+  const isAlbum = contentType === "Album";
+  const countries = ["IT", "US", "GB"];
+  const artistResponses = await Promise.allSettled(countries.map(async (country) => {
+    const params = new URLSearchParams({ term: query, entity: "musicArtist", limit: "50", country });
+    const data = await itunesJson<{ results?: Array<Record<string, unknown>> }>(`${ITUNES}/search?${params}`);
+    return data.results ?? [];
+  }));
+  const artistResults = artistResponses.flatMap(result => result.status === "fulfilled" ? result.value : []);
+  const artistsById = new Map<string, Record<string, unknown>>();
+  for (const artist of artistResults) {
+    if (typeof artist.artistId === "number" && typeof artist.artistName === "string" && !artistsById.has(String(artist.artistId))) {
+      artistsById.set(String(artist.artistId), artist);
+    }
+  }
+  const artists = [...artistsById.values()];
+  const normalizedQuery = normalizeMusicText(query);
+  const exactArtists = artists.filter(artist => normalizeMusicText(String(artist.artistName)) === normalizedQuery);
+  const selectedArtists = (exactArtists.length ? exactArtists : artists).slice(0, isAlbum ? 5 : 25);
+
+  if (isAlbum) {
+    // Album mode intentionally returns the same complete artist discography
+    // as Discography mode, instead of relying on iTunes' sparse album search.
+    const discographies = await Promise.allSettled(selectedArtists.map(async artist => {
+      const artistId = artist.artistId as number;
+      const artistName = String(artist.artistName);
+      const params = new URLSearchParams({ id: String(artistId), entity: "album", limit: "200", country: "IT" });
+      const data = await itunesJson<{ results?: Array<Record<string, unknown>> }>(`${ITUNES}/lookup?${params}`);
+      return (data.results ?? []).flatMap<MusicEntity>(entry => {
+        if (entry.wrapperType !== "collection" || typeof entry.collectionId !== "number" || typeof entry.collectionName !== "string") return [];
+        const year = typeof entry.releaseDate === "string" ? entry.releaseDate.slice(0, 4) : "";
+        return [{
+          id: String(entry.collectionId),
+          title: entry.collectionName,
+          subtitle: [artistName, year].filter(Boolean).join(" · "),
+          imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace(/\\d+x\\d+bb\\./, "600x600bb.") : undefined,
+          provider: "itunes" as const,
+          payload: { collectionId: entry.collectionId, artistId, artistName },
+          spotifyUrl: spotifySearchUrl(`${artistName} ${entry.collectionName}`),
+        }];
+      });
+    }));
+    const albums = discographies.flatMap(result => result.status === "fulfilled" ? result.value : []);
+    const uniqueAlbums = new Map<string, MusicEntity>();
+    for (const album of albums) if (!uniqueAlbums.has(album.id)) uniqueAlbums.set(album.id, album);
+    if (uniqueAlbums.size) return [...uniqueAlbums.values()];
+
+    // Keep direct album-title search as a fallback when the query is not an artist.
+    const fallbackParams = new URLSearchParams({ term: query, entity: "album", limit: "50", country: "IT" });
+    const fallback = await itunesJson<{ results?: Array<Record<string, unknown>> }>(`${ITUNES}/search?${fallbackParams}`);
+    return (fallback.results ?? []).flatMap(entry => {
+      if (typeof entry.collectionId !== "number" || typeof entry.collectionName !== "string") return [];
+      const artistName = typeof entry.artistName === "string" ? entry.artistName : "Artista sconosciuto";
+      const year = typeof entry.releaseDate === "string" ? entry.releaseDate.slice(0, 4) : "";
+      return [{
+        id: String(entry.collectionId), title: entry.collectionName,
+        subtitle: [artistName, year].filter(Boolean).join(" · "),
+        imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace(/\\d+x\\d+bb\\./, "600x600bb.") : undefined,
+        provider: "itunes" as const,
+        payload: { collectionId: entry.collectionId, artistId: entry.artistId, artistName },
+        spotifyUrl: spotifySearchUrl(`${artistName} ${entry.collectionName}`),
+      }];
+    });
+  }
+
+  return Promise.all(selectedArtists.map(async artist => {
+    const artistId = artist.artistId as number;
+    const artistName = String(artist.artistName);
+    const imageUrl = await resolveArtistImage(artistName);
+    return {
+      id: String(artistId), title: artistName,
+      subtitle: typeof artist.primaryGenreName === "string" ? artist.primaryGenreName : "Artista",
+      imageUrl, provider: "itunes" as const,
+      payload: { artistId, artistImageUrl: imageUrl, artistName },
+      spotifyUrl: spotifySearchUrl(artistName),
+    };
+  }));
 }
-async function searchMusicBrainz(query:string,contentType:string):Promise<MusicEntity[]>{
- const isAlbum=contentType==="Album",resource=isAlbum?"release-group":"artist";
- const params=new URLSearchParams({query,fmt:"json",limit:"50"});
- const data=await musicBrainzJson<Record<string,unknown>>(`${MUSICBRAINZ}/${resource}?${params}`);
- if(isAlbum){
-  const groups=((data["release-groups"]??[]) as Array<Record<string,unknown>>).filter(g=>g["primary-type"]==="Album").sort((a,b)=>Number(b.score??0)-Number(a.score??0));
-  return groups.flatMap<MusicEntity>(group=>{
-   if(typeof group.id!=="string"||typeof group.title!=="string")return[];
-   const credits=group["artist-credit"] as Array<{name?:string;artist?:{name?:string}}>|undefined,artistName=artistCredit(credits),date=typeof group["first-release-date"]==="string"?group["first-release-date"]:"";
-   return[{id:group.id,title:group.title,subtitle:[artistName,date].filter(Boolean).join(" · "),imageUrl:"https://coverartarchive.org/release-group/"+group.id+"/front-250",provider:"musicbrainz" as const,payload:{releaseGroupId:group.id,imageUrl:"https://coverartarchive.org/release-group/"+group.id+"/front-250",albumTitle:group.title,artistName},spotifyUrl:spotifySearchUrl(`${artistName} ${group.title}`)}];
-  });
- }
- const artists=((data.artists??[]) as Array<Record<string,unknown>>).sort((a,b)=>Number(b.score??0)-Number(a.score??0));
- return Promise.all(artists.slice(0,25).flatMap(artist=>{
-  const artistId=artist.id,artistName=artist.name;if(typeof artistId!=="string"||typeof artistName!=="string")return[];
-  const disambiguation=typeof artist.disambiguation==="string"?artist.disambiguation:"",country=typeof artist.country==="string"?artist.country:"";
-  return[resolveArtistImage(artistName).then(imageUrl=>({id:artistId,title:artistName,subtitle:[disambiguation,country].filter(Boolean).join(" · ")||"Artista",imageUrl,provider:"musicbrainz" as const,payload:{artistId,artistImageUrl:imageUrl,artistName},spotifyUrl:spotifySearchUrl(artistName)}))];
- }));
+
+async function searchMusicBrainz(query: string, contentType: string): Promise<MusicEntity[]> {
+  const isAlbum = contentType === "Album";
+  const params = new URLSearchParams({ query, fmt: "json", limit: "50" });
+  const data = await musicBrainzJson<Record<string, unknown>>(`${MUSICBRAINZ}/artist?${params}`);
+  const artists = ((data.artists ?? []) as Array<Record<string, unknown>>).sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0));
+  const normalizedQuery = normalizeMusicText(query);
+  const exactArtists = artists.filter(artist => typeof artist.name === "string" && normalizeMusicText(artist.name) === normalizedQuery);
+  const selectedArtists = (exactArtists.length ? exactArtists : artists).slice(0, isAlbum ? 5 : 25);
+
+  if (isAlbum) {
+    const discographies = await Promise.allSettled(selectedArtists.flatMap(artist => {
+      const artistId = artist.id, artistName = artist.name;
+      if (typeof artistId !== "string" || typeof artistName !== "string") return [];
+      return [loadMusicBrainzItems({ artistId, artistName }, "Discografie").then(items => items.map(item => ({
+        id: item.id,
+        title: item.title,
+        subtitle: item.subtitle,
+        imageUrl: item.imageUrl,
+        provider: "musicbrainz" as const,
+        payload: { releaseGroupId: item.id, imageUrl: item.imageUrl, albumTitle: item.title, artistName },
+        spotifyUrl: spotifySearchUrl(`${artistName} ${item.title}`),
+      })))];
+    }));
+    const albums = discographies.flatMap(result => result.status === "fulfilled" ? result.value : []);
+    const uniqueAlbums = new Map<string, MusicEntity>();
+    for (const album of albums) if (!uniqueAlbums.has(album.id)) uniqueAlbums.set(album.id, album);
+    if (uniqueAlbums.size) return [...uniqueAlbums.values()];
+
+    // If no artist matches, retain direct release-group title search.
+    const releaseParams = new URLSearchParams({ query, fmt: "json", limit: "50" });
+    const releaseData = await musicBrainzJson<Record<string, unknown>>(`${MUSICBRAINZ}/release-group?${releaseParams}`);
+    const groups = ((releaseData["release-groups"] ?? []) as Array<Record<string, unknown>>)
+      .filter(group => group["primary-type"] === "Album")
+      .sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0));
+    return groups.flatMap<MusicEntity>(group => {
+      if (typeof group.id !== "string" || typeof group.title !== "string") return [];
+      const credits = group["artist-credit"] as Array<{ name?: string; artist?: { name?: string } }> | undefined;
+      const artistName = artistCredit(credits);
+      const date = typeof group["first-release-date"] === "string" ? group["first-release-date"] : "";
+      return [{
+        id: group.id, title: group.title, subtitle: [artistName, date].filter(Boolean).join(" · "),
+        imageUrl: "https://coverartarchive.org/release-group/" + group.id + "/front-250",
+        provider: "musicbrainz" as const,
+        payload: { releaseGroupId: group.id, imageUrl: "https://coverartarchive.org/release-group/" + group.id + "/front-250", albumTitle: group.title, artistName },
+        spotifyUrl: spotifySearchUrl(`${artistName} ${group.title}`),
+      }];
+    });
+  }
+
+  return Promise.all(selectedArtists.flatMap(artist => {
+    const artistId = artist.id, artistName = artist.name;
+    if (typeof artistId !== "string" || typeof artistName !== "string") return [];
+    const disambiguation = typeof artist.disambiguation === "string" ? artist.disambiguation : "";
+    const country = typeof artist.country === "string" ? artist.country : "";
+    return [resolveArtistImage(artistName).then(imageUrl => ({
+      id: artistId, title: artistName,
+      subtitle: [disambiguation, country].filter(Boolean).join(" · ") || "Artista",
+      imageUrl, provider: "musicbrainz" as const,
+      payload: { artistId, artistImageUrl: imageUrl, artistName },
+      spotifyUrl: spotifySearchUrl(artistName),
+    }))];
+  }));
 }
 
 async function loadItunesItems(payload: Record<string, unknown>, contentType: string): Promise<MusicItem[]> {
