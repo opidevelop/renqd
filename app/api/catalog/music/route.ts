@@ -89,6 +89,10 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
   const selectedArtists = (exactArtists.length ? exactArtists : artists).slice(0, isAlbum ? 5 : 25);
 
   if (isAlbum) {
+    const artistNames=selectedArtists.map(artist=>normalizeMusicText(String(artist.artistName))).sort((x,y)=>y.length-x.length);let residualQuery=normalizedQuery;
+    for(const artistName of artistNames)residualQuery=residualQuery.replace(artistName," ").replace(/\\s+/g," ").trim();
+    const directAlbums:MusicEntity[]=[];
+    if(residualQuery&&residualQuery!==normalizedQuery){const directParams=new URLSearchParams({term:residualQuery,entity:"album",limit:"50",country:"IT"});const direct=await itunesJson<{results?:Array<Record<string,unknown>>}>(`${ITUNES}/search?${directParams}`);for(const entry of direct.results??[]){if(typeof entry.collectionId!=="number"||typeof entry.collectionName!=="string")continue;const artistName=typeof entry.artistName==="string"?entry.artistName:"Artista sconosciuto",year=typeof entry.releaseDate==="string"?entry.releaseDate.slice(0,4):"";directAlbums.push({id:String(entry.collectionId),title:entry.collectionName,subtitle:[artistName,year].filter(Boolean).join(" · "),imageUrl:typeof entry.artworkUrl100==="string"?entry.artworkUrl100.replace(/\\d+x\\d+bb\\./,"600x600bb."):undefined,provider:"itunes",payload:{collectionId:entry.collectionId,artistId:entry.artistId,artistName},spotifyUrl:spotifySearchUrl(`${artistName} ${entry.collectionName}`)});}}
     // Album mode intentionally returns the same complete artist discography
     // as Discography mode, instead of relying on iTunes' sparse album search.
     const discographies = await Promise.allSettled(selectedArtists.map(async artist => {
@@ -113,7 +117,7 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
     const albums = discographies.flatMap(result => result.status === "fulfilled" ? result.value : []);
     const uniqueAlbums = new Map<string, MusicEntity>();
     for (const album of albums) if (!uniqueAlbums.has(album.id)) uniqueAlbums.set(album.id, album);
-    if (uniqueAlbums.size) return [...uniqueAlbums.values()];
+    if (uniqueAlbums.size) { const merged=new Map<string,MusicEntity>();for(const album of directAlbums)merged.set(album.id,album);for(const album of uniqueAlbums.values())if(!merged.has(album.id))merged.set(album.id,album);return [...merged.values()]; }
 
     // Keep direct album-title search as a fallback when the query is not an artist.
     const fallbackParams = new URLSearchParams({ term: query, entity: "album", limit: "50", country: "IT" });
