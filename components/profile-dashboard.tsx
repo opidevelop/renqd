@@ -283,6 +283,8 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       </form>}
     </section>
 
+    {favorites.length > 0 && <section className="profile-renqs-section"><div className="profile-section-heading"><div><span>RACCOLTA PERSONALE</span><h2>I miei preferiti</h2><p>I Renq degli altri utenti che hai apprezzato.</p></div><Heart size={20}/></div><div className="profile-renq-grid">{favorites.map(ranking => { const settings = ranking.settings ?? {}; const cover = typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null; return <Link key={ranking.id} href={"/r/" + (ranking.public_slug || ranking.id)} className="profile-renq-card"><div style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.75),rgba(15,12,10,.05)),url(" + cover + ")" } : undefined}><span>{String(ranking.mode).replaceAll("_", " ")}</span><ArrowUpRight size={17}/></div><strong>{ranking.title}</strong></Link>; })}</div></section>}
+
     <section className="profile-renqs-section">
       <div className="profile-section-heading"><div><span>LE TUE CLASSIFICHE</span><h2>I miei Renq</h2><p>Tutti i Renq completati, anche quelli non inseriti in una collezione.</p></div><Trophy size={21}/></div>
       {rankings.length ? <div className="profile-renq-grid">{rankings.map(ranking => {
@@ -291,8 +293,6 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
         return <Link key={ranking.id} href={"/renq/" + (ranking.public_slug || ranking.id)} className="profile-renq-card"><div style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.75),rgba(15,12,10,.05)),url(" + cover + ")" } : undefined}><span>{String(ranking.mode).replaceAll("_", " ")}</span><ArrowUpRight size={17}/></div><strong>{ranking.title}</strong></Link>;
       })}</div> : <div className="profile-empty-state"><Trophy size={24}/><strong>Il tuo primo Renq ti aspetta</strong><p>Quando completi una classifica, la ritroverai qui.</p><Link href="/create">Crea un Renq <ArrowUpRight size={15}/></Link></div>}
     </section>
-
-    {favorites.length > 0 && <section className="profile-renqs-section"><div className="profile-section-heading"><div><span>RACCOLTA PERSONALE</span><h2>I miei preferiti</h2><p>I Renq degli altri utenti che hai apprezzato.</p></div><Heart size={20}/></div><div className="profile-renq-grid">{favorites.map(ranking => { const settings = ranking.settings ?? {}; const cover = typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null; return <Link key={ranking.id} href={"/r/" + (ranking.public_slug || ranking.id)} className="profile-renq-card"><div style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.75),rgba(15,12,10,.05)),url(" + cover + ")" } : undefined}><span>{String(ranking.mode).replaceAll("_", " ")}</span><ArrowUpRight size={17}/></div><strong>{ranking.title}</strong></Link>; })}</div></section>}
     <div className="profile-social-meta"><span><Users size={14}/> Segui {followingCount} profili</span><span><Heart size={14}/> {likeCount} apprezzamenti ricevuti</span><Link href={"/u/" + profile.username}>Apri il profilo pubblico <ArrowUpRight size={14}/></Link></div>
     {(message || error) && <p className={"profile-feedback" + (error ? " is-error" : "")} role="status">{error || message}</p>}
   </div>;

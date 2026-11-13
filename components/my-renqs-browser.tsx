@@ -6,11 +6,11 @@ import { ArrowUpRight, BookOpen, Clapperboard, Gamepad2, Music2, Plus, Search, S
 
 type RenqCard = {
   id: string; public_slug: string; title: string; mode: string; created_at: string;
-  rows: { title: string; image_url?: string | null; rank_position?: number | null }[];
+  rows: { title: string; image_url?: string | null; rank_position?: number | null }[]; elapsedSeconds?: number | null;
   category: string; coverImage: string | null; coverPosition: { x: number; y: number };
 };
 const categoryLabels: Record<string,string> = { music:"Musica", games:"Videogiochi", film:"Film e serie", books:"Libri", sport:"Sport", food:"Cibo", travel:"Viaggi", custom:"Personalizzato" };
-const modeLabels: Record<string,string> = { RENQ:"Classico", BATTLE_RENQ:"Battle", SPEED_RENQ:"Speed" };
+const modeLabels: Record<string,string> = { RENQ:"Renq classico", BATTLE_RENQ:"Battle Renq", SPEED_RENQ:"Speed Renq" };
 const categoryIcons: Record<string,typeof Music2> = { music:Music2, games:Gamepad2, film:Clapperboard, books:BookOpen, sport:Trophy };
 
 export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
@@ -57,7 +57,7 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
     {error && <p className="my-renqs-error" role="alert">{error}</p>}
     {!items.length ? <div className="my-renqs-empty"><span className="my-renqs-empty-icon"><Trophy size={25}/></span><h2>{query||category||mode ? "Nessun Renq trovato." : "La tua collezione inizia da qui."}</h2><p>{query||category||mode ? "Prova a cambiare i termini di ricerca o i filtri." : "Quando completi un Renq e scegli “Conferma e salva”, lo troverai in questa pagina."}</p>{!(query||category||mode) && <Link href="/create">Crea il tuo primo Renq <ArrowUpRight size={16}/></Link>}</div> : <div className="my-renqs-grid">{items.map(item=>{
       const Icon = categoryIcons[item.category] ?? Trophy;
-      return <Link href={"/renq/" + (item.public_slug || item.id)} className="my-renq-card" key={item.id}><div className="my-renq-card-art">{item.coverImage ? <img src={item.coverImage} alt="" loading="lazy" style={{objectPosition:item.coverPosition.x+"% "+item.coverPosition.y+"%"}}/> : <span><Icon size={25}/></span>}<div className="my-renq-card-art-shade"/><div className="my-renq-card-top"><span className="my-renq-category"><Icon size={14}/>{categoryLabels[item.category] ?? "Renq"}</span><span className="my-renq-mode">{modeLabels[item.mode] ?? "Renq"}</span></div></div><h2>{item.title}</h2><p className="my-renq-card-meta">{item.rows.length} elementi <i>·</i> Salvato il {new Date(item.created_at).toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"})}</p><div className="my-renq-preview">{item.rows.slice(0,3).map((row,index)=><div key={index}><span>{String(row.rank_position??index+1).padStart(2,"0")}</span><strong>{row.title}</strong></div>)}</div><div className="my-renq-card-bottom"><span>Apri classifica</span><ArrowUpRight size={17}/></div></Link>;
+      return <Link href={"/renq/" + (item.public_slug || item.id)} className="my-renq-card" key={item.id}><div className="my-renq-card-art">{item.coverImage ? <img src={item.coverImage} alt="" loading="lazy" style={{objectPosition:item.coverPosition.x+"% "+item.coverPosition.y+"%"}}/> : <span><Icon size={25}/></span>}<div className="my-renq-card-art-shade"/><div className="my-renq-card-top"><span className="my-renq-category"><Icon size={14}/>{categoryLabels[item.category] ?? "Renq"}</span><span className="my-renq-mode">{modeLabels[item.mode] ?? "Renq"}</span></div></div><h2>{item.title}</h2><p className="my-renq-card-meta">{item.rows.length} elementi{item.mode==="SPEED_RENQ"&&item.elapsedSeconds!=null?" · Tempo: "+Math.floor(item.elapsedSeconds/60)+"m "+String(item.elapsedSeconds%60).padStart(2,"0")+"s":""} <i>·</i> Salvato il {new Date(item.created_at).toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"})}</p><div className="my-renq-preview">{item.rows.slice(0,3).map((row,index)=><div key={index}><span>{String(row.rank_position??index+1).padStart(2,"0")}</span><strong>{row.title}</strong></div>)}</div><div className="my-renq-card-bottom"><span>Apri classifica</span><ArrowUpRight size={17}/></div></Link>;
     })}</div>}
   </div>;
 }

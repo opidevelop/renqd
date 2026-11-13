@@ -3,9 +3,10 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Heart, MessageCircle, Pencil, Send, Share2, Trophy, Trash2 } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Pencil, Play, Send, Share2, Trophy, Trash2 } from "lucide-react";
 import { RenqCoverPicker } from "@/components/renq-cover-picker";
 import { highQualityImageUrl } from "@/lib/image-quality";
+import { RenqReveal } from "@/components/renq-reveal";
 
 type SavedItem = {
   id: string;
@@ -14,6 +15,7 @@ type SavedItem = {
   description?: string | null;
   rank_position?: number | null;
   tie_group_id?: string | null;
+  metadata?: { previewUrl?: string | null };
 };
 type CommentItem = { id: string; body: string; created_at: string; author_id: string };
 type Props = {
@@ -42,6 +44,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const [currentCoverPath, setCurrentCoverPath] = useState(coverImagePath);
   const [currentCoverPosition, setCurrentCoverPosition] = useState(initialCoverPosition);
   const [coverEditorOpen, setCoverEditorOpen] = useState(false);
+  const [showReveal, setShowReveal] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -135,6 +138,8 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const rawCover = currentCoverUrl || defaultCoverImageUrl || items.find(item => item.image_url)?.image_url || null;
   const cover = highQualityImageUrl(rawCover);
 
+  if (showReveal) return <div className="saved-renq-page saved-renq-reveal-page"><button className="saved-renq-back" type="button" onClick={() => setShowReveal(false)}><ArrowLeft size={17}/> Torna alla classifica</button><RenqReveal title={ranking.title} mode={ranking.mode} category={String(settings.category ?? "custom")} contentType={contentType} coverImageUrl={rawCover} coverPosition={currentCoverPosition} allowTies={items.some(item => Boolean(item.tie_group_id))} items={items.map(item => ({...item, preview_url: item.metadata?.previewUrl ?? null}))} actions={<button type="button" className="renq-save-button" onClick={() => setShowReveal(false)}>Torna alla classifica</button>} /></div>;
+
   return (
     <main className="saved-renq-page">
       <button className="saved-renq-back" type="button" onClick={() => router.push("/rankings")}><ArrowLeft size={17} /> I miei Renq</button>
@@ -152,6 +157,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         </div>
         <div className="saved-renq-toolbar">
         <button type="button" onClick={() => void editRanking()} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>
+        <button type="button" onClick={() => setShowReveal(true)}><Play size={17} /><span>Rivedi reveal</span></button>
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
         <button type="button" className="saved-renq-delete" onClick={() => void deleteRanking()} disabled={busy}><Trash2 size={16}/><span>Elimina</span></button>
