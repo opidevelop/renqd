@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const query = (params.get("q") ?? "").trim().slice(0, 100);
   const category = params.get("category") ?? "";
   const mode = params.get("mode") ?? "";
-  let requestQuery = supabase.from("rankings").select("id,public_slug,title,mode,status,settings,created_at,completed_at").eq("user_id", user.id).in("status", ["COMPLETED","DRAFT"]);
+  let requestQuery = supabase.from("rankings").select("id,public_slug,title,mode,status,settings,created_at,started_at,completed_at").eq("user_id", user.id).in("status", ["COMPLETED","DRAFT"]);
   if (query) requestQuery = requestQuery.ilike("title", "%" + query.replace(/[%_]/g, "\\$&") + "%");
   if (category) requestQuery = requestQuery.filter("settings->>category", "eq", category);
   if (mode) requestQuery = requestQuery.eq("mode", mode);
@@ -26,6 +26,7 @@ export async function GET(request: Request) {
     const { data: signed } = coverPath ? await supabase.storage.from("renq-covers").createSignedUrl(coverPath, 60 * 60 * 24 * 7) : { data: null };
     return {
       id: ranking.id, public_slug: ranking.public_slug, title: ranking.title, mode: ranking.mode,
+      elapsedSeconds: ranking.mode === "SPEED_RENQ" && ranking.started_at && ranking.completed_at ? Math.max(0, Math.round((new Date(ranking.completed_at).getTime() - new Date(ranking.started_at).getTime()) / 1000)) : null,
       created_at: String(settings.savedAt ?? ranking.completed_at ?? ranking.created_at),
       rows, category: String(settings.category ?? "custom"),
       coverImage: signed?.signedUrl ?? (typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : rows.find(row => row.image_url)?.image_url ?? null),
