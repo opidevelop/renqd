@@ -28,7 +28,7 @@ export default async function ProfilePage() {
   const { data: likedRows } = await supabase.from("ranking_likes").select("ranking_id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(24);
   const likedIds = (likedRows ?? []).map(item => item.ranking_id);
   const { data: likedRankings } = likedIds.length ? await supabase.from("rankings").select("id,title,public_slug,mode,settings").in("id", likedIds).eq("status", "COMPLETED").eq("visibility", "LIVE").filter("settings->>access", "eq", "public") : { data: [] };
-  const favorites = likedIds.map(id => (likedRankings ?? []).find(item => item.id === id)).filter(Boolean);
+  const favorites = likedIds.flatMap(id => { const match = (likedRankings ?? []).find(item => item.id === id); return match ? [match] : []; });
   const rankingIds = rankings.map(item => item.id);
   const { count: likeCount } = rankingIds.length ? await supabase.from("ranking_likes").select("ranking_id", { count: "exact", head: true }).in("ranking_id", rankingIds) : { count: 0 };
   return <div className="profile-page">
