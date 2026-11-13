@@ -32,7 +32,7 @@ function FinalRankList({items,tieMap={}}:{items:Item[];tieMap?:Record<string,str
   <strong className="renq-position">{String(positions[item.id]??item.rank_position??index+1).padStart(2,"0")}</strong>
   {item.image_url?<img src={item.image_url} alt=""/>:<span className="renq-item-placeholder"><Layers3/></span>}
   <div className="renq-sort-copy"><strong>{item.title}</strong>{item.description&&<small>{item.description}</small>}</div>
-  <div className="renq-final-actions"><MusicActions item={item}/></div><span className="renq-medal-slot">{(positions[item.id]??item.rank_position??index+1)<=3?<img className={"renq-medal-png medal-"+(positions[item.id]??item.rank_position??index+1)} src={"/medals/"+((positions[item.id]??item.rank_position??index+1)===1?"gold":(positions[item.id]??item.rank_position??index+1)===2?"silver":"bronze")+".png"} alt="Medaglia"/>:null}</span>
+  <div className="renq-final-actions"><MusicActions item={item}/></div><span className="renq-medal-slot">{(positions[item.id]??item.rank_position??index+1)<=3?<span className={"renq-medal medal-"+(positions[item.id]??item.rank_position??index+1)} aria-label={"Posizione "+(positions[item.id]??item.rank_position??index+1)}>{(positions[item.id]??item.rank_position??index+1)===1?"🥇":(positions[item.id]??item.rank_position??index+1)===2?"🥈":"🥉"}</span>:null}</span>
  </article>)}</div>;
 }
 export function RenqExperience({ranking,items:initialItems}:{ranking:Ranking;items:Item[]}){

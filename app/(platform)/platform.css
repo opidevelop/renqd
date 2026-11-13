@@ -668,3 +668,47 @@
 .renq-reveal-group-item+.renq-reveal-group-item{margin-top:14px;padding-top:12px;border-top:1px solid #ffffff30}.renq-reveal-summary-items{display:grid;gap:4px;min-width:0;flex:1}.renq-reveal-summary-items strong{font-size:inherit;line-height:1.35}
 
 .title-error-inline{display:flex!important;align-items:center!important;gap:11px!important;max-width:100%!important;margin-top:12px!important;padding:12px 14px!important;border:1px solid #efb1ad!important;border-radius:12px!important;background:#fff0ef!important;color:#b42318!important}.title-error-inline strong{color:#b42318!important;font-size:11px!important;font-weight:850!important}.title-error-inline small{color:#d46c66!important;font-size:10px!important;font-weight:650!important}.title-error-symbol{display:grid!important;place-items:center!important;width:28px!important;height:28px!important;flex:none!important;border-radius:8px!important;background:transparent!important;color:#c62828!important}.renq-medal-png{display:block!important;width:34px!important;height:38px!important;object-fit:contain!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important}.renq-reveal-medal{display:block;width:34px;height:38px;object-fit:contain;background:transparent;border:0;box-shadow:none}.renq-medal-slot{background:transparent!important;border:0!important;box-shadow:none!important}.public-profile-page{width:min(920px,calc(100% - 48px))!important;margin:0 auto!important;padding:24px 0 50px!important}@media(max-width:680px){.public-profile-page{width:calc(100% - 28px)!important;padding:12px 0 35px!important}}
+
+/* Mobile profile: keep every section inside the viewport */
+.profile-page,.profile-dashboard{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.profile-dashboard>*{min-width:0;max-width:100%;box-sizing:border-box}
+.profile-cover,.profile-overview,.profile-stats-badges,.profile-stats-grid,.profile-editor-panel,.profile-collections-section,.profile-renqs-section,.profile-badges-section,.profile-social-meta{min-width:0;max-width:100%;box-sizing:border-box}
+.profile-collection-grid,.profile-renq-grid{min-width:0;width:100%;grid-template-columns:repeat(3,minmax(0,1fr))}
+.profile-collection-card,.profile-renq-card{min-width:0;max-width:100%;box-sizing:border-box}
+.profile-section-heading>div,.profile-overview-copy,.profile-cover-copy{min-width:0;max-width:100%}
+.profile-cover-copy h1,.profile-overview-copy h2,.profile-collection-art strong,.profile-renq-card>strong{overflow-wrap:anywhere;word-break:normal}
+.profile-social-meta>*{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.profile-editor-panel input,.profile-editor-panel textarea,.profile-editor-panel select,.profile-create-collection input,.profile-create-collection textarea,.profile-create-collection select{max-width:100%;box-sizing:border-box}
+.renq-medal-slot{display:inline-flex;align-items:center;justify-content:center;min-width:28px;background:transparent!important;border:0!important;box-shadow:none!important}
+.renq-medal,.saved-renq-medal{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important}
+.saved-renq-medal.medal-1,.saved-renq-medal.medal-2,.saved-renq-medal.medal-3{background:transparent!important;border:0!important;box-shadow:none!important;color:inherit!important}
+.renq-medal.medal-1,.renq-medal.medal-2,.renq-medal.medal-3{background:transparent!important;border:0!important;box-shadow:none!important;color:inherit!important}
+@media(max-width:680px){
+ .profile-page{padding-left:0!important;padding-right:0!important;overflow-x:clip}
+ .profile-dashboard{gap:14px;padding:0;overflow-x:clip}
+ .profile-cover{width:100%;min-height:180px;padding:17px;gap:10px;align-items:flex-end}
+ .profile-cover-copy{flex:1;min-width:0}
+ .profile-cover-copy>span{font-size:7px;letter-spacing:1px}
+ .profile-cover-copy h1{font-size:clamp(25px,7vw,34px);line-height:1.05;overflow-wrap:anywhere}
+ .profile-share-button{flex:none;max-width:42%;white-space:nowrap}
+ .profile-overview{width:100%;flex-wrap:wrap;align-items:flex-start;gap:10px;padding:0}
+ .profile-overview-copy{flex:1 1 calc(100% - 72px);width:calc(100% - 72px)}
+ .profile-overview-actions{width:100%;max-width:100%;margin:4px 0 0!important;justify-content:flex-start;flex-wrap:wrap}
+ .profile-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .profile-stats-grid>div{min-width:0;padding:11px}
+ .profile-stats-grid span{font-size:7px;letter-spacing:.7px;overflow-wrap:anywhere}
+ .profile-collection-grid,.profile-renq-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .profile-collection-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 30px 30px;gap:2px;padding:7px 5px}
+ .profile-collection-actions button{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.2;font-size:7px;padding:5px 2px}
+ .profile-collection-actions button svg{width:12px;height:12px;flex:none}
+ .profile-banner-change{width:28px;height:28px}
+ .profile-section-heading{gap:8px}
+ .profile-section-heading h2{font-size:clamp(18px,5vw,21px);overflow-wrap:anywhere}
+ .profile-image-editors{flex-wrap:wrap}
+ .profile-image-upload{min-width:0;max-width:100%}
+ .profile-banner-upload{flex:1 1 150px}
+ .profile-editor-actions{align-items:stretch}
+ .profile-editor-actions button{min-width:0;max-width:100%;white-space:normal}
+ .profile-social-meta{display:flex;flex-wrap:wrap;gap:8px}
+ .profile-social-meta a{margin-left:0;overflow-wrap:anywhere}
+}
