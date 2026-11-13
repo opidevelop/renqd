@@ -160,6 +160,23 @@ export async function POST(request:Request){
   if(error)return jsonError(error.message,500);
   return NextResponse.json({ok:true});
  }
+ if(body.action==="delete-renq"){
+  const {rankingId}=body as {rankingId:string};
+  const {data:ranking,error:lookupError}=await supabase.from("rankings").select("id,settings").eq("id",rankingId).eq("user_id",user.id).maybeSingle();
+  if(lookupError||!ranking)return jsonError("Renq non trovato o non eliminabile.",404);
+  const {data:itemRows}=await supabase.from("ranking_items").select("custom_item_id").eq("ranking_id",rankingId);
+  const customIds=[...new Set((itemRows??[]).map(row=>row.custom_item_id).filter((id):id is string=>Boolean(id)))];
+  const {error:deleteError}=await supabase.from("rankings").delete().eq("id",rankingId).eq("user_id",user.id);
+  if(deleteError)return jsonError(deleteError.message,500);
+  for(const customId of customIds){
+   const {data:references}=await supabase.from("ranking_items").select("id").eq("custom_item_id",customId).limit(1);
+   if(!references?.length)await supabase.from("custom_items").delete().eq("id",customId).eq("owner_id",user.id).eq("is_reusable",false);
+  }
+  const settings=(ranking.settings??{}) as Record<string,unknown>;
+  const coverPath=typeof settings.coverImagePath==="string"?settings.coverImagePath:null;
+  if(coverPath)await supabase.storage.from("renq-covers").remove([coverPath]);
+  return NextResponse.json({ok:true});
+ }
  if(body.action==="cancel-renq"){
   const {rankingId}=body as {rankingId:string};const {data:ranking}=await supabase.from("rankings").select("id").eq("id",rankingId).eq("user_id",user.id).single();if(!ranking)return jsonError("Renq non trovato.",404);const {error}=await supabase.from("rankings").update({status:"CANCELLED"}).eq("id",rankingId);if(error)return jsonError(error.message,500);return NextResponse.json({ok:true});
  }

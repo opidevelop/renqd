@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowUpRight, BadgeCheck, Camera, FolderPlus, Globe2, Heart, ImagePlus, LockKeyhole, Plus, Save, Share2, Sparkles, Trash2, Trophy, Users } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, Camera, FolderPlus, Globe2, Heart, ImagePlus, LockKeyhole, Plus, Save, Share2, Sparkles, Trash2, Trophy, Users, Pencil, Search, LoaderCircle, X } from "lucide-react";
 
 type PublicProfile = {
   user_id: string; username: string; display_name: string; bio: string;
@@ -15,6 +15,7 @@ type Collection = {
   visibility: "PUBLIC" | "PRIVATE"; is_featured: boolean; item_count: number; item_ids: string[];
 };
 type Renq = { id: string; title: string; public_slug: string; mode: string; settings: Record<string, unknown> };
+type CollectionSearchResult = { id: string; title: string; coverImage: string | null; rows: { title: string; image_url?: string | null; rank_position?: number | null }[] };
 
 export function ProfileDashboard({ profile: initialProfile, collections: initialCollections, rankings, favorites, followerCount, followingCount, likeCount }: {
   profile: PublicProfile; collections: Collection[]; rankings: Renq[]; favorites: Renq[];
@@ -24,10 +25,14 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   const [collections, setCollections] = useState(initialCollections);
   const [savingProfile, setSavingProfile] = useState(false);
   const [creatingCollection, setCreatingCollection] = useState(false);
+  const [profileEditorOpen, setProfileEditorOpen] = useState(false);
+  const [collectionFormOpen, setCollectionFormOpen] = useState(false);
+  const [collectionSearchTarget, setCollectionSearchTarget] = useState<string | null>(null);
+  const [collectionSearchQuery, setCollectionSearchQuery] = useState("");
+  const [collectionSearchResults, setCollectionSearchResults] = useState<CollectionSearchResult[]>([]);
+  const [collectionSearchLoading, setCollectionSearchLoading] = useState(false);
   const [displayName, setDisplayName] = useState(initialProfile.display_name || "");
   const [bio, setBio] = useState(initialProfile.bio || "");
-  const [location, setLocation] = useState(initialProfile.location || "");
-  const [website, setWebsite] = useState(initialProfile.website_url || "");
   const [collectionTitle, setCollectionTitle] = useState("");
   const [collectionDescription, setCollectionDescription] = useState("");
   const [collectionVisibility, setCollectionVisibility] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
@@ -36,6 +41,55 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   const [collectionSelections, setCollectionSelections] = useState<Record<string,string[]>>({});
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const query = collectionSearchQuery.trim();
+    if (!collectionSearchTarget || query.length < 2) {
+      setCollectionSearchResults([]);
+      setCollectionSearchLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setCollectionSearchLoading(true);
+      try {
+        const response = await fetch("/api/my-renqs?q=" + encodeURIComponent(query), { signal: controller.signal, cache: "no-store" });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error ?? "Ricerca Renq non disponibile.");
+        setCollectionSearchResults(result.items ?? []);
+      } catch (e) {
+        if (e instanceof Error && e.name === "AbortError") return;
+        setError(e instanceof Error ? e.message : "Ricerca Renq non disponibile.");
+      } finally {
+        if (!controller.signal.aborted) setCollectionSearchLoading(false);
+      }
+    }, 260);
+    return () => { window.clearTimeout(timeout); controller.abort(); };
+  }, [collectionSearchTarget, collectionSearchQuery]);
+
+  function toggleSearchSelection(id: string, target: string) {
+    if (target === "new") {
+      setSelectedRenqIds(current => current.includes(id) ? current.filter(value => value !== id) : [...current, id]);
+      return;
+    }
+    setCollectionSelections(current => {
+      const values = current[target] ?? [];
+      return { ...current, [target]: values.includes(id) ? values.filter(value => value !== id) : [...values, id] };
+    });
+  }
+
+  function renderCollectionSearch(target: string) {
+    const selectedIds = target === "new" ? selectedRenqIds : collectionSelections[target] ?? [];
+    const results = target === collectionSearchTarget ? collectionSearchResults : [];
+    return <div className="profile-collection-search">
+      <label><Search size={15}/><input value={target === collectionSearchTarget ? collectionSearchQuery : ""} onFocus={() => setCollectionSearchTarget(target)} onChange={event => { setCollectionSearchTarget(target); setCollectionSearchQuery(event.target.value); }} placeholder="Cerca tra i tuoi Renq…"/></label>
+      {target === collectionSearchTarget && collectionSearchLoading && <small className="profile-search-status"><LoaderCircle size={13}/> Ricerca in corso…</small>}
+      {target === collectionSearchTarget && collectionSearchQuery.trim().length > 0 && collectionSearchQuery.trim().length < 2 && <small className="profile-search-status">Inserisci almeno 2 caratteri.</small>}
+      {results.length > 0 && <div className="profile-collection-search-results">{results.filter(item => target === "new" || !(collections.find(collection => collection.id === target)?.item_ids ?? []).includes(item.id)).map(item => <button type="button" key={item.id} className={selectedIds.includes(item.id) ? "is-selected" : ""} aria-pressed={selectedIds.includes(item.id)} onClick={() => toggleSearchSelection(item.id, target)}>{item.coverImage ? <img src={item.coverImage} alt=""/> : <span className="profile-search-placeholder"><Trophy size={14}/></span>}<span><strong>{item.title}</strong><small>{item.rows.length} elementi</small></span>{selectedIds.includes(item.id) ? <BadgeCheck size={16}/> : <Plus size={16}/>}</button>)}</div>}
+      {target === collectionSearchTarget && collectionSearchQuery.trim().length >= 2 && !collectionSearchLoading && results.length === 0 && <small className="profile-search-status">Nessun Renq corrispondente.</small>}
+      {selectedIds.length > 0 && <small className="profile-search-selected">{selectedIds.length} Renq selezionati</small>}
+    </div>;
+  }
 
   async function uploadImage(file: File, prefix: string) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Scegli un'immagine JPG, PNG o WebP.");
@@ -66,7 +120,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Sessione scaduta. Accedi di nuovo.");
-      const next = { ...profile, display_name: displayName.trim().slice(0, 60), bio: bio.trim().slice(0, 280), location: location.trim().slice(0, 80), website_url: website.trim().slice(0, 180), updated_at: new Date().toISOString() };
+      const next = { ...profile, display_name: displayName.trim().slice(0, 60), bio: bio.trim().slice(0, 280), updated_at: new Date().toISOString() };
       const { error: saveError } = await supabase.from("public_profiles").upsert({ ...next, user_id: user.id, username: profile.username }, { onConflict: "user_id" });
       if (saveError) throw saveError;
       setProfile(next); setMessage("Profilo aggiornato.");
@@ -108,6 +162,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       }
       setCollections(current => [...current, { ...created, item_count: selectedRenqIds.length, item_ids: selectedRenqIds }]);
       setCollectionTitle(""); setCollectionDescription(""); setCollectionFile(null); setSelectedRenqIds([]);
+      setCollectionFormOpen(false); setCollectionSearchTarget(null); setCollectionSearchQuery("");
       setMessage("Collezione creata.");
     } catch (e) { setError(e instanceof Error ? e.message : "Non è stato possibile creare la collezione."); }
     finally { setCreatingCollection(false); }
@@ -167,9 +222,18 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     likeCount >= 10 ? "Apprezzato dalla community" : null
   ].filter(Boolean) as string[];
 
+  function firstCollectionCover(collection: Collection) {
+    const firstId = collection.item_ids[0];
+    const firstRenq = rankings.find(item => item.id === firstId);
+    if (!firstRenq) return null;
+    const settings = firstRenq.settings ?? {};
+    const snapshot = settings.savedSnapshot as { items?: { image_url?: string | null }[] } | undefined;
+    return (typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null) ?? snapshot?.items?.find(item => item.image_url)?.image_url ?? null;
+  }
+
   return <div className="profile-dashboard">
     <section className="profile-cover" style={profile.banner_url ? { backgroundImage: "linear-gradient(90deg,rgba(18,14,11,.78),rgba(18,14,11,.16)),url(" + profile.banner_url + ")" } : undefined}>
-      <div className="profile-cover-copy"><span>IL TUO SPAZIO SU RENQD</span><h1>{profile.display_name || profile.username}</h1><p>@{profile.username}</p></div>
+      <div className="profile-cover-copy"><span>IL TUO PROFILO SU RENQD</span><h1>{profile.display_name || profile.username}</h1><p>@{profile.username}</p></div>
       <button type="button" className="profile-share-button" onClick={() => void shareProfile()}><Share2 size={16}/> Condividi</button>
     </section>
 
@@ -177,18 +241,21 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       <div className="profile-avatar-wrap">
         {profile.avatar_url ? <img src={profile.avatar_url} alt="Avatar profilo"/> : <span>{(profile.display_name || profile.username).slice(0, 1).toUpperCase()}</span>}
       </div>
-      <div className="profile-overview-copy"><h2>{profile.display_name || profile.username}</h2><p>@{profile.username}{profile.location ? " · " + profile.location : ""}</p>{profile.bio && <div className="profile-bio">{profile.bio}</div>}{profile.website_url && <a href={profile.website_url} target="_blank" rel="noreferrer">{profile.website_url}</a>}</div>
-      <div className="profile-privacy-pill">{profile.is_private ? <><LockKeyhole size={14}/> Privato</> : <><Globe2 size={14}/> Pubblico</>}</div>
+      <div className="profile-overview-copy"><h2>{profile.display_name || profile.username}</h2><p>@{profile.username}</p>{profile.bio && <div className="profile-bio">{profile.bio}</div>}</div>
+      <div className="profile-overview-actions"><div className="profile-privacy-pill">{profile.is_private ? <><LockKeyhole size={14}/> Privato</> : <><Globe2 size={14}/> Pubblico</>}</div><button type="button" className="profile-edit-trigger" onClick={() => setProfileEditorOpen(value => !value)} aria-expanded={profileEditorOpen}><Pencil size={14}/> Modifica profilo</button></div>
     </section>
 
-    <section className="profile-stats-grid">
-      <div><strong>{rankings.length}</strong><span>RENQ</span></div>
-      <div><strong>{collections.length}</strong><span>COLLEZIONI</span></div>
-      <div><strong>{followerCount}</strong><span>FOLLOWER</span></div>
-      <div><strong>{likeCount}</strong><span>LIKE RICEVUTI</span></div>
+    <section className="profile-stats-badges">
+      <div className="profile-stats-grid">
+        <div><strong>{rankings.length}</strong><span>RENQ</span></div>
+        <div><strong>{collections.length}</strong><span>COLLEZIONI</span></div>
+        <div><strong>{followerCount}</strong><span>FOLLOWER</span></div>
+        <div><strong>{likeCount}</strong><span>LIKE RICEVUTI</span></div>
+      </div>
+      {badges.length > 0 && <div className="profile-badges-section"><div className="profile-badges-heading"><span>TRAGUARDI</span><strong>I tuoi badge</strong></div><div className="profile-badge-list">{badges.map(badge => <span key={badge}><BadgeCheck size={15}/>{badge}</span>)}</div></div>}
     </section>
 
-    <section className="profile-editor-panel">
+    {profileEditorOpen && <section className="profile-editor-panel">
       <div className="profile-section-heading"><div><span>PERSONALIZZAZIONE</span><h2>Il tuo profilo</h2></div><Sparkles size={20}/></div>
       <div className="profile-image-editors">
         <label className="profile-image-upload">{profile.avatar_url ? <img src={profile.avatar_url} alt=""/> : <Camera size={20}/>}<span>Avatar</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={event => void updateProfileImage(event.target.files?.[0] ?? null, "avatar_url")}/></label>
@@ -196,26 +263,24 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       </div>
       <div className="profile-edit-grid">
         <label>Nome visualizzato<input value={displayName} maxLength={60} onChange={event => setDisplayName(event.target.value)} placeholder="Come vuoi apparire"/></label>
-        <label>Località<input value={location} maxLength={80} onChange={event => setLocation(event.target.value)} placeholder="La tua città"/></label>
         <label className="profile-edit-wide">Biografia<textarea value={bio} maxLength={280} rows={3} onChange={event => setBio(event.target.value)} placeholder="Racconta qualcosa di te…"/></label>
-        <label className="profile-edit-wide">Sito web<input value={website} maxLength={180} onChange={event => setWebsite(event.target.value)} placeholder="https://…"/></label>
       </div>
       <div className="profile-editor-actions"><button type="button" className="profile-save-button" onClick={() => void saveProfile()} disabled={savingProfile}><Save size={16}/>{savingProfile ? "Salvataggio…" : "Salva profilo"}</button><button type="button" className="profile-privacy-button" onClick={() => void togglePrivacy()}>{profile.is_private ? <Globe2 size={15}/> : <LockKeyhole size={15}/>} {profile.is_private ? "Rendi pubblico" : "Rendi privato"}</button></div>
-    </section>
+    </section>}
 
     <section className="profile-collections-section">
-      <div className="profile-section-heading"><div><span>LA TUA LIBRERIA</span><h2>Le tue collezioni</h2><p>Crea cartelle con un banner personalizzato e raccogli i tuoi Renq.</p></div><FolderPlus size={21}/></div>
-      {collections.length ? <div className="profile-collection-grid">{collections.map(collection => <article className="profile-collection-card" key={collection.id}>
-        <Link href={"/collections/" + collection.slug} className="profile-collection-art" style={collection.banner_url ? { backgroundImage: "linear-gradient(0deg,rgba(16,13,11,.72),rgba(16,13,11,.05)),url(" + collection.banner_url + ")" } : undefined}><span>{collection.visibility === "PRIVATE" ? <LockKeyhole size={13}/> : <Globe2 size={13}/>} {collection.visibility === "PRIVATE" ? "PRIVATA" : "PUBBLICA"}</span><strong>{collection.title}</strong><small>{collection.item_count} Renq</small></Link>
-        <div className="profile-collection-actions"><button type="button" onClick={() => void updateCollection(collection.id, { is_featured: !collection.is_featured })}>{collection.is_featured ? <BadgeCheck size={14}/> : <Sparkles size={14}/>} {collection.is_featured ? "In evidenza" : "Metti in evidenza"}</button><button type="button" onClick={() => void updateCollection(collection.id,{visibility:collection.visibility==="PUBLIC"?"PRIVATE":"PUBLIC"})}>{collection.visibility==="PUBLIC"?<LockKeyhole size={13}/>:<Globe2 size={13}/>} {collection.visibility==="PUBLIC"?"Rendi privata":"Rendi pubblica"}</button><label className="profile-banner-change">Banner<input type="file" accept="image/jpeg,image/png,image/webp" onChange={event=>void updateCollectionBanner(collection,event.target.files?.[0]??null)}/></label><button type="button" aria-label="Elimina collezione" onClick={() => void deleteCollection(collection.id)}><Trash2 size={14}/></button></div>
-        <details className="profile-collection-manage"><summary>Aggiungi Renq alla cartella</summary><div>{rankings.filter(ranking=>!collection.item_ids.includes(ranking.id)).map(ranking=><label key={ranking.id}><input type="checkbox" checked={(collectionSelections[collection.id]??[]).includes(ranking.id)} onChange={event=>setCollectionSelections(current=>({...current,[collection.id]:event.target.checked?[...(current[collection.id]??[]),ranking.id]:(current[collection.id]??[]).filter(id=>id!==ranking.id)}))}/><span>{ranking.title}</span></label>)}{rankings.every(ranking=>collection.item_ids.includes(ranking.id))&&<small>Tutti i tuoi Renq sono già in questa cartella.</small>}<button type="button" className="profile-save-button" onClick={()=>void addRenqsToCollection(collection)} disabled={!(collectionSelections[collection.id]??[]).length}>Aggiungi selezionati</button></div></details>
-      </article>)}</div> : <div className="profile-empty-state"><FolderPlus size={24}/><strong>Ancora nessuna collezione</strong><p>Crea la tua prima cartella e inizia a organizzare i Renq.</p></div>}
-      <form className="profile-create-collection" onSubmit={event => void createCollection(event)}>
-        <div className="profile-create-collection-heading"><Plus size={18}/><strong>Crea una nuova collezione</strong></div>
+      <div className="profile-section-heading"><div><span>LA TUA LIBRERIA</span><h2>Le tue collezioni</h2><p>Crea cartelle con un banner personalizzato e raccogli i tuoi Renq.</p></div><button type="button" className="profile-add-collection" aria-label={collectionFormOpen ? "Chiudi creazione collezione" : "Crea una collezione"} onClick={() => { setCollectionFormOpen(value => !value); setCollectionSearchTarget(collectionFormOpen ? null : "new"); setCollectionSearchQuery(""); }}><FolderPlus size={20}/></button></div>
+      {collections.length ? <div className="profile-collection-grid">{collections.map(collection => { const cover = collection.banner_url || firstCollectionCover(collection); return <article className={"profile-collection-card" + (collection.is_featured ? " is-featured" : "")} key={collection.id}>
+        <Link href={"/collections/" + collection.slug} className="profile-collection-art" style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(16,13,11,.72),rgba(16,13,11,.05)),url(" + cover + ")" } : undefined}><span>{collection.visibility === "PRIVATE" ? <LockKeyhole size={13}/> : <Globe2 size={13}/>} {collection.visibility === "PRIVATE" ? "PRIVATA" : "PUBBLICA"}</span><strong>{collection.title}</strong><small>{collection.item_count} Renq</small></Link>
+        <div className="profile-collection-actions"><button type="button" onClick={() => void updateCollection(collection.id, { is_featured: !collection.is_featured })}>{collection.is_featured ? <BadgeCheck size={14}/> : <Sparkles size={14}/>} {collection.is_featured ? "In evidenza" : "Metti in evidenza"}</button><button type="button" onClick={() => void updateCollection(collection.id,{visibility:collection.visibility==="PUBLIC"?"PRIVATE":"PUBLIC"})}>{collection.visibility==="PUBLIC"?<LockKeyhole size={13}/>:<Globe2 size={13}/>} {collection.visibility==="PUBLIC"?"Rendi privata":"Rendi pubblica"}</button><label className="profile-banner-change" aria-label="Cambia banner della cartella" title="Cambia banner"><ImagePlus size={14}/><input type="file" accept="image/jpeg,image/png,image/webp" onChange={event=>void updateCollectionBanner(collection,event.target.files?.[0]??null)}/></label><button type="button" aria-label="Elimina collezione" onClick={() => void deleteCollection(collection.id)}><Trash2 size={14}/></button></div>
+        <details className="profile-collection-manage"><summary onClick={() => { setCollectionSearchTarget(collection.id); setCollectionSearchQuery(""); }}>Aggiungi Renq alla cartella</summary><div>{renderCollectionSearch(collection.id)}<button type="button" className="profile-save-button" onClick={()=>void addRenqsToCollection(collection)} disabled={!(collectionSelections[collection.id]??[]).length}>Aggiungi selezionati</button></div></details>
+      </article>;})}</div> : <div className="profile-empty-state"><FolderPlus size={24}/><strong>Ancora nessuna collezione</strong><p>Crea la tua prima cartella e inizia a organizzare i Renq.</p></div>}
+      {collectionFormOpen && <form className="profile-create-collection" onSubmit={event => void createCollection(event)}>
+        <div className="profile-create-collection-heading"><Plus size={18}/><strong>Crea una nuova collezione</strong><button type="button" onClick={() => { setCollectionFormOpen(false); setCollectionSearchTarget(null); }} aria-label="Chiudi"><X size={16}/></button></div>
         <div className="profile-edit-grid"><label>Nome cartella<input value={collectionTitle} onChange={event => setCollectionTitle(event.target.value)} maxLength={70} required placeholder="Es. Le mie auto preferite"/></label><label>Visibilità<select value={collectionVisibility} onChange={event => setCollectionVisibility(event.target.value as "PUBLIC" | "PRIVATE")}><option value="PUBLIC">Pubblica</option><option value="PRIVATE">Privata</option></select></label><label className="profile-edit-wide">Descrizione<input value={collectionDescription} onChange={event => setCollectionDescription(event.target.value)} maxLength={240} placeholder="Descrivi questa raccolta…"/></label><label className="profile-edit-wide profile-file-field">Banner della cartella<input type="file" accept="image/jpeg,image/png,image/webp" onChange={event => setCollectionFile(event.target.files?.[0] ?? null)}/><small>{collectionFile ? collectionFile.name : "JPG, PNG o WebP · massimo 8 MB"}</small></label></div>
-        {rankings.length > 0 && <div className="profile-renq-picker"><span>AGGIUNGI RENQ ALLA CARTELLA</span><div>{rankings.map(ranking => <label key={ranking.id}><input type="checkbox" checked={selectedRenqIds.includes(ranking.id)} onChange={event => setSelectedRenqIds(current => event.target.checked ? [...current, ranking.id] : current.filter(id => id !== ranking.id))}/><span>{ranking.title}</span></label>)}</div></div>}
+        {renderCollectionSearch("new")}
         <button type="submit" className="profile-save-button" disabled={creatingCollection || !collectionTitle.trim()}><FolderPlus size={16}/>{creatingCollection ? "Creazione…" : "Crea collezione"}</button>
-      </form>
+      </form>}
     </section>
 
     <section className="profile-renqs-section">
@@ -228,7 +293,6 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     </section>
 
     {favorites.length > 0 && <section className="profile-renqs-section"><div className="profile-section-heading"><div><span>RACCOLTA PERSONALE</span><h2>I miei preferiti</h2><p>I Renq degli altri utenti che hai apprezzato.</p></div><Heart size={20}/></div><div className="profile-renq-grid">{favorites.map(ranking => { const settings = ranking.settings ?? {}; const cover = typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null; return <Link key={ranking.id} href={"/r/" + (ranking.public_slug || ranking.id)} className="profile-renq-card"><div style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.75),rgba(15,12,10,.05)),url(" + cover + ")" } : undefined}><span>{String(ranking.mode).replaceAll("_", " ")}</span><ArrowUpRight size={17}/></div><strong>{ranking.title}</strong></Link>; })}</div></section>}
-    {badges.length > 0 && <section className="profile-badges-section"><div className="profile-section-heading"><div><span>I TUOI TRAGUARDI</span><h2>Badge</h2></div><BadgeCheck size={20}/></div><div className="profile-badge-list">{badges.map(badge => <span key={badge}><BadgeCheck size={15}/>{badge}</span>)}</div></section>}
     <div className="profile-social-meta"><span><Users size={14}/> Segui {followingCount} profili</span><span><Heart size={14}/> {likeCount} apprezzamenti ricevuti</span><Link href={"/u/" + profile.username}>Apri il profilo pubblico <ArrowUpRight size={14}/></Link></div>
     {(message || error) && <p className={"profile-feedback" + (error ? " is-error" : "")} role="status">{error || message}</p>}
   </div>;

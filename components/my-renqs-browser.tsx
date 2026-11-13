@@ -46,7 +46,7 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
   const reset = () => { setQuery(""); setCategory(""); setMode(""); };
   return <div className="my-renqs-page">
     <header className="my-renqs-header"><div><span className="page-eyebrow"><Trophy size={14}/> LA TUA COLLEZIONE</span><h1>Renq</h1><p>Le classifiche che hai deciso di conservare, tutte in un unico posto.</p></div><Link href="/create" className="my-renqs-create"><Plus size={17}/> Crea un Renq</Link></header>
-    <div className="my-renqs-summary"><div><strong>{items.length.toString().padStart(2,"0")}</strong><span>RENQ TROVATI</span></div><p>Ogni classifica racconta una scelta. Qui ritrovi le tue.</p></div>
+    <div className="my-renqs-summary" aria-live="polite"><div className="my-renqs-results-count"><strong>{items.length.toLocaleString("it-IT")}</strong><span>{items.length === 1 ? "classifica" : "classifiche"}</span></div><p>{loading ? "Aggiornamento dei risultati…" : query || category || mode ? "Risultati aggiornati in base alla tua ricerca." : "Le tue classifiche, raccolte in un unico spazio."}</p></div>
     <section className="my-renqs-filters">
       <label className="my-renqs-search"><Search size={17}/><input value={query} onChange={event=>setQuery(event.target.value)} placeholder="Cerca un Renq per titolo…"/>{query && <button type="button" onClick={()=>setQuery("")} aria-label="Cancella ricerca"><X size={15}/></button>}</label>
       <label><SlidersHorizontal size={15}/><select value={category} onChange={event=>setCategory(event.target.value)}><option value="">Tutte le categorie</option>{Object.entries(categoryLabels).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>

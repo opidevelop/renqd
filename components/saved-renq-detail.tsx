@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Heart, MessageCircle, Pencil, Send, Share2, Trophy } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Pencil, Send, Share2, Trophy, Trash2 } from "lucide-react";
 import { RenqCoverPicker } from "@/components/renq-cover-picker";
 import { highQualityImageUrl } from "@/lib/image-quality";
 
@@ -92,6 +92,19 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     }
   }
 
+  async function deleteRanking() {
+    if (busy || !window.confirm("Eliminare definitivamente questo Renq? L'operazione non può essere annullata.")) return;
+    setBusy(true); setError("");
+    try {
+      await post({ action: "delete-renq", rankingId: ranking.id });
+      router.push("/rankings");
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Non è stato possibile eliminare il Renq.");
+      setBusy(false);
+    }
+  }
+
   async function shareRanking() {
     const url = window.location.href;
     try {
@@ -141,6 +154,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         <button type="button" onClick={() => void editRanking()} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
+        <button type="button" className="saved-renq-delete" onClick={() => void deleteRanking()} disabled={busy}><Trash2 size={16}/><span>Elimina</span></button>
 
         </div>
       </section>

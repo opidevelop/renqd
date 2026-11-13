@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import type { ReactNode, TouchEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Trophy, Sparkles, Crown, Medal } from "lucide-react";
+import { ArrowLeft, ArrowRight, Trophy, Sparkles, Crown, Medal, Play, Pause } from "lucide-react";
 import { highQualityImageUrl } from "@/lib/image-quality";
 
 type RevealItem = {
@@ -11,6 +11,7 @@ type RevealItem = {
   title: string;
   image_url: string | null;
   description?: string | null;
+  preview_url?: string | null;
   rank_position: number | null;
   tie_group_id?: string | null;
 };
@@ -33,8 +34,20 @@ type Slide =
   | { type: "stats" }
   | { type: "podium-intro" }
   | { type: "winner-intro" }
-  | { type: "item"; item: RevealItem; position: number }
+  | { type: "item"; item: RevealItem; position: number; previewUrl: string | null }
   | { type: "summary" };
+
+function RevealPreview({ src }: { src: string }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  async function toggle() {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) { audio.pause(); setPlaying(false); return; }
+    try { await audio.play(); setPlaying(true); } catch { setPlaying(false); }
+  }
+  return <div className="renq-reveal-preview"><audio ref={audioRef} src={src} preload="none" onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)}/><button type="button" onClick={() => void toggle()}>{playing ? <Pause size={14}/> : <Play size={14}/>} {playing ? "Pausa anteprima" : "Ascolta un estratto"}</button><span>ANTEPRIMA AUDIO</span></div>;
+}
 
 const modeLabels: Record<string, string> = { RENQ: "Renq", BATTLE_RENQ: "Battle Renq", SPEED_RENQ: "Speed Renq" };
 const categoryLabels: Record<string, string> = { music: "Musica", games: "Videogiochi", film: "Film e serie", books: "Libri", sport: "Sport", custom: "Personalizzato" };
@@ -44,6 +57,8 @@ export function RenqReveal({ title, mode, category, contentType, coverImageUrl, 
   const touchStart = useRef<number | null>(null);
   const ranked = [...items].sort((a, b) => (a.rank_position ?? 999) - (b.rank_position ?? 999));
   const descending = [...ranked].reverse();
+  const firstByPosition = new Map<number, RevealItem>();
+  ranked.forEach((item, index) => { const position = item.rank_position ?? index + 1; if (!firstByPosition.has(position)) firstByPosition.set(position, item); });
   const automaticCover = ranked.find(item => item.image_url)?.image_url ?? null;
   const cover = highQualityImageUrl(coverImageUrl || automaticCover);
   const slides: Slide[] = [{ type: "cover" }, { type: "details" }, { type: "stats" }];
@@ -59,7 +74,7 @@ export function RenqReveal({ title, mode, category, contentType, coverImageUrl, 
       slides.push({ type: "winner-intro" });
       winnerIntroAdded = true;
     }
-    slides.push({ type: "item", item, position });
+    slides.push({ type: "item", item, position, previewUrl: firstByPosition.get(position)?.preview_url ?? null });
   });
   slides.push({ type: "summary" });
   const currentSlide = slides[step];
@@ -93,11 +108,11 @@ export function RenqReveal({ title, mode, category, contentType, coverImageUrl, 
 
       <div className="renq-reveal-stage">
         <AnimatePresence mode="wait">
-          <motion.section key={step} className={"renq-reveal-slide is-" + currentSlide.type + (currentSlide.type === "item" && currentSlide.position === 1 ? " is-winner" : "")}
-            initial={{ opacity: 0, y: 30, scale: .965, rotateX: 2 }}
-            animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-            exit={{ opacity: 0, y: -22, scale: .975, rotateX: -1 }}
-            transition={{ duration: .42, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.section key={step} className={"renq-reveal-slide is-" + currentSlide.type + (currentSlide.type === "item" && currentSlide.position <= 3 ? " is-placement-" + currentSlide.position : "") + (currentSlide.type === "item" && currentSlide.position === 1 ? " is-winner" : "")}
+            initial={{ opacity: 0, y: 34, scale: .94, rotateX: 3 }}
+            animate={{ opacity: 1, y: 0, scale: currentSlide.type === "item" && currentSlide.position === 1 ? 1.015 : 1, rotateX: 0 }}
+            exit={{ opacity: 0, y: -26, scale: .96, rotateX: -2 }}
+            transition={currentSlide.type === "item" && currentSlide.position === 1 ? { type: "spring", stiffness: 190, damping: 17, mass: .8 } : { duration: .42, ease: [0.22, 1, 0.36, 1] }}>
             {currentSlide.type === "cover" && <>
               {cover && <img className="renq-reveal-cover" src={cover} alt="" style={{ objectPosition: coverPosition.x + "% " + coverPosition.y + "%" }} />}
               <div className="renq-reveal-cover-shade" />
@@ -148,7 +163,8 @@ export function RenqReveal({ title, mode, category, contentType, coverImageUrl, 
                 <h2>{currentSlide.item.title}</h2>
                 {currentSlide.item.description && <p>{currentSlide.item.description}</p>}
               </div>
-              {currentSlide.position === 1 && <div className="renq-reveal-winner-glow" />}
+              {currentSlide.previewUrl && <RevealPreview src={currentSlide.previewUrl}/>}
+              {currentSlide.position === 1 && <><div className="renq-reveal-winner-glow" /><div className="renq-reveal-confetti" aria-hidden="true">{Array.from({length: 36}, (_, index) => <i key={index} style={{ left: ((index * 37) % 100) + "%", animationDelay: ((index % 9) * .09) + "s" }}/>)}</div></>}
             </div>}
             {currentSlide.type === "summary" && <div className="renq-reveal-summary-content">
               <span className="renq-reveal-kicker"><Trophy size={15}/> IL RISULTATO FINALE</span>

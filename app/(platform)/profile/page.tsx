@@ -1,7 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { ProfileDashboard } from "@/components/profile-dashboard";
-import { LogOut } from "lucide-react";
-import { signOut } from "@/app/(auth)/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +19,7 @@ export default async function ProfilePage() {
   const rankings = (rows ?? []).filter(item => Boolean((item.settings as Record<string, unknown> | null)?.savedAt));
   const { data: collections } = await supabase.from("profile_collections").select("id,title,slug,description,banner_url,visibility,is_featured").eq("owner_id", user.id).order("is_featured", { ascending: false }).order("sort_order").order("created_at", { ascending: false });
   const collectionIds = (collections ?? []).map(item => item.id);
-  const { data: collectionItems } = collectionIds.length ? await supabase.from("profile_collection_items").select("collection_id,ranking_id").in("collection_id", collectionIds) : { data: [] };
+  const { data: collectionItems } = collectionIds.length ? await supabase.from("profile_collection_items").select("collection_id,ranking_id").in("collection_id", collectionIds).order("position", { ascending: true }) : { data: [] };
   const enrichedCollections = (collections ?? []).map(item => ({ ...item, item_count: (collectionItems ?? []).filter(row => row.collection_id === item.id).length, item_ids: (collectionItems ?? []).filter(row => row.collection_id === item.id).map(row => row.ranking_id) }));
   const { count: followerCount } = await supabase.from("user_follows").select("follower_id", { count: "exact", head: true }).eq("followed_id", user.id).eq("status", "ACCEPTED");
   const { count: followingCount } = await supabase.from("user_follows").select("followed_id", { count: "exact", head: true }).eq("follower_id", user.id).eq("status", "ACCEPTED");
@@ -32,7 +30,6 @@ export default async function ProfilePage() {
   const rankingIds = rankings.map(item => item.id);
   const { count: likeCount } = rankingIds.length ? await supabase.from("ranking_likes").select("ranking_id", { count: "exact", head: true }).in("ranking_id", rankingIds) : { count: 0 };
   return <div className="profile-page">
-    <div className="platform-page-heading"><div><span className="page-eyebrow">IL TUO SPAZIO</span><h1>Profilo</h1></div><form action={signOut}><button type="submit" className="profile-signout"><LogOut size={16}/> Esci</button></form></div>
     <ProfileDashboard profile={profile} collections={enrichedCollections} rankings={rankings} favorites={favorites} followerCount={followerCount ?? 0} followingCount={followingCount ?? 0} likeCount={likeCount ?? 0}/>
   </div>;
 }
