@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImagePlus, RotateCcw, LoaderCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -11,16 +11,18 @@ type Props = {
   canReset?: boolean;
   focusPosition?: { x: number; y: number };
   onFocusChange?: (position: { x: number; y: number }) => void;
+  onFocusPreview?: (position: { x: number; y: number }) => void;
   variant?: "panel" | "overlay";
 };
 
-export function RenqCoverPicker({ value, onChange, onReset, canReset = false, focusPosition = { x: 50, y: 50 }, onFocusChange, variant = "panel" }: Props) {
+export function RenqCoverPicker({ value, onChange, onReset, canReset = false, focusPosition = { x: 50, y: 50 }, onFocusChange, onFocusPreview, variant = "panel" }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [focus, setFocus] = useState(focusPosition);
 
-  function changeFocus(axis: "x" | "y", value: number) { setFocus(current => ({ ...current, [axis]: value })); }
+  useEffect(() => { setFocus(focusPosition); }, [focusPosition.x, focusPosition.y]);
+  function changeFocus(axis: "x" | "y", value: number) { const next = { ...focus, [axis]: value }; setFocus(next); onFocusPreview?.(next); }
   function commitFocus() { onFocusChange?.(focus); }
 
   async function upload(file?: File) {

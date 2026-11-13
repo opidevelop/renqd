@@ -41,6 +41,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const [currentCoverUrl, setCurrentCoverUrl] = useState(coverImageUrl);
   const [currentCoverPath, setCurrentCoverPath] = useState(coverImagePath);
   const [currentCoverPosition, setCurrentCoverPosition] = useState(initialCoverPosition);
+  const [coverEditorOpen, setCoverEditorOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -127,6 +128,10 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
       <section className="saved-renq-hero">
         {cover ? <img className="saved-renq-cover" src={cover} alt="" style={{ objectPosition: `${currentCoverPosition.x}% ${currentCoverPosition.y}%` }} /> : <div className="saved-renq-cover saved-renq-cover-empty"><Trophy size={58} /></div>}
         <div className="saved-renq-cover-shade" />
+        <div className="saved-renq-cover-controls">
+          <button type="button" className="saved-renq-cover-edit" onClick={() => setCoverEditorOpen(value => !value)} aria-label="Modifica copertina" aria-expanded={coverEditorOpen}><Pencil size={17} /></button>
+          {coverEditorOpen && <div className="saved-renq-cover-editor"><RenqCoverPicker value={currentCoverUrl ?? defaultCoverImageUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={(path,url) => void saveCover(path,url)} onFocusPreview={position => setCurrentCoverPosition(position)} onFocusChange={position => void saveCover(currentCoverPath,currentCoverUrl,position)} focusPosition={currentCoverPosition} onReset={() => void saveCover(null,null,{x:50,y:50})} canReset={Boolean(currentCoverPath)||currentCoverPosition.x!==50||currentCoverPosition.y!==50} variant="overlay"/></div>}
+        </div>
         <div className="saved-renq-hero-copy">
           <span>{modeLabels[ranking.mode] ?? "Renq"} · {category} · {contentType}</span>
           <h1>{ranking.title}</h1>
@@ -136,7 +141,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         <button type="button" onClick={() => void editRanking()} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
-        <RenqCoverPicker key={currentCoverPosition.x+"-"+currentCoverPosition.y} value={currentCoverUrl ?? defaultCoverImageUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={(path,url) => void saveCover(path,url)} onFocusChange={position => void saveCover(currentCoverPath,currentCoverUrl,position)} focusPosition={currentCoverPosition} onReset={() => void saveCover(null,null,{x:50,y:50})} canReset={Boolean(currentCoverPath)||currentCoverPosition.x!==50||currentCoverPosition.y!==50} variant="overlay"/>
+
         </div>
       </section>
 

@@ -11,5 +11,7 @@ export default async function PlatformLayout({ children }: { children: React.Rea
   if (error || !profile) redirect("/login?error=profile");
   if (profile.status === "PENDING") redirect("/pending");
   if (profile.status !== "APPROVED") redirect("/access-denied");
+  const { data: publicProfile } = await supabase.from("public_profiles").select("user_id").eq("user_id", user.id).maybeSingle();
+  if (!publicProfile) await supabase.from("public_profiles").insert({ user_id: user.id, username: profile.username, display_name: profile.username });
   return <PlatformShell>{children}</PlatformShell>;
 }
