@@ -103,7 +103,7 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
           id: String(entry.collectionId),
           title: entry.collectionName,
           subtitle: [artistName, year].filter(Boolean).join(" · "),
-          imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace(/\\d+x\\d+bb\\./, "600x600bb.") : undefined,
+          imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace(/\d+x\d+bb\./, "600x600bb.") : undefined,
           provider: "itunes" as const,
           payload: { collectionId: entry.collectionId, artistId, artistName },
           spotifyUrl: spotifySearchUrl(`${artistName} ${entry.collectionName}`),
@@ -125,7 +125,7 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
       return [{
         id: String(entry.collectionId), title: entry.collectionName,
         subtitle: [artistName, year].filter(Boolean).join(" · "),
-        imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace(/\\d+x\\d+bb\\./, "600x600bb.") : undefined,
+        imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace(/\d+x\d+bb\./, "600x600bb.") : undefined,
         provider: "itunes" as const,
         payload: { collectionId: entry.collectionId, artistId: entry.artistId, artistName },
         spotifyUrl: spotifySearchUrl(`${artistName} ${entry.collectionName}`),
