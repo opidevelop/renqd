@@ -6,7 +6,7 @@ import { RenqReveal } from "@/components/renq-reveal";
 import { highQualityImageUrl } from "@/lib/image-quality";
 
 type Item={id:string;title:string;title_snapshot:string;sort_order:number;rank_position:number|null;tie_group_id?:string|null;image_url:string|null;description:string|null;preview_url?:string|null;apple_music_url?:string|null;spotify_url?:string|null};
-type Ranking={id:string;title:string;mode:string;status:string;visibility:string;participation_mode:string;allow_ties:boolean;settings:Record<string,unknown>;created_at:string};
+type Ranking={id:string;title:string;mode:string;status:string;visibility:string;participation_mode:string;allow_ties:boolean;settings:Record<string,unknown>;created_at:string;started_at?:string|null;completed_at?:string|null};
 
 function MusicActions({item}:{item:Item}){
  const audioRef=useRef<HTMLAudioElement>(null);const [playing,setPlaying]=useState(false);
@@ -23,7 +23,7 @@ function RankHeading({ranking,items}:{ranking:Ranking;items:Item[]}){
  const cover=highQualityImageUrl(typeof settings.coverImageUrl==="string"?settings.coverImageUrl:items.find(item=>item.image_url)?.image_url);
  return <div className={"renq-card-heading"+(cover?" has-cover":"")}>
   {cover&&<div className="renq-card-cover"><img src={cover} alt="" style={{objectPosition:coverPosition.x+"% "+coverPosition.y+"%"}} /><span/></div>}
-  <div className="renq-card-heading-copy"><h1>{ranking.title}</h1><p>{String(settings.category??"custom").toUpperCase()} · {String(settings.contentType??"Lista personalizzata")} · {items.length} elementi</p><div className="renq-meta-chips"><span>{ranking.participation_mode==="COLLAB"?"Collaborativa":"Solo"}</span><span>{ranking.visibility==="LIVE"?"Live":"Reveal"}</span><span>{ranking.allow_ties?"Ex aequo":"Senza ex aequo"}</span></div></div>
+  <div className="renq-card-heading-copy"><h1>{ranking.title}</h1><p>{String(settings.category??"custom").toUpperCase()} · {String(settings.contentType??"Lista personalizzata")} · {items.length} elementi</p><div className="renq-meta-chips"><span>{ranking.participation_mode==="COLLAB"?"Collaborativa":"Solo"}</span><span>{ranking.visibility==="LIVE"?"Live":"Reveal"}</span><span>{ranking.allow_ties?"Ex aequo":"Senza ex aequo"}</span>{ranking.mode==="SPEED_RENQ"&&ranking.started_at&&ranking.completed_at&&<span>Tempo impiegato {Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/60000)}m {String(Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/1000)%60).padStart(2,"0")}s</span>}</div></div>
  </div>;
 }
 function getRankPositions(items:Item[],tieMap:Record<string,string>={}){const positions:Record<string,number>={};const groupRanks=new Map<string,number>();let skipped=0;for(let i=0;i<items.length;i++){const item=items[i];const group=tieMap[item.id]??item.tie_group_id??null;if(group){if(!groupRanks.has(group))groupRanks.set(group,i+1-skipped);else skipped++;positions[item.id]=groupRanks.get(group)!;}else positions[item.id]=i+1-skipped;}return positions;}

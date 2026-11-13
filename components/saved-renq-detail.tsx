@@ -19,7 +19,7 @@ type SavedItem = {
 };
 type CommentItem = { id: string; body: string; created_at: string; author_id: string };
 type Props = {
-  ranking: { id: string; public_slug?: string; title: string; mode: string; settings: Record<string, unknown>; created_at: string };
+  ranking: { id: string; public_slug?: string; title: string; mode: string; settings: Record<string, unknown>; created_at: string; visibility?: string; started_at?: string | null; completed_at?: string | null };
   items: SavedItem[];
   coverImageUrl: string | null;
   coverImagePath: string | null;
@@ -153,11 +153,11 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         <div className="saved-renq-hero-copy">
           <span>{modeLabels[ranking.mode] ?? "Renq"} · {category} · {contentType}</span>
           <h1>{ranking.title}</h1>
-          <p>{items.length} elementi · Salvato il {new Date(String(settings.savedAt ?? ranking.created_at)).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}</p>
+          <p>{items.length} elementi{ranking.mode === "SPEED_RENQ" && ranking.started_at && ranking.completed_at ? " · Tempo impiegato " + Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/60000) + "m " + String(Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/1000)%60).padStart(2,"0") + "s" : ""} · Salvato il {new Date(String(settings.savedAt ?? ranking.created_at)).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}</p>
         </div>
         <div className="saved-renq-toolbar">
         <button type="button" onClick={() => void editRanking()} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>
-        <button type="button" onClick={() => setShowReveal(true)}><Play size={17} /><span>Rivedi reveal</span></button>
+        {ranking.visibility === "REVEAL" && <button type="button" onClick={() => setShowReveal(true)}><Play size={17} /><span>Rivedi reveal</span></button>}
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
         <button type="button" className="saved-renq-delete" onClick={() => void deleteRanking()} disabled={busy}><Trash2 size={16}/><span>Elimina</span></button>
