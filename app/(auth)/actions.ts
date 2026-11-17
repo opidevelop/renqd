@@ -13,7 +13,16 @@ export async function signIn(formData:FormData){
  const email=String(formData.get("email")??"").trim().toLowerCase(),password=String(formData.get("password")??""),captchaToken=String(formData.get("captchaToken")??"");
  if(!email||!password)redirect("/login?error=missing"); if(!captchaToken)redirect("/login?error=captcha");
  const supabase=await createClient(); const {error}=await supabase.auth.signInWithPassword({email,password,options:{captchaToken}});
- if(error)redirect("/login?error=credentials"); redirect("/home");
+ if(error)redirect("/login?error=credentials");
+ const {data:{user}}=await supabase.auth.getUser();
+ if(!user)redirect("/login?error=profile");
+ const {data:profile,error:profileError}=await supabase.from("profiles").select("status").eq("id",user.id).maybeSingle();
+ if(profileError||!profile)redirect("/login?status=profile");
+ if(profile.status!=="APPROVED"){
+  const status=profile.status==="PENDING"?"pending":profile.status==="REJECTED"?"rejected":"suspended";
+  redirect("/login?status="+status);
+ }
+ redirect("/home");
 }
 export async function signUp(formData:FormData){
  const email=String(formData.get("email")??"").trim().toLowerCase(),username=String(formData.get("username")??"").trim().toLowerCase(),password=String(formData.get("password")??""),captchaToken=String(formData.get("captchaToken")??"");
@@ -33,6 +42,11 @@ export async function updatePassword(formData:FormData){
  const password=String(formData.get("password")??""); if(!validPassword(password))redirect("/reset-password?error=policy");
  const supabase=await createClient(); const {error}=await supabase.auth.updateUser({password});
  if(error){console.error("[Renqd] Password update failed:",{code:error.code,message:error.message});if(error.code==="same_password")redirect("/reset-password?error=same");if(error.code==="weak_password")redirect("/reset-password?error=policy");if(error.code==="session_not_found"||error.code==="invalid_token")redirect("/reset-password?error=expired");redirect("/reset-password?error=update");}
- redirect("/home");
+ const {data:{user}}=await supabase.auth.getUser();
+ if(!user)redirect("/login");
+ const {data:profile}=await supabase.from("profiles").select("status").eq("id",user.id).maybeSingle();
+ if(profile?.status==="APPROVED")redirect("/home");
+ const status=profile?.status==="PENDING"?"pending":profile?.status==="REJECTED"?"rejected":"suspended";
+ redirect("/login?status="+status);
 }
 export async function signOut(){const supabase=await createClient();await supabase.auth.signOut();redirect("/login");}
