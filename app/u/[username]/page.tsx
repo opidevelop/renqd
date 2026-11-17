@@ -19,7 +19,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     getProfileMediaUrl(supabase, profile.banner_url),
   ]);
   const { data: collections } = await supabase.from("profile_collections").select("id,title,slug,description,banner_url,visibility,is_featured").eq("owner_id", profile.user_id).eq("visibility", "PUBLIC").order("is_featured", { ascending: false }).order("sort_order");
-  const { data: rows } = await supabase.from("rankings").select("id,title,public_slug,mode,settings,completed_at").eq("user_id", profile.user_id).eq("status", "COMPLETED").order("completed_at", { ascending: false });
+  const { data: rows } = await supabase.from("rankings").select("id,title,public_slug,mode,settings,completed_at").eq("user_id", profile.user_id).eq("status", "COMPLETED").is("deleted_at",null).order("completed_at", { ascending: false });
   const rankings = (rows ?? []).filter(item => Boolean((item.settings as Record<string, unknown> | null)?.savedAt));
   const visibleCollections = await Promise.all((collections ?? []).map(async collection => ({
     ...collection,
