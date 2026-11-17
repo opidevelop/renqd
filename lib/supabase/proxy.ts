@@ -10,13 +10,6 @@ const PUBLIC_PATHS = new Set([
   "/auth/callback",
 ]);
 
-const LIMITED_ACCOUNT_PATHS = new Set([
-  "/login",
-  "/forgot-password",
-  "/reset-password",
-  "/auth/callback",
-]);
-
 function isApiPath(pathname: string) {
   return pathname === "/api" || pathname.startsWith("/api/");
 }
@@ -26,20 +19,10 @@ function copyCookies(source: NextResponse, target: NextResponse) {
   return target;
 }
 
-function accountStatusPath(status: string | null | undefined) {
-  switch (status) {
-    case "PENDING": return "pending";
-    case "REJECTED": return "rejected";
-    case "SUSPENDED": return "suspended";
-    default: return "profile";
-  }
-}
-
-function redirectToLogin(request: NextRequest, response: NextResponse, status?: string) {
+function redirectToLogin(request: NextRequest, response: NextResponse) {
   const destination = request.nextUrl.clone();
   destination.pathname = "/login";
   destination.search = "";
-  if (status) destination.searchParams.set("status", status);
   return copyCookies(response, NextResponse.redirect(destination));
 }
 
@@ -53,7 +36,7 @@ export async function updateSession(request: NextRequest) {
     if (isApiPath(request.nextUrl.pathname)) {
       return NextResponse.json({ error: "Servizio di autenticazione non disponibile." }, { status: 503 });
     }
-    return redirectToLogin(request, response, "profile");
+    return redirectToLogin(request, response);
   }
 
   const supabase = createServerClient(url, key, {
@@ -70,7 +53,8 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // Verify the JWT before using its subject as an identity.
+  // Verify the JWT for an optimistic identity check. Account approval is
+  // enforced by protected layouts, API handlers and database RLS policies.
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
   const userId = !claimsError && typeof claimsData?.claims?.sub === "string"
     ? claimsData.claims.sub
@@ -85,32 +69,11 @@ export async function updateSession(request: NextRequest) {
     return redirectToLogin(request, response);
   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("status")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (profileError || !profile) {
-    if (LIMITED_ACCOUNT_PATHS.has(pathname)) return response;
-    if (isApiPath(pathname)) {
-      return copyCookies(response, NextResponse.json({ error: "Profilo non disponibile." }, { status: 403 }));
-    }
-    return redirectToLogin(request, response, "profile");
-  }
-
-  if (profile.status !== "APPROVED") {
-    if (LIMITED_ACCOUNT_PATHS.has(pathname)) return response;
-    const status = accountStatusPath(profile.status);
-    if (isApiPath(pathname)) {
-      return copyCookies(response, NextResponse.json({ error: "Account non ancora abilitato.", status }, { status: 403 }));
-    }
-    return redirectToLogin(request, response, status);
-  }
-
-  if (pathname === "/login" || pathname === "/register") {
+  // A signed-in user should use the login screen for account status and
+  // cannot create a second registration session in the same browser.
+  if (pathname === "/register") {
     const destination = request.nextUrl.clone();
-    destination.pathname = "/home";
+    destination.pathname = "/login";
     destination.search = "";
     return copyCookies(response, NextResponse.redirect(destination));
   }
