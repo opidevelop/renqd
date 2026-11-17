@@ -23,15 +23,26 @@ export default async function ProfilePage() {
   };
   const { data: rows } = await supabase.from("rankings").select("id,title,public_slug,mode,settings,status,completed_at").eq("user_id", user.id).eq("status", "COMPLETED").is("deleted_at",null).order("completed_at", { ascending: false });
   const rankings = (rows ?? []).filter(item => Boolean((item.settings as Record<string, unknown> | null)?.savedAt));
-  const { data: collections } = await supabase.from("profile_collections").select("id,title,slug,description,banner_url,visibility,is_featured").eq("owner_id", user.id).order("is_featured", { ascending: false }).order("sort_order").order("created_at", { ascending: false });
+  const { data: collections } = await supabase.from("profile_collections").select("id,title,slug,description,banner_url,visibility,is_featured,sort_order").eq("owner_id", user.id).order("is_featured", { ascending: false }).order("sort_order").order("created_at", { ascending: false });
   const collectionIds = (collections ?? []).map(item => item.id);
-  const { data: collectionItems } = collectionIds.length ? await supabase.from("profile_collection_items").select("collection_id,ranking_id,rankings!inner(deleted_at)").in("collection_id", collectionIds).is("rankings.deleted_at",null).order("position", { ascending: true }) : { data: [] };
-  const enrichedCollections = await Promise.all((collections ?? []).map(async item => ({
-    ...item,
-    banner_display_url: await getProfileMediaUrl(supabase, item.banner_url),
-    item_count: (collectionItems ?? []).filter(row => row.collection_id === item.id).length,
-    item_ids: (collectionItems ?? []).filter(row => row.collection_id === item.id).map(row => row.ranking_id),
-  })));
+  const { data: collectionItems } = collectionIds.length ? await supabase.from("profile_collection_items").select("collection_id,ranking_id,position,rankings!inner(deleted_at)").in("collection_id", collectionIds).is("rankings.deleted_at",null).order("position", { ascending: true }) : { data: [] };
+  const collectionRankingIds = [...new Set((collectionItems ?? []).map(row => row.ranking_id))];
+  const { data: collectionRankings } = collectionRankingIds.length
+    ? await supabase.from("rankings").select("id,title,public_slug").in("id", collectionRankingIds)
+    : { data: [] };
+  const enrichedCollections = await Promise.all((collections ?? []).map(async item => {
+    const links = (collectionItems ?? []).filter(row => row.collection_id === item.id).sort((a,b) => a.position - b.position);
+    return {
+      ...item,
+      banner_display_url: await getProfileMediaUrl(supabase, item.banner_url),
+      item_count: links.length,
+      item_ids: links.map(row => row.ranking_id),
+      item_titles: links.map(row => {
+        const ranking = (collectionRankings ?? []).find(value => value.id === row.ranking_id);
+        return { id: row.ranking_id, title: ranking?.title ?? "Renq", public_slug: ranking?.public_slug ?? row.ranking_id };
+      }),
+    };
+  }));
   const { count: followerCount } = await supabase.from("user_follows").select("follower_id", { count: "exact", head: true }).eq("followed_id", user.id).eq("status", "ACCEPTED");
   const { count: followingCount } = await supabase.from("user_follows").select("followed_id", { count: "exact", head: true }).eq("follower_id", user.id).eq("status", "ACCEPTED");
   const { data: likedRows } = await supabase.from("ranking_likes").select("ranking_id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(24);
