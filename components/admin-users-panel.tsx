@@ -127,11 +127,6 @@ export default function AdminUsersPanel({
     router.refresh();
   }
 
-  function failAction(message: string) {
-    setFeedback({ type: "error", message });
-    setBusyId(null);
-  }
-
   function review(user: AdminUser, decision: "APPROVED" | "REJECTED") {
     const why = decision === "REJECTED" ? reason.trim() : "";
     if (decision === "REJECTED" && !why) {
