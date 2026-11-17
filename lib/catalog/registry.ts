@@ -13,7 +13,7 @@ async function requestCatalog<T>(path: string, provider: string, action: "search
 function musicProvider(id: "itunes" | "musicbrainz"): CatalogProvider {
   return {
     id,
-    supports: (category, contentType) => category === "music" && ["Album", "Artisti", "Discografie"].includes(contentType),
+    supports: (category, contentType) => category === "music" && ["Album", "Artisti", "Discografie", "Discografia brani"].includes(contentType),
     async search(query, _category, contentType) {
       const result = await requestCatalog<{ entities: CatalogEntity[] }>("/api/catalog/music", id, "search", contentType, { query });
       return { entities: result.entities };
@@ -87,11 +87,12 @@ export async function searchCatalog(query: string, category: CatalogCategory, co
   };
 }
 
-export async function loadCatalogItems(entity: CatalogEntity, category: CatalogCategory, contentType: string) {
-  const provider = providers.find((candidate) => candidate.id === entity.provider && candidate.supports(category, contentType));
+export async function loadCatalogItems(entity: CatalogEntity, category: CatalogCategory, contentType: string, discographyMode: "albums" | "tracks" = "albums") {
+  const effectiveType = contentType === "Discografie" && discographyMode === "tracks" ? "Discografia brani" : contentType;
+  const provider = providers.find((candidate) => candidate.id === entity.provider && candidate.supports(category, effectiveType));
   if (!provider) return { status: "unavailable" as const, items: [] as Omit<CatalogItem, "selected" | "source">[] };
   try {
-    return { status: "ready" as const, items: await provider.getItems(entity, category, contentType) };
+    return { status: "ready" as const, items: await provider.getItems(entity, category, effectiveType) };
   } catch {
     return { status: "error" as const, items: [] as Omit<CatalogItem, "selected" | "source">[] };
   }
