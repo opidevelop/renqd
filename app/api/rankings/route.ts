@@ -170,5 +170,5 @@ export async function POST(request:Request){
  const rpcItems=items.map(item=>({title:item.title.trim(),subtitle:item.subtitle??null,imageUrl:item.imageUrl??null,previewUrl:item.previewUrl??null,appleMusicUrl:item.appleMusicUrl??null,spotifyUrl:item.spotifyUrl??null,source:item.source??"manual",provider:item.payload&&typeof item.payload==="object"?(item.payload as Record<string,unknown>).provider??null:null,externalId:item.id??null}));
  const {data:created,error:createError}=await supabase.rpc("renqd_create_ranking_with_items",{p_payload:{...payload,items:rpcItems}});
  if(createError||!created)return jsonError(createError?.message??"Impossibile creare il Renq.",500);
- return NextResponse.json({id:created.id,slug:created.slug}); return NextResponse.json({id:ranking.id,slug:publicSlug});
+ return NextResponse.json({id:created.id,slug:created.slug});
 }
