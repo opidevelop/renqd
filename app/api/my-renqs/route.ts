@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getAccountAccess } from "@/lib/supabase/authorization";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { user, status } = await getAccountAccess(supabase);
   if (!user) return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
+  if (status !== "APPROVED") return NextResponse.json({ error: "Account non ancora abilitato." }, { status: 403 });
   const params = new URL(request.url).searchParams;
   const query = (params.get("q") ?? "").trim().slice(0, 100);
   const category = params.get("category") ?? "";
