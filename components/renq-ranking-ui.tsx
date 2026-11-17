@@ -9,7 +9,7 @@ export type RenqRanking={id:string;public_slug?:string;title:string;mode:string;
 
 export function RenqMusicActions({item}:{item:RenqItem}){
  const audioRef=useRef<HTMLAudioElement>(null);const[playing,setPlaying]=useState(false);
- async function togglePreview(){const audio=audioRef.current;if(!audio)return;if(playing){audio.pause();setPlaying(false);}else{try{await audio.play();setPlaying(true);}catch{setPlaying(false);}}}
+ async function togglePreview(){const audio=audioRef.current;if(!audio)return;if(playing){audio.pause();setPlaying(false);}else{try{document.querySelectorAll<HTMLAudioElement>("audio").forEach(other=>{if(other!==audio&&!other.paused){other.pause();other.currentTime=0;}});await audio.play();setPlaying(true);}catch{setPlaying(false);}}}
  return <div className="renq-music-actions">
   {item.preview_url&&<><audio ref={audioRef} src={item.preview_url} preload="none" onEnded={()=>setPlaying(false)} onPause={()=>setPlaying(false)}/><button type="button" className="music-action preview-action" onClick={()=>void togglePreview()} aria-label={playing?"Pausa anteprima":"Ascolta anteprima"}>{playing?<Pause size={15}/>:<Play size={15}/>}</button></>}
   {item.spotify_url&&<a className="music-action spotify-action" href={item.spotify_url} target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M6.2 9.2c4.2-1.2 8.5-.7 11.8 1.2M7 12.1c3.6-1 7.1-.5 9.9 1.1M7.8 14.8c2.8-.7 5.5-.3 7.8.9" fill="none" stroke="#fff" strokeWidth="1.7" strokeLinecap="round"/></svg></a>}
