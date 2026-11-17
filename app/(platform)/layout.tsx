@@ -21,5 +21,5 @@ export default async function PlatformLayout({ children }: { children: React.Rea
   }
   const metadataAvatar = user.user_metadata?.avatar_url ?? user.user_metadata?.picture;
   const avatarUrl = publicProfile?.avatar_url ? await getProfileMediaUrl(supabase, publicProfile.avatar_url) : (typeof metadataAvatar === "string" ? metadataAvatar : null);
-  return <PlatformShell avatarUrl={avatarUrl} displayName={publicProfile?.display_name ?? profile.username} username={profile.username}>{children}</PlatformShell>;
+  return <PlatformShell avatarUrl={avatarUrl} displayName={publicProfile?.display_name ?? profile.username} username={profile.username} role={profile.role}>{children}</PlatformShell>;
 }
