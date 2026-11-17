@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Keep auth cookies on the exact response returned by this Route Handler.
-  let response = NextResponse.redirect(new URL(next, request.url));
+  const response = NextResponse.redirect(new URL(next, request.url));
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
