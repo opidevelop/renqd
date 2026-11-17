@@ -123,7 +123,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     if (busy) return;
     setBusy(true); setError("");
     try {
-      await post({ action: "update-cover", rankingId: ranking.id, coverImagePath: path, coverPosition: position });
+      await post({ action: "update-cover", rankingId: ranking.id, coverImagePath: path, coverImageUrl: path ? null : (previewUrl && previewUrl !== defaultCoverImageUrl ? previewUrl : null), coverPosition: position });
       setCurrentCoverPath(path);
       setCurrentCoverPosition(position);
       setCurrentCoverUrl(previewUrl ?? defaultCoverImageUrl);
