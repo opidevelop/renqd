@@ -89,8 +89,10 @@ export async function POST(request:Request){
   const {data:version,error:saveError}=await supabase.rpc("renqd_save_ranking_snapshot",{p_ranking_id:rankingId,p_settings:settings});if(saveError)return jsonError(saveError.message,500);return NextResponse.json({ok:true,version});
  }
  if(body.action==="restart-renq"){
-  const {rankingId}=body as {rankingId:string};const {data:ranking}=await supabase.from("rankings").select("id,mode,settings").eq("id",rankingId).eq("user_id",user.id).single();if(!ranking)return jsonError("Renq non trovato.",404);
-  await supabase.from("ranking_battle_sessions").delete().eq("ranking_id",rankingId).eq("user_id",user.id);await supabase.from("ranking_speed_sessions").delete().eq("ranking_id",rankingId).eq("user_id",user.id);const {error}=await supabase.from("ranking_items").update({rank_position:null,tie_group_id:null}).eq("ranking_id",rankingId);if(error)return jsonError(error.message,500);const settings={...(ranking.settings??{})};delete settings.savedAt;delete settings.savedSnapshot;const {error:resetError}=await supabase.from("rankings").update({status:"DRAFT",started_at:null,completed_at:null,settings}).eq("id",rankingId);if(resetError)return jsonError(resetError.message,500);return NextResponse.json({ok:true});
+  const {rankingId}=body as {rankingId:string};
+  const {error}=await supabase.rpc("renqd_restart_ranking",{p_ranking_id:rankingId});
+  if(error)return jsonError(error.message,500);
+  return NextResponse.json({ok:true});
  }
  if(body.action==="toggle-like"){
   const {rankingId}=body as {rankingId:string};
