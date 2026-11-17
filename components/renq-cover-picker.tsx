@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ImagePlus, RotateCcw, LoaderCircle } from "lucide-react";
+import { ImagePlus, RotateCcw, LoaderCircle, Link2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type Props = {
   value: string | null;
-  onChange: (path: string, previewUrl: string) => void;
+  onChange: (path: string | null, previewUrl: string | null) => void;
   onReset?: () => void;
   canReset?: boolean;
   focusPosition?: { x: number; y: number };
@@ -19,11 +19,13 @@ export function RenqCoverPicker({ value, onChange, onReset, canReset = false, fo
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [urlInput,setUrlInput]=useState("");
   const [focus, setFocus] = useState(focusPosition);
 
   useEffect(() => { setFocus(focusPosition); }, [focusPosition.x, focusPosition.y]);
   function changeFocus(axis: "x" | "y", value: number) { const next = { ...focus, [axis]: value }; setFocus(next); onFocusPreview?.(next); }
   function commitFocus() { onFocusChange?.(focus); }
+  function applyUrl(){setError("");try{const parsed=new URL(urlInput.trim());if(parsed.protocol!=="https:"||parsed.username||parsed.password)throw new Error();onChange(null,parsed.toString());setUrlInput("");}catch{setError("Inserisci un indirizzo HTTPS valido.");}}
 
   async function upload(file?: File) {
     if (!file) return;
@@ -70,6 +72,7 @@ export function RenqCoverPicker({ value, onChange, onReset, canReset = false, fo
           {uploading ? <LoaderCircle size={16} className="spin" /> : <ImagePlus size={16} />}
           <span>{uploading ? "Caricamento…" : value ? "Cambia copertina" : "Carica copertina"}</span>
         </button>
+        <div className="renq-cover-url-control"><label><Link2 size={14}/> URL HTTPS</label><div><input type="url" value={urlInput} onChange={event=>setUrlInput(event.target.value)} placeholder="https://…" aria-label="URL HTTPS della copertina"/><button type="button" onClick={applyUrl} disabled={!urlInput.trim()||uploading}>Applica</button></div></div>
         {variant === "overlay" && <div className="renq-cover-focus-controls"><label><span>Orizzontale</span><input aria-label="Fuoco orizzontale copertina" type="range" min="0" max="100" value={focus.x} onChange={event => changeFocus("x", Number(event.target.value))} onPointerUp={commitFocus} onKeyUp={commitFocus} disabled={uploading} /></label><label><span>Verticale</span><input aria-label="Fuoco verticale copertina" type="range" min="0" max="100" value={focus.y} onChange={event => changeFocus("y", Number(event.target.value))} onPointerUp={commitFocus} onKeyUp={commitFocus} disabled={uploading} /></label></div>}
         {canReset && onReset && <button type="button" className="renq-cover-reset" onClick={onReset} disabled={uploading}><RotateCcw size={14} /> Ripristina originale</button>}
       </div>
