@@ -5,6 +5,15 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowUpRight, BadgeCheck, Camera, FolderPlus, Globe2, Heart, ImagePlus, LockKeyhole, Plus, Save, Share2, Sparkles, Trash2, Trophy, Users, Pencil, Search, LoaderCircle, X } from "lucide-react";
 
+function isHttpsUrl(value: string) {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" && Boolean(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
 type PublicProfile = {
   user_id: string; username: string; display_name: string; bio: string;
   avatar_url: string | null; banner_url: string | null; avatar_display_url?: string | null; banner_display_url?: string | null; website_url: string | null;
@@ -12,7 +21,8 @@ type PublicProfile = {
 };
 type Collection = {
   id: string; title: string; slug: string; description: string; banner_url: string | null; banner_display_url?: string | null;
-  visibility: "PUBLIC" | "PRIVATE"; is_featured: boolean; item_count: number; item_ids: string[];
+  visibility: "PUBLIC" | "PRIVATE"; is_featured: boolean; sort_order: number; item_count: number; item_ids: string[];
+  item_titles: { id: string; title: string; public_slug: string }[];
 };
 type Renq = { id: string; title: string; public_slug: string; mode: string; settings: Record<string, unknown> };
 type CollectionSearchResult = { id: string; title: string; coverImage: string | null; rows: { title: string; image_url?: string | null; rank_position?: number | null }[] };
@@ -33,6 +43,16 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   const [collectionSearchLoading, setCollectionSearchLoading] = useState(false);
   const [displayName, setDisplayName] = useState(initialProfile.display_name || "");
   const [bio, setBio] = useState(initialProfile.bio || "");
+  const [websiteUrl, setWebsiteUrl] = useState(initialProfile.website_url || "");
+  const [location, setLocation] = useState(initialProfile.location || "");
+  const [avatarUrlInput, setAvatarUrlInput] = useState(initialProfile.avatar_url?.startsWith("https://") ? initialProfile.avatar_url : "");
+  const [bannerUrlInput, setBannerUrlInput] = useState(initialProfile.banner_url?.startsWith("https://") ? initialProfile.banner_url : "");
+  const [collectionBannerUrl, setCollectionBannerUrl] = useState("");
+  const [editingCollectionId, setEditingCollectionId] = useState<string | null>(null);
+  const [editingCollectionTitle, setEditingCollectionTitle] = useState("");
+  const [editingCollectionDescription, setEditingCollectionDescription] = useState("");
+  const [editingCollectionVisibility, setEditingCollectionVisibility] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
+  const [editingCollectionBannerUrl, setEditingCollectionBannerUrl] = useState("");
   const [collectionTitle, setCollectionTitle] = useState("");
   const [collectionDescription, setCollectionDescription] = useState("");
   const [collectionVisibility, setCollectionVisibility] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
@@ -106,6 +126,15 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     return { path, url: signed.signedUrl };
   }
 
+  function updateProfileImageUrl(field: "avatar_url" | "banner_url", value: string) {
+    const url = value.trim();
+    if (url && !isHttpsUrl(url)) { setError("Inserisci un URL HTTPS valido per l'immagine."); return; }
+    const displayField = field === "avatar_url" ? "avatar_display_url" : "banner_display_url";
+    setProfile(current => ({ ...current, [field]: url || null, [displayField]: url || null }));
+    setError("");
+    setMessage(url ? "URL immagine impostato. Salva il profilo per confermare." : "URL immagine rimosso. Salva il profilo per confermare.");
+  }
+
   async function updateProfileImage(file: File | null, field: "avatar_url" | "banner_url") {
     if (!file) return;
     setError(""); setMessage("");
@@ -123,7 +152,8 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Sessione scaduta. Accedi di nuovo.");
-      const next = { ...profile, display_name: displayName.trim().slice(0, 60), bio: bio.trim().slice(0, 280), updated_at: new Date().toISOString() };
+      const next = { ...profile, display_name: displayName.trim().slice(0, 60), bio: bio.trim().slice(0, 280), website_url: websiteUrl.trim() || null, location: location.trim().slice(0, 80) || null, updated_at: new Date().toISOString() };
+      if (next.website_url && !isHttpsUrl(next.website_url)) throw new Error("Il sito web deve essere un URL HTTPS valido.");
       const { avatar_display_url, banner_display_url, ...persisted } = next;
       void avatar_display_url;
       void banner_display_url;
@@ -153,7 +183,8 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Sessione scaduta. Accedi di nuovo.");
       const bannerUpload = collectionFile ? await uploadImage(collectionFile, "collection") : null;
-      const bannerUrl = bannerUpload?.path ?? null;
+      const bannerUrl = bannerUpload?.path ?? (collectionBannerUrl.trim() || null);
+      if (bannerUrl && bannerUrl.startsWith("http") && !isHttpsUrl(bannerUrl)) throw new Error("Il banner deve usare un URL HTTPS valido.");
       const slugBase = collectionTitle.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 38) || "collezione";
       const slug = profile.username.toLowerCase() + "-" + slugBase + "-" + crypto.randomUUID().slice(0, 5);
       const { data: created, error: insertError } = await supabase.from("profile_collections").insert({
@@ -168,18 +199,93 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
         if (itemError) throw itemError;
       }
       setCollections(current => [...current, { ...created, banner_display_url: bannerUpload?.url ?? null, item_count: selectedRenqIds.length, item_ids: selectedRenqIds }]);
-      setCollectionTitle(""); setCollectionDescription(""); setCollectionFile(null); setSelectedRenqIds([]);
+      setCollectionTitle(""); setCollectionDescription(""); setCollectionFile(null); setCollectionBannerUrl(""); setSelectedRenqIds([]);
       setCollectionFormOpen(false); setCollectionSearchTarget(null); setCollectionSearchQuery("");
       setMessage("Collezione creata.");
     } catch (e) { setError(e instanceof Error ? e.message : "Non è stato possibile creare la collezione."); }
     finally { setCreatingCollection(false); }
   }
 
-  async function updateCollection(id: string, patch: Partial<Pick<Collection, "is_featured" | "visibility" | "banner_url">>) {
+  async function updateCollection(id: string, patch: Partial<Pick<Collection, "is_featured" | "visibility" | "banner_url" | "title" | "description" | "sort_order">>) {
     const supabase = createClient();
     const { error: updateError } = await supabase.from("profile_collections").update(patch).eq("id", id);
     if (updateError) { setError(updateError.message); return; }
     setCollections(current => current.map(item => item.id === id ? { ...item, ...patch } : item));
+  }
+
+  function startEditingCollection(collection: Collection) {
+    setEditingCollectionId(collection.id);
+    setEditingCollectionTitle(collection.title);
+    setEditingCollectionDescription(collection.description || "");
+    setEditingCollectionVisibility(collection.visibility);
+    setEditingCollectionBannerUrl(collection.banner_url?.startsWith("https://") ? collection.banner_url : "");
+  }
+
+  async function saveCollectionDetails() {
+    if (!editingCollectionId || !editingCollectionTitle.trim()) return;
+    const banner = editingCollectionBannerUrl.trim() || null;
+    if (banner && !isHttpsUrl(banner)) { setError("Il banner deve usare un URL HTTPS valido."); return; }
+    await updateCollection(editingCollectionId, {
+      title: editingCollectionTitle.trim().slice(0, 70),
+      description: editingCollectionDescription.trim().slice(0, 240),
+      visibility: editingCollectionVisibility,
+      banner_url: banner,
+    });
+    setCollections(current => current.map(item => item.id === editingCollectionId ? { ...item, banner_display_url: banner } : item));
+    setEditingCollectionId(null);
+    setMessage("Collezione aggiornata.");
+  }
+
+  async function removeRenqFromCollection(collection: Collection, rankingId: string) {
+    const supabase = createClient();
+    const { error: deleteError } = await supabase.from("profile_collection_items").delete().eq("collection_id", collection.id).eq("ranking_id", rankingId);
+    if (deleteError) { setError(deleteError.message); return; }
+    setCollections(current => current.map(item => item.id === collection.id ? {
+      ...item,
+      item_count: Math.max(0, item.item_count - 1),
+      item_ids: item.item_ids.filter(id => id !== rankingId),
+      item_titles: item.item_titles.filter(entry => entry.id !== rankingId),
+    } : item));
+    setMessage("Renq rimosso dalla collezione.");
+  }
+
+  async function reorderCollectionItem(collection: Collection, rankingId: string, direction: -1 | 1) {
+    const currentIds = [...collection.item_ids];
+    const index = currentIds.indexOf(rankingId);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= currentIds.length) return;
+    [currentIds[index], currentIds[target]] = [currentIds[target], currentIds[index]];
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setError("Sessione scaduta."); return; }
+    const { error: deleteError } = await supabase.from("profile_collection_items").delete().eq("collection_id", collection.id);
+    if (deleteError) { setError(deleteError.message); return; }
+    const { error: insertError } = await supabase.from("profile_collection_items").insert(currentIds.map((id, position) => ({ collection_id: collection.id, ranking_id: id, owner_id: user.id, position })));
+    if (insertError) {
+      await supabase.from("profile_collection_items").insert(collection.item_ids.map((id, position) => ({ collection_id: collection.id, ranking_id: id, owner_id: user.id, position })));
+      setError(insertError.message);
+      return;
+    }
+    setCollections(current => current.map(item => item.id === collection.id ? {
+      ...item,
+      item_ids: currentIds,
+      item_titles: currentIds.map(id => item.item_titles.find(entry => entry.id === id)).filter((entry): entry is NonNullable<typeof entry> => Boolean(entry)),
+    } : item));
+    setMessage("Ordine dei Renq aggiornato.");
+  }
+
+  async function moveCollection(collection: Collection, direction: -1 | 1) {
+    const ordered = [...collections].sort((a,b) => a.sort_order - b.sort_order);
+    const index = ordered.findIndex(item => item.id === collection.id);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= ordered.length) return;
+    [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
+    const supabase = createClient();
+    for (let position = 0; position < ordered.length; position++) {
+      const { error: updateError } = await supabase.from("profile_collections").update({ sort_order: position }).eq("id", ordered[position].id);
+      if (updateError) { setError(updateError.message); return; }
+    }
+    setCollections(ordered.map((item, sort_order) => ({ ...item, sort_order })));
   }
 
   async function addRenqsToCollection(collection: Collection) {
