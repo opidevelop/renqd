@@ -44,7 +44,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <p className="auth-copy">{accountStatus ? "La verifica dell'account è necessaria per accedere alla piattaforma." : "Ritrova le tue classifiche, le tue idee e la community."}</p>
     {accountStatus ? <>
       <div className="auth-alert">{accountMessages[accountStatus] ?? accountMessages.PROFILE_ERROR}</div>
-      <form action={signOut}><button className="auth-submit" type="submit">Esci dall'account</button></form>
+      <form action={signOut}><button className="auth-submit" type="submit">Esci dall&apos;account</button></form>
     </> : <>
       {error && <div className="auth-alert auth-error">{messages[error] ?? "Si è verificato un errore. Riprova."}</div>}
       <form className="auth-form" action={signIn}>
