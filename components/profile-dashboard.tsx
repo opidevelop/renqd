@@ -7,11 +7,11 @@ import { ArrowUpRight, BadgeCheck, Camera, FolderPlus, Globe2, Heart, ImagePlus,
 
 type PublicProfile = {
   user_id: string; username: string; display_name: string; bio: string;
-  avatar_url: string | null; banner_url: string | null; website_url: string | null;
+  avatar_url: string | null; banner_url: string | null; avatar_display_url?: string | null; banner_display_url?: string | null; website_url: string | null;
   location: string | null; is_private: boolean;
 };
 type Collection = {
-  id: string; title: string; slug: string; description: string; banner_url: string | null;
+  id: string; title: string; slug: string; description: string; banner_url: string | null; banner_display_url?: string | null;
   visibility: "PUBLIC" | "PRIVATE"; is_featured: boolean; item_count: number; item_ids: string[];
 };
 type Renq = { id: string; title: string; public_slug: string; mode: string; settings: Record<string, unknown> };
@@ -101,15 +101,18 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     const path = user.id + "/" + prefix + "-" + crypto.randomUUID() + "." + extension;
     const { error: uploadError } = await supabase.storage.from("profile-media").upload(path, file, { contentType: file.type, cacheControl: "31536000", upsert: false });
     if (uploadError) throw uploadError;
-    return supabase.storage.from("profile-media").getPublicUrl(path).data.publicUrl;
+    const { data: signed, error: signedError } = await supabase.storage.from("profile-media").createSignedUrl(path, 60 * 60);
+    if (signedError || !signed) throw signedError ?? new Error("Impossibile creare il link privato dell'immagine.");
+    return { path, url: signed.signedUrl };
   }
 
   async function updateProfileImage(file: File | null, field: "avatar_url" | "banner_url") {
     if (!file) return;
     setError(""); setMessage("");
     try {
-      const url = await uploadImage(file, field === "avatar_url" ? "avatar" : "profile-banner");
-      setProfile(current => ({ ...current, [field]: url }));
+      const uploaded = await uploadImage(file, field === "avatar_url" ? "avatar" : "profile-banner");
+      const displayField = field === "avatar_url" ? "avatar_display_url" : "banner_display_url";
+      setProfile(current => ({ ...current, [field]: uploaded.path, [displayField]: uploaded.url }));
       setMessage("Immagine caricata. Salva il profilo per confermare.");
     } catch (e) { setError(e instanceof Error ? e.message : "Caricamento non riuscito."); }
   }
@@ -121,7 +124,10 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Sessione scaduta. Accedi di nuovo.");
       const next = { ...profile, display_name: displayName.trim().slice(0, 60), bio: bio.trim().slice(0, 280), updated_at: new Date().toISOString() };
-      const { error: saveError } = await supabase.from("public_profiles").upsert({ ...next, user_id: user.id, username: profile.username }, { onConflict: "user_id" });
+      const { avatar_display_url, banner_display_url, ...persisted } = next;
+      void avatar_display_url;
+      void banner_display_url;
+      const { error: saveError } = await supabase.from("public_profiles").upsert({ ...persisted, user_id: user.id, username: profile.username }, { onConflict: "user_id" });
       if (saveError) throw saveError;
       setProfile(next); setMessage("Profilo aggiornato.");
     } catch (e) { setError(e instanceof Error ? e.message : "Non è stato possibile salvare il profilo."); }
@@ -146,7 +152,8 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Sessione scaduta. Accedi di nuovo.");
-      const bannerUrl = collectionFile ? await uploadImage(collectionFile, "collection") : null;
+      const bannerUpload = collectionFile ? await uploadImage(collectionFile, "collection") : null;
+      const bannerUrl = bannerUpload?.path ?? null;
       const slugBase = collectionTitle.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 38) || "collezione";
       const slug = profile.username.toLowerCase() + "-" + slugBase + "-" + crypto.randomUUID().slice(0, 5);
       const { data: created, error: insertError } = await supabase.from("profile_collections").insert({
@@ -160,7 +167,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
         })));
         if (itemError) throw itemError;
       }
-      setCollections(current => [...current, { ...created, item_count: selectedRenqIds.length, item_ids: selectedRenqIds }]);
+      setCollections(current => [...current, { ...created, banner_display_url: bannerUpload?.url ?? null, item_count: selectedRenqIds.length, item_ids: selectedRenqIds }]);
       setCollectionTitle(""); setCollectionDescription(""); setCollectionFile(null); setSelectedRenqIds([]);
       setCollectionFormOpen(false); setCollectionSearchTarget(null); setCollectionSearchQuery("");
       setMessage("Collezione creata.");
@@ -192,8 +199,9 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   async function updateCollectionBanner(collection: Collection, file: File | null) {
     if (!file) return;
     try {
-      const url = await uploadImage(file,"collection-banner");
-      await updateCollection(collection.id,{banner_url:url});
+      const uploaded = await uploadImage(file,"collection-banner");
+      await updateCollection(collection.id,{banner_url:uploaded.path});
+      setCollections(current => current.map(item => item.id === collection.id ? { ...item, banner_display_url: uploaded.url } : item));
       setMessage("Banner della collezione aggiornato.");
     } catch (e) { setError(e instanceof Error ? e.message : "Non è stato possibile aggiornare il banner."); }
   }
@@ -232,14 +240,14 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   }
 
   return <div className="profile-dashboard">
-    <section className="profile-cover" style={profile.banner_url ? { backgroundImage: "linear-gradient(90deg,rgba(18,14,11,.78),rgba(18,14,11,.16)),url(" + profile.banner_url + ")" } : undefined}>
+    <section className="profile-cover" style={profile.banner_display_url ? { backgroundImage: "linear-gradient(90deg,rgba(18,14,11,.78),rgba(18,14,11,.16)),url(" + profile.banner_display_url + ")" } : undefined}>
       <div className="profile-cover-copy"><span>IL TUO PROFILO SU RENQD</span><h1>{profile.display_name || profile.username}</h1><p>@{profile.username}</p></div>
       <button type="button" className="profile-share-button" onClick={() => void shareProfile()}><Share2 size={16}/> Condividi</button>
     </section>
 
     <section className="profile-overview">
       <div className="profile-avatar-wrap">
-        {profile.avatar_url ? <img src={profile.avatar_url} alt="Avatar profilo"/> : <span>{(profile.display_name || profile.username).slice(0, 1).toUpperCase()}</span>}
+        {profile.avatar_display_url ? <img src={profile.avatar_display_url} alt="Avatar profilo"/> : <span>{(profile.display_name || profile.username).slice(0, 1).toUpperCase()}</span>}
       </div>
       <div className="profile-overview-copy"><h2>{profile.display_name || profile.username}</h2><p>@{profile.username}</p>{profile.bio && <div className="profile-bio">{profile.bio}</div>}</div>
       <div className="profile-overview-actions"><div className="profile-privacy-pill">{profile.is_private ? <><LockKeyhole size={14}/> Privato</> : <><Globe2 size={14}/> Pubblico</>}</div><button type="button" className="profile-edit-trigger" onClick={() => setProfileEditorOpen(value => !value)} aria-expanded={profileEditorOpen}><Pencil size={14}/> Modifica profilo</button></div>
@@ -270,7 +278,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
 
     <section className="profile-collections-section">
       <div className="profile-section-heading"><div><span>LA TUA LIBRERIA</span><h2>Le tue collezioni</h2><p>Crea cartelle con un banner personalizzato e raccogli i tuoi Renq.</p></div><button type="button" className="profile-add-collection" aria-label={collectionFormOpen ? "Chiudi creazione collezione" : "Crea una collezione"} onClick={() => { setCollectionFormOpen(value => !value); setCollectionSearchTarget(collectionFormOpen ? null : "new"); setCollectionSearchQuery(""); }}><FolderPlus size={20}/></button></div>
-      {collections.length ? <div className="profile-collection-grid">{collections.map(collection => { const cover = collection.banner_url || firstCollectionCover(collection); return <article className={"profile-collection-card" + (collection.is_featured ? " is-featured" : "")} key={collection.id}>
+      {collections.length ? <div className="profile-collection-grid">{collections.map(collection => { const cover = collection.banner_display_url || firstCollectionCover(collection); return <article className={"profile-collection-card" + (collection.is_featured ? " is-featured" : "")} key={collection.id}>
         <Link href={"/collections/" + collection.slug} className="profile-collection-art" style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(16,13,11,.72),rgba(16,13,11,.05)),url(" + cover + ")" } : undefined}><span>{collection.visibility === "PRIVATE" ? <LockKeyhole size={13}/> : <Globe2 size={13}/>} {collection.visibility === "PRIVATE" ? "PRIVATA" : "PUBBLICA"}</span><strong>{collection.title}</strong><small>{collection.item_count} Renq</small></Link>
         <div className="profile-collection-actions"><button type="button" onClick={() => void updateCollection(collection.id, { is_featured: !collection.is_featured })}>{collection.is_featured ? <BadgeCheck size={14}/> : <Sparkles size={14}/>} {collection.is_featured ? "In evidenza" : "Metti in evidenza"}</button><button type="button" onClick={() => void updateCollection(collection.id,{visibility:collection.visibility==="PUBLIC"?"PRIVATE":"PUBLIC"})}>{collection.visibility==="PUBLIC"?<LockKeyhole size={13}/>:<Globe2 size={13}/>} {collection.visibility==="PUBLIC"?"Rendi privata":"Rendi pubblica"}</button><label className="profile-banner-change" aria-label="Cambia banner della cartella" title="Cambia banner"><ImagePlus size={14}/><input type="file" accept="image/jpeg,image/png,image/webp" onChange={event=>void updateCollectionBanner(collection,event.target.files?.[0]??null)}/></label><button type="button" aria-label="Elimina collezione" onClick={() => void deleteCollection(collection.id)}><Trash2 size={14}/></button></div>
         <details className="profile-collection-manage"><summary onClick={() => { setCollectionSearchTarget(collection.id); setCollectionSearchQuery(""); }}>Aggiungi Renq alla cartella</summary><div>{renderCollectionSearch(collection.id)}<button type="button" className="profile-save-button" onClick={()=>void addRenqsToCollection(collection)} disabled={!(collectionSelections[collection.id]??[]).length}>Aggiungi selezionati</button></div></details>
