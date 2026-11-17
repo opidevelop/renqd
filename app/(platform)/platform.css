@@ -803,3 +803,13 @@
 .renq-speed-custom-duration{display:flex;align-items:center;gap:10px;font-size:12px}
 .renq-speed-custom-duration input{width:92px;padding:10px 12px;border:1px solid var(--renq-border,#e9e2da);border-radius:9px;background:#fff;color:inherit;font:inherit}
 @media(max-width:520px){.renq-speed-duration-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.renq-speed-duration-card{min-height:70px}}
+
+
+/* Reveal: readable podium medals and summary rows */
+.renq-reveal-summary-list>div{display:flex;align-items:center;gap:12px}
+.renq-reveal-summary-list>div>span:first-child{width:28px;flex:0 0 28px;color:#f0a15d;font-size:11px;font-weight:900;text-align:center}
+.renq-reveal-summary-items{display:grid;flex:1;min-width:0;gap:3px}
+.renq-reveal-summary-items strong{overflow-wrap:anywhere;color:#fff;font-size:11px;line-height:1.35;font-weight:750}
+.renq-reveal-summary-list .renq-reveal-medal{display:flex;width:38px;height:38px;flex:0 0 38px;align-items:center;justify-content:center;margin-left:auto;border:0;background:transparent;box-shadow:none;font-size:25px;line-height:1}
+.renq-reveal-summary-list>div.is-podium .renq-reveal-medal{filter:drop-shadow(0 2px 5px #0008)}
+@media(max-width:520px){.renq-reveal-summary-list>div{gap:8px;padding:7px}.renq-reveal-summary-items strong{font-size:10px}.renq-reveal-summary-list .renq-reveal-medal{width:32px;height:34px;flex-basis:32px;font-size:22px}}
