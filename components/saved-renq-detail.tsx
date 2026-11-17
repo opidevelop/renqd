@@ -18,6 +18,7 @@ type SavedItem = {
   metadata?: { previewUrl?: string | null };
 };
 type CommentItem = { id: string; body: string; created_at: string; author_id: string };
+type RevisionItem = { id: string; version: number; change_summary: string | null; created_at: string };
 type Props = {
   ranking: { id: string; public_slug?: string; title: string; mode: string; settings: Record<string, unknown>; created_at: string; visibility?: string; started_at?: string | null; completed_at?: string | null };
   items: SavedItem[];
@@ -29,11 +30,12 @@ type Props = {
   commentCount: number;
   initialLiked: boolean;
   likeCount: number;
+  revisions: RevisionItem[];
 };
 
 const modeLabels: Record<string, string> = { RENQ: "Renq", BATTLE_RENQ: "Battle Renq", SPEED_RENQ: "Speed Renq" };
 
-export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, coverPosition: initialCoverPosition, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount }: Props) {
+export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, coverPosition: initialCoverPosition, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount, revisions }: Props) {
   const router = useRouter();
   const [comments, setComments] = useState(initialComments);
   const [commentCount, setCommentCount] = useState(initialCommentCount);
@@ -96,7 +98,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   }
 
   async function deleteRanking() {
-    if (busy || !window.confirm("Eliminare definitivamente questo Renq? L'operazione non può essere annullata.")) return;
+    if (busy || !window.confirm("Spostare questo Renq nel cestino? Potrai ripristinarlo in seguito.")) return;
     setBusy(true); setError("");
     try {
       await post({ action: "delete-renq", rankingId: ranking.id });
@@ -179,6 +181,11 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
             </article>;
           })}
         </div>
+      </section>
+
+      <section className="saved-renq-comments saved-renq-history">
+        <div className="saved-renq-section-heading"><div><span>TRACCIABILITÀ</span><h2>Cronologia <small>{revisions.length}</small></h2></div><Trophy size={21} /></div>
+        {revisions.length ? <ol className="saved-renq-revision-list">{revisions.map(revision => <li key={revision.id}><strong>Versione {revision.version}</strong><span>{revision.change_summary || "Modifica classifica"}</span><time dateTime={revision.created_at}>{new Date(revision.created_at).toLocaleString("it-IT", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" })}</time></li>)}</ol> : <p className="saved-renq-no-comments">La cronologia verrà popolata automaticamente con le prossime modifiche.</p>}
       </section>
 
       <section className="saved-renq-comments">
