@@ -104,7 +104,7 @@ export default function AdminUsersPanel({ users }: { users: AdminUser[] }) {
 
     <section className="admin-users-section">
       <div className="admin-section-heading">
-        <div><span className="admin-eyebrow">GESTIONE UTENTI</span><h2>Account <em>registrati.</em></h2><p>Controlla le richieste e gestisci l'accesso alla piattaforma.</p></div>
+        <div><span className="admin-eyebrow">GESTIONE UTENTI</span><h2>Account <em>registrati.</em></h2><p>Controlla le richieste e gestisci l&apos;accesso alla piattaforma.</p></div>
         <span className="admin-total-pill">{visibleUsers.length} risultati</span>
       </div>
 
