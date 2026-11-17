@@ -9,6 +9,15 @@ function jsonError(message:string,status=400){return NextResponse.json({error:me
 export async function POST(request:Request){
  const supabase=await createClient();const {user,status}=await getAccountAccess(supabase);if(!user)return jsonError("Sessione scaduta. Accedi di nuovo.",401);if(status!=="APPROVED")return jsonError("Account non ancora abilitato.",403);
  const body=await request.json().catch(()=>null);if(!body)return jsonError("Richiesta non valida.");
+ if(body.action==="update-title"){
+  const {rankingId,title}=body as {rankingId:string;title:string};
+  const clean=typeof title==="string"?title.trim():"";
+  if(!rankingId||!clean||clean.length>80)return jsonError("Il titolo deve contenere da 1 a 80 caratteri.");
+  const {data,error}=await supabase.from("rankings").update({title:clean}).eq("id",rankingId).eq("user_id",user.id).eq("status","DRAFT").is("deleted_at",null).select("id").maybeSingle();
+  if(error)return jsonError(error.message,500);
+  if(!data)return jsonError("Renq non modificabile o non trovato.",404);
+  return NextResponse.json({ok:true,title:clean});
+ }
  if(body.action==="start-battle"){
   const {rankingId,pairs,difficulty}=body as {rankingId:string;pairs:{a:string;b:string}[];difficulty:string};
   if(!Array.isArray(pairs)||pairs.length<1)return jsonError("Confronti non validi.");
