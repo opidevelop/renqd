@@ -8,13 +8,14 @@ export type EmailDeliveryResult =
   | { sent: false; reason: "not_configured" | "invalid_recipient" | "provider_error" };
 
 function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, character => ({
+  const entities: Record<string, string> = {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
     "'": "&#39;",
-  })[character] ?? character);
+  };
+  return value.replace(/[&<>"']/g, character => entities[character] ?? character);
 }
 
 function approvedEmailHtml(username: string): string {
