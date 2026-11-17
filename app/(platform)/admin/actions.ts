@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { sendAccountApprovedEmail } from "@/lib/email";
 
-type AdminActionResult = { ok: boolean; error?: string };
+type AdminActionResult = { ok: boolean; error?: string; emailSent?: boolean };
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -78,8 +79,24 @@ export async function reviewAdminAccount(
     return { ok: false, error: mapAdminError(error.message) };
   }
 
+  let emailSent = false;
+  if (decision === "APPROVED") {
+    const { data: detail, error: detailError } = await auth.supabase.rpc(
+      "admin_get_user_detail",
+      { p_target_user_id: targetUserId },
+    );
+    const account = (detail as { account?: { email?: string; username?: string } } | null)?.account;
+    if (!detailError && account?.email && account.username) {
+      const delivery = await sendAccountApprovedEmail({
+        to: account.email,
+        username: account.username,
+      });
+      emailSent = delivery.sent;
+    }
+  }
+
   revalidatePath("/admin");
-  return { ok: true };
+  return { ok: true, ...(decision === "APPROVED" ? { emailSent } : {}) };
 }
 
 export async function manageAdminAccount(
