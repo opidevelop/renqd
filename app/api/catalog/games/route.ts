@@ -1,4 +1,6 @@
 import type { NextRequest } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { getAccountAccess } from "@/lib/supabase/authorization";
 import type { CatalogEntity, CatalogItem } from "@/lib/catalog/types";
 
 type IgdbImage = { image_id?: string };
@@ -157,6 +159,11 @@ async function loadRelatedGames(payload: Record<string, unknown>, contentType: s
 }
 
 export async function GET(request: NextRequest) {
+  const supabase = await createClient();
+  const { user, status } = await getAccountAccess(supabase);
+  if (!user) return Response.json({ error: "Sessione scaduta." }, { status: 401 });
+  if (status !== "APPROVED") return Response.json({ error: "Account non ancora abilitato." }, { status: 403 });
+
   const params = request.nextUrl.searchParams;
   const action = params.get("action");
   const contentType = params.get("contentType");
