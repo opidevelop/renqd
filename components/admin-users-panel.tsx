@@ -2,9 +2,10 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Check, X, Search, ShieldCheck, Clock3, Users, MailCheck, LoaderCircle,
-  PauseCircle, PlayCircle, History, Shield, UserCog, Save,
+  PauseCircle, PlayCircle, History, Shield, UserCog, Save, ArrowUpRight,
 } from "lucide-react";
 import {
   reviewAdminAccount,
@@ -226,6 +227,7 @@ export default function AdminUsersPanel({
                 <div className="admin-user-title">
                   <strong>@{user.username}</strong>
                   <span className={"admin-status status-" + user.account_status.toLowerCase()}>{statusLabels[user.account_status]}</span>
+                  <Link href={"/admin/users/" + user.user_id} className="admin-user-detail-link">Scheda <ArrowUpRight size={12}/></Link>
                 </div>
                 <span>{user.email}</span>
                 <small>Registrato il {formatDate(user.created_at)} · {roleLabels[user.account_role]}</small>
