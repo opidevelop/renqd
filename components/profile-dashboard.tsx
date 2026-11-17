@@ -154,6 +154,8 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       if (!user) throw new Error("Sessione scaduta. Accedi di nuovo.");
       const next = { ...profile, display_name: displayName.trim().slice(0, 60), bio: bio.trim().slice(0, 280), website_url: websiteUrl.trim() || null, location: location.trim().slice(0, 80) || null, updated_at: new Date().toISOString() };
       if (next.website_url && !isHttpsUrl(next.website_url)) throw new Error("Il sito web deve essere un URL HTTPS valido.");
+      if (avatarUrlInput.trim() && !isHttpsUrl(avatarUrlInput.trim())) throw new Error("L'avatar deve usare un URL HTTPS valido.");
+      if (bannerUrlInput.trim() && !isHttpsUrl(bannerUrlInput.trim())) throw new Error("Il banner del profilo deve usare un URL HTTPS valido.");
       const { avatar_display_url, banner_display_url, ...persisted } = next;
       void avatar_display_url;
       void banner_display_url;
