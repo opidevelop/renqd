@@ -1,3 +1,4 @@
+import "./renq-data-lifecycle.css";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PlatformShell } from "@/components/platform-shell";
