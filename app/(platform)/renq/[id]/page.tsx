@@ -14,7 +14,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
 
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
   const { data: ranking } = isUuid
-    ? await supabase.from("rankings").select("*").eq("id", id).eq("user_id", user.id).single()
+    ? await supabase.from("rankings").select("*").eq("id", id).eq("user_id", user.id).is("deleted_at",null).single()
     : await supabase.from("rankings").select("*").eq("public_slug", id).eq("user_id", user.id).single();
   if (!ranking) notFound();
 
@@ -26,10 +26,11 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   const isSaved = ranking.status === "COMPLETED" && Boolean(settings.savedAt) && Array.isArray(savedSnapshot?.items);
 
   if (isSaved) {
-    const [{ data: comments, count: commentCount }, { data: liked }, { count: likeCount }] = await Promise.all([
+    const [{ data: comments, count: commentCount }, { data: liked }, { count: likeCount }, { data: revisions }] = await Promise.all([
       supabase.from("ranking_comments").select("id,body,created_at,author_id", { count: "exact" }).eq("ranking_id", ranking.id).is("deleted_at", null).order("created_at", { ascending: true }),
       supabase.from("ranking_likes").select("user_id").eq("ranking_id", ranking.id).eq("user_id", user.id).maybeSingle(),
-      supabase.from("ranking_likes").select("user_id", { count: "exact", head: true }).eq("ranking_id", ranking.id)
+      supabase.from("ranking_likes").select("user_id", { count: "exact", head: true }).eq("ranking_id", ranking.id),
+      supabase.from("ranking_revisions").select("id,version,change_summary,created_at").eq("ranking_id", ranking.id).order("version", { ascending: false }).limit(20)
     ]);
     return <SavedRenqDetail
       ranking={{ id: ranking.id, public_slug: ranking.public_slug, title: ranking.title, mode: ranking.mode, settings, created_at: ranking.created_at, visibility: ranking.visibility, started_at: ranking.started_at, completed_at: ranking.completed_at }}
@@ -42,6 +43,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
       commentCount={commentCount ?? 0}
       initialLiked={Boolean(liked)}
       likeCount={likeCount ?? 0}
+      revisions={revisions ?? []}
     />;
   }
 
