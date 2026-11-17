@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getAccountAccess } from "@/lib/supabase/authorization";
 
 type ItemInput={id:string;title:string;subtitle?:string;imageUrl?:string;previewUrl?:string;appleMusicUrl?:string;spotifyUrl?:string;source?:"catalog"|"manual";payload?:unknown};
 const modeMap:Record<string,string>={renq:"RENQ",battle:"BATTLE_RENQ",speed:"SPEED_RENQ"};
 const categoryMap:Record<string,string>={music:"MUSIC",games:"VIDEOGAME",film:"CINEMA",books:"BOOK",sport:"OTHER",food:"OTHER",travel:"OTHER",custom:"CUSTOM"};
 function jsonError(message:string,status=400){return NextResponse.json({error:message},{status});}
 export async function POST(request:Request){
- const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)return jsonError("Sessione scaduta. Accedi di nuovo.",401);
+ const supabase=await createClient();const {user,status}=await getAccountAccess(supabase);if(!user)return jsonError("Sessione scaduta. Accedi di nuovo.",401);if(status!=="APPROVED")return jsonError("Account non ancora abilitato.",403);
  const body=await request.json().catch(()=>null);if(!body)return jsonError("Richiesta non valida.");
  if(body.action==="start-battle"){
   const {rankingId,pairs,difficulty}=body as {rankingId:string;pairs:{a:string;b:string}[];difficulty:string};
