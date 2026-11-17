@@ -184,7 +184,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       if (!user) throw new Error("Sessione scaduta. Accedi di nuovo.");
       const bannerUpload = collectionFile ? await uploadImage(collectionFile, "collection") : null;
       const bannerUrl = bannerUpload?.path ?? (collectionBannerUrl.trim() || null);
-      if (bannerUrl && bannerUrl.startsWith("http") && !isHttpsUrl(bannerUrl)) throw new Error("Il banner deve usare un URL HTTPS valido.");
+      if (!bannerUpload && collectionBannerUrl.trim() && !isHttpsUrl(collectionBannerUrl.trim())) throw new Error("Il banner deve usare un URL HTTPS valido.");
       const slugBase = collectionTitle.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 38) || "collezione";
       const slug = profile.username.toLowerCase() + "-" + slugBase + "-" + crypto.randomUUID().slice(0, 5);
       const { data: created, error: insertError } = await supabase.from("profile_collections").insert({
