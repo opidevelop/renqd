@@ -9,8 +9,10 @@ export default async function PlatformLayout({ children }: { children: React.Rea
   if (!user) redirect("/login");
   const { data: profile, error } = await supabase.from("profiles").select("username, role, status").eq("id", user.id).maybeSingle();
   if (error || !profile) redirect("/login?error=profile");
-  if (profile.status === "PENDING") redirect("/pending");
-  if (profile.status !== "APPROVED") redirect("/access-denied");
+  if (profile.status !== "APPROVED") {
+    const status = profile.status === "PENDING" ? "pending" : profile.status === "REJECTED" ? "rejected" : "suspended";
+    redirect("/login?status=" + status);
+  }
   let { data: publicProfile } = await supabase.from("public_profiles").select("user_id, avatar_url, display_name").eq("user_id", user.id).maybeSingle();
   if (!publicProfile) {
     const { data: created } = await supabase.from("public_profiles").insert({ user_id: user.id, username: profile.username, display_name: profile.username }).select("user_id, avatar_url, display_name").single();
