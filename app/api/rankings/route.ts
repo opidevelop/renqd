@@ -6,6 +6,7 @@ type ItemInput={id:string;title:string;subtitle?:string;imageUrl?:string;preview
 const modeMap:Record<string,string>={renq:"RENQ",battle:"BATTLE_RENQ",speed:"SPEED_RENQ"};
 const categoryMap:Record<string,string>={music:"MUSIC",games:"VIDEOGAME",film:"CINEMA",books:"BOOK",sport:"OTHER",food:"OTHER",travel:"OTHER",custom:"CUSTOM"};
 function jsonError(message:string,status=400){return NextResponse.json({error:message},{status});}
+function validHttpsUrl(value:unknown):value is string{if(typeof value!=="string"||value.length>2048)return false;try{const url=new URL(value);return url.protocol==="https:"&&!url.username&&!url.password;}catch{return false;}}
 export async function POST(request:Request){
  const supabase=await createClient();const {user,status}=await getAccountAccess(supabase);if(!user)return jsonError("Sessione scaduta. Accedi di nuovo.",401);if(status!=="APPROVED")return jsonError("Account non ancora abilitato.",403);
  const body=await request.json().catch(()=>null);if(!body)return jsonError("Richiesta non valida.");
@@ -138,9 +139,10 @@ export async function POST(request:Request){
   const {data:ranking}=await supabase.from("rankings").select("id,status,settings").eq("id",rankingId).eq("user_id",user.id).single();
   if(!ranking||ranking.status!=="COMPLETED"||!(ranking.settings as Record<string,unknown>|null)?.savedAt)return jsonError("Renq salvato non trovato.",404);
   if(coverImagePath!==null&&(typeof coverImagePath!=="string"||!new RegExp("^"+user.id+"/[a-f0-9-]{36}\\.(jpg|png|webp)$","i").test(coverImagePath)))return jsonError("La copertina non è valida o non appartiene al tuo spazio.");
+  const coverImageUrl=(body as {coverImageUrl?:string|null}).coverImageUrl??null;if(coverImageUrl!==null&&!validHttpsUrl(coverImageUrl))return jsonError("Inserisci un URL HTTPS valido per la copertina.");
   const rawPosition=(body as {coverPosition?:{x:number;y:number}}).coverPosition;
   const coverPosition=rawPosition&&Number.isInteger(rawPosition.x)&&Number.isInteger(rawPosition.y)&&rawPosition.x>=0&&rawPosition.x<=100&&rawPosition.y>=0&&rawPosition.y<=100?rawPosition:{x:50,y:50};
-  const settings={...(ranking.settings as Record<string,unknown>),coverImagePath,coverPosition};
+  const settings={...(ranking.settings as Record<string,unknown>),coverImagePath,coverImageUrl,coverPosition};
   const {error}=await supabase.from("rankings").update({settings}).eq("id",rankingId).eq("user_id",user.id);
   if(error)return jsonError(error.message,500);
   return NextResponse.json({ok:true});
@@ -182,6 +184,7 @@ export async function POST(request:Request){
  const {title,mode,category,contentType,sportDiscipline,coverImageUrl,coverImagePath,defaultCoverImageUrl,coverTitle,participation,collaborators,visibility,access,allowTies,duration,battleDepth,items}=body as {title:string;mode:string;category:string;contentType:string;sportDiscipline?:string;coverImageUrl?:string|null;coverImagePath?:string|null;defaultCoverImageUrl?:string|null;coverTitle?:string;participation:string;collaborators:number;visibility:string;access:string;allowTies:boolean;duration:number;battleDepth:string;items:ItemInput[]};
  if(!title?.trim()||!modeMap[mode]||!Array.isArray(items)||items.length<1||items.length>100)return jsonError("Completa il titolo e inserisci da 1 a 100 elementi.");
  if(coverImagePath!==undefined&&coverImagePath!==null&&(typeof coverImagePath!=="string"||!new RegExp("^"+user.id+"/[a-f0-9-]{36}\\.(jpg|png|webp)$","i").test(coverImagePath)))return jsonError("La copertina caricata non è valida.");
+ if(coverImageUrl!==undefined&&coverImageUrl!==null&&!validHttpsUrl(coverImageUrl))return jsonError("L’URL della copertina deve usare HTTPS.");
  const slugBase=title.normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"renq";
  const publicSlug=slugBase+"-"+crypto.randomUUID().replace(/-/g,"").slice(0,6);
  const settings={category,contentType,sportDiscipline:sportDiscipline??null,coverImageUrl:coverImageUrl??null,coverImagePath:coverImagePath??null,defaultCoverImageUrl:defaultCoverImageUrl??null,coverTitle:coverTitle??title.trim(),access,collaborators:participation==="collab"?collaborators:1,durationSeconds:mode==="speed"?duration:null,battleDepth};
