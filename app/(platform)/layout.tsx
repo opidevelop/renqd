@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PlatformShell } from "@/components/platform-shell";
+import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import "./platform.css";
 export const dynamic = "force-dynamic";
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
@@ -19,6 +20,6 @@ export default async function PlatformLayout({ children }: { children: React.Rea
     publicProfile = created;
   }
   const metadataAvatar = user.user_metadata?.avatar_url ?? user.user_metadata?.picture;
-  const avatarUrl = publicProfile?.avatar_url ?? (typeof metadataAvatar === "string" ? metadataAvatar : null);
+  const avatarUrl = publicProfile?.avatar_url ? await getProfileMediaUrl(supabase, publicProfile.avatar_url) : (typeof metadataAvatar === "string" ? metadataAvatar : null);
   return <PlatformShell avatarUrl={avatarUrl} displayName={publicProfile?.display_name ?? profile.username} username={profile.username}>{children}</PlatformShell>;
 }
