@@ -16,7 +16,16 @@ export async function POST(request:Request){
   if(error||!sessionId)return jsonError(error?.message??"Impossibile avviare la sfida.",500);
   return NextResponse.json({sessionId});
  }
- if(body.action==="battle-tie"){
+ if(body.action==="battle-undo"){
+   const {sessionId}=body as {sessionId:string};
+   if(typeof sessionId!=="string")return jsonError("Sessione Battle non valida.");
+   const {data:session,error:sessionError}=await supabase.from("ranking_battle_sessions").select("id,status").eq("id",sessionId).eq("user_id",user.id).single();
+   if(sessionError||!session||session.status!=="ACTIVE")return jsonError("Sessione Battle non disponibile.",404);
+   const {data,error}=await supabase.rpc("renqd_undo_battle_choice",{p_session_id:sessionId});
+   if(error)return jsonError(error.message,500);
+   return NextResponse.json(data??{ok:true});
+  }
+  if(body.action==="battle-tie"){
   const {sessionId}=body as {sessionId:string};const {data:session,error}=await supabase.from("ranking_battle_sessions").select("*").eq("id",sessionId).eq("user_id",user.id).single();
   if(error||!session||session.status!=="ACTIVE")return jsonError("Sessione Battle non disponibile.",404);
   const state=session.comparison_state as {pairs:{a:string;b:string}[];cursor:number;wins:Record<string,number>;tiePairs?:{a:string;b:string}[]};
