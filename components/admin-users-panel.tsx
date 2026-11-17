@@ -144,7 +144,9 @@ export default function AdminUsersPanel({
         return;
       }
       finishAction(decision === "APPROVED"
-        ? "Account @" + user.username + " approvato."
+        ? result.emailSent
+          ? "Account @" + user.username + " approvato. Email di conferma inviata."
+          : "Account @" + user.username + " approvato, ma l'email non è stata inviata. Verifica RESEND_API_KEY e RENQD_EMAIL_FROM su Vercel."
         : "Richiesta di @" + user.username + " rifiutata.");
     });
   }
