@@ -816,3 +816,24 @@
 
 .renq-battle-undo-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin:14px 8px 0 0;padding:10px 14px;border:1px solid #e8ddd2;border-radius:10px;background:#fff;color:#6d5a4b;font-size:11px;font-weight:750;cursor:pointer}
 .renq-battle-undo-button:disabled{opacity:.55;cursor:wait}
+
+/* Phase 4: title editing, grouped drag and cover URLs */
+.renq-inline-title-editor{display:flex;align-items:center;gap:7px;max-width:100%}
+.renq-inline-title-editor input{min-width:0;width:min(420px,70vw);padding:9px 11px;border:1px solid #d8c7b7;border-radius:9px;font:inherit;color:#302820;background:#fff}
+.renq-inline-title-editor button,.renq-title-edit{display:inline-grid;place-items:center;width:30px;height:30px;border:1px solid #e7ddd3;border-radius:8px;background:#fff;color:#806b59;cursor:pointer}
+.renq-heading-title-line{display:flex;align-items:center;gap:8px}
+.renq-title-error{color:#a33b30!important;font-size:10px!important}
+.renq-sort-row .renq-select-item{width:16px;height:16px;accent-color:#8b7cce;flex:none;cursor:pointer}
+.renq-sort-row.is-dragging{opacity:.65;outline:1px dashed #a88d72}
+.renq-cover-url-control{display:grid;gap:6px;width:min(360px,100%);margin-top:10px}
+.renq-cover-url-control label{display:flex;align-items:center;gap:6px;color:#806f60;font-size:10px;font-weight:800}
+.renq-cover-url-control>div{display:flex;gap:6px}
+.renq-cover-url-control input{min-width:0;flex:1;padding:8px 10px;border:1px solid #e6ddd4;border-radius:8px;font-size:11px}
+.renq-cover-url-control button{padding:8px 11px;border:1px solid #dfc9b5;border-radius:8px;background:#fff7ef;color:#9a5d32;font-size:10px;font-weight:800;cursor:pointer}
+.discography-mode-picker{display:flex;gap:8px;margin:12px 0;padding:5px;border-radius:12px;background:#f2eee9}
+.discography-mode-picker button{flex:1;padding:10px;border:1px solid transparent;border-radius:9px;background:transparent;color:#796b5f;font-size:11px;font-weight:750;cursor:pointer}
+.discography-mode-picker button.is-active{background:#fff;border-color:#e7d8ca;color:#9b5d31;box-shadow:0 2px 8px #3b28100d}
+.review-cover-url-field{display:grid;gap:7px;margin:16px 0;padding:13px;border:1px solid #eee4d9;border-radius:12px;background:#fffaf5;color:#8b6b51;font-size:9px;font-weight:850;letter-spacing:1px}
+.review-cover-url-field input{width:100%;min-width:0;padding:10px;border:1px solid #e5d9cd;border-radius:8px;background:#fff;color:#40352d;font-size:12px;letter-spacing:0}
+.review-cover-url-field small{color:#8d8177;font-size:10px;font-weight:500;letter-spacing:0}
+@media(max-width:680px){.discography-mode-picker{flex-direction:column}.renq-sort-row .renq-select-item{width:15px;height:15px}}
