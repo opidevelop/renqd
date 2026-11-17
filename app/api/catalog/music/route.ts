@@ -217,6 +217,8 @@ async function searchMusicBrainz(query: string, contentType: string): Promise<Mu
   }));
 }
 
+async function loadItunesDiscographyTracks(payload:Record<string,unknown>):Promise<MusicItem[]>{const id=payload.artistId;if(typeof id!=="number"||!Number.isSafeInteger(id))throw new Error("Invalid iTunes artist identifier");const params=new URLSearchParams({id:String(id),entity:"song",limit:"200",country:"IT"});const data=await itunesJson<{results?:Array<Record<string,unknown>>}>(`${ITUNES}/lookup?${params}`);const artist=typeof payload.artistName==="string"?payload.artistName:"";return(data.results??[]).flatMap(entry=>{if(entry.wrapperType!=="track"||typeof entry.trackName!=="string")return[];return[{id:String(entry.trackId??entry.trackName),title:entry.trackName,subtitle:typeof entry.collectionName==="string"?entry.collectionName:artist,imageUrl:typeof entry.artworkUrl100==="string"?entry.artworkUrl100.replace("100x100","300x300"):undefined,previewUrl:typeof entry.previewUrl==="string"?entry.previewUrl:undefined,appleMusicUrl:typeof entry.trackViewUrl==="string"?entry.trackViewUrl:undefined,spotifyUrl:spotifySearchUrl(`${artist} ${entry.trackName}`)}];});}
+
 async function loadItunesItems(payload: Record<string, unknown>, contentType: string): Promise<MusicItem[]> {
   const id = contentType === "Album" ? payload.collectionId : payload.artistId;
   if (typeof id !== "number" || !Number.isSafeInteger(id)) throw new Error("Invalid iTunes catalog identifier");
@@ -254,6 +256,8 @@ async function loadItunesAlbumTrackMetadata(albumTitle: string, artistName: stri
   } catch { return new Map<string, { previewUrl?: string; appleMusicUrl?: string }>(); }
 }
 
+async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):Promise<MusicItem[]>{const id=payload.artistId;if(typeof id!=="string"||!/^[0-9a-f-]{36}$/i.test(id))throw new Error("Invalid MusicBrainz artist identifier");const params=new URLSearchParams({query:"arid:"+id,fmt:"json",limit:"100"});const data=await musicBrainzJson<{recordings?:Array<{id?:string;title?:string}>}>(`${MUSICBRAINZ}/recording?${params}`);const artist=typeof payload.artistName==="string"?payload.artistName:"";return(data.recordings??[]).flatMap(recording=>recording.id&&recording.title?[{id:recording.id,title:recording.title,subtitle:artist||undefined,spotifyUrl:spotifySearchUrl(`${artist} ${recording.title}`)}]:[]);}
+
 async function loadMusicBrainzItems(payload: Record<string, unknown>, contentType: string): Promise<MusicItem[]> {
   if (contentType === "Album") {
     const id = payload.releaseGroupId;
@@ -288,7 +292,7 @@ export async function GET(request: NextRequest) {
   const action = params.get("action");
   const provider = params.get("provider");
   const contentType = params.get("contentType");
-  if (!["itunes", "musicbrainz"].includes(provider ?? "") || !["Album", "Artisti", "Discografie"].includes(contentType ?? "")) {
+  if (!["itunes", "musicbrainz"].includes(provider ?? "") || !["Album", "Artisti", "Discografie", "Discografia brani"].includes(contentType ?? "")) {
     return Response.json({ error: "Unsupported music catalog request." }, { status: 400 });
   }
 
@@ -304,7 +308,7 @@ export async function GET(request: NextRequest) {
       const rawPayload = params.get("payload");
       if (!rawPayload || rawPayload.length > 2000) return Response.json({ error: "Catalog item payload is missing or invalid." }, { status: 400 });
       const payload = JSON.parse(rawPayload) as Record<string, unknown>;
-      const items = provider === "itunes" ? await loadItunesItems(payload, contentType!) : await loadMusicBrainzItems(payload, contentType!);
+      const items = contentType==="Discografia brani"?(provider==="itunes"?await loadItunesDiscographyTracks(payload):await loadMusicBrainzDiscographyTracks(payload)):(provider === "itunes" ? await loadItunesItems(payload, contentType!) : await loadMusicBrainzItems(payload, contentType!));
       return Response.json({ items });
     }
 
