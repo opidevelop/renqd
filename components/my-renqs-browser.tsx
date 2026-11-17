@@ -18,6 +18,7 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
   const [query,setQuery] = useState("");
   const [category,setCategory] = useState("");
   const [mode,setMode] = useState("");
+  const [sortOrder,setSortOrder] = useState("newest");
   const [loading,setLoading] = useState(false);
   const [error,setError] = useState("");
 
@@ -43,8 +44,14 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
     return () => { window.clearTimeout(timeout); controller.abort(); };
   }, [query,category,mode,initialItems]);
 
-  const visibleItems = !query.trim() && !category && !mode ? initialItems : items;
-  const reset = () => { setQuery(""); setCategory(""); setMode(""); };
+  const filteredItems = !query.trim() && !category && !mode ? initialItems : items;
+  const visibleItems = [...filteredItems].sort((a,b) => {
+    if (sortOrder === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    if (sortOrder === "title_asc") return a.title.localeCompare(b.title, "it", { sensitivity: "base" });
+    if (sortOrder === "title_desc") return b.title.localeCompare(a.title, "it", { sensitivity: "base" });
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+  const reset = () => { setQuery(""); setCategory(""); setMode(""); setSortOrder("newest"); };
   return <div className="my-renqs-page">
     <header className="my-renqs-header"><div><span className="page-eyebrow"><Trophy size={14}/> LA TUA COLLEZIONE</span><h1>Renq</h1><p>Le classifiche che hai deciso di conservare, tutte in un unico posto.</p></div><div className="my-renqs-header-actions"><Link href="/rankings/trash" className="my-renqs-trash-link"><Trash2 size={16}/> Cestino</Link><Link href="/create" className="my-renqs-create"><Plus size={17}/> Crea un Renq</Link></div></header>
     <div className="my-renqs-summary" aria-live="polite"><div className="my-renqs-results-count"><strong>{visibleItems.length.toLocaleString("it-IT")}</strong><span>{visibleItems.length === 1 ? "classifica" : "classifiche"}</span></div><p>{loading ? "Aggiornamento dei risultati…" : query || category || mode ? "Risultati aggiornati in base alla tua ricerca." : "Le tue classifiche, raccolte in un unico spazio."}</p></div>
@@ -52,7 +59,8 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
       <label className="my-renqs-search"><Search size={17}/><input value={query} onChange={event=>setQuery(event.target.value)} placeholder="Cerca un Renq per titolo…"/>{query && <button type="button" onClick={()=>setQuery("")} aria-label="Cancella ricerca"><X size={15}/></button>}</label>
       <label><SlidersHorizontal size={15}/><select value={category} onChange={event=>setCategory(event.target.value)}><option value="">Tutte le categorie</option>{Object.entries(categoryLabels).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
       <label><select value={mode} onChange={event=>setMode(event.target.value)}><option value="">Tutte le tipologie</option><option value="RENQ">Renq classico</option><option value="BATTLE_RENQ">Battle Renq</option><option value="SPEED_RENQ">Speed Renq</option></select></label>
-      {(query||category||mode) && <button type="button" className="my-renqs-reset" onClick={reset}>Azzera filtri</button>}
+      <label className="my-renqs-sort"><select value={sortOrder} onChange={event=>setSortOrder(event.target.value)} aria-label="Ordina i Renq"><option value="newest">Più recenti</option><option value="oldest">Meno recenti</option><option value="title_asc">Titolo A–Z</option><option value="title_desc">Titolo Z–A</option></select></label>
+      {(query||category||mode||sortOrder!=="newest") && <button type="button" className="my-renqs-reset" onClick={reset}>Azzera filtri</button>}
     </section>
     {loading && <p className="my-renqs-loading">Aggiornamento risultati…</p>}
     {error && <p className="my-renqs-error" role="alert">{error}</p>}
