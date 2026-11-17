@@ -791,3 +791,15 @@
 @media(max-width:760px){.admin-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-users-section{padding:17px}.admin-page{padding-top:0}}
 @media(max-width:520px){.admin-page-heading{padding:10px 0 21px}.admin-page-heading h1{font-size:36px}.admin-section-heading{align-items:flex-start;flex-direction:column;gap:10px}.admin-total-pill{align-self:flex-start}.admin-user-main{align-items:flex-start;flex-wrap:wrap}.admin-user-identity{flex-basis:calc(100% - 60px)}.admin-email-state{margin-left:54px}.admin-review-actions{margin-left:0}.admin-action-buttons{flex-wrap:wrap}.admin-reject-footer{flex-wrap:wrap}.admin-reject-footer>small{flex-basis:100%}}
 @media(prefers-reduced-motion:reduce){.admin-spin{animation:none}.admin-button:hover:not(:disabled){transform:none}}
+
+/* Speed Renq duration selection */
+.renq-speed-duration-picker{display:grid;gap:12px;margin:26px 0 18px;text-align:left}
+.renq-speed-duration-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.renq-speed-duration-card{display:flex;min-height:82px;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid var(--renq-border,#e9e2da);border-radius:14px;background:rgba(255,255,255,.72);color:inherit;cursor:pointer;transition:border-color .18s,background .18s,transform .18s}
+.renq-speed-duration-card strong{font-size:23px;line-height:1.1;font-weight:700}
+.renq-speed-duration-card small{font-size:10px;opacity:.7}
+.renq-speed-duration-card.is-selected{border-color:var(--renq-accent,#b78a52);background:rgba(183,138,82,.1);box-shadow:inset 0 0 0 1px var(--renq-accent,#b78a52)}
+.renq-speed-duration-card:focus-visible{outline:2px solid var(--renq-accent,#b78a52);outline-offset:3px}
+.renq-speed-custom-duration{display:flex;align-items:center;gap:10px;font-size:12px}
+.renq-speed-custom-duration input{width:92px;padding:10px 12px;border:1px solid var(--renq-border,#e9e2da);border-radius:9px;background:#fff;color:inherit;font:inherit}
+@media(max-width:520px){.renq-speed-duration-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.renq-speed-duration-card{min-height:70px}}
