@@ -5,7 +5,7 @@ import {ChevronDown,ChevronUp,Layers3,Pause,Play,Trophy} from "lucide-react";
 import {RenqReveal} from "@/components/renq-reveal";
 
 export type RenqItem={id:string;title:string;title_snapshot:string;sort_order:number;rank_position:number|null;tie_group_id?:string|null;image_url:string|null;description:string|null;preview_url?:string|null;apple_music_url?:string|null;spotify_url?:string|null};
-export type RenqRanking={id:string;title:string;mode:string;status:string;visibility:string;participation_mode:string;allow_ties:boolean;settings:Record<string,unknown>;created_at:string;started_at?:string|null;completed_at?:string|null};
+export type RenqRanking={id:string;public_slug?:string;title:string;mode:string;status:string;visibility:string;participation_mode:string;allow_ties:boolean;settings:Record<string,unknown>;created_at:string;started_at?:string|null;completed_at?:string|null};
 
 export function RenqMusicActions({item}:{item:RenqItem}){
  const audioRef=useRef<HTMLAudioElement>(null);const[playing,setPlaying]=useState(false);
