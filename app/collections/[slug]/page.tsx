@@ -19,7 +19,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   if (!profile || (profile.is_private && !isOwner)) notFound();
   const { data: links } = await supabase.from("profile_collection_items").select("ranking_id,position").eq("collection_id", collection.id).order("position");
   const ids = (links ?? []).map(item => item.ranking_id);
-  const { data: rankings } = ids.length ? await supabase.from("rankings").select("id,title,public_slug,mode,settings").in("id", ids) : { data: [] };
+  const { data: rankings } = ids.length ? await supabase.from("rankings").select("id,title,public_slug,mode,settings").in("id", ids).is("deleted_at",null) : { data: [] };
   const ordered = (links ?? []).map(link => (rankings ?? []).find(ranking => ranking.id === link.ranking_id)).filter(Boolean);
   const firstSettings = ordered[0]?.settings as Record<string, unknown> | undefined;
   const firstSnapshot = firstSettings?.savedSnapshot as { items?: { image_url?: string | null }[] } | undefined;
