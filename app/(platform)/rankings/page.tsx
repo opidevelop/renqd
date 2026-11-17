@@ -7,7 +7,7 @@ export default async function MyRenqsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data: rankings } = await supabase.from("rankings").select("id,public_slug,title,mode,status,settings,created_at,started_at,completed_at").eq("user_id", user.id).in("status", ["COMPLETED","DRAFT"]).order("completed_at", { ascending: false });
+  const { data: rankings } = await supabase.from("rankings").select("id,public_slug,title,mode,status,settings,created_at,started_at,completed_at,deleted_at").eq("user_id", user.id).in("status", ["COMPLETED","DRAFT"]).is("deleted_at",null).order("completed_at", { ascending: false });
   const saved = (rankings ?? []).filter(item => Boolean((item.settings as Record<string,unknown> | null)?.savedAt));
   const initialItems = await Promise.all(saved.map(async ranking => {
     const settings = (ranking.settings ?? {}) as Record<string,unknown>;
