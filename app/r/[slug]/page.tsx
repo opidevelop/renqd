@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
 export default async function PublicRenqPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
-  let { data: ranking } = await supabase.from("rankings").select("id,user_id,public_slug,title,mode,settings,visibility,status").eq("public_slug", slug).maybeSingle();
+  let { data: ranking } = await supabase.from("rankings").select("id,user_id,public_slug,title,mode,settings,visibility,status").eq("public_slug", slug).is("deleted_at",null).maybeSingle();
   if (!ranking && /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(slug)) {
-    const result = await supabase.from("rankings").select("id,user_id,public_slug,title,mode,settings,visibility,status").eq("id", slug).maybeSingle();
+    const result = await supabase.from("rankings").select("id,user_id,public_slug,title,mode,settings,visibility,status").eq("id", slug).is("deleted_at",null).maybeSingle();
     ranking = result.data;
   }
   if (!ranking || ranking.status !== "COMPLETED" || ranking.visibility !== "LIVE" || (ranking.settings as Record<string,unknown>)?.access === "private") notFound();
