@@ -198,7 +198,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
         })));
         if (itemError) throw itemError;
       }
-      setCollections(current => [...current, { ...created, banner_display_url: bannerUpload?.url ?? collectionBannerUrl.trim() || null, sort_order: collections.length, item_count: selectedRenqIds.length, item_ids: selectedRenqIds, item_titles: selectedRenqIds.map(id => { const found = collectionSearchResults.find(item => item.id === id); return { id, title: found?.title ?? "Renq", public_slug: id }; }) }]);
+      setCollections(current => [...current, { ...created, banner_display_url: bannerUpload?.url ?? (collectionBannerUrl.trim() || null), sort_order: collections.length, item_count: selectedRenqIds.length, item_ids: selectedRenqIds, item_titles: selectedRenqIds.map(id => { const found = collectionSearchResults.find(item => item.id === id); return { id, title: found?.title ?? "Renq", public_slug: id }; }) }]);
       setCollectionTitle(""); setCollectionDescription(""); setCollectionFile(null); setCollectionBannerUrl(""); setSelectedRenqIds([]);
       setCollectionFormOpen(false); setCollectionSearchTarget(null); setCollectionSearchQuery("");
       setMessage("Collezione creata.");
@@ -209,8 +209,9 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   async function updateCollection(id: string, patch: Partial<Pick<Collection, "is_featured" | "visibility" | "banner_url" | "title" | "description" | "sort_order">>) {
     const supabase = createClient();
     const { error: updateError } = await supabase.from("profile_collections").update(patch).eq("id", id);
-    if (updateError) { setError(updateError.message); return; }
+    if (updateError) { setError(updateError.message); return false; }
     setCollections(current => current.map(item => item.id === id ? { ...item, ...patch } : item));
+    return true;
   }
 
   function startEditingCollection(collection: Collection) {
@@ -225,13 +226,15 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     if (!editingCollectionId || !editingCollectionTitle.trim()) return;
     const banner = editingCollectionBannerUrl.trim() || null;
     if (banner && !isHttpsUrl(banner)) { setError("Il banner deve usare un URL HTTPS valido."); return; }
-    await updateCollection(editingCollectionId, {
+    const patch: Partial<Pick<Collection, "title" | "description" | "visibility" | "banner_url">> = {
       title: editingCollectionTitle.trim().slice(0, 70),
       description: editingCollectionDescription.trim().slice(0, 240),
       visibility: editingCollectionVisibility,
-      banner_url: banner,
-    });
-    setCollections(current => current.map(item => item.id === editingCollectionId ? { ...item, banner_display_url: banner } : item));
+    };
+    if (banner) patch.banner_url = banner;
+    const updated = await updateCollection(editingCollectionId, patch);
+    if (!updated) return;
+    if (banner) setCollections(current => current.map(item => item.id === editingCollectionId ? { ...item, banner_display_url: banner } : item));
     setEditingCollectionId(null);
     setMessage("Collezione aggiornata.");
   }
