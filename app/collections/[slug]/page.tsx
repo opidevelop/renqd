@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import { ArrowLeft, ArrowUpRight, Globe2, LockKeyhole, Trophy } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   const { data: collection } = await supabase.from("profile_collections").select("*").eq("slug", slug).maybeSingle();
   if (!collection) notFound();
   const isOwner = collection.owner_id === user?.id;
+  const collectionBannerUrl = await getProfileMediaUrl(supabase, collection.banner_url);
   if (collection.visibility === "PRIVATE" && !isOwner) notFound();
   const { data: profile } = await supabase.from("public_profiles").select("username,display_name,is_private").eq("user_id", collection.owner_id).maybeSingle();
   if (!profile || (profile.is_private && !isOwner)) notFound();
@@ -21,7 +23,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   const ordered = (links ?? []).map(link => (rankings ?? []).find(ranking => ranking.id === link.ranking_id)).filter(Boolean);
   const firstSettings = ordered[0]?.settings as Record<string, unknown> | undefined;
   const firstSnapshot = firstSettings?.savedSnapshot as { items?: { image_url?: string | null }[] } | undefined;
-  const collectionCover = collection.banner_url || (typeof firstSettings?.coverImageUrl === "string" ? firstSettings.coverImageUrl : null) || firstSnapshot?.items?.find(item => item.image_url)?.image_url || null;
+  const collectionCover = collectionBannerUrl || (typeof firstSettings?.coverImageUrl === "string" ? firstSettings.coverImageUrl : null) || firstSnapshot?.items?.find(item => item.image_url)?.image_url || null;
   return <main className="public-profile-page collection-detail-page">
     <Link href={"/u/" + profile.username} className="public-profile-back"><ArrowLeft size={15}/> {profile.display_name || profile.username}</Link>
     <section className="profile-cover collection-detail-cover" style={collectionCover ? { backgroundImage: "linear-gradient(90deg,rgba(18,14,11,.82),rgba(18,14,11,.15)),url(" + collectionCover + ")" } : undefined}>
