@@ -1022,3 +1022,11 @@
 .renq-reveal-grade-score strong{font-size:19px;letter-spacing:-.03em}
 .renq-reveal-grade-score span{font-size:11px;font-weight:800}
 .renq-reveal-summary-score{display:block;margin-top:4px;color:#bd8b55;font-size:10px;font-weight:700}
+
+
+.grade-published-unrated{display:grid;gap:8px;margin-top:24px;padding-top:18px;border-top:1px solid #eee8df}
+.grade-published-unrated-row{display:flex;align-items:center;gap:11px;min-height:58px;padding:9px 12px;border:1px solid #eee8df;border-radius:13px;background:#fbfaf8}
+.grade-published-unrated-row>img,.grade-published-unrated-row>.saved-renq-item-placeholder{width:38px;height:38px;flex:none;object-fit:cover;border-radius:9px}
+.grade-published-unrated-row>div{display:grid;gap:4px;min-width:0}
+.grade-published-unrated-row strong{overflow:hidden;color:#443c34;font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+.grade-published-unrated-row small{color:#a49a8e;font-size:9px}
