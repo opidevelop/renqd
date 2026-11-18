@@ -319,8 +319,8 @@ async function loadMusicBrainzItems(payload:Record<string,unknown>,contentType:s
  const params=new URLSearchParams({artist:id,inc:"release-groups",fmt:"json",limit:"100"});
  const data=await musicBrainzJson<{releases?:MusicBrainzRelease[]}>(`${MUSICBRAINZ}/release?${params}`);
  const artistName=typeof payload.artistName==="string"?payload.artistName:"";
- return(data.releases??[]).filter(release=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";}).map(release=>({
-  id:release.id,title:release.title,subtitle:[release["release-group"]?.["primary-type"],release.date?.slice(0,4),release.country].filter(Boolean).join(" · ")||undefined,
+ return(data.releases??[]).filter(release=>Boolean(release.id&&release.title)&&(()=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";})()).map(release=>({
+  id:release.id as string,title:release.title as string,subtitle:[release["release-group"]?.["primary-type"],release.date?.slice(0,4),release.country].filter(Boolean).join(" · ")||undefined,
   imageUrl:"https://coverartarchive.org/release/"+release.id+"/front-250",spotifyUrl:spotifySearchUrl(`${artistName} ${release.title}`)
  }));
 }
