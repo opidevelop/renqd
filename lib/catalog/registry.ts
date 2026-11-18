@@ -65,6 +65,10 @@ const booksProvider: CatalogProvider = {
 };
 const providers: CatalogProvider[] = [musicProvider("itunes"), musicProvider("musicbrainz"), gamesProvider, filmProvider, booksProvider];
 
+function normalizeMusicSearchValue(value: string) {
+  return value.normalize("NFKD").replace(/\\p{Diacritic}/gu, "").toLocaleLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
 export async function searchCatalog(query: string, category: CatalogCategory, contentType: string, offset = 0, discipline = "") {
   if (category === "sport") { const params = new URLSearchParams({ provider: "sports", action: "search", contentType, query, offset: String(offset), discipline }); try { const response = await fetch("/api/catalog/sport?" + params.toString()); if (!response.ok) { const body = await response.json().catch(() => null) as { error?: string } | null; throw new Error(body?.error ?? "Sport catalog request failed"); } return await response.json() as { status: "ready" | "error" | "unavailable"; entities: CatalogEntity[]; hasMore?: boolean; nextOffset?: number }; } catch { return { status: "error" as const, entities: [] as CatalogEntity[] }; } }
   const matching = providers.filter((provider) => provider.supports(category, contentType));
@@ -81,7 +85,20 @@ export async function searchCatalog(query: string, category: CatalogCategory, co
   }
   return {
     status: unique.size ? "ready" as const : allFailed ? "error" as const : "ready" as const,
-    entities: [...unique.values()],
+    entities: (() => {
+      const merged = [...unique.values()];
+      if (category !== "music" || contentType !== "Album") return merged;
+      const normalizedQuery = normalizeMusicSearchValue(query);
+      const priority = (entity: CatalogEntity) => {
+        if (normalizeMusicSearchValue(entity.title) === normalizedQuery) return 0;
+        const artistName = (entity.subtitle ?? "").split(" · ")[0].trim();
+        if (artistName && normalizeMusicSearchValue(artistName) === normalizedQuery) return 1;
+        return 2;
+      };
+      return merged.map((entity, index) => ({ entity, index, priority: priority(entity) }))
+        .sort((a, b) => a.priority - b.priority || a.index - b.index)
+        .map(({ entity }) => entity);
+    })(),
     hasMore,
     nextOffset,
   };
