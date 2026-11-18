@@ -53,7 +53,7 @@ export default function DeleteAccountButton({
       ) : (
         <div className="admin-delete-confirmation" role="group" aria-label={"Eliminazione definitiva account " + username}>
           <strong><AlertTriangle size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 5 }}/> Eliminare definitivamente @{username}?</strong>
-          <p>L'account, tutti i suoi Renq, i dati personali collegati e i file caricati saranno eliminati. L'operazione non può essere annullata.</p>
+          <p>L’account, tutti i suoi Renq, i dati personali collegati e i file caricati saranno eliminati. L’operazione non può essere annullata.</p>
           <label htmlFor={"delete-account-confirm-" + targetUserId}>Per confermare, scrivi esattamente <b>{username}</b></label>
           <input
             id={"delete-account-confirm-" + targetUserId}
