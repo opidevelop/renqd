@@ -256,7 +256,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
 
   return (
     <main className="saved-renq-page">
-      <button className="saved-renq-back" type="button" onClick={() => router.push("/rankings")}><ArrowLeft size={17} /> I miei Renq</button>
+      <Link href="/rankings" className="saved-renq-back"><ArrowLeft size={17} /> I miei Renq</Link>
       <section className="saved-renq-hero">
         {cover ? <img className="saved-renq-cover" src={cover} alt="" style={{ objectPosition: `${currentCoverPosition.x}% ${currentCoverPosition.y}%` }} /> : <div className="saved-renq-cover saved-renq-cover-empty"><Trophy size={58} /></div>}
         <div className="saved-renq-cover-shade" />
