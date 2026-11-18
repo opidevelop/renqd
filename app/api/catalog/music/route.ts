@@ -235,7 +235,30 @@ async function searchMusicBrainz(query: string, contentType: string): Promise<Mu
   }));
 }
 
-async function loadItunesDiscographyTracks(payload:Record<string,unknown>):Promise<MusicItem[]>{const id=payload.artistId;if(typeof id!=="number"||!Number.isSafeInteger(id))throw new Error("Invalid iTunes artist identifier");const params=new URLSearchParams({id:String(id),entity:"song",limit:"200",country:"IT"});const data=await itunesJson<{results?:Array<Record<string,unknown>>}>(`${ITUNES}/lookup?${params}`);const artist=typeof payload.artistName==="string"?payload.artistName:"";return(data.results??[]).flatMap(entry=>{if(entry.wrapperType!=="track"||typeof entry.trackName!=="string")return[];return[{id:String(entry.trackId??entry.trackName),title:entry.trackName,subtitle:typeof entry.collectionName==="string"?entry.collectionName:artist,imageUrl:typeof entry.artworkUrl100==="string"?entry.artworkUrl100.replace("100x100","300x300"):undefined,previewUrl:typeof entry.previewUrl==="string"?entry.previewUrl:undefined,appleMusicUrl:typeof entry.trackViewUrl==="string"?entry.trackViewUrl:undefined,spotifyUrl:spotifySearchUrl(`${artist} ${entry.trackName}`)}];});}
+async function loadItunesDiscographyTracks(payload:Record<string,unknown>):Promise<MusicItem[]>{
+ const id=payload.artistId;
+ if(typeof id!=="number"||!Number.isSafeInteger(id))throw new Error("Invalid iTunes artist identifier");
+ const artist=typeof payload.artistName==="string"?payload.artistName:"";
+ // iTunes caps an artist lookup at 200 tracks. Resolve the artist in MusicBrainz
+ // first so the discography can include every release, including EPs and reissues.
+ if(artist){
+  try{
+   const matches=await searchMusicBrainz(artist,"Discografie");
+   const match=matches.find(entity=>normalizeMusicText(entity.title)===normalizeMusicText(artist));
+   const musicBrainzArtistId=match?.payload?.artistId;
+   if(typeof musicBrainzArtistId==="string"){
+    const completeTracks=await loadMusicBrainzDiscographyTracks({artistId:musicBrainzArtistId,artistName:artist});
+    if(completeTracks.length)return completeTracks;
+   }
+  }catch{}
+ }
+ const params=new URLSearchParams({id:String(id),entity:"song",limit:"200",country:"IT"});
+ const data=await itunesJson<{results?:Array<Record<string,unknown>>}>(`${ITUNES}/lookup?${params}`);
+ return(data.results??[]).flatMap(entry=>{
+  if(entry.wrapperType!=="track"||typeof entry.trackName!=="string")return[];
+  return[{id:String(entry.trackId??entry.trackName),title:entry.trackName,subtitle:typeof entry.collectionName==="string"?entry.collectionName:artist,imageUrl:typeof entry.artworkUrl100==="string"?entry.artworkUrl100.replace("100x100","300x300"):undefined,previewUrl:typeof entry.previewUrl==="string"?entry.previewUrl:undefined,appleMusicUrl:typeof entry.trackViewUrl==="string"?entry.trackViewUrl:undefined,spotifyUrl:spotifySearchUrl(`${artist} ${entry.trackName}`)}];
+ });
+}
 
 async function loadItunesItems(payload: Record<string, unknown>, contentType: string): Promise<MusicItem[]> {
   const id = contentType === "Album" ? payload.collectionId : payload.artistId;
@@ -278,17 +301,6 @@ async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):
  const id=payload.artistId;
  if(typeof id!=="string"||!/^[0-9a-f-]{36}$/i.test(id))throw new Error("Invalid MusicBrainz artist identifier");
  const artist=typeof payload.artistName==="string"?payload.artistName:"";
- if(artist){
-  try{
-   const params=new URLSearchParams({term:artist,entity:"musicArtist",limit:"5",country:"IT"});
-   const search=await itunesJson<{results?:Array<Record<string,unknown>>}>(`${ITUNES}/search?${params}`);
-   const match=(search.results??[]).find(entry=>entry.wrapperType==="artist"&&typeof entry.artistId==="number"&&normalizeMusicText(String(entry.artistName??""))===normalizeMusicText(artist));
-   if(match&&typeof match.artistId==="number"){
-    const tracks=await loadItunesDiscographyTracks({artistId:match.artistId,artistName:artist});
-    if(tracks.length)return tracks;
-   }
-  }catch{}
- }
  try{
   const releaseData=await browseMusicBrainzReleases(id,"recordings+release-groups");
   const releases=releaseData.filter(release=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";});
