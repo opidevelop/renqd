@@ -133,8 +133,9 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     if(target<0||target>=next.length)return;
     if(next[index].score===null||next[index].score===undefined||next[index].score!==next[target].score)return;
     const firstOrder=next[index].tie_order??index,secondOrder=next[target].tie_order??target;
-    next[index]={...next[index],tie_order:secondOrder};
-    next[target]={...next[target],tie_order:firstOrder};
+    const firstItem=next[index],secondItem=next[target];
+    next[index]={...secondItem,tie_order:firstOrder};
+    next[target]={...firstItem,tie_order:secondOrder};
     setEditItems(next);
   }
 
