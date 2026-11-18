@@ -25,7 +25,20 @@ export function RenqCoverPicker({ value, onChange, onReset, canReset = false, fo
   useEffect(() => { setFocus(focusPosition); }, [focusPosition.x, focusPosition.y]);
   function changeFocus(axis: "x" | "y", value: number) { const next = { ...focus, [axis]: value }; setFocus(next); onFocusPreview?.(next); }
   function commitFocus() { onFocusChange?.(focus); }
-  function applyUrl(){setError("");try{const parsed=new URL(urlInput.trim());if(parsed.protocol!=="https:"||parsed.username||parsed.password)throw new Error();onChange(null,parsed.toString());setUrlInput("");}catch{setError("Inserisci un indirizzo HTTPS valido.");}}
+  async function applyUrl(){
+    setError("");
+    let parsed:URL;
+    try{parsed=new URL(urlInput.trim());if(parsed.protocol!=="https:"||parsed.username||parsed.password)throw new Error();}
+    catch{setError("Inserisci un indirizzo HTTPS valido.");return;}
+    const valid=await new Promise<boolean>(resolve=>{
+      const image=new Image();let settled=false;
+      const finish=(value:boolean)=>{if(settled)return;settled=true;window.clearTimeout(timeout);resolve(value);};
+      const timeout=window.setTimeout(()=>finish(false),10000);
+      image.referrerPolicy="no-referrer";image.onload=()=>finish(true);image.onerror=()=>finish(false);image.src=parsed.toString();
+    });
+    if(!valid){setError("L’URL non restituisce un’immagine valida o non è raggiungibile.");return;}
+    onChange(null,parsed.toString());setUrlInput("");
+  }
 
   async function upload(file?: File) {
     if (!file) return;
