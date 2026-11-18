@@ -20,11 +20,11 @@ export async function POST(request:Request){
   return NextResponse.json({ok:true,title:clean});
  }
  if(body.action==="update-published-renq"){
-  const {rankingId,title,orderedIds,tieMap={},visibility,access}=body as {rankingId:string;title:string;orderedIds:string[];tieMap?:Record<string,string>;visibility?:string;access?:string};
+  const {rankingId,title,orderedIds,tieMap={}}=body as {rankingId:string;title:string;orderedIds:string[];tieMap?:Record<string,string>};
   const cleanTitle=typeof title==="string"?title.trim():"";
   if(!rankingId||!cleanTitle||cleanTitle.length>80)return jsonError("Il titolo deve contenere da 1 a 80 caratteri.");
   if(!Array.isArray(orderedIds)||orderedIds.length<1||orderedIds.length>100||new Set(orderedIds).size!==orderedIds.length||orderedIds.some(id=>typeof id!=="string"))return jsonError("Ordine degli elementi non valido.");
-  const {data:ranking,error:rankingLookupError}=await supabase.from("rankings").select("id,title,status,settings,visibility").eq("id",rankingId).eq("user_id",user.id).is("deleted_at",null).maybeSingle();
+  const {data:ranking,error:rankingLookupError}=await supabase.from("rankings").select("id,title,status,settings").eq("id",rankingId).eq("user_id",user.id).is("deleted_at",null).maybeSingle();
   if(rankingLookupError||!ranking||ranking.status!=="COMPLETED"||!(ranking.settings as Record<string,unknown>|null)?.savedAt)return jsonError("Renq pubblicato non trovato o non modificabile.",404);
   const {data:rows,error:rowsError}=await supabase.from("ranking_items").select("id,rank_position,tie_group_id").eq("ranking_id",rankingId);
   if(rowsError||!rows)return jsonError(rowsError?.message??"Impossibile leggere gli elementi.",500);
@@ -53,10 +53,6 @@ export async function POST(request:Request){
    changedIds.push(id);
   }
   const settings=(ranking.settings??{}) as Record<string,unknown>;
-  const nextVisibility=visibility===undefined?ranking.visibility:visibility;
-  if(nextVisibility!=="LIVE"&&nextVisibility!=="REVEAL")return jsonError("Visibilità non valida.");
-  const nextAccess=access===undefined?(settings.access==="private"?"private":"public"):access;
-  if(nextAccess!=="public"&&nextAccess!=="private")return jsonError("Accesso non valido.");
   const savedSnapshot=settings.savedSnapshot as {items?:Array<Record<string,unknown>>}|undefined;
   const snapshotItems=savedSnapshot?.items;
   if(!Array.isArray(snapshotItems)||snapshotItems.length!==orderedIds.length){
@@ -69,19 +65,19 @@ export async function POST(request:Request){
    for(const id of changedIds){const previous=rowById.get(id)!;await supabase.from("ranking_items").update({rank_position:previous.rank_position,tie_group_id:previous.tie_group_id}).eq("id",id).eq("ranking_id",rankingId);}
    return jsonError("Snapshot incompleto: impossibile salvare la modifica.",500);
   }
-  const nextSettings={...settings,access:nextAccess,savedSnapshot:{...savedSnapshot,items:nextItems}};
-  const {error:saveError}=await supabase.from("rankings").update({title:cleanTitle,visibility:nextVisibility,settings:nextSettings,updated_at:new Date().toISOString()}).eq("id",rankingId).eq("user_id",user.id);
+  const nextSettings={...settings,savedSnapshot:{...savedSnapshot,items:nextItems}};
+  const {error:saveError}=await supabase.from("rankings").update({title:cleanTitle,settings:nextSettings,updated_at:new Date().toISOString()}).eq("id",rankingId).eq("user_id",user.id);
   if(saveError){
    for(const id of changedIds){const previous=rowById.get(id)!;await supabase.from("ranking_items").update({rank_position:previous.rank_position,tie_group_id:previous.tie_group_id}).eq("id",id).eq("ranking_id",rankingId);}
    return jsonError(saveError.message,500);
   }
   const {data:version,error:revisionError}=await supabase.rpc("renqd_record_revision",{p_ranking_id:rankingId,p_change_summary:"Modifica classifica pubblicata"});
   if(revisionError){
-   await supabase.from("rankings").update({title:ranking.title,visibility:ranking.visibility,settings:ranking.settings}).eq("id",rankingId).eq("user_id",user.id);
+   await supabase.from("rankings").update({title:ranking.title,settings:ranking.settings}).eq("id",rankingId).eq("user_id",user.id);
    for(const id of changedIds){const previous=rowById.get(id)!;await supabase.from("ranking_items").update({rank_position:previous.rank_position,tie_group_id:previous.tie_group_id}).eq("id",id).eq("ranking_id",rankingId);}
    return jsonError(revisionError.message,500);
   }
-  return NextResponse.json({ok:true,title:cleanTitle,visibility:nextVisibility,access:nextAccess,version,items:nextItems});
+  return NextResponse.json({ok:true,title:cleanTitle,version,items:nextItems});
  }
  if(body.action==="start-battle"){
   const {rankingId,pairs,difficulty}=body as {rankingId:string;pairs:{a:string;b:string}[];difficulty:string};
