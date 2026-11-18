@@ -61,6 +61,8 @@
 11. La moderazione deve essere tracciata nell'audit log. Il Renq moderato con «Elimina» resta recuperabile dal cestino; non è una cancellazione definitiva.
 12. **Solo OWNER può cancellare un account.** La cancellazione è completa e irreversibile: elimina l'utente da Auth e tutti i dati/contenuti collegati, inclusi tutti i Renq di ogni modalità, elementi, sessioni, revisioni, raccolte, commenti, like e altri dati personali associati. Gli eventuali record di audit da conservare devono essere anonimizzati. L'ultimo OWNER attivo non può essere eliminato.
 
+13. Quando un MODERATOR nasconde un Renq, il contenuto diventa invisibile a tutti gli utenti ordinari, incluso il suo autore. Resta consultabile e gestibile esclusivamente da OWNER, ADMIN e MODERATOR. La visibilità nascosta è distinta dal cestino: il contenuto non viene eliminato e può essere reso nuovamente visibile.
+
 ## 4. Architettura dati e conservazione
 
 1. Le modifiche ai dati devono rispettare le migrazioni versionate in `supabase/migrations`.
