@@ -66,7 +66,7 @@ export default function ReportRenqMenu({ rankingId, alreadyReported }: {
           <textarea id="report-renq-details" value={details} onChange={event => setDetails(event.target.value)} maxLength={1000} rows={3} placeholder="Aggiungi informazioni utili per la revisione..."/>
           <div className="report-renq-dialog-actions"><small>{details.length}/1000</small><button type="button" disabled={!reason} onClick={() => setConfirming(true)}>Continua</button></div>
         </> : <>
-          <p>Confermi l&apos;invio della segnalazione per questo Renq? La segnalazione sarà esaminata dal team di moderazione. Non potrai inviarne un&apos;altra per lo stesso contenuto.</p>
+          <p>Confermi l'invio della segnalazione per questo Renq? La segnalazione sarà esaminata dal team di moderazione. Non potrai inviarne un'altra per lo stesso contenuto.</p>
           {feedback && <div className="report-renq-feedback is-error">{feedback.message}</div>}
           <div className="report-renq-dialog-actions"><button type="button" className="is-quiet" onClick={() => setConfirming(false)}>Indietro</button><button type="button" disabled={pending} onClick={submit}>{pending ? <LoaderCircle size={14} className="report-renq-spin"/> : <Flag size={14}/>} Conferma invio</button></div>
         </>}

@@ -25,7 +25,9 @@ export default async function PublicRenqPage({ params }: { params: Promise<{ slu
   const snapshot = (settings.savedSnapshot ?? {}) as { items?: { id?:string; title:string; image_url?:string|null; description?:string|null; rank_position?:number|null }[] };
   const items = (snapshot.items ?? []).slice().sort((a,b)=>(a.rank_position??999)-(b.rank_position??999));
   const { data: profile } = await supabase.from("public_profiles").select("username,display_name").eq("user_id", ranking.user_id).maybeSingle();
-  const canReport = actor?.status === "APPROVED" && user.id !== ranking.user_id;
+  const canReport = actor?.status === "APPROVED" && user.id !== ranking.user_id
+    && !ranking.hidden_at && !ranking.deleted_at && ranking.visibility === "LIVE"
+    && (settings as Record<string, unknown>).access !== "private";
   const reportStatus = canReport ? await supabase.rpc("ranking_report_exists", { p_ranking_id: ranking.id }) : { data: false };
   const cover = typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null;
   const position = settings.coverPosition && typeof settings.coverPosition === "object" ? settings.coverPosition as {x:number;y:number} : {x:50,y:50};
