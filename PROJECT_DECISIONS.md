@@ -196,3 +196,4 @@
 
 14. La console MODERATOR deve mostrare **tutti i Renq pubblicati**, non soltanto quelli segnalati. Deve inoltre offrire un filtro dedicato alle segnalazioni ricevute, così da distinguere la coda delle segnalazioni dalla consultazione generale dei contenuti.
 15. Quando un MODERATOR nasconde o sposta nel cestino un Renq per cui esistono segnalazioni aperte, tali segnalazioni devono essere **chiuse automaticamente come risolte**. La risoluzione deve essere coerente e atomica con l'operazione di moderazione, e lasciare traccia nell'audit log.
+16. Nella console MODERATOR, l'elenco generale deve includere tutti i Renq pubblicati, compresi quelli nascosti. I Renq nel cestino devono essere consultabili separatamente, tramite una sezione o un filtro distinto.
