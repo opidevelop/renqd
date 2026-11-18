@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireApprovedUser } from "@/lib/supabase/authorization";
 import { ArrowLeft, Trophy } from "lucide-react";
 
 export const dynamic = "force-dynamic";
