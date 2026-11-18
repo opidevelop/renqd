@@ -62,6 +62,7 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
       const result=await response.json();
       if(!response.ok)throw new Error(result.error??"Non è stato possibile eliminare il Renq.");
       setItems(current=>current.filter(row=>row.id!==item.id));
+      setDeletedIds(current=>current.includes(item.id)?current:[...current,item.id]);
       setMessage("Renq spostato nel cestino.");
     }catch(cause){setError(cause instanceof Error?cause.message:"Non è stato possibile eliminare il Renq.");}
   }
