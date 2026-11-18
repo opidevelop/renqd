@@ -22,9 +22,10 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
   const [loading,setLoading] = useState(false);
   const [error,setError] = useState("");
   const [message,setMessage] = useState("");
+  const [deletedIds,setDeletedIds] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!query.trim() && !category && !mode) { setItems(initialItems); return; }
+    if (!query.trim() && !category && !mode) return;
     const controller = new AbortController();
     const timeout = window.setTimeout(async () => {
       setLoading(true); setError("");
@@ -45,7 +46,7 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
     return () => { window.clearTimeout(timeout); controller.abort(); };
   }, [query,category,mode,initialItems]);
 
-  const filteredItems = items;
+  const filteredItems = !query.trim() && !category && !mode ? initialItems.filter(item => !deletedIds.includes(item.id)) : items;
   const visibleItems = [...filteredItems].sort((a,b) => {
     if (sortOrder === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     if (sortOrder === "title_asc") return a.title.localeCompare(b.title, "it", { sensitivity: "base" });
