@@ -254,4 +254,12 @@
 - La nota sulla pubblicazione parziale deve essere visivamente distanziata dal pulsante di pubblicazione.
 - Le liste lunghe di elementi/risultati devono essere contenute in aree con scroll interno, senza aumentare inutilmente l'altezza complessiva della pagina.
 - Il badge di modalità Grade nelle card del profilo e negli elenchi personali deve mostrare **Grade**, non il fallback generico «Renq».
-- Il limite di 100 elementi resta invariato: il problema segnalato non era causato dal superamento di tale limite.
+- Il limite artificiale di 100 elementi per singolo Renq è stato rimosso: non va reintrodotto nell'interfaccia, nelle API o nel database. Eventuali limiti tecnici o dei cataloghi sorgente vanno gestiti separatamente e non confusi con un limite della classifica.
+
+
+### Decisione approvata il 18 novembre 2026 — rimozione limite elementi per Renq
+- Non deve esistere un limite artificiale di 100 elementi per un singolo Renq, indipendentemente dalla modalità (Renq, Battle Renq, Speed Renq o Grade).
+- La creazione, la modifica, l'ordinamento e la pubblicazione devono accettare classifiche con più di 100 elementi.
+- Il limite deve essere rimosso in tutti i livelli coinvolti: interfaccia, API, funzioni RPC e vincoli del database.
+- Le etichette Grade basate sulla posizione devono poter coprire anche posizioni successive alla 100.
+- I limiti di un catalogo esterno o della piattaforma di trasporto sono distinti dal limite applicativo della classifica e devono essere dichiarati/gestiti separatamente.

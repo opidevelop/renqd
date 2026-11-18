@@ -7,7 +7,7 @@
 > **Aggiornato:** 18 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `50c6ed119541066011a1e4be863e6e30cbbe4347`
+> **Ultimo commit applicativo analizzato su main:** `6cba817dc3721c91da66655002b4ceaa82e30c97`
 
 ## 1. Sintesi esecutiva
 
@@ -494,3 +494,26 @@ Revisione della migrazione di hardening:
 - Vercel Production deployment `dpl_BB1dnVnJ73uY3km7HpXbGRU2b7E8`: **READY**, commit `50c6ed119541066011a1e4be863e6e30cbbe4347`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app` associati.
 - Smoke test anonimo: `/login` risponde 200; `/create` e `/home` vengono reindirizzate a `/login`, coerentemente con la piattaforma chiusa.
 - Il collaudo funzionale autenticato delle nuove impostazioni Grade, delle liste lunghe e delle card profilo resta da eseguire su mobile e desktop.
+
+
+## 16. Rimozione del limite di 100 elementi per Renq — 18 novembre 2026
+
+### Decisione
+- Rimosso il limite artificiale di 100 elementi per tutte le modalità: Renq, Battle Renq, Speed Renq e Grade.
+- La classifica può contenere più di 100 elementi; restano soltanto i limiti tecnici intrinseci del database, delle richieste e degli eventuali cataloghi esterni, che non costituiscono un tetto applicativo di 100.
+
+### Implementazione repository
+- Commit applicativo su `main`: `6cba817dc3721c91da66655002b4ceaa82e30c97`.
+- `components/create-renq-form.tsx`: rimossi i blocchi a 100 elementi per selezione multipla dal catalogo e inserimento manuale; le etichette Grade per posizione arrivano oltre il centesimo posto.
+- `app/api/rankings/route.ts`: rimossi i controlli `>100` dalla creazione e dal riordino del Renq pubblicato; aggiornato il range massimo delle etichette Grade per posizione.
+- `components/saved-renq-detail.tsx`: aggiornati gli intervalli Grade per posizione anche nell'editor pubblicato.
+- Migrazione `supabase/migrations/20261118201740_renqd_remove_100_item_ranking_limit.sql`: rimosso il tetto `sort_order <= 100` mantenendo `sort_order >= 1`; sostituita `renqd_create_ranking_with_items` rimuovendo il controllo sul numero massimo di elementi e preservando autenticazione, approvazione, validazione dei titoli e registrazione revisioni.
+
+### Database e verifiche
+- Migrazione applicata a Supabase; versione registrata `20261118201740`.
+- Vincolo live verificato: `CHECK (sort_order >= 1)`; la funzione RPC live non contiene più il controllo `jsonb_array_length(items) > 100`.
+- Test SQL transazionale con 101 elementi: `renqd_create_ranking_with_items` ha creato correttamente il Renq di prova; transazione annullata con `ROLLBACK` e verifica successiva: zero ranking di test persistenti.
+- GitHub Actions Code quality run **#116 / 44389478763** sul commit applicativo: **success**; TypeScript, ESLint e build di produzione superati.
+- Il commit successivo di riallineamento del nome file migrazione è `02de964156d9f62eeaa6e96f30b551d6aa90c6fe`; il relativo run CI #117 e il deployment Vercel erano ancora in corso al momento di questo aggiornamento documentale.
+- Vercel Production deployment `dpl_BZ7x2z5ans6WFXCJCTYgEusbauGe`: **READY**, commit applicativo `6cba817dc3721c91da66655002b4ceaa82e30c97`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app` associati.
+- Test funzionale dal browser autenticato per la creazione e la pubblicazione di Renq con oltre 100 elementi resta da eseguire. Il test SQL verifica la RPC e il database, ma non sostituisce il collaudo UI end-to-end.
