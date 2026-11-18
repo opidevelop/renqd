@@ -192,10 +192,8 @@ export async function deleteAdminAccount(
 
   revalidatePath("/admin");
   revalidatePath("/admin/users/" + targetUserId);
-  return {
-    ok: true,
-    ...(data.auditLogged === false
-      ? { error: "Account eliminato, ma non è stato possibile registrare l'evento nell'audit log." }
-      : {}),
-  };
+  if (data.auditLogged === false) {
+    console.error("Renqd account deletion completed without an audit log entry.", targetUserId);
+  }
+  return { ok: true };
 }
