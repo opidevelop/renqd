@@ -28,6 +28,8 @@ export async function POST(request:Request){
   if(rankingLookupError||!ranking||ranking.status!=="COMPLETED"||!(ranking.settings as Record<string,unknown>|null)?.savedAt)return jsonError("Renq pubblicato non trovato o non modificabile.",404);
   const {data:rows,error:rowsError}=await supabase.from("ranking_items").select("id,rank_position,tie_group_id").eq("ranking_id",rankingId);
   if(rowsError||!rows)return jsonError(rowsError?.message??"Impossibile leggere gli elementi.",500);
+  const {error:revisionError}=await supabase.rpc("renqd_record_revision",{p_ranking_id:rankingId,p_change_summary:"Avvio di una nuova Battle"});
+  if(revisionError)return jsonError(revisionError.message,500);
   const rowById=new Map(rows.map(row=>[row.id,row]));
   if(rows.length!==orderedIds.length||orderedIds.some(id=>!rowById.has(id)))return jsonError("La lista degli elementi non corrisponde alla classifica.");
   const safeTieMap=tieMap&&typeof tieMap==="object"?tieMap:{};
