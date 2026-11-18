@@ -7,7 +7,7 @@
 > **Aggiornato:** 18 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `6cba817dc3721c91da66655002b4ceaa82e30c97`
+> **Ultimo commit applicativo analizzato su main:** `6223a57e1f828809b42d377a09585831fa551989`
 
 ## 1. Sintesi esecutiva
 
@@ -507,13 +507,15 @@ Revisione della migrazione di hardening:
 - `components/create-renq-form.tsx`: rimossi i blocchi a 100 elementi per selezione multipla dal catalogo e inserimento manuale; le etichette Grade per posizione arrivano oltre il centesimo posto.
 - `app/api/rankings/route.ts`: rimossi i controlli `>100` dalla creazione e dal riordino del Renq pubblicato; aggiornato il range massimo delle etichette Grade per posizione.
 - `components/saved-renq-detail.tsx`: aggiornati gli intervalli Grade per posizione anche nell'editor pubblicato.
+- `app/api/catalog/music/route.ts`: il fallback MusicBrainz per le discografie paginate usa blocchi da 100 risultati con `offset` e continua fino al totale dichiarato dal catalogo; 100 è solo la dimensione della pagina, non un tetto alla discografia.
 - Migrazione `supabase/migrations/20261118201740_renqd_remove_100_item_ranking_limit.sql`: rimosso il tetto `sort_order <= 100` mantenendo `sort_order >= 1`; sostituita `renqd_create_ranking_with_items` rimuovendo il controllo sul numero massimo di elementi e preservando autenticazione, approvazione, validazione dei titoli e registrazione revisioni.
 
 ### Database e verifiche
 - Migrazione applicata a Supabase; versione registrata `20261118201740`.
 - Vincolo live verificato: `CHECK (sort_order >= 1)`; la funzione RPC live non contiene più il controllo `jsonb_array_length(items) > 100`.
 - Test SQL transazionale end-to-end con 101 elementi: `renqd_create_ranking_with_items` e `renqd_complete_ranking` hanno completato correttamente il Renq; il risultato include la posizione 101. Transazione annullata con `ROLLBACK` e verifica successiva: zero ranking di test persistenti.
-- GitHub Actions Code quality run **#116 / 44389478763** sul commit applicativo: **success**; TypeScript, ESLint e build di produzione superati.
+- GitHub Actions Code quality run **#116 / 44389478763** sul commit `6cba817dc3721c91da66655002b4ceaa82e30c97`: **success**; TypeScript, ESLint e build di produzione superati.
+- GitHub Actions Code quality run **#120 / 44390542253** sul commit applicativo finale `6223a57e1f828809b42d377a09585831fa551989`: **success**; TypeScript, ESLint e build di produzione superati.
 - Il commit di riallineamento del nome file migrazione è `02de964156d9f62eeaa6e96f30b551d6aa90c6fe`; GitHub Actions Code quality run **#117 / 44389589575**: **success**. Il successivo aggiornamento documentale è `6f09f272dd577f807ee4574df830d93d791fbca0`; run **#118 / 44389889808**: **success**.
-- Vercel Production deployment applicativo `dpl_BZ7x2z5ans6WFXCJCTYgEusbauGe`: **READY**, commit `6cba817dc3721c91da66655002b4ceaa82e30c97`. Ultimo deployment Production `dpl_H9czuSkMJ9bDDGMHxaRBxdLMXK8w`: **READY**, commit `6f09f272dd577f807ee4574df830d93d791fbca0`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app` associati.
+- Vercel Production deployment applicativo finale `dpl_2RNXMoswPTfsfUbmS66Aw7ryEeM5`: **READY**, commit `6223a57e1f828809b42d377a09585831fa551989`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app` associati.
 - Test funzionale dal browser autenticato per la creazione e la pubblicazione di Renq con oltre 100 elementi resta da eseguire. Il test SQL verifica la RPC e il database, ma non sostituisce il collaudo UI end-to-end.
