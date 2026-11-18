@@ -519,3 +519,19 @@ Revisione della migrazione di hardening:
 - Il commit di riallineamento del nome file migrazione è `02de964156d9f62eeaa6e96f30b551d6aa90c6fe`; GitHub Actions Code quality run **#117 / 44389589575**: **success**. Il successivo aggiornamento documentale è `6f09f272dd577f807ee4574df830d93d791fbca0`; run **#118 / 44389889808**: **success**.
 - Vercel Production deployment applicativo finale `dpl_2RNXMoswPTfsfUbmS66Aw7ryEeM5`: **READY**, commit `6223a57e1f828809b42d377a09585831fa551989`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app` associati.
 - Test funzionale dal browser autenticato per la creazione e la pubblicazione di Renq con oltre 100 elementi resta da eseguire. Il test SQL verifica la RPC e il database, ma non sostituisce il collaudo UI end-to-end.
+
+
+## 17. Correzione inserimento decimali in Grade — 18 novembre 2026
+
+### Problema
+- Durante la valutazione iniziale, il primo carattere numerico valido (ad esempio `1`) veniva immediatamente scritto nello stato del punteggio. L elemento passava subito dalla lista «Da valutare» alla classifica valutata, smontando il campo e interrompendo la digitazione di valori come `10` o `7,5`.
+
+### Correzione repository
+- `components/grade-experience.tsx`: introdotto `GradeScoreInput`, che mantiene la digitazione in uno stato locale e comunica il voto al ranking soltanto al blur o alla pressione di Invio.
+- Accettati sia virgola sia punto come separatore decimale; i voti validi vengono normalizzati a una cifra decimale dopo il completamento dell inserimento. Il valore `10` viene riconosciuto come `10,0` e non viene salvato come `1` durante la digitazione.
+- La modifica riguarda l inserimento dei voti nella fase di creazione Grade; ordinamento, pari merito, media e validazione server restano invariati.
+
+### Verifiche
+- Commit applicativo su `main`: in attesa di CI.
+- Test manuale autenticato per `10`, `7,5`, `7.5`, `0` e cancellazione del voto: da eseguire dopo il rilascio.
+- Nessuna modifica a database, migrazioni o dati applicativi.
