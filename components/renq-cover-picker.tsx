@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ImagePlus, RotateCcw, LoaderCircle, Link2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -20,9 +20,12 @@ export function RenqCoverPicker({ value, onChange, onReset, canReset = false, fo
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [urlInput,setUrlInput]=useState("");
+  const [previousFocus, setPreviousFocus] = useState(focusPosition);
   const [focus, setFocus] = useState(focusPosition);
-
-  useEffect(() => { setFocus(focusPosition); }, [focusPosition.x, focusPosition.y]);
+  if (previousFocus.x !== focusPosition.x || previousFocus.y !== focusPosition.y) {
+    setPreviousFocus(focusPosition);
+    setFocus(focusPosition);
+  }
   function changeFocus(axis: "x" | "y", value: number) { const next = { ...focus, [axis]: value }; setFocus(next); onFocusPreview?.(next); }
   function commitFocus() { onFocusChange?.(focus); }
   async function applyUrl(){
