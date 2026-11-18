@@ -404,17 +404,18 @@ Revisione della migrazione di hardening:
 
 ### Implementazione repository
 - `components/auth-submit-button.tsx` e `app/(auth)/login/page.tsx`: stato pending con spinner dentro il pulsante Accedi.
-- `app/api/catalog/music/route.ts`: priorità ai match esatti del titolo album prima di cercare l'artista esatto e i risultati parziali, sia su iTunes sia su MusicBrainz.
+- `app/api/catalog/music/route.ts` e `lib/catalog/registry.ts`: priorità globale tra provider ai match esatti del titolo album, poi agli album dell'artista esatto, infine ai risultati parziali; ordinamento stabile anche quando iTunes e MusicBrainz restituiscono risultati concorrenti.
 - `components/create-renq-form.tsx`: cambio Album/Brani con reset di query, risultati, selezione e paginazione; rimossa la copertina personalizzata dal builder; scroll automatico ai nuovi passaggi; barra di avanzamento durante la creazione.
-- `components/platform-shell.tsx` e `app/(platform)/platform.css`: transizione breve al cambio di pathname per tutte le pagine interne.
+- `app/layout.tsx`, `components/page-transition.tsx` e `app/globals.css`: transizione breve al cambio di pathname a livello root, così copre anche le pagine interne fuori da PlatformShell (profili pubblici, collezioni e reveal), mantenendo stabili gli header locali e globale.
 - `components/renq-experience.tsx`: nascosta l'azione Elimina Renq esclusivamente nella schermata iniziale della Battle non avviata.
 - `components/renq-ranking-ui.tsx` e `app/api/rankings/route.ts`: calcolo progressivo delle posizioni e normalizzazione dei gruppi ex aequo contigui nell'editor pubblicato.
 - `supabase/migrations/20261118161155_renqd_progressive_tie_positions.sql`: sostituisce le tre RPC Classic/riordino/Speed mantenendo le verifiche di ownership, approvazione, stato e hidden; i gruppi ex aequo condividono la posizione soltanto se consecutivi. Migrazione applicata al database live.
-- `app/(platform)/platform.css`: contenitori delle liste lunghe con scroll interno; `app/(auth)/auth.css`: animazione dello spinner con rispetto di prefers-reduced-motion.
+- `app/(platform)/platform.css`: contenitori delle liste lunghe con scroll interno nel builder, nell'esperienza ranking, nell'editor e nel risultato pubblicato; `app/(auth)/auth.css`: animazione dello spinner con rispetto di `prefers-reduced-motion`.
 
 ### Verifiche e limiti
-- Commit applicativo `eceec07122b21df7781a2e719f593eeb21be27d1`: GitHub Actions `Code quality` run #65 concluso con `success`; TypeScript, ESLint e build di produzione superati.
-- Vercel Production: deployment `dpl_8ixoBXpGGG99g26q9k2z3gSdtaSz`, commit `eceec07122b21df7781a2e719f593eeb21be27d1`, stato `READY`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app`.
+- Commit applicativi: `eceec07122b21df7781a2e719f593eeb21be27d1` (UX principale), `a9874167fe822860be837cfecfbc7ef6573e5135` (transizioni globali), `112dc78fde6f871c4ec3ac8d9ecc8c7d48d2a4b4` (scroll del risultato pubblicato), `d0c96e2126e6fb0302befbfff8075395811dd1d6` (priorità globale catalogo, prima verifica ha rilevato un escape errato), `0e004ba920de64885f87e17490de8d6b3f2dc236` (correzione regex). GitHub Actions `Code quality`: run #65, #66, #67, #68 e #70 conclusi con `success`; il run #69 è fallito sul controllo TypeScript per l'escape della regex, corretto nel commit successivo e verificato dal run #70.
+- Vercel Production: deployment `dpl_BqdmLawHWu5U66BFkixd9jV4XjRS`, commit `0e004ba920de64885f87e17490de8d6b3f2dc236`, stato `READY`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app`.
 - Migrazione Supabase `20261118161155_renqd_progressive_tie_positions` applicata con successo. Verifica SQL read-only della regola progressiva: posizioni attese `1, 2, 2, 2, 3, 4, 4, 5` per due gruppi ex aequo consecutivi e un elemento isolato. Le definizioni live delle tre RPC contengono il nuovo criterio.
+- Audit dati preesistenti: 51 Renq con risultati e 687 elementi classificati; **zero** posizioni non coerenti con la numerazione progressiva. Nessun dato applicativo è stato modificato dalla migrazione.
 - Advisor post-migrazione: nessun nuovo rilievo introdotto; restano i rilievi già noti (12 tabelle RLS senza policy, 26 funzioni SECURITY DEFINER eseguibili da authenticated, 27 FK senza indice, oltre agli altri warning già descritti nella sezione 6).
-- Test funzionali ancora da eseguire: login pending state, priorità album/artista sui cataloghi reali, cambio Album/Brani, creazione con barra di avanzamento, transizioni, scroll step, Battle iniziale, pari merito con gruppi numerosi e liste lunghe su mobile/desktop. Lo stato CI/Production READY non sostituisce questi test.
+- Test funzionali ancora da eseguire: login pending state, priorità album/artista sui cataloghi reali, cambio Album/Brani, creazione con barra di avanzamento, transizioni, scroll step, Battle iniziale, pari merito con gruppi numerosi e liste lunghe su mobile/desktop. CI e deployment non sostituiscono questi test.
