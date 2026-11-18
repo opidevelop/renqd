@@ -469,3 +469,10 @@ Revisione della migrazione di hardening:
 - **Deployment Production non completato:** Vercel ha rifiutato la creazione del deployment sul commit finale con HTTP 402, codice `api-deployments-free-per-day`: limite giornaliero del piano Hobby superato (risposta Vercel: riprovare dopo 24 ore oppure risolvere il requisito di piano/billing). Il runtime locale non dispone del Vercel CLI, quindi non è disponibile un fallback CLI autenticato. Nessuna impostazione di piano o billing è stata modificata.
 - L'ultimo deployment Production READY osservato resta quello sul commit `54f5d9109477eddf8650fdec092abb9dbbdf3cc5`, precedente alle ultime modifiche Grade. **Non dichiarare Grade disponibile su `renqd.app` finché un deployment del commit finale non risulta READY.**
 - Per completare il rilascio: dopo il ripristino della quota Vercel, creare un deployment Production dal branch `main` al commit `d11378869280d25c27357d41a0d4005bddcdc9fe`, attendere READY e poi svolgere il test funzionale autenticato su mobile e desktop.
+
+### Deployment Production Grade completato — 18 novembre 2026
+- Creato deployment Vercel Production `dpl_6Tjg6BvYJMQRcmuK6YhQsSNNg2ha` dal branch `main`, commit applicativo `d11378869280d25c27357d41a0d4005bddcdc9fe`.
+- Stato Vercel verificato: **READY**. Build Next.js completata; compilazione, controllo TypeScript, generazione pagine statiche e finalizzazione build completati senza errori.
+- Alias Production associati al deployment, incluso `https://renqd.app` (oltre a `renqd.vercel.app`, `renqd-opiteam.vercel.app` e `www.renqd.app`).
+- Smoke test HTTP autenticazione: `/login` risponde correttamente; richieste anonime a `/home` e `/create` vengono instradate a `/login`, coerentemente con il modello chiuso.
+- Il deployment conferma il rilascio del codice Grade in Production. Restano da eseguire i test funzionali autenticati end-to-end della modalità Grade su mobile e desktop; lo smoke test HTTP non li sostituisce.
