@@ -10,8 +10,9 @@
 
 ## 1. Regole inderogabili di lavoro
 
-1. **Si lavora soltanto su `main`.** Non creare branch `develop`, branch temporanei, feature branch o branch di prova. Non spostare il lavoro su altri branch.
+1. **Si lavora soltanto su `main`.** Non creare branch `develop`, branch temporanei, feature branch o branch di prova. Non spostare il lavoro su altri branch. Non creare branch Supabase o ambienti paralleli come scorciatoia senza richiesta esplicita.
 2. Prima di modificare il codice, leggere questo documento e `PROJECT_STATUS.md`.
+3. Rispettare l'ordine delle fasi concordato: Fase 2 Amministrazione → Fase 3 Database e conservazione → Fase 4 Esperienza Renqd → Fase 5 Profilo/cataloghi/collezioni → Fase 6 Rifinitura e test. Non saltare avanti autonomamente.
 3. Controllare il codice attuale e le migrazioni prima di intervenire: non presumere che una funzione sia assente o difettosa solo perché non è evidente dall'interfaccia.
 4. Distinguere sempre tra:
    - implementato nel repository;
@@ -24,6 +25,7 @@
 6. Non modificare impostazioni, integrazioni, dati o servizi esterni senza una ragione verificata e senza rispettare le decisioni qui riportate.
 7. Quando una richiesta sembra contraddire una decisione, non reinterpretare autonomamente il progetto: verificare la conversazione più recente e chiedere chiarimento se necessario. Una nuova decisione esplicita dell'utente può aggiornare questo documento.
 8. Non introdurre cambiamenti di UX, funzionalità o architettura solo perché sembrano convenzionali o «migliori»: Renqd deve rispettare le scelte approvate.
+9. La visibilità del repository GitHub è distinta dall'accesso alla piattaforma. Al 18 novembre 2026 il repository risulta pubblico; non cambiarne la visibilità senza una decisione esplicita dell'utente.
 
 ## 2. Accesso, privacy e modello chiuso
 
