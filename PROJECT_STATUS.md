@@ -532,6 +532,9 @@ Revisione della migrazione di hardening:
 - La modifica riguarda l inserimento dei voti nella fase di creazione Grade; ordinamento, pari merito, media e validazione server restano invariati.
 
 ### Verifiche
-- Primo run CI #121 / `44391151404`: TypeScript superato, ESLint ha segnalato la sincronizzazione dello stato locale tramite effect; rimossa la sincronizzazione ridondante, perché il componente mantiene e normalizza autonomamente la bozza al commit. Nuovo run CI sul commit correttivo: in attesa.
+- Primo run CI #122 / `44391151404`: TypeScript superato, ESLint ha segnalato la sincronizzazione dello stato locale tramite effect; rimossa la sincronizzazione ridondante, perché il componente mantiene e normalizza autonomamente la bozza al commit.
+- Commit applicativo correttivo su `main`: `9c46cff9a9026ed2a233125ed43cb61cc175854b`.
+- GitHub Actions Code quality run **#123 / 44391390452** sul commit correttivo: **success**; `npm ci`, TypeScript, ESLint e build di produzione superati.
+- Vercel ha segnalato `build-rate-limit` (upgrade/build limit) e non ha creato un deployment per il commit correttivo. L'ultimo Production READY verificato resta `dpl_2RNXMoswPTfsfUbmS66Aw7ryEeM5` sul commit `6223a57e1f828809b42d377a09585831fa551989`; la correzione Grade è quindi su `main` ma non ancora disponibile su `renqd.app`.
 - Test manuale autenticato per `10`, `7,5`, `7.5`, `0` e cancellazione del voto: da eseguire dopo il rilascio.
 - Nessuna modifica a database, migrazioni o dati applicativi.
