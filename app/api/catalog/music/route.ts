@@ -338,10 +338,19 @@ async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):
   })));
   if(tracks.length)return tracks;
  }catch(cause){if(cause instanceof Error&&cause.message.includes("supera il limite"))throw cause;}
- const params=new URLSearchParams({query:"arid:"+id,fmt:"json",limit:"100"});
- const data=await musicBrainzJson<{recordings?:Array<{id?:string;title?:string}>;"recording-count"?:number}>(`${MUSICBRAINZ}/recording?${params}`);
- const recordings=data.recordings??[];
- if(Number(data["recording-count"]??0)>recordings.length)throw new Error("MusicBrainz ha restituito solo una parte della discografia. Non posso garantire un elenco completo: riprova più tardi.");
+ const recordings:Array<{id?:string;title?:string}>=[];
+ let offset=0;
+ let total=0;
+ do{
+  const params=new URLSearchParams({query:"arid:"+id,fmt:"json",limit:"100",offset:String(offset)});
+  const data=await musicBrainzJson<{recordings?:Array<{id?:string;title?:string}>;"recording-count"?:number}>(`${MUSICBRAINZ}/recording?${params}`);
+  const page=data.recordings??[];
+  if(!page.length)break;
+  recordings.push(...page);
+  offset+=page.length;
+  total=Number(data["recording-count"]??offset);
+ }while(offset<total);
+ if(total>recordings.length)throw new Error("MusicBrainz ha restituito solo una parte della discografia. Non posso garantire un elenco completo: riprova più tardi.");
  return recordings.flatMap(recording=>recording.id&&recording.title?[{id:recording.id,title:recording.title,subtitle:artist||undefined,spotifyUrl:spotifySearchUrl(`${artist} ${recording.title}`)}]:[]);
 }
 
