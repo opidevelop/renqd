@@ -251,7 +251,7 @@ async function loadItunesDiscographyTracks(payload:Record<string,unknown>):Promi
     const completeTracks=await loadMusicBrainzDiscographyTracks({artistId:musicBrainzArtistId,artistName:artist});
     if(completeTracks.length)return completeTracks;
    }
-  }catch{}
+  }catch(cause){if(cause instanceof Error&&cause.message.includes("supera il limite"))throw cause;}
  }
  const params=new URLSearchParams({id:String(id),entity:"song",limit:"200",country:"IT"});
  const data=await itunesJson<{results?:Array<Record<string,unknown>>}>(`${ITUNES}/lookup?${params}`);
@@ -313,10 +313,12 @@ async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):
    return[{id:release.id+":"+idPart,title,subtitle:release.title||artist||undefined,imageUrl:"https://coverartarchive.org/release/"+release.id+"/front-250",spotifyUrl:spotifySearchUrl(`${artist} ${title}`)}];
   })));
   if(tracks.length)return tracks;
- }catch{}
+ }catch(cause){if(cause instanceof Error&&cause.message.includes("supera il limite"))throw cause;}
  const params=new URLSearchParams({query:"arid:"+id,fmt:"json",limit:"100"});
- const data=await musicBrainzJson<{recordings?:Array<{id?:string;title?:string}>}>(`${MUSICBRAINZ}/recording?${params}`);
- return(data.recordings??[]).flatMap(recording=>recording.id&&recording.title?[{id:recording.id,title:recording.title,subtitle:artist||undefined,spotifyUrl:spotifySearchUrl(`${artist} ${recording.title}`)}]:[]);
+ const data=await musicBrainzJson<{recordings?:Array<{id?:string;title?:string}>;"recording-count"?:number}>(`${MUSICBRAINZ}/recording?${params}`);
+ const recordings=data.recordings??[];
+ if(Number(data["recording-count"]??0)>recordings.length)throw new Error("MusicBrainz ha restituito solo una parte della discografia. Non posso garantire un elenco completo: riprova più tardi.");
+ return recordings.flatMap(recording=>recording.id&&recording.title?[{id:recording.id,title:recording.title,subtitle:artist||undefined,spotifyUrl:spotifySearchUrl(`${artist} ${recording.title}`)}]:[]);
 }
 
 async function loadMusicBrainzItems(payload:Record<string,unknown>,contentType:string):Promise<MusicItem[]>{
