@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireApprovedUser } from "@/lib/supabase/authorization";
 import { ProfileFollowButton } from "@/components/profile-follow-button";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import { ArrowLeft, ArrowUpRight, BadgeCheck, Folder, Globe2, Trophy } from "lucide-react";
@@ -9,8 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function PublicProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await requireApprovedUser();
   const { data: profile } = await supabase.from("public_profiles").select("*").eq("username", username).maybeSingle();
   if (!profile || (profile.is_private && profile.user_id !== user?.id)) notFound();
   const isOwner = profile.user_id === user?.id;
