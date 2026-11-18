@@ -207,10 +207,11 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     try{
       if(ranking.mode==="GRADE"){
         const scores:Record<string,number>={};
-        for(const item of editItems){if(item.score===null||item.score===undefined||!Number.isFinite(Number(item.score))||Number(item.score)<0||Number(item.score)>10||Math.round(Number(item.score)*10)!==Number(item.score)*10)throw new Error("Ogni elemento deve avere un voto valido da 0 a 10 con un decimale.");scores[item.id]=Number(item.score);}
-        const tieOrder=Object.fromEntries(editItems.map((item,index)=>[item.id,item.tie_order??index]));
+        for(const item of editItems){if(item.score===null||item.score===undefined)continue;if(!Number.isFinite(Number(item.score))||Number(item.score)<0||Number(item.score)>10||Math.round(Number(item.score)*10)!==Number(item.score)*10)throw new Error("I voti devono essere da 0 a 10 con un solo decimale.");scores[item.id]=Number(item.score);}
+        if(Object.keys(scores).length===0)throw new Error("Assegna almeno un voto prima di salvare il Grade.");
+        const tieOrder=Object.fromEntries(editItems.filter(item=>item.score!==null&&item.score!==undefined).map((item,index)=>[item.id,item.tie_order??index]));
         const result=await post({action:"update-grade",rankingId:ranking.id,title:cleanTitle,scores,tieOrder,gradeConfig:editGradeConfig});
-        const nextItems=(result.items as SavedItem[]).map(item=>({...item,title:item.title,score:Number(item.score),tie_order:Number(item.tie_order??0)}));
+        const nextItems=(result.items as SavedItem[]).map(item=>({...item,title:item.title,score:item.score===null||item.score===undefined?null:Number(item.score),tie_order:Number(item.tie_order??0)}));
         setDisplayItems(nextItems);setEditItems(nextItems);setCurrentTitle(cleanTitle);setEditing(false);setSelectedIds([]);setMessage("Voti ed etichette aggiornati nella cronologia.");router.refresh();return;
       }
       const result=await post({action:"update-published-renq",rankingId:ranking.id,title:cleanTitle,orderedIds:editItems.map(item=>item.id),tieMap:editTieMap});
@@ -266,6 +267,8 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
 
 
   const settings = ranking.settings ?? {};
+  const gradeRatedItems=displayItems.filter(item=>item.score!==null&&item.score!==undefined);
+  const currentGradeAverage=gradeRatedItems.length?Number((gradeRatedItems.reduce((sum,item)=>sum+Number(item.score),0)/gradeRatedItems.length).toFixed(1)):null;
   const category = String(settings.category ?? "custom").replaceAll("_", " ");
   const contentType = String(settings.contentType ?? "Lista personalizzata");
   const rawCover = currentCoverUrl || defaultCoverImageUrl || displayItems.find(item => item.image_url)?.image_url || null;
@@ -273,7 +276,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const sortableEditItems=editItems.map((item,index)=>({...item,title_snapshot:item.title,sort_order:index,image_url:item.image_url??null,description:item.description??null,rank_position:item.rank_position??null,preview_url:item.metadata?.previewUrl??null}));
   const editPositions=getRenqRankPositions(sortableEditItems,editTieMap);
 
-  if (showReveal) return <div className="saved-renq-page saved-renq-reveal-page"><button className="saved-renq-back" type="button" onClick={() => setShowReveal(false)}><ArrowLeft size={17}/> Torna alla classifica</button><RenqReveal title={currentTitle} mode={ranking.mode} category={String(settings.category ?? "custom")} contentType={contentType} coverImageUrl={rawCover} coverPosition={currentCoverPosition} allowTies={displayItems.some(item => Boolean(item.tie_group_id))} gradeAverage={typeof settings.gradeAverage==="number"?settings.gradeAverage:null} items={displayItems.map(item => {const position=item.rank_position??0;const label=ranking.mode==="GRADE"&&item.score!==null&&item.score!==undefined?gradeLabelFor(Number(item.score),position,(settings.gradeConfig as GradeConfig|undefined)??{criterion:"score",labels:[]}):null;return {id:item.id,title:item.title,image_url:item.image_url??null,description:item.description??null,rank_position:item.rank_position??null,tie_group_id:item.tie_group_id??null,preview_url:item.metadata?.previewUrl??null,score:item.score??null,gradeLabel:label?.name??null,gradeColor:label?.color??null};})} actions={<button type="button" className="renq-save-button" onClick={() => setShowReveal(false)}>Torna alla classifica</button>} /></div>;
+  if (showReveal) return <div className="saved-renq-page saved-renq-reveal-page"><button className="saved-renq-back" type="button" onClick={() => setShowReveal(false)}><ArrowLeft size={17}/> Torna alla classifica</button><RenqReveal title={currentTitle} mode={ranking.mode} category={String(settings.category ?? "custom")} contentType={contentType} coverImageUrl={rawCover} coverPosition={currentCoverPosition} allowTies={displayItems.some(item => Boolean(item.tie_group_id))} gradeAverage={currentGradeAverage} items={displayItems.map(item => {const position=item.rank_position??0;const label=ranking.mode==="GRADE"&&item.score!==null&&item.score!==undefined?gradeLabelFor(Number(item.score),position,(settings.gradeConfig as GradeConfig|undefined)??{criterion:"score",labels:[]}):null;return {id:item.id,title:item.title,image_url:item.image_url??null,description:item.description??null,rank_position:item.rank_position??null,tie_group_id:item.tie_group_id??null,preview_url:item.metadata?.previewUrl??null,score:item.score??null,gradeLabel:label?.name??null,gradeColor:label?.color??null};})} actions={<button type="button" className="renq-save-button" onClick={() => setShowReveal(false)}>Torna alla classifica</button>} /></div>;
 
   return (
     <main className="saved-renq-page">
@@ -287,7 +290,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         </div>
         <div className="saved-renq-hero-copy">
           <span>{modeLabels[ranking.mode] ?? "Renq"} · {category} · {contentType}</span>
-          <div className="saved-renq-title-line"><h1>{currentTitle}</h1>{ranking.mode==="GRADE"&&<strong className="saved-grade-average">{Number(settings.gradeAverage??(displayItems.reduce((sum,item)=>sum+Number(item.score??0),0)/Math.max(displayItems.length,1))).toFixed(1).replace(".",",")}<small>/10</small></strong>}</div>
+          <div className="saved-renq-title-line"><h1>{currentTitle}</h1>{ranking.mode==="GRADE"&&<strong className="saved-grade-average">{currentGradeAverage===null?"—":currentGradeAverage.toFixed(1).replace(".",",")}<small>/10</small></strong>}</div>
           <p>{displayItems.length} elementi{ranking.mode === "SPEED_RENQ" && ranking.started_at && ranking.completed_at ? " · Tempo impiegato " + Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/60000) + "m " + String(Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/1000)%60).padStart(2,"0") + "s" : ""} · Salvato il {new Date(String(settings.savedAt ?? ranking.created_at)).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}</p>
         </div>
         <div className="saved-renq-toolbar">
@@ -315,7 +318,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
           </div>:<><p>Riordina gli elementi trascinandoli o usando le frecce. Seleziona più elementi con Ctrl (Windows), Command (Mac) o con le caselle su mobile.</p>
           <RenqSortableList items={sortableEditItems} positions={editPositions} allowTies={ranking.allow_ties} tieMap={editTieMap} onToggleTie={toggleEditTie} onMove={moveEdit} showDragHandle dragIndex={dragIndex} draggedIds={draggedIds} selectedIds={selectedIds} onToggleSelect={id=>setSelectedIds(current=>current.includes(id)?current.filter(value=>value!==id):[...current,id])} onDragStart={(index,event)=>{event.preventDefault();const id=latestEditItemsRef.current[index]?.id;if(!id)return;const group=selectedIds.includes(id)?selectedIds:[id];draggedIdsRef.current=group;setDraggedIds(group);setSelectedIds(group);dragStartRef.current=index;setDragIndex(index);event.currentTarget.parentElement?.setPointerCapture(event.pointerId);}} onDragMove={(index,event)=>{if(dragStartRef.current===null||event.buttons===0)return;const target=document.elementFromPoint(event.clientX,event.clientY)?.closest("[data-renq-index]");const targetIndex=Number(target?.getAttribute("data-renq-index"));const targetId=latestEditItemsRef.current[targetIndex]?.id;if(targetId){shiftSelectedEdit(targetId);dragStartRef.current=targetIndex;}}} onDragEnd={finishEditDrag}/></>}
         </div> : <div className="saved-renq-list">
-          {displayItems.map((item, index) => {
+          {(ranking.mode==="GRADE"?displayItems.filter(item=>item.score!==null&&item.score!==undefined):displayItems).map((item, index) => {
             const position = item.rank_position ?? index + 1;
             const medal = position <= 3 ? ["🥇", "🥈", "🥉"][position - 1] : null;
             return <article className={"saved-renq-row" + (position <= 3 ? " is-top-" + position : "")} key={item.id}>
@@ -327,6 +330,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
             </article>;
           })}
         </div>}
+        {ranking.mode==="GRADE"&&displayItems.some(item=>item.score===null||item.score===undefined)&&<div className="grade-published-unrated"><div className="grade-unrated-heading"><strong>Da valutare</strong><span>{displayItems.filter(item=>item.score===null||item.score===undefined).length}</span></div>{displayItems.filter(item=>item.score===null||item.score===undefined).map(item=><article className="grade-published-unrated-row" key={item.id}>{item.image_url?<img src={highQualityImageUrl(item.image_url)??item.image_url} alt="" loading="lazy"/>:<span className="saved-renq-item-placeholder"><Trophy size={17}/></span>}<div><strong>{item.title}</strong><small>Ancora senza voto</small></div></article>)}</div>}
       </section>
 
       <section className="saved-renq-comments saved-renq-history">
