@@ -278,7 +278,7 @@ export default function AdminUsersPanel({
                 <div className="admin-reject-footer"><small>{reason.length}/500 caratteri</small><button type="button" className="admin-button admin-button-quiet" onClick={() => { setActiveAction(null); setReason(""); }}>Annulla</button><button type="button" className="admin-button admin-button-approve" disabled={isBusy || selectedRole === user.account_role} onClick={() => saveRole(user)}>{isBusy ? <LoaderCircle size={15} className="admin-spin"/> : <Save size={15}/>} Conferma ruolo</button></div>
               </div>}
             </div>}
-            {isOwner && <div className="admin-protected-note"><Shield size={14}/> Account OWNER protetto: nessuna modifica disponibile.</div>}
+            {isOwner && <div className="admin-protected-note"><Shield size={14}/> Ruolo e stato degli account OWNER non sono modificabili.</div>}
             {actorRole === "OWNER" && user.user_id !== actorUserId && <DeleteAccountButton targetUserId={user.user_id} username={user.username} location="list" />}
             {!isOwner && isProtectedTarget && <div className="admin-protected-note"><Shield size={14}/> Gli account ADMIN possono essere gestiti soltanto dall’OWNER.</div>}
           </article>;
