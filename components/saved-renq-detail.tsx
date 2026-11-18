@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Heart, MessageCircle, Pencil, Play, Send, Share2, Trophy, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, Heart, MessageCircle, Pencil, Play, Send, Share2, Trophy, Trash2, X } from "lucide-react";
 import { RenqCoverPicker } from "@/components/renq-cover-picker";
 import { highQualityImageUrl } from "@/lib/image-quality";
 import { RenqReveal } from "@/components/renq-reveal";
@@ -228,6 +228,8 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const contentType = String(settings.contentType ?? "Lista personalizzata");
   const rawCover = currentCoverUrl || defaultCoverImageUrl || displayItems.find(item => item.image_url)?.image_url || null;
   const cover = highQualityImageUrl(rawCover);
+  const sortableEditItems=editItems.map((item,index)=>({...item,title_snapshot:item.title,sort_order:index,image_url:item.image_url??null,description:item.description??null,rank_position:item.rank_position??null,preview_url:item.metadata?.previewUrl??null}));
+  const editPositions=getRenqRankPositions(sortableEditItems,editTieMap);
 
   if (showReveal) return <div className="saved-renq-page saved-renq-reveal-page"><button className="saved-renq-back" type="button" onClick={() => setShowReveal(false)}><ArrowLeft size={17}/> Torna alla classifica</button><RenqReveal title={currentTitle} mode={ranking.mode} category={String(settings.category ?? "custom")} contentType={contentType} coverImageUrl={rawCover} coverPosition={currentCoverPosition} allowTies={displayItems.some(item => Boolean(item.tie_group_id))} items={displayItems.map(item => ({id:item.id,title:item.title,image_url:item.image_url ?? null,description:item.description ?? null,rank_position:item.rank_position ?? null,tie_group_id:item.tie_group_id ?? null,preview_url:item.metadata?.previewUrl ?? null}))} actions={<button type="button" className="renq-save-button" onClick={() => setShowReveal(false)}>Torna alla classifica</button>} /></div>;
 
@@ -247,7 +249,10 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
           <p>{displayItems.length} elementi{ranking.mode === "SPEED_RENQ" && ranking.started_at && ranking.completed_at ? " · Tempo impiegato " + Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/60000) + "m " + String(Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/1000)%60).padStart(2,"0") + "s" : ""} · Salvato il {new Date(String(settings.savedAt ?? ranking.created_at)).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}</p>
         </div>
         <div className="saved-renq-toolbar">
-        <button type="button" onClick={startEditing} disabled={busy || editing}><Pencil size={17} /><span>Modifica</span></button>
+        {editing ? <>
+          <button type="button" onClick={cancelEditing} disabled={busy}><X size={16}/><span>Annulla</span></button>
+          <button type="button" onClick={() => void savePublishedChanges()} disabled={busy || !editTitle.trim()}><Check size={16}/><span>{busy ? "Salvataggio…" : "Salva modifiche"}</span></button>
+        </> : <button type="button" onClick={startEditing} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>}
         {ranking.visibility === "REVEAL" && <button type="button" onClick={() => setShowReveal(true)}><Play size={17} /><span>Rivedi reveal</span></button>}
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
@@ -258,7 +263,11 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
 
       <section className="saved-renq-ranking">
         <div className="saved-renq-section-heading"><div><span>IL RISULTATO</span><h2>La tua classifica</h2></div><Trophy size={21} /></div>
-        <div className="saved-renq-list">
+        {editing ? <div className="saved-renq-editor">
+          <label className="saved-renq-edit-title">Titolo del Renq<input value={editTitle} onChange={event=>setEditTitle(event.target.value)} maxLength={80}/></label>
+          <p>Riordina gli elementi trascinandoli, usando le frecce o selezionandone più di uno con Ctrl (Windows) o Command (Mac).</p>
+          <RenqSortableList items={sortableEditItems} positions={editPositions} allowTies={ranking.allow_ties} tieMap={editTieMap} onToggleTie={toggleEditTie} onMove={moveEdit} showDragHandle dragIndex={dragIndex} draggedIds={draggedIds} selectedIds={selectedIds} onToggleSelect={id=>setSelectedIds(current=>current.includes(id)?current.filter(value=>value!==id):[...current,id])} onDragStart={(index,event)=>{event.preventDefault();const id=latestEditItemsRef.current[index]?.id;if(!id)return;const group=selectedIds.includes(id)?selectedIds:[id];draggedIdsRef.current=group;setDraggedIds(group);setSelectedIds(group);dragStartRef.current=index;setDragIndex(index);event.currentTarget.parentElement?.setPointerCapture(event.pointerId);}} onDragMove={(index,event)=>{if(dragStartRef.current===null||event.buttons===0)return;const target=document.elementFromPoint(event.clientX,event.clientY)?.closest("[data-renq-index]");const targetIndex=Number(target?.getAttribute("data-renq-index"));const targetId=latestEditItemsRef.current[targetIndex]?.id;if(targetId){shiftSelectedEdit(targetId);dragStartRef.current=targetIndex;}}} onDragEnd={finishEditDrag}/>
+        </div> : <div className="saved-renq-list">
           {displayItems.map((item, index) => {
             const position = item.rank_position ?? index + 1;
             const medal = position <= 3 ? ["🥇", "🥈", "🥉"][position - 1] : null;
@@ -269,7 +278,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
               {medal && <span className={"saved-renq-medal medal-" + position} aria-label={"Posizione " + position}>{medal}</span>}
             </article>;
           })}
-        </div>
+        </div>}
       </section>
 
       <section className="saved-renq-comments saved-renq-history">
@@ -285,7 +294,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         </form>
         {comments.length ? <div className="saved-renq-comment-list">{comments.map(item => <article key={item.id}><div className="saved-renq-comment-avatar">R</div><div><p>{item.body}</p><small>{new Date(item.created_at).toLocaleString("it-IT", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</small></div></article>)}</div> : <p className="saved-renq-no-comments">Ancora nessun commento. Apri tu la conversazione.</p>}
       </section>
-      {error && <p className="saved-renq-feedback" role="status">{error}</p>}
+      {(error || message) && <p className={"saved-renq-feedback" + (error ? " is-error" : " is-success")} role="status">{error || message}</p>}
       <div className="saved-renq-footer-mark">renqd<span>.</span></div>
     </main>
   );
