@@ -837,3 +837,24 @@
 .review-cover-url-field input{width:100%;min-width:0;padding:10px;border:1px solid #e5d9cd;border-radius:8px;background:#fff;color:#40352d;font-size:12px;letter-spacing:0}
 .review-cover-url-field small{color:#8d8177;font-size:10px;font-weight:500;letter-spacing:0}
 @media(max-width:680px){.discography-mode-picker{flex-direction:column}.renq-sort-row .renq-select-item{width:15px;height:15px}}
+
+
+/* Renq trash bulk actions and consistent feedback */
+.renq-trash-bulk-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.renq-trash-bulk-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 12px;border:1px solid #e9dfd5;border-radius:999px;background:#fff;color:#7d634d;font-size:9px;font-weight:850;cursor:pointer}
+.renq-trash-bulk-actions button:hover{border-color:#e2b58f;background:#fff8f1}
+.renq-trash-bulk-actions button.is-danger{border-color:#f0d8d4;color:#a94f45}
+.renq-trash-bulk-actions button.is-danger:hover{background:#fff5f3}
+.renq-trash-bulk-actions button:disabled{opacity:.55;cursor:wait}
+.renq-trash-feedback{margin:-8px 0 14px;color:#54805e;font-size:10px;font-weight:750}
+.renq-trash-list{display:grid;gap:10px}
+.renq-trash-item{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;border:1px solid #eee7df;border-radius:14px;background:#fff}
+.renq-trash-item>div:first-child{min-width:0}
+.renq-trash-item strong{display:block;overflow-wrap:anywhere;color:#302820;font-size:12px}
+.renq-trash-item p{margin:5px 0 0;color:#8b8178;font-size:9px}
+.renq-trash-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.renq-trash-actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:33px;padding:0 10px;border:1px solid #e9dfd5;border-radius:9px;background:#fff;color:#80684f;font-size:9px;font-weight:800;cursor:pointer}
+.renq-trash-actions button:hover{background:#faf5ef}
+.renq-trash-actions button.renq-trash-delete{border-color:#f0d8d4;color:#a94f45}
+.renq-trash-actions button:disabled{opacity:.55;cursor:wait}
+@media(max-width:680px){.renq-trash-page .my-renqs-header{align-items:flex-start;flex-direction:column}.renq-trash-bulk-actions{width:100%;justify-content:flex-start}.renq-trash-item{align-items:stretch;flex-direction:column}.renq-trash-actions{width:100%}.renq-trash-actions button{flex:1}}
