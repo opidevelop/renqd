@@ -256,7 +256,25 @@ async function loadItunesAlbumTrackMetadata(albumTitle: string, artistName: stri
   } catch { return new Map<string, { previewUrl?: string; appleMusicUrl?: string }>(); }
 }
 
-async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):Promise<MusicItem[]>{const id=payload.artistId;if(typeof id!=="string"||!/^[0-9a-f-]{36}$/i.test(id))throw new Error("Invalid MusicBrainz artist identifier");const params=new URLSearchParams({query:"arid:"+id,fmt:"json",limit:"100"});const data=await musicBrainzJson<{recordings?:Array<{id?:string;title?:string}>}>(`${MUSICBRAINZ}/recording?${params}`);const artist=typeof payload.artistName==="string"?payload.artistName:"";return(data.recordings??[]).flatMap(recording=>recording.id&&recording.title?[{id:recording.id,title:recording.title,subtitle:artist||undefined,spotifyUrl:spotifySearchUrl(`${artist} ${recording.title}`)}]:[]);}
+async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):Promise<MusicItem[]>{
+ const id=payload.artistId;
+ if(typeof id!=="string"||!/^[0-9a-f-]{36}$/i.test(id))throw new Error("Invalid MusicBrainz artist identifier");
+ const artist=typeof payload.artistName==="string"?payload.artistName:"";
+ if(artist){
+  try{
+   const params=new URLSearchParams({term:artist,entity:"musicArtist",limit:"5",country:"IT"});
+   const search=await itunesJson<{results?:Array<Record<string,unknown>>}>(`${ITUNES}/search?${params}`);
+   const match=(search.results??[]).find(entry=>entry.wrapperType==="artist"&&typeof entry.artistId==="number"&&normalizeMusicText(String(entry.artistName??""))===normalizeMusicText(artist));
+   if(match&&typeof match.artistId==="number"){
+    const tracks=await loadItunesDiscographyTracks({artistId:match.artistId,artistName:artist});
+    if(tracks.length)return tracks;
+   }
+  }catch{}
+ }
+ const params=new URLSearchParams({query:"arid:"+id,fmt:"json",limit:"100"});
+ const data=await musicBrainzJson<{recordings?:Array<{id?:string;title?:string}>}>(`${MUSICBRAINZ}/recording?${params}`);
+ return(data.recordings??[]).flatMap(recording=>recording.id&&recording.title?[{id:recording.id,title:recording.title,subtitle:artist||undefined,spotifyUrl:spotifySearchUrl(`${artist} ${recording.title}`)}]:[]);
+}
 
 async function loadMusicBrainzItems(payload: Record<string, unknown>, contentType: string): Promise<MusicItem[]> {
   if (contentType === "Album") {
