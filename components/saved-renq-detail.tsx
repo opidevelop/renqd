@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useConfirmDialog } from "@/components/confirm-dialog";
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, Heart, MessageCircle, Pencil, Play, RotateCcw, Send, Share2, Trophy, Trash2, X } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, Heart, MessageCircle, Pencil, Play, RotateCcw, Send, Share2, Trophy, Trash2, X } from "lucide-react";
 import { RenqCoverPicker } from "@/components/renq-cover-picker";
 import { highQualityImageUrl } from "@/lib/image-quality";
 import { RenqReveal } from "@/components/renq-reveal";
@@ -39,6 +40,8 @@ const modeLabels: Record<string, string> = { RENQ: "Renq", BATTLE_RENQ: "Battle 
 
 export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, coverPosition: initialCoverPosition, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount, revisions }: Props) {
   const router = useRouter();
+  const { confirm, dialog } = useConfirmDialog();
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [comments, setComments] = useState(initialComments);
   const [commentCount, setCommentCount] = useState(initialCommentCount);
   const [comment, setComment] = useState("");
@@ -168,7 +171,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   }
 
   async function repeatBattle() {
-    if(busy||!window.confirm("Avviare una nuova Battle? La classifica attuale resterà nella cronologia e potrai costruirne una nuova da zero."))return;
+    if(busy||!(await confirm({title:"Avviare una nuova Battle?",description:"La classifica attuale resterà nella cronologia e potrai costruirne una nuova da zero.",confirmLabel:"Avvia nuova Battle"})))return;
     setBusy(true);setError("");setMessage("");
     try{
       await post({action:"repeat-battle",rankingId:ranking.id});
@@ -201,7 +204,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   }
 
   async function deleteRanking() {
-    if (busy || !window.confirm("Spostare questo Renq nel cestino? Potrai ripristinarlo in seguito.")) return;
+    if (busy || !(await confirm({title:"Spostare il Renq nel cestino?",description:"Potrai ripristinarlo in seguito dalla sezione Cestino.",confirmLabel:"Sposta nel cestino",tone:"danger"}))) return;
     setBusy(true); setError("");
     try {
       await post({ action: "delete-renq", rankingId: ranking.id });
@@ -299,7 +302,10 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
 
       <section className="saved-renq-comments saved-renq-history">
         <div className="saved-renq-section-heading"><div><span>TRACCIABILITÀ</span><h2>Cronologia <small>{revisions.length}</small></h2></div><Trophy size={21} /></div>
-        {revisions.length ? <ol className="saved-renq-revision-list">{revisions.map(revision => <li key={revision.id}><strong>Versione {revision.version}</strong><span>{revision.change_summary || "Modifica classifica"}</span><time dateTime={revision.created_at}>{new Date(revision.created_at).toLocaleString("it-IT", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" })}</time></li>)}</ol> : <p className="saved-renq-no-comments">La cronologia verrà popolata automaticamente con le prossime modifiche.</p>}
+        {revisions.length ? <>
+        <button type="button" className="saved-renq-history-toggle" onClick={() => setHistoryOpen(value => !value)} aria-expanded={historyOpen}><span>{historyOpen ? "Nascondi cronologia" : "Mostra cronologia"}</span><ChevronDown size={16} className={historyOpen ? "is-open" : ""}/></button>
+        {historyOpen && <ol className="saved-renq-revision-list">{revisions.map(revision => <li key={revision.id}><strong>Versione {revision.version}</strong><span>{revision.change_summary || "Modifica classifica"}</span><time dateTime={revision.created_at}>{new Date(revision.created_at).toLocaleString("it-IT", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" })}</time></li>)}</ol>}
+      </> : <p className="saved-renq-no-comments">La cronologia verrà popolata automaticamente con le prossime modifiche.</p>}
       </section>
 
       <section className="saved-renq-comments">
@@ -312,6 +318,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
       </section>
       {(error || message) && <p className={"saved-renq-feedback" + (error ? " is-error" : " is-success")} role="status">{error || message}</p>}
       <div className="saved-renq-footer-mark">renqd<span>.</span></div>
+      {dialog}
     </main>
   );
 }

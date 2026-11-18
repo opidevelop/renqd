@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, BookOpen, Clapperboard, Gamepad2, Music2, Plus, Search, SlidersHorizontal, Trophy, X, Trash2 } from "lucide-react";
+import { useConfirmDialog } from "@/components/confirm-dialog";
 
 type RenqCard = {
   id: string; public_slug: string; title: string; mode: string; created_at: string;
@@ -23,6 +24,7 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
   const [error,setError] = useState("");
   const [message,setMessage] = useState("");
   const [deletedIds,setDeletedIds] = useState<string[]>([]);
+  const { confirm, dialog } = useConfirmDialog();
 
   useEffect(() => {
     if (!query.trim() && !category && !mode) return;
@@ -55,7 +57,7 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
   });
   const reset = () => { setQuery(""); setCategory(""); setMode(""); setSortOrder("newest"); };
   async function deleteRenq(item:RenqCard) {
-    if(!window.confirm("Spostare questo Renq nel cestino? Potrai ripristinarlo in seguito."))return;
+    if(!(await confirm({title:"Spostare il Renq nel cestino?",description:"Potrai ripristinarlo in seguito dalla sezione Cestino.",confirmLabel:"Sposta nel cestino",tone:"danger"})))return;
     setError("");setMessage("");
     try{
       const response=await fetch("/api/rankings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"delete-renq",rankingId:item.id})});
@@ -85,5 +87,6 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
         <button type="button" className="my-renq-card-delete" onClick={()=>void deleteRenq(item)} aria-label={"Sposta "+item.title+" nel cestino"}><Trash2 size={15}/></button>
       </article>;
     })}</div>}
+    {dialog}
   </div>;
 }

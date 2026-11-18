@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useConfirmDialog } from "@/components/confirm-dialog";
 import { ArrowUpRight, BadgeCheck, Camera, FolderPlus, Globe2, Heart, ImagePlus, LockKeyhole, Plus, Save, Share2, Sparkles, Trash2, Trophy, Users, Pencil, Search, LoaderCircle, X } from "lucide-react";
 
 type MediaCrop = { x:number; y:number; zoom:number };
@@ -59,6 +60,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   followerCount: number; followingCount: number; likeCount: number;
 }) {
   const router=useRouter();
+  const { confirm, dialog } = useConfirmDialog();
   const [profile, setProfile] = useState(initialProfile);
   const [collections, setCollections] = useState(initialCollections);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -365,7 +367,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   }
 
   async function deleteCollection(id: string) {
-    if (!window.confirm("Vuoi eliminare questa collezione? I Renq non verranno cancellati.")) return;
+    if (!(await confirm({title:"Eliminare la collezione?",description:"La collezione verrà eliminata, ma i Renq al suo interno non verranno cancellati.",confirmLabel:"Elimina collezione",tone:"danger"}))) return;
     const supabase = createClient();
     const { error: deleteError } = await supabase.from("profile_collections").delete().eq("id", id);
     if (deleteError) { setError(deleteError.message); return; }
@@ -502,5 +504,6 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     </section>
     <div className="profile-social-meta"><span><Users size={14}/> Segui {followingCount} profili</span><span><Heart size={14}/> {likeCount} apprezzamenti ricevuti</span><Link href={"/u/" + profile.username}>Apri il profilo pubblico <ArrowUpRight size={14}/></Link></div>
     {(message || error) && <p className={"profile-feedback" + (error ? " is-error" : "")} role="status">{error || message}</p>}
+    {dialog}
   </div>;
 }

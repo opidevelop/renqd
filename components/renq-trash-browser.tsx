@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, RotateCcw, Trash2, Trash } from "lucide-react";
+import { useConfirmDialog } from "@/components/confirm-dialog";
 
 type TrashItem = { id: string; public_slug: string; title: string; mode: string; deleted_at: string | null; count: number };
 type TrashAction = "restore-renq" | "permanently-delete-renq";
@@ -13,6 +14,7 @@ export function RenqTrashBrowser({ initialItems }: { initialItems: TrashItem[] }
   const [busyAll, setBusyAll] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const { confirm, dialog } = useConfirmDialog();
 
   async function runAction(item: TrashItem, actionName: TrashAction) {
     const response = await fetch("/api/rankings", {
@@ -26,7 +28,7 @@ export function RenqTrashBrowser({ initialItems }: { initialItems: TrashItem[] }
 
   async function action(item: TrashItem, actionName: TrashAction) {
     if (busyId || busyAll) return;
-    if (actionName === "permanently-delete-renq" && !window.confirm("Eliminare definitivamente questo Renq e tutti i dati collegati? Questa operazione non può essere annullata.")) return;
+    if (actionName === "permanently-delete-renq" && !(await confirm({title:"Eliminare definitivamente il Renq?",description:"Il Renq e tutti i dati collegati verranno eliminati. Questa operazione non può essere annullata.",confirmLabel:"Elimina definitivamente",tone:"danger"}))) return;
     setBusyId(item.id); setError(""); setMessage("");
     try {
       await runAction(item, actionName);
@@ -39,7 +41,7 @@ export function RenqTrashBrowser({ initialItems }: { initialItems: TrashItem[] }
 
   async function bulkAction(actionName: TrashAction) {
     if (busyId || busyAll || !items.length) return;
-    if (actionName === "permanently-delete-renq" && !window.confirm("Svuotare il cestino ed eliminare definitivamente tutti i Renq? Questa operazione non può essere annullata.")) return;
+    if (actionName === "permanently-delete-renq" && !(await confirm({title:"Svuotare il cestino?",description:"Tutti i Renq presenti nel cestino e i relativi dati verranno eliminati definitivamente. Questa operazione non può essere annullata.",confirmLabel:"Svuota cestino",tone:"danger"}))) return;
     setBusyAll(true); setError(""); setMessage("");
     const completed = new Set<string>();
     const failures: string[] = [];
@@ -79,5 +81,6 @@ export function RenqTrashBrowser({ initialItems }: { initialItems: TrashItem[] }
           <button type="button" className="renq-trash-delete" onClick={() => void action(item,"permanently-delete-renq")} disabled={Boolean(busyId) || busyAll}><Trash2 size={16}/> Elimina definitivamente</button>
         </div>
       </article>)}</div>}
+    {dialog}
   </main>;
 }

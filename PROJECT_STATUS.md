@@ -362,3 +362,27 @@ Revisione della migrazione di hardening:
 - GitHub Actions `Code quality`: run #56, #57, #58, #59 e #60 conclusi con `success`; TypeScript, ESLint e build di produzione superati.
 - Vercel Production: deployment `dpl_2afd4Kj3QbitL5UEz2JW2V9kdv49`, commit `0f47e48d689e1a3dfdfbd7e02faacf64f5c9eeca`, stato `READY`.
 - Nessun account è stato cancellato durante l'implementazione. Il flusso irreversibile non è stato provato su account reali: il collaudo funzionale va eseguito soltanto su un account di test sacrificabile, mai su un account o contenuto reale da conservare.
+
+
+## 12. Rifinitura esperienza Renqd — 18 novembre 2026
+
+### Assessment del repository
+- Confermato che la cronologia delle revisioni era presente ma resa come lista statica, senza controllo di espansione/compressione.
+- Confermata la presenza di chiamate native `window.confirm()` in cinque componenti: esperienza ranking, dettaglio Renq pubblicato, cestino, elenco Renq e dashboard profilo/collezioni.
+- Verificato che Speed Renq è la modalità temporizzata prevista: non esiste una quarta modalità separata «Timed Rank». Il drag-and-drop, la selezione multipla tramite checkbox, i controlli 30/60/90 secondi e la durata personalizzata in minuti sono già presenti nel repository.
+- Il ripristino singolo/collettivo del cestino è già implementato; l'elenco personale ordina i Renq usando `created_at`, perciò il ripristino non deve assegnare una nuova data di creazione.
+- Undo/Redo dell'editor pubblicato non viene introdotto: la decisione più recente conferma modifiche definitive con cronologia e non approva il ripristino delle versioni. L'annullamento dell'ultima scelta resta limitato alla Battle prima della finalizzazione.
+- Il pulsante «Torna a →» resta fuori da questo intervento perché la destinazione è stata esplicitamente messa in pausa in attesa di una decisione.
+
+### Modifiche repository
+- Aggiunto `components/confirm-dialog.tsx`: conferma riutilizzabile con dialogo accessibile, gestione Escape, focus iniziale e focus trap, chiusura tramite Annulla o conferma, overlay e layout mobile.
+- Sostituite le conferme native nei cinque componenti interessati, mantenendo distinte le azioni distruttive e le relative descrizioni.
+- Resa espandibile/comprimibile la sezione Cronologia del Renq pubblicato; le revisioni continuano a essere consultive e non introducono rollback.
+- Aggiunti gli stili condivisi della modale e del controllo Cronologia in `app/(platform)/platform.css`.
+
+### Verifiche e limiti
+- Implementazione repository: inclusa nel commit dedicato.
+- Build/ESLint/TypeScript: da verificare tramite CI sul commit.
+- Deployment Production: da verificare dopo il completamento della CI.
+- Test funzionali reali (modali, focus/keyboard, flusso Battle, cronologia, cestino e Speed Renq): da eseguire.
+- Nessuna migrazione SQL, modifica al database, dato applicativo o servizio esterno prevista da questo intervento.

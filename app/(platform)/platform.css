@@ -917,3 +917,24 @@
 .topbar-avatar{overflow:visible}
 .topbar-avatar-image{display:block;flex:none;width:23px;height:23px;overflow:hidden;border-radius:50%}
 .topbar-avatar-image img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;transform-origin:center}
+
+
+/* Shared, accessible confirmation modal */
+.renqd-confirm-overlay{position:fixed;z-index:1200;inset:0;display:grid;place-items:center;padding:20px;background:rgba(19,16,14,.52);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);animation:renqd-confirm-fade .16s ease-out}
+.renqd-confirm-dialog{width:min(100%,430px);padding:25px;border:1px solid var(--line,#e8e3dc);border-radius:22px;background:var(--card,#fff);color:var(--ink,#292521);box-shadow:0 24px 80px rgba(22,17,12,.22);animation:renqd-confirm-rise .2s ease-out}
+.renqd-confirm-icon{display:grid;place-items:center;width:42px;height:42px;margin-bottom:16px;border-radius:14px;background:#f7eee6;color:#b66a32}
+.renqd-confirm-dialog.is-danger .renqd-confirm-icon{background:#fff0ed;color:#b64e42}
+.renqd-confirm-dialog h2{margin:0;font-size:20px;line-height:1.25;font-weight:800;letter-spacing:-.035em}
+.renqd-confirm-dialog p{margin:10px 0 22px;color:var(--muted,#81786f);font-size:13px;line-height:1.65}
+.renqd-confirm-actions{display:flex;justify-content:flex-end;gap:9px}
+.renqd-confirm-actions button{min-height:43px;padding:0 16px;border:1px solid var(--line,#e8e3dc);border-radius:12px;font:inherit;font-size:12px;font-weight:750;cursor:pointer}
+.renqd-confirm-cancel{background:transparent;color:var(--ink,#292521)}
+.renqd-confirm-submit{border-color:#c7793d!important;background:#c7793d;color:#fff}
+.renqd-confirm-dialog.is-danger .renqd-confirm-submit{border-color:#b64e42!important;background:#b64e42}
+.renqd-confirm-actions button:focus-visible,.saved-renq-history-toggle:focus-visible{outline:3px solid rgba(199,121,61,.32);outline-offset:3px}
+.saved-renq-history-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;margin:8px 0 0;padding:12px 0;border:0;border-top:1px solid var(--border);background:transparent;color:var(--muted-foreground);font:inherit;font-size:12px;font-weight:750;text-align:left;cursor:pointer}
+.saved-renq-history-toggle svg{transition:transform .2s ease}
+.saved-renq-history-toggle svg.is-open{transform:rotate(180deg)}
+@keyframes renqd-confirm-fade{from{opacity:0}to{opacity:1}}
+@keyframes renqd-confirm-rise{from{opacity:0;transform:translateY(9px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:600px){.renqd-confirm-overlay{align-items:end;padding:12px}.renqd-confirm-dialog{width:100%;padding:22px 20px calc(20px + env(safe-area-inset-bottom));border-radius:22px 22px 16px 16px}.renqd-confirm-actions button{flex:1}}
