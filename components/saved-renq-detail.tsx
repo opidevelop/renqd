@@ -53,10 +53,6 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [currentTitle, setCurrentTitle] = useState(ranking.title);
-  const [currentVisibility,setCurrentVisibility]=useState(ranking.visibility??"LIVE");
-  const [currentAccess,setCurrentAccess]=useState(String(ranking.settings.access??"public"));
-  const [editVisibility,setEditVisibility]=useState(ranking.visibility??"LIVE");
-  const [editAccess,setEditAccess]=useState(String(ranking.settings.access??"public"));
   const [displayItems, setDisplayItems] = useState(items);
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(ranking.title);
@@ -105,8 +101,6 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
 
   function startEditing() {
     setEditTitle(currentTitle);
-    setEditVisibility(currentVisibility);
-    setEditAccess(currentAccess);
     setEditItems(displayItems);
     latestEditItemsRef.current = displayItems;
     setEditTieMap(Object.fromEntries(displayItems.filter(item => item.tie_group_id).map(item => [item.id, item.tie_group_id as string])));
@@ -192,13 +186,11 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     if(!cleanTitle||cleanTitle.length>80){setError("Il titolo deve contenere da 1 a 80 caratteri.");return;}
     setBusy(true);setError("");setMessage("");
     try{
-      const result=await post({action:"update-published-renq",rankingId:ranking.id,title:cleanTitle,orderedIds:editItems.map(item=>item.id),tieMap:editTieMap,visibility:editVisibility,access:editAccess});
+      const result=await post({action:"update-published-renq",rankingId:ranking.id,title:cleanTitle,orderedIds:editItems.map(item=>item.id),tieMap:editTieMap});
       const sortable=editItems.map((item,index)=>({...item,title_snapshot:item.title,sort_order:index,image_url:item.image_url??null,description:item.description??null,rank_position:item.rank_position??null,preview_url:item.metadata?.previewUrl??null}));const positions=getRenqRankPositions(sortable,editTieMap);
       const nextItems=editItems.map(item=>({...item,rank_position:positions[item.id]??null,tie_group_id:editTieMap[item.id]??null}));
       setDisplayItems(nextItems);
       setCurrentTitle(result.title??cleanTitle);
-      setCurrentVisibility(result.visibility??editVisibility);
-      setCurrentAccess(result.access??editAccess);
       setEditing(false);
       setSelectedIds([]);
       setMessage("Modifiche salvate nella cronologia.");
@@ -277,7 +269,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
           <button type="button" onClick={() => void savePublishedChanges()} disabled={busy || !editTitle.trim()}><Check size={16}/><span>{busy ? "Salvataggio…" : "Salva modifiche"}</span></button>
         </> : <button type="button" onClick={startEditing} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>}
         {!editing && ranking.mode === "BATTLE_RENQ" && <button type="button" onClick={() => void repeatBattle()} disabled={busy}><RotateCcw size={16}/><span>Ripeti Battle</span></button>}
-        {currentVisibility === "REVEAL" && <button type="button" onClick={() => setShowReveal(true)}><Play size={17} /><span>Rivedi reveal</span></button>}
+        {ranking.visibility === "REVEAL" && <button type="button" onClick={() => setShowReveal(true)}><Play size={17} /><span>Rivedi reveal</span></button>}
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
         <button type="button" className="saved-renq-delete" onClick={() => void deleteRanking()} disabled={busy}><Trash2 size={16}/><span>Elimina</span></button>
@@ -289,10 +281,6 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         <div className="saved-renq-section-heading"><div><span>IL RISULTATO</span><h2>La tua classifica</h2></div><Trophy size={21} /></div>
         {editing ? <div className="saved-renq-editor">
           <label className="saved-renq-edit-title">Titolo del Renq<input value={editTitle} onChange={event=>setEditTitle(event.target.value)} maxLength={80}/></label>
-          <div className="saved-renq-edit-settings">
-            <label>Pubblicazione<select value={editVisibility} onChange={event=>setEditVisibility(event.target.value)}><option value="LIVE">Live</option><option value="REVEAL">Reveal</option></select></label>
-            <label>Accesso<select value={editAccess} onChange={event=>setEditAccess(event.target.value)}><option value="public">Pubblico</option><option value="private">Privato</option></select></label>
-          </div>
           <p>Riordina gli elementi trascinandoli o usando le frecce. Seleziona più elementi con Ctrl (Windows), Command (Mac) o con le caselle su mobile.</p>
           <RenqSortableList items={sortableEditItems} positions={editPositions} allowTies={ranking.allow_ties} tieMap={editTieMap} onToggleTie={toggleEditTie} onMove={moveEdit} showDragHandle dragIndex={dragIndex} draggedIds={draggedIds} selectedIds={selectedIds} onToggleSelect={id=>setSelectedIds(current=>current.includes(id)?current.filter(value=>value!==id):[...current,id])} onDragStart={(index,event)=>{event.preventDefault();const id=latestEditItemsRef.current[index]?.id;if(!id)return;const group=selectedIds.includes(id)?selectedIds:[id];draggedIdsRef.current=group;setDraggedIds(group);setSelectedIds(group);dragStartRef.current=index;setDragIndex(index);event.currentTarget.parentElement?.setPointerCapture(event.pointerId);}} onDragMove={(index,event)=>{if(dragStartRef.current===null||event.buttons===0)return;const target=document.elementFromPoint(event.clientX,event.clientY)?.closest("[data-renq-index]");const targetIndex=Number(target?.getAttribute("data-renq-index"));const targetId=latestEditItemsRef.current[targetIndex]?.id;if(targetId){shiftSelectedEdit(targetId);dragStartRef.current=targetIndex;}}} onDragEnd={finishEditDrag}/>
         </div> : <div className="saved-renq-list">
