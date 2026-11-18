@@ -193,3 +193,5 @@
 - `PROJECT_STATUS.md` descrive lo stato tecnico corrente e può cambiare frequentemente; non sostituisce le decisioni qui contenute.
 - Il file storico `Recuperare chat Renqd.txt` contiene anche istruzioni di sessioni precedenti poi superate (ad esempio l'uso di `develop`). In caso di conflitto prevalgono le decisioni più recenti e questo documento: si lavora solo su `main`.
 - Aggiornare questo file quando l'utente approva una nuova decisione o modifica esplicitamente una decisione esistente.
+
+14. La console MODERATOR deve mostrare **tutti i Renq pubblicati**, non soltanto quelli segnalati. Deve inoltre offrire un filtro dedicato alle segnalazioni ricevute, così da distinguere la coda delle segnalazioni dalla consultazione generale dei contenuti.
