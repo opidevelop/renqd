@@ -210,13 +210,13 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   }
   async function saveCover(path: string | null, previewUrl: string | null, position = currentCoverPosition) {
     if (busy) return;
-    setBusy(true); setError("");
+    setBusy(true); setError(""); setMessage("");
     try {
       await post({ action: "update-cover", rankingId: ranking.id, coverImagePath: path, coverImageUrl: path ? null : (previewUrl && previewUrl !== defaultCoverImageUrl ? previewUrl : null), coverPosition: position });
       setCurrentCoverPath(path);
       setCurrentCoverPosition(position);
       setCurrentCoverUrl(previewUrl ?? defaultCoverImageUrl);
-      setError("Copertina aggiornata.");
+      setMessage("Copertina aggiornata e registrata nella cronologia.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Non è stato possibile aggiornare la copertina.");
     } finally { setBusy(false); }
