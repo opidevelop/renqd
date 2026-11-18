@@ -172,7 +172,7 @@ async function searchMusicBrainz(query: string, contentType: string): Promise<Mu
         subtitle: item.subtitle,
         imageUrl: item.imageUrl,
         provider: "musicbrainz" as const,
-        payload: { releaseGroupId: item.id, imageUrl: item.imageUrl, albumTitle: item.title, artistName },
+        payload: { releaseId: item.id, imageUrl: item.imageUrl, albumTitle: item.title, artistName },
         spotifyUrl: spotifySearchUrl(`${artistName} ${item.title}`),
       })))];
     }));
@@ -288,30 +288,41 @@ async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):
  return(data.recordings??[]).flatMap(recording=>recording.id&&recording.title?[{id:recording.id,title:recording.title,subtitle:artist||undefined,spotifyUrl:spotifySearchUrl(`${artist} ${recording.title}`)}]:[]);
 }
 
-async function loadMusicBrainzItems(payload: Record<string, unknown>, contentType: string): Promise<MusicItem[]> {
-  if (contentType === "Album") {
-    const id = payload.releaseGroupId;
-    if (typeof id !== "string" || !/^[0-9a-f-]{36}$/i.test(id)) throw new Error("Invalid MusicBrainz release-group identifier");
-    const params = new URLSearchParams({ "release-group": id, inc: "recordings", fmt: "json", limit: "1" });
-    const data = await musicBrainzJson<{ releases?: Array<{ media?: Array<{ tracks?: Array<{ id?: string; position?: number; title?: string; recording?: { id?: string; title?: string } }> }> }> }>(`${MUSICBRAINZ}/release?${params}`);
-    const tracks = data.releases?.[0]?.media?.flatMap((medium) => medium.tracks ?? []) ?? [];
-    const albumTitle = typeof payload.albumTitle === "string" ? payload.albumTitle : "";
-    const artistName = typeof payload.artistName === "string" ? payload.artistName : "";
-    const previewMetadata = albumTitle ? await loadItunesAlbumTrackMetadata(albumTitle, artistName) : new Map<string, { previewUrl?: string; appleMusicUrl?: string }>();
-    return tracks.flatMap((track) => {
-      const title = track.recording?.title ?? track.title;
-      if (!title) return [];
-      const metadata = previewMetadata.get(normalizeMusicText(title));
-      return [{ id: track.recording?.id ?? track.id ?? `${track.position}-${title}`, title, subtitle: track.position ? `Traccia ${track.position}` : undefined, imageUrl: typeof payload.imageUrl === "string" ? payload.imageUrl : undefined, previewUrl: metadata?.previewUrl, appleMusicUrl: metadata?.appleMusicUrl, spotifyUrl: spotifySearchUrl(`${artistName} ${title}`) }];
-    });
+async function loadMusicBrainzItems(payload:Record<string,unknown>,contentType:string):Promise<MusicItem[]>{
+ if(contentType==="Album"){
+  const releaseId=payload.releaseId;
+  let tracks:Array<{id?:string;position?:number;title?:string;recording?:{id?:string;title?:string}}>=[];
+  if(typeof releaseId==="string"&&/^[0-9a-f-]{36}$/i.test(releaseId)){
+   const release=await musicBrainzJson<{media?:Array<{tracks?:Array<{id?:string;position?:number;title?:string;recording?:{id?:string;title?:string}}>}>}>(`${MUSICBRAINZ}/release/${releaseId}?inc=recordings&fmt=json`);
+   tracks=release.media?.flatMap(medium=>medium.tracks??[])??[];
+  }else{
+   const id=payload.releaseGroupId;
+   if(typeof id!=="string"||!/^[0-9a-f-]{36}$/i.test(id))throw new Error("Invalid MusicBrainz release-group identifier");
+   const params=new URLSearchParams({"release-group":id,inc:"recordings",fmt:"json",limit:"1"});
+   const data=await musicBrainzJson<{releases?:Array<{media?:Array<{tracks?:Array<{id?:string;position?:number;title?:string;recording?:{id?:string;title?:string}}>}>}>}>(`${MUSICBRAINZ}/release?${params}`);
+   tracks=data.releases?.[0]?.media?.flatMap(medium=>medium.tracks??[])??[];
   }
-  const id = payload.artistId;
-  if (typeof id !== "string" || !/^[0-9a-f-]{36}$/i.test(id)) throw new Error("Invalid MusicBrainz artist identifier");
-  const params = new URLSearchParams({ artist: id, type: "album|ep", fmt: "json", limit: "100" });
-  const data = await musicBrainzJson<{ "release-groups"?: Array<{ id: string; title: string; "first-release-date"?: string; "primary-type"?: string }> }>(`${MUSICBRAINZ}/release-group?${params}`);
-  const artistName = typeof payload.artistName === "string" ? payload.artistName : "";
-  return (data["release-groups"] ?? []).map((group) => ({ id: group.id, title: group.title, subtitle: [group["primary-type"], group["first-release-date"]].filter(Boolean).join(" · ") || undefined, imageUrl: "https://coverartarchive.org/release-group/" + group.id + "/front-250", spotifyUrl: spotifySearchUrl(`${artistName} ${group.title}`) }));
+  const albumTitle=typeof payload.albumTitle==="string"?payload.albumTitle:"";
+  const artistName=typeof payload.artistName==="string"?payload.artistName:"";
+  const previewMetadata=albumTitle?await loadItunesAlbumTrackMetadata(albumTitle,artistName):new Map<string,{previewUrl?:string;appleMusicUrl?:string}>();
+  return tracks.flatMap(track=>{
+   const title=track.recording?.title??track.title;
+   if(!title)return[];
+   const metadata=previewMetadata.get(normalizeMusicText(title));
+   return[{id:track.recording?.id??track.id??`${track.position}-${title}`,title,subtitle:track.position?`Traccia ${track.position}`:undefined,imageUrl:typeof payload.imageUrl==="string"?payload.imageUrl:undefined,previewUrl:metadata?.previewUrl,appleMusicUrl:metadata?.appleMusicUrl,spotifyUrl:spotifySearchUrl(`${artistName} ${title}`)}];
+  });
+ }
+ const id=payload.artistId;
+ if(typeof id!=="string"||!/^[0-9a-f-]{36}$/i.test(id))throw new Error("Invalid MusicBrainz artist identifier");
+ const params=new URLSearchParams({artist:id,inc:"release-groups",fmt:"json",limit:"100"});
+ const data=await musicBrainzJson<{releases?:Array<{id:string;title:string;date?:string;country?:string;"release-group"?:{"primary-type"?:string}}> }>(`${MUSICBRAINZ}/release?${params}`);
+ const artistName=typeof payload.artistName==="string"?payload.artistName:"";
+ return(data.releases??[]).filter(release=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";}).map(release=>({
+  id:release.id,title:release.title,subtitle:[release["release-group"]?.["primary-type"],release.date?.slice(0,4),release.country].filter(Boolean).join(" · ")||undefined,
+  imageUrl:"https://coverartarchive.org/release/"+release.id+"/front-250",spotifyUrl:spotifySearchUrl(`${artistName} ${release.title}`)
+ }));
 }
+
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { user, status } = await getAccountAccess(supabase);
