@@ -212,7 +212,7 @@ begin
   from public.profiles p
   where p.id = v_actor_id and p.status = 'APPROVED';
 
-  if v_actor_id is null or v_actor_role not in ('OWNER','ADMIN','MODERATOR') then
+  if v_actor_id is null or v_actor_role is null or v_actor_role not in ('OWNER','ADMIN','MODERATOR') then
     raise exception 'Insufficient privileges' using errcode = '42501';
   end if;
   if p_ranking_id is null then
