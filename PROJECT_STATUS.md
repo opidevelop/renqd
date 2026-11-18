@@ -7,7 +7,7 @@
 > **Aggiornato:** 18 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Commit HEAD al momento dell'aggiornamento:** `34a39eaebc19f94142e7eda26c49a5736cfc32ee`
+> **Commit HEAD al momento dell'aggiornamento:** `3051e8fe3510722c6e4230716c351e079b0c2b79`
 
 ## 1. Sintesi esecutiva
 
@@ -183,7 +183,7 @@ Queste modifiche sono nel repository; non sono ancora tutte validate da test fun
 
 - Branch operativo: `main`.
 - Commit HEAD al momento dell'aggiornamento: `34a39eaebc19f94142e7eda26c49a5736cfc32ee`.
-- Workflow CI: `Code quality`, run associato al commit HEAD avviato il 18 novembre 2026; esito ancora in corso al momento della stesura.
+- Workflow CI: `Code quality`. Il primo controllo ha confermato `npm ci` e `npx tsc --noEmit`; ESLint ha trovato 4 errori (uno JSX e tre relativi a setState negli effect). Le correzioni sono state applicate su `main`; il nuovo run per il commit HEAD `3051e8f` è in coda/in avvio. ESLint e build di produzione non sono ancora confermati verdi.
 - Vercel: deployment recenti bloccati dal limite giornaliero `api-deployments-free-per-day`. Il check Vercel restituisce failure con indicazione di riprovare dopo circa 24 ore.
 - **Non affermare che il commit HEAD sia in produzione.** Verificare un deployment Vercel Production `READY` che riporti esattamente il commit HEAD.
 - Non creare branch per aggirare il limite e non fare deploy ripetuti durante il blocco.
@@ -203,6 +203,8 @@ L'ultima lettura degli advisor ha riportato:
 1. **11 tabelle con RLS abilitato e nessuna policy** (livello INFO), tra cui tabelle/cache legacy cataloghi e `transactional_outbox`. Verificare intenzionalità, accessibilità tramite API e ruolo previsto; non aggiungere policy permissive per eliminare l'avviso.
 2. **21 funzioni SECURITY DEFINER eseguibili dal ruolo authenticated** (livello WARN), incluse RPC amministrative e RPC di ranking/lifecycle. L'avviso non dimostra da solo un'esposizione: controllare che ogni funzione verifichi internamente identità, ruolo, ownership e stato account. Revocare EXECUTE o cambiare SECURITY INVOKER solo dopo aver verificato i flussi che dipendono dalle funzioni.
 3. **Protezione password compromesse disabilitata** (livello WARN). Valutare l'attivazione nella configurazione Auth e documentare l'esito.
+
+Il log di `npm ci` ha inoltre segnalato **40 vulnerabilità nelle dipendenze** (12 moderate, 26 high, 2 critical). Va eseguito un audit mirato del lockfile e delle dipendenze dirette/transitive; non lanciare `npm audit fix --force` senza analisi di compatibilità.
 
 Questi sono rilievi da analizzare, non modifiche da applicare automaticamente. Le RPC amministrative devono continuare a rispettare il modello OWNER/ADMIN; le RPC utente devono verificare la proprietà delle risorse.
 
