@@ -239,6 +239,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
       setCurrentCoverPosition(position);
       setCurrentCoverUrl(previewUrl ?? defaultCoverImageUrl);
       setMessage("Copertina aggiornata e registrata nella cronologia.");
+      router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Non è stato possibile aggiornare la copertina.");
     } finally { setBusy(false); }
