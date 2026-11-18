@@ -173,7 +173,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     setBusy(true);setError("");setMessage("");
     try{
       const result=await post({action:"update-published-renq",rankingId:ranking.id,title:cleanTitle,orderedIds:editItems.map(item=>item.id),tieMap:editTieMap});
-      const positions=getRenqRankPositions(editItems,editTieMap);
+      const sortable=editItems.map((item,index)=>({...item,title_snapshot:item.title,sort_order:index,image_url:item.image_url??null,description:item.description??null,rank_position:item.rank_position??null,preview_url:item.metadata?.previewUrl??null}));const positions=getRenqRankPositions(sortable,editTieMap);
       const nextItems=editItems.map(item=>({...item,rank_position:positions[item.id]??null,tie_group_id:editTieMap[item.id]??null}));
       setDisplayItems(nextItems);
       setCurrentTitle(result.title??cleanTitle);
@@ -241,7 +241,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         <div className="saved-renq-cover-shade" />
         <div className="saved-renq-cover-controls">
           <button type="button" className="saved-renq-cover-edit" onClick={() => setCoverEditorOpen(value => !value)} aria-label="Modifica copertina" aria-expanded={coverEditorOpen}><Pencil size={17} /></button>
-          {coverEditorOpen && <div className="saved-renq-cover-editor"><RenqCoverPicker value={currentCoverUrl ?? defaultCoverImageUrl ?? items.find(item => item.image_url)?.image_url ?? null} onChange={(path,url) => void saveCover(path,url)} onFocusPreview={position => setCurrentCoverPosition(position)} onFocusChange={position => void saveCover(currentCoverPath,currentCoverUrl,position)} focusPosition={currentCoverPosition} onReset={() => void saveCover(null,null,{x:50,y:50})} canReset={Boolean(currentCoverPath)||(Boolean(currentCoverUrl)&&currentCoverUrl!==defaultCoverImageUrl)||currentCoverPosition.x!==50||currentCoverPosition.y!==50} variant="overlay"/></div>}
+          {coverEditorOpen && <div className="saved-renq-cover-editor"><RenqCoverPicker value={currentCoverUrl ?? defaultCoverImageUrl ?? displayItems.find(item => item.image_url)?.image_url ?? null} onChange={(path,url) => void saveCover(path,url)} onFocusPreview={position => setCurrentCoverPosition(position)} onFocusChange={position => void saveCover(currentCoverPath,currentCoverUrl,position)} focusPosition={currentCoverPosition} onReset={() => void saveCover(null,null,{x:50,y:50})} canReset={Boolean(currentCoverPath)||(Boolean(currentCoverUrl)&&currentCoverUrl!==defaultCoverImageUrl)||currentCoverPosition.x!==50||currentCoverPosition.y!==50} variant="overlay"/></div>}
         </div>
         <div className="saved-renq-hero-copy">
           <span>{modeLabels[ranking.mode] ?? "Renq"} · {category} · {contentType}</span>
