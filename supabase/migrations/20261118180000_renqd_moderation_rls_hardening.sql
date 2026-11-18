@@ -320,10 +320,19 @@ begin
   if auth.uid() is null or not private.is_approved_user() then
     raise exception 'Account non autorizzato' using errcode='42501';
   end if;
-  if not exists(select 1 from public.rankings where id=p_ranking_id and user_id=auth.uid() and deleted_at is not null and deleted_by=auth.uid() and hidden_at is null) then
+  perform 1 from public.rankings
+  where id=p_ranking_id and user_id=auth.uid()
+    and deleted_at is not null and deleted_by=auth.uid() and hidden_at is null
+  for update;
+  if not found then
     raise exception 'Il Renq deve essere nel cestino' using errcode='P0002';
   end if;
-  delete from public.rankings where id=p_ranking_id and user_id=auth.uid();
+  delete from public.rankings
+  where id=p_ranking_id and user_id=auth.uid()
+    and deleted_at is not null and deleted_by=auth.uid() and hidden_at is null;
+  if not found then
+    raise exception 'Il Renq non è più eliminabile' using errcode='P0002';
+  end if;
   delete from public.custom_items ci
   where ci.owner_id=auth.uid() and ci.is_reusable=false
     and not exists(select 1 from public.ranking_items ri where ri.custom_item_id=ci.id);

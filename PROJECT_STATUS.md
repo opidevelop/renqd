@@ -307,4 +307,10 @@ Stato di verifica:
 - le definizioni delle RPC sono state recuperate in sola lettura dal database live e usate come base per le sostituzioni, così da preservare le versioni effettivamente installate;
 - la migrazione è soltanto nel repository: **non è stata applicata a Supabase**;
 - nessuna modifica è stata eseguita sul database live e nessun deployment Production è stato avviato;
-- restano da verificare CI, applicazione delle migrazioni in ambiente approvato e test funzionali dei permessi per autore, altro utente e staff.
+- GitHub Actions `Code quality` run #47 sul commit `457a30cecb469c73268441ebf1b6eccc3474aeba`: `success`; TypeScript, ESLint e build di produzione superati. Il workflow non applica né valida semanticamente le migrazioni SQL;
+- restano da verificare l'applicazione delle migrazioni in ambiente approvato e i test funzionali dei permessi per autore, altro utente e staff.
+
+
+Revisione della migrazione di hardening:
+- la cancellazione definitiva del cestino personale blocca ora la riga con `FOR UPDATE` e ripete il controllo di `deleted_at`, `deleted_by` e `hidden_at` nell'istruzione DELETE, evitando race con un ripristino o un'azione di moderazione concorrente;
+- modifica presente soltanto nel repository; database live invariato.
