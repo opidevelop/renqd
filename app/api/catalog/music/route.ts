@@ -13,6 +13,8 @@ type MusicEntity = {
 };
 
 type MusicItem = { id: string; title: string; subtitle?: string; imageUrl?: string; previewUrl?: string; appleMusicUrl?: string; spotifyUrl?: string };
+type MusicBrainzTrack = { id?: string; position?: number; title?: string; recording?: { id?: string; title?: string } };
+type MusicBrainzRelease = { id?: string; title?: string; date?: string; country?: string; "release-group"?: { "primary-type"?: string }; media?: Array<{ tracks?: MusicBrainzTrack[] }> };
 
 const ITUNES = "https://itunes.apple.com";
 const MUSICBRAINZ = "https://musicbrainz.org/ws/2";
@@ -273,7 +275,7 @@ async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):
  }
  try{
   const releaseParams=new URLSearchParams({artist:id,inc:"recordings+release-groups",fmt:"json",limit:"100"});
-  const releaseData=await musicBrainzJson<{releases?:Array<{id?:string;title?:string;"release-group"?:{"primary-type"?:string};media?:Array<{tracks?:Array<{id?:string;position?:number;title?:string;recording?:{id?:string;title?:string}}>}>}>(`${MUSICBRAINZ}/release?${releaseParams}`);
+  const releaseData=await musicBrainzJson<{releases?:MusicBrainzRelease[]}>(`${MUSICBRAINZ}/release?${releaseParams}`);
   const releases=(releaseData.releases??[]).filter(release=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";});
   const tracks=releases.flatMap(release=>(release.media??[]).flatMap(medium=>(medium.tracks??[]).flatMap(track=>{
    const title=track.recording?.title??track.title;
