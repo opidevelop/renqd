@@ -863,3 +863,14 @@
 /* Global fixed-feeling application header */
 .platform-topbar{position:sticky!important;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px)}
 #profile-editor-panel{scroll-margin-top:92px}
+
+
+/* In-page editor for published Renq */
+.saved-renq-editor{display:grid;gap:14px;padding:16px;border:1px solid #eee4da;border-radius:15px;background:#fffdfb}
+.saved-renq-edit-title{display:grid;gap:7px;color:#96785f;font-size:10px;font-weight:850}
+.saved-renq-edit-title input{width:100%;min-height:44px;padding:10px 13px;border:1px solid #e9dfd5;border-radius:10px;background:#fff;color:#302820;font:inherit;font-size:14px;font-weight:700;outline:0}
+.saved-renq-edit-title input:focus{border-color:#d79c6b;box-shadow:0 0 0 3px #d79c6b20}
+.saved-renq-editor>p{margin:0;color:#8b8178;font-size:10px;line-height:1.6}
+.saved-renq-editor .renq-sort-list{display:grid;gap:8px}
+.saved-renq-feedback.is-success{color:#54805e}
+.saved-renq-feedback.is-error{color:#b33b30}
