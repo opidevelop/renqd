@@ -52,6 +52,15 @@
 7. Per i servizi email, mantenere template HTML curati e coerenti con la grafica Renqd. Per ora usare il logo/wordmark attuale, sostituibile in seguito.
 8. Non attribuire nel profilo i nomi dei servizi/API utilizzati, ma non rimuovere né alterare le integrazioni funzionanti (ad esempio Spotify, IGDB, TMDB e altri cataloghi).
 
+
+
+### Decisioni amministrative approvate il 18 novembre 2026
+
+9. Gerarchia dei ruoli: **OWNER > ADMIN > MODERATOR > USER**. Ogni ruolo può gestire soltanto i livelli inferiori; ADMIN non può modificare, sospendere o riattivare account ADMIN. Le operazioni riservate all'OWNER restano esclusive.
+10. **MODERATOR** è limitato alla moderazione dei contenuti. Nella versione attuale può intervenire esclusivamente sui Renq pubblicati dagli utenti: nascondere un Renq oppure spostarlo nel cestino (soft delete). Non può approvare, rifiutare, sospendere, riattivare o modificare account e profili. Le responsabilità di moderazione potranno essere estese quando saranno introdotti commenti e altre funzioni social.
+11. La moderazione deve essere tracciata nell'audit log. Il Renq moderato con «Elimina» resta recuperabile dal cestino; non è una cancellazione definitiva.
+12. **Solo OWNER può cancellare un account.** La cancellazione è completa e irreversibile: elimina l'utente da Auth e tutti i dati/contenuti collegati, inclusi tutti i Renq di ogni modalità, elementi, sessioni, revisioni, raccolte, commenti, like e altri dati personali associati. Gli eventuali record di audit da conservare devono essere anonimizzati. L'ultimo OWNER attivo non può essere eliminato.
+
 ## 4. Architettura dati e conservazione
 
 1. Le modifiche ai dati devono rispettare le migrazioni versionate in `supabase/migrations`.
