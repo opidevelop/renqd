@@ -7,7 +7,7 @@
 > **Aggiornato:** 18 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato:** `ae93d384154f70db05b8105b2524334ecbc60961`
+> **Ultimo commit applicativo analizzato:** `fcfae616f13941e70f81bc26297381e6be74f9d5`
 
 ## 1. Sintesi esecutiva
 
@@ -40,7 +40,7 @@ Sono stati analizzati repository, struttura Next.js, autenticazione, Supabase, s
 
 ### Fase 2 — Amministrazione
 
-**Stato:** audit tecnico eseguito; decisioni funzionali aggiornate il 18 novembre 2026; implementazione delle correzioni ancora da completare.
+**Stato:** dashboard unificata e flusso di segnalazione implementati nel repository su `main`; migrazioni Supabase non applicate e test funzionali da eseguire.
 
 Decisioni approvate:
 - gerarchia OWNER > ADMIN > MODERATOR > USER; ADMIN non può gestire account ADMIN;
@@ -57,7 +57,7 @@ Rilievi di codice da correggere:
 - il flusso di moderazione Renq è stato implementato nel repository su `main` (commit `36312d1`); resta da applicare e verificare la migrazione Supabase;
 - manca una procedura server-side di cancellazione account completa, transazionale e protetta dall'eliminazione dell'ultimo OWNER.
 
-Nessuna delle tre correzioni è ancora implementata né testata. La cancellazione completa richiede prima una verifica di tutte le FK, dei file Storage e delle dipendenze Auth; non eseguire cancellazioni reali durante i test.
+Le correzioni amministrative e la console di moderazione sono presenti nel repository, ma le migrazioni pertinenti non sono ancora applicate e i flussi non sono stati collaudati end-to-end. La cancellazione completa degli account resta da implementare: richiede prima una verifica di tutte le FK, dei file Storage e delle dipendenze Auth; non eseguire cancellazioni reali durante i test.
 
 Risultano già presenti nel codice/database:
 - dashboard amministrativa;
@@ -79,27 +79,20 @@ Da verificare:
 
 
 
-Audit e implementazione moderazione Renq — 18 novembre 2026:
-- `rankings` non dispone ancora di campi di moderazione (ad esempio `hidden_at` e `hidden_by`); dispone di `deleted_at`/`deleted_by` per il cestino del proprietario.
-- Le RPC esistenti `renqd_soft_delete_ranking` e `renqd_restore_ranking` verificano esclusivamente la proprietà del ranking e non consentono interventi moderatore.
-- Le policy RLS attuali consentono all'autore di leggere i propri ranking e ai membri autenticati di leggere ranking completati LIVE con profilo non privato; non considerano lo stato nascosto e la policy dell'autore non esclude contenuti nascosti. Le policy `ranking_items` riflettono la stessa esposizione.
-- `content_reports` è predisposta per segnalazioni di ranking, ma la lettura/modifica è riservata a `service_role`; non esiste ancora una console moderazione.
-- La pagina `/r/[slug]` controlla completamento, visibilità e accesso privato ma non lo stato di moderazione. Il layout `/r` mantiene l'autenticazione prevista dal modello chiuso.
-- Decisione confermata: un Renq nascosto è invisibile anche al suo autore e resta visibile soltanto a OWNER, ADMIN e MODERATOR. La funzione non è ancora implementata.
-- Perimetro confermato: la console deve mostrare tutti i Renq pubblicati e offrire un filtro dedicato alle segnalazioni. La funzionalità non è ancora implementata; non sono state applicate modifiche al database.
-- Nuova decisione confermata: quando un MODERATOR nasconde o sposta nel cestino un Renq, tutte le segnalazioni aperte relative a quel contenuto devono essere chiuse automaticamente come risolte. La chiusura dovrà essere atomica con l'azione di moderazione e tracciata nell'audit log. Implementazione e migrazione ancora da progettare; nessuna modifica applicativa o database eseguita.
-- Nuova decisione confermata: la lista generale del MODERATOR include tutti i Renq pubblicati, anche quelli nascosti; i Renq nel cestino sono consultabili separatamente tramite sezione/filtro dedicato. UI e query non ancora implementate.
+Audit, moderazione e segnalazioni Renq — 18 novembre 2026:
 
-Implementazione repository — commit `36312d1fd9c47c5d36ec0b77565fd74cf57aa75b`:
-- aggiunta la migrazione `20261118150000_renqd_moderation_console.sql`: campi `hidden_at`/`hidden_by`, audit log dedicato, funzioni RPC di elenco e moderazione, chiusura atomica delle segnalazioni OPEN/IN_REVIEW durante HIDE/TRASH;
-- aggiunte policy RLS per impedire all'autore e agli altri utenti ordinari di leggere o modificare un Renq nascosto e i dati collegati; accesso di consultazione riservato a OWNER/ADMIN/MODERATOR approvati;
-- aggiunta la console `/moderation` con viste Pubblicati, Segnalati e Cestino, ricerca, dettaglio segnalazioni, azioni Nascondi/Rendi visibile/Sposta nel cestino/Ripristina e registro audit;
-- aggiunto l'accesso alla console per OWNER/ADMIN/MODERATOR nella navigazione e nel menu profilo;
-- aggiornata la pagina `/r/[slug]`: gli utenti ordinari non possono aprire Renq nascosti o nel cestino; lo staff approvato può consultare i Renq completati anche se nascosti, nel cestino o non-Live;
-- **migrazione non applicata a Supabase**: il database live non dispone ancora dei nuovi campi, tabella e RPC; non distribuire l'applicazione in produzione prima di aver applicato e verificato la migrazione;
-- GitHub Actions `Code quality` run #39 sul commit `36312d1`: conclusione `success` (TypeScript, ESLint e build secondo il workflow);
-- nessun deployment Vercel è stato verificato per il commit `36312d1`; il codice non è considerato distribuito né collaudato funzionalmente;
-- nel repository non è stato trovato un flusso applicativo per creare nuove righe in `content_reports`: la console legge le segnalazioni esistenti, ma serve ancora il flusso utente «Segnala Renq» per alimentare la coda dall'interfaccia.
+- La migrazione `20261118150000_renqd_moderation_console.sql` aggiunge `hidden_at`/`hidden_by`, audit log dedicato, RPC di elenco e moderazione e chiusura atomica delle segnalazioni aperte quando un Renq viene nascosto o cestinato.
+- La console di moderazione è implementata nel repository. La lista generale comprende tutti i Renq completati, inclusi quelli nascosti; i segnalati e il cestino sono viste distinte.
+- OWNER, ADMIN e MODERATOR sono autorizzati dalle RPC di moderazione. OWNER e ADMIN utilizzano quindi le funzioni di moderazione senza un ruolo MODERATOR aggiuntivo.
+- La dashboard unica `/admin` è implementata: OWNER e ADMIN vedono le sezioni Moderazione e Utenti e accessi; MODERATOR vede soltanto Moderazione. La vecchia route `/moderation` reindirizza alla sezione corrispondente. Il menu globale espone un solo accesso «Amministrazione» ai tre ruoli.
+- La migrazione `20261118170000_renqd_ranking_reports.sql` aggiunge la creazione server-side delle segnalazioni, la verifica della segnalazione già inviata e un indice univoco che impone una sola segnalazione per reporter e Renq, anche dopo la risoluzione. La verifica read-only del database live non ha rilevato coppie duplicate esistenti.
+- Il flusso utente «Segnala questo Renq» è integrato nel menu secondario `⋯` della pagina Renq; è disponibile a utenti approvati diversi dall'autore e soltanto per contenuti Live, non nascosti e non cestinati. Include motivo, dettagli facoltativi, conferma e feedback.
+- Le funzioni di moderazione e reporting sono protette lato server/RPC. La creazione del report blocca il Renq con lock condiviso per evitare race con HIDE/TRASH: una segnalazione inserita prima della moderazione viene chiusa nella stessa transazione; una segnalazione avviata dopo il cambio di stato viene rifiutata.
+- **Nessuna delle due migrazioni di moderazione/reporting è stata applicata a Supabase**. Non effettuare deployment Production dell'applicazione finché le migrazioni non sono state applicate e verificate.
+- Il controllo read-only ha verificato che `content_reports` non contiene duplicati esistenti per coppia reporter/Renq.
+- GitHub Actions `Code quality` run #45 sul commit `fcfae616f13941e70f81bc26297381e6be74f9d5`: conclusione `success`; TypeScript, ESLint e build di produzione superati. I run precedenti #41, #42 e #44 avevano fallito per testo JSX con apostrofi non escapati; corretto e verificato nel run #45.
+- Nessun deployment Vercel è stato trovato per il commit `fcfae616f13941e70f81bc26297381e6be74f9d5`; il database live non è stato modificato.
+- Resta da verificare la copertura RLS effettiva sulle tabelle collegate ai ranking: la migrazione di moderazione crea policy restrittive su alcune tabelle per cui l'audit precedente non aveva confermato RLS abilitato. Non considerare conclusa la protezione dei dati collegati prima di aver verificato `relrowsecurity` e le policy per ogni tabella.
 
 ### Fase 3 — Database e conservazione dei dati
 
@@ -224,9 +217,9 @@ Il commit `ae93d38` è stato compilato e distribuito da Vercel in Production con
 ## 5. Stato GitHub e deployment
 
 - Branch operativo: `main`.
-- Ultimo commit applicativo su `main`: `36312d1fd9c47c5d36ec0b77565fd74cf57aa75b` (`Harden moderator actor validation`). Il deployment Production verificato in precedenza è ancora riferito al commit `ae93d384154f70db05b8105b2524334ecbc60961`; nessun deployment del nuovo commit è stato verificato.
-- Workflow CI: `Code quality`. I run sui commit `16aad741a054585ea0e02ca5e02df3721786e24d` e `70cc1ee6a267c930c38e1bf93453ca49f354ce59` sono terminati con successo. Anche il run #39 sul commit `36312d1fd9c47c5d36ec0b77565fd74cf57aa75b` è terminato con successo: `npm ci`, `npx tsc --noEmit`, ESLint e `npm run build` tutti verdi. ESLint lascia warning non bloccanti (principalmente immagini `<img>` non ottimizzate e alcune variabili/funzioni inutilizzate). I commit successivi riguardano soltanto la documentazione di progetto.
-- File applicativo modificato nell'ultimo commit: `app/api/rankings/route.ts` (rimosse 2 righe duplicate).
+- Ultimo commit applicativo su `main`: `fcfae616f13941e70f81bc26297381e6be74f9d5` (dashboard unica e reporting Renq). Il deployment Production verificato in precedenza è ancora riferito al commit `ae93d384154f70db05b8105b2524334ecbc60961`; nessun deployment del nuovo commit è stato trovato.
+- Workflow CI: `Code quality`. I run sui commit `16aad741a054585ea0e02ca5e02df3721786e24d` e `70cc1ee6a267c930c38e1bf93453ca49f354ce59` sono terminati con successo. Anche il run #39 sul commit `36312d1fd9c47c5d36ec0b77565fd74cf57aa75b` è terminato con successo. Il run #45 sul commit `fcfae616f13941e70f81bc26297381e6be74f9d5` è terminato con successo: `npm ci`, `npx tsc --noEmit`, ESLint e `npm run build` tutti verdi. ESLint lascia warning non bloccanti (principalmente immagini `<img>` non ottimizzate e alcune variabili/funzioni inutilizzate). I commit successivi riguardano soltanto la documentazione di progetto.
+- File applicativi modificati nel gruppo dashboard/reporting: `app/(platform)/admin/page.tsx`, route legacy `/moderation`, `components/platform-shell.tsx`, `components/moderation-console.tsx`, `app/r/[slug]/page.tsx`, `app/r/[slug]/actions.ts`, `components/report-renq-menu.tsx`, CSS dashboard/reporting e migrazione `20261118170000_renqd_ranking_reports.sql`.
 - **Vercel Production:** deployment `dpl_H8pTtS1CE4cbFLJjVRsPo5wsKnAj`, target `production`, stato `READY`, alias assegnati senza errori. Il deployment riporta esattamente il commit `ae93d384154f70db05b8105b2524334ecbc60961` su `main`.
 - Alias di produzione verificati: `https://renqd.app`, `https://renqd.vercel.app`, `https://www.renqd.app`.
 - La precedente condizione di blocco per quota giornaliera non è più attuale per questo rilascio. Lo stato `READY` conferma il deploy, non il collaudo funzionale.
