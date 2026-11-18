@@ -64,6 +64,15 @@ const actionLabels: Record<ModerationAction, string> = {
   RESTORE: "Ripristina dal cestino",
 };
 
+const reportReasonLabels: Record<string, string> = {
+  INAPPROPRIATE_CONTENT: "Contenuto inappropriato",
+  SPAM: "Spam o contenuto ingannevole",
+  HARASSMENT: "Molestie o contenuto offensivo",
+  COPYRIGHT: "Violazione del diritto d'autore",
+  FALSE_INFORMATION: "Informazioni false",
+  OTHER: "Altro",
+};
+
 function date(value: string | null) {
   if (!value) return "—";
   const parsed = new Date(value);
@@ -97,6 +106,7 @@ function auditLabel(action: string) {
 }
 
 export default function ModerationConsole({
+  basePath,
   view,
   query,
   rankings,
@@ -104,6 +114,7 @@ export default function ModerationConsole({
   loadError,
   auditUnavailable,
 }: {
+  basePath: string;
   view: ModerationView;
   query: string;
   rankings: ModerationRanking[];
@@ -157,7 +168,7 @@ export default function ModerationConsole({
         {(["published", "reported", "trash"] as ModerationView[]).map(item => (
           <Link
             key={item}
-            href={"/moderation?view=" + item + (query ? "&q=" + encodeURIComponent(query) : "")}
+            href={basePath + "?section=moderation&view=" + item + (query ? "&q=" + encodeURIComponent(query) : "")}
             className={view === item ? "is-active" : ""}
             aria-current={view === item ? "page" : undefined}
           >
@@ -167,8 +178,8 @@ export default function ModerationConsole({
         ))}
       </nav>
 
-      <form className="moderation-search" action="/moderation" method="get">
-        <input type="hidden" name="view" value={view}/>
+      <form className="moderation-search" action={basePath} method="get">
+        <input type="hidden" name="section" value="moderation"/><input type="hidden" name="view" value={view}/>
         <Search size={17}/>
         <input type="search" name="q" defaultValue={query} placeholder="Cerca per titolo o username..." aria-label="Cerca Renq"/>
         <button type="submit">Cerca</button>
@@ -216,7 +227,7 @@ export default function ModerationConsole({
                       <div className="moderation-report-list">
                         {ranking.reports.map(report => (
                           <article key={report.id}>
-                            <div><strong>{report.reason}</strong><span>@{report.reporter_username} · {dateTime(report.created_at)} · {report.status === "IN_REVIEW" ? "In revisione" : "Aperta"}</span></div>
+                            <div><strong>{reportReasonLabels[report.reason] ?? report.reason}</strong><span>@{report.reporter_username} · {dateTime(report.created_at)} · {report.status === "IN_REVIEW" ? "In revisione" : "Aperta"}</span></div>
                             {report.details && <p>{report.details}</p>}
                           </article>
                         ))}

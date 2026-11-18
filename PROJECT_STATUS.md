@@ -275,3 +275,19 @@ Dopo ogni sessione significativa:
 - spostare un'attività da «da verificare» a «verificata» soltanto dopo aver eseguito il test;
 - registrare warning e blocchi esterni;
 - non modificare le decisioni stabili in `PROJECT_DECISIONS.md` senza una scelta esplicita dell'utente.
+
+
+## Aggiornamento dashboard e segnalazioni — 18 novembre 2026
+
+Decisioni approvate:
+- una sola segnalazione per utente e per Renq, anche se la precedente è già stata risolta o archiviata;
+- dashboard unica `/admin`: OWNER e ADMIN accedono a moderazione e gestione account; MODERATOR accede esclusivamente alla moderazione; USER non visualizza né può aprire le funzioni riservate;
+- OWNER e ADMIN utilizzano direttamente le funzioni MODERATOR senza assegnazione di un secondo ruolo.
+
+Implementazione repository:
+- la console di moderazione viene integrata in `/admin`, con tab Moderazione e Utenti; il route legacy `/moderation` reindirizza alla sezione corrispondente;
+- menu laterale e menu profilo espongono un unico accesso «Amministrazione» a OWNER, ADMIN e MODERATOR;
+- il Renq presenta un menu secondario `⋯` per la segnalazione, con motivo, dettagli facoltativi e conferma;
+- una nuova migrazione aggiunge RPC di creazione/verifica segnalazione e indice univoco per reporter/Renq. La verifica read-only del database live non ha rilevato coppie duplicate esistenti;
+- **migrazione non applicata a Supabase**; nessuna modifica al database live;
+- build/CI, test funzionali e deployment da verificare dopo il commit.

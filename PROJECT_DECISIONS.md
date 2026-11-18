@@ -197,3 +197,9 @@
 14. La console MODERATOR deve mostrare **tutti i Renq pubblicati**, non soltanto quelli segnalati. Deve inoltre offrire un filtro dedicato alle segnalazioni ricevute, così da distinguere la coda delle segnalazioni dalla consultazione generale dei contenuti.
 15. Quando un MODERATOR nasconde o sposta nel cestino un Renq per cui esistono segnalazioni aperte, tali segnalazioni devono essere **chiuse automaticamente come risolte**. La risoluzione deve essere coerente e atomica con l'operazione di moderazione, e lasciare traccia nell'audit log.
 16. Nella console MODERATOR, l'elenco generale deve includere tutti i Renq pubblicati, compresi quelli nascosti. I Renq nel cestino devono essere consultabili separatamente, tramite una sezione o un filtro distinto.
+
+
+### Decisioni approvate il 18 novembre 2026 — dashboard e segnalazioni
+
+17. Un utente approvato può inviare **una sola segnalazione per ciascun Renq**. Il vincolo vale anche dopo la chiusura della segnalazione: non è consentito inviarne una seconda sullo stesso Renq. La segnalazione è disponibile soltanto per contenuti pubblicati, Live, non nascosti e non cestinati, e non può essere inviata dall'autore.
+18. L'accesso amministrativo e di moderazione confluisce in una **dashboard unica «Amministrazione»**, raggiungibile da `/admin`. OWNER e ADMIN dispongono sia delle funzioni amministrative sia di tutte le funzioni MODERATOR; MODERATOR accede soltanto alla sezione di moderazione. USER e account non approvati non accedono alla dashboard. Le autorizzazioni restano verificate lato server e database; la gerarchia OWNER > ADMIN > MODERATOR > USER e i privilegi esclusivi dell'OWNER restano invariati.

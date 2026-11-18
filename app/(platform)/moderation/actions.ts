@@ -50,6 +50,7 @@ export async function moderateRanking(
 
   const result = data as { resolved_reports_count?: number } | null;
   revalidatePath("/moderation");
+  revalidatePath("/admin");
   revalidatePath("/rankings");
   revalidatePath("/rankings/trash");
   revalidatePath("/r/[slug]", "page");
