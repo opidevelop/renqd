@@ -77,6 +77,17 @@ Da verificare:
 - permessi reali per OWNER, ADMIN, utenti approvati, non approvati e sospesi;
 - comportamento dell'audit log e dei controlli server-side in test autenticati.
 
+
+
+Audit moderazione Renq — 18 novembre 2026:
+- `rankings` non dispone ancora di campi di moderazione (ad esempio `hidden_at` e `hidden_by`); dispone di `deleted_at`/`deleted_by` per il cestino del proprietario.
+- Le RPC esistenti `renqd_soft_delete_ranking` e `renqd_restore_ranking` verificano esclusivamente la proprietà del ranking e non consentono interventi moderatore.
+- Le policy RLS attuali consentono all'autore di leggere i propri ranking e ai membri autenticati di leggere ranking completati LIVE con profilo non privato; non considerano lo stato nascosto e la policy dell'autore non esclude contenuti nascosti. Le policy `ranking_items` riflettono la stessa esposizione.
+- `content_reports` è predisposta per segnalazioni di ranking, ma la lettura/modifica è riservata a `service_role`; non esiste ancora una console moderazione.
+- La pagina `/r/[slug]` controlla completamento, visibilità e accesso privato ma non lo stato di moderazione. Il layout `/r` mantiene l'autenticazione prevista dal modello chiuso.
+- Decisione confermata: un Renq nascosto è invisibile anche al suo autore e resta visibile soltanto a OWNER, ADMIN e MODERATOR. La funzione non è ancora implementata.
+- Prima dell'implementazione va definito il perimetro dell'elenco moderazione (tutti i Renq pubblicati o solo quelli segnalati); non sono state applicate modifiche al database per questa funzionalità.
+
 ### Fase 3 — Database e conservazione dei dati
 
 **Stato:** struttura implementata; allineamento migrazioni e test dei flussi da completare.
