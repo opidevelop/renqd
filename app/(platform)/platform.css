@@ -874,3 +874,13 @@
 .saved-renq-editor .renq-sort-list{display:grid;gap:8px}
 .saved-renq-feedback.is-success{color:#54805e}
 .saved-renq-feedback.is-error{color:#b33b30}
+
+
+/* Direct soft-delete action on My Renq cards */
+.my-renq-card-shell{position:relative;min-width:0}
+.my-renq-card-shell .my-renq-card{height:100%}
+.my-renq-card-delete{position:absolute;top:32px;right:32px;z-index:4;display:grid;width:32px;height:32px;place-items:center;border:1px solid #ffffff70;border-radius:50%;background:#2b241f9c;color:#fff;backdrop-filter:blur(8px);cursor:pointer;transition:background .18s,transform .18s}
+.my-renq-card-delete:hover{background:#a94f45;transform:scale(1.06)}
+.my-renqs-feedback{position:fixed;z-index:220;right:20px;bottom:22px;max-width:min(480px,calc(100vw - 40px));padding:12px 16px;border:1px solid #dce9dd;border-radius:13px;background:#fff;color:#54805e;font-size:11px;font-weight:750;box-shadow:0 12px 35px #3028201a;animation:renqd-toast-out 5.5s ease forwards}
+@keyframes renqd-toast-out{0%,78%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(10px);pointer-events:none}}
+@media(max-width:680px){.my-renq-card-delete{top:25px;right:25px;width:30px;height:30px}.my-renqs-feedback{right:12px;bottom:calc(78px + env(safe-area-inset-bottom));max-width:calc(100vw - 24px)}}
