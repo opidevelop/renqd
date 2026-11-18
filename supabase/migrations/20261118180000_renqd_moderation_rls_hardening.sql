@@ -206,8 +206,7 @@ begin
   perform public.renqd_record_revision(p_ranking_id, 'Completamento classifica');
   return jsonb_build_object('ok',true,'rankPositions',v_positions);
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_complete_speed_session(p_session_id uuid, p_ranking_id uuid, p_ordered_ids jsonb, p_tie_map jsonb DEFAULT '{}'::jsonb)
  RETURNS jsonb
@@ -270,8 +269,7 @@ begin
   perform public.renqd_record_revision(p_ranking_id,'Completamento Speed Renq');
   return jsonb_build_object('timedOut',v_timed_out);
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_finalize_battle_ranking(p_session_id uuid, p_rank_positions jsonb, p_tie_groups jsonb DEFAULT '{}'::jsonb)
  RETURNS void
@@ -307,8 +305,7 @@ begin
   where id=v_ranking_id and user_id=v_user_id;
   perform public.renqd_record_revision(v_ranking_id,'Completamento Battle Renq');
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_permanently_delete_ranking(p_ranking_id uuid)
  RETURNS void
@@ -337,8 +334,7 @@ begin
   where ci.owner_id=auth.uid() and ci.is_reusable=false
     and not exists(select 1 from public.ranking_items ri where ri.custom_item_id=ci.id);
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_record_battle_choice(p_session_id uuid, p_winner_item_id uuid DEFAULT NULL::uuid, p_is_tie boolean DEFAULT false)
  RETURNS jsonb
@@ -411,8 +407,7 @@ begin
 
   return jsonb_build_object('completed',v_completed,'cursor',v_cursor,'total',v_total,'wins',v_wins,'tiePairs',v_ties);
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_record_revision(p_ranking_id uuid, p_change_summary text DEFAULT 'Modifica classifica'::text)
  RETURNS integer
@@ -468,8 +463,7 @@ begin
 
   return v_version;
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_reorder_ranking(p_ranking_id uuid, p_ordered_ids jsonb, p_tie_map jsonb DEFAULT '{}'::jsonb)
  RETURNS jsonb
@@ -521,8 +515,7 @@ begin
   perform public.renqd_record_revision(p_ranking_id,'Riordino classifica');
   return jsonb_build_object('ok',true);
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_restart_ranking(p_ranking_id uuid)
  RETURNS void
@@ -551,8 +544,7 @@ begin
         updated_at=now()
   where id=p_ranking_id and user_id=v_user_id;
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_restore_ranking(p_ranking_id uuid)
  RETURNS void
@@ -569,8 +561,7 @@ begin
   where id=p_ranking_id and user_id=auth.uid() and deleted_at is not null and deleted_by=auth.uid() and hidden_at is null;
   if not found then raise exception 'Renq non trovato nel cestino' using errcode='P0002'; end if;
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_save_ranking_snapshot(p_ranking_id uuid, p_settings jsonb)
  RETURNS integer
@@ -588,8 +579,7 @@ begin
   if not found then raise exception 'Renq completato non trovato' using errcode='P0002'; end if;
   return public.renqd_record_revision(p_ranking_id,'Salvataggio Renq');
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_soft_delete_ranking(p_ranking_id uuid)
  RETURNS void
@@ -606,8 +596,7 @@ begin
   where id=p_ranking_id and user_id=auth.uid() and deleted_at is null and hidden_at is null;
   if not found then raise exception 'Renq non trovato' using errcode='P0002'; end if;
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_start_battle_session(p_ranking_id uuid, p_difficulty text, p_pairs jsonb)
  RETURNS uuid
@@ -647,8 +636,7 @@ begin
   where id=p_ranking_id and user_id=v_user_id;
   return v_session_id;
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_start_speed_session(p_ranking_id uuid, p_duration_seconds integer)
  RETURNS jsonb
@@ -677,8 +665,7 @@ begin
   where id=p_ranking_id and user_id=v_user_id;
   return jsonb_build_object('id',v_session.id,'started_at',v_session.started_at,'deadline_at',v_session.deadline_at);
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION public.renqd_undo_battle_choice(p_session_id uuid)
  RETURNS jsonb
@@ -786,7 +773,6 @@ begin
     'tiePairs',v_ties
   );
 end;
-$function$
-
+$function$;
 
 commit;
