@@ -246,3 +246,12 @@
 8. Gli elementi senza voto restano in una sezione separata, senza posizione e senza etichetta. **È consentito pubblicare Grade anche se alcuni elementi non sono ancora valutati**; devono essere presenti almeno un elemento valutato e una classifica effettiva. Gli elementi non valutati restano separati anche dopo la pubblicazione e non entrano nella media.
 9. La pagina pubblicata resta l'unico editor: è possibile modificare voti, ordine interno ai pari merito e configurazione delle etichette. Le modifiche aggiornano classifica, media e snapshot e generano una revisione.
 10. L'introduzione di Grade non deve modificare il comportamento di Renq, Battle Renq o Speed Renq.
+
+### Decisioni approvate il 18 novembre 2026 — rifinitura modalità Grade
+- Nella configurazione Grade deve essere possibile aggiungere e rimuovere liberamente le etichette, sia durante la creazione sia nell'editor del Renq pubblicato.
+- I nomi iniziali delle quattro etichette sono **Win**, **High**, **Safe** e **Low**; i nomi restano modificabili.
+- Le etichette devono avere una presentazione visiva più riconoscibile e giocosa nella pagina del Renq e nel Reveal, mantenendo il colore configurato.
+- La nota sulla pubblicazione parziale deve essere visivamente distanziata dal pulsante di pubblicazione.
+- Le liste lunghe di elementi/risultati devono essere contenute in aree con scroll interno, senza aumentare inutilmente l'altezza complessiva della pagina.
+- Il badge di modalità Grade nelle card del profilo e negli elenchi personali deve mostrare **Grade**, non il fallback generico «Renq».
+- Il limite di 100 elementi resta invariato: il problema segnalato non era causato dal superamento di tale limite.

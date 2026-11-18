@@ -7,7 +7,7 @@
 > **Aggiornato:** 18 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `d11378869280d25c27357d41a0d4005bddcdc9fe`
+> **Ultimo commit applicativo analizzato su main:** `50c6ed119541066011a1e4be863e6e30cbbe4347`
 
 ## 1. Sintesi esecutiva
 
@@ -476,3 +476,21 @@ Revisione della migrazione di hardening:
 - Alias Production associati al deployment, incluso `https://renqd.app` (oltre a `renqd.vercel.app`, `renqd-opiteam.vercel.app` e `www.renqd.app`).
 - Smoke test HTTP autenticazione: `/login` risponde correttamente; richieste anonime a `/home` e `/create` vengono instradate a `/login`, coerentemente con il modello chiuso.
 - Il deployment conferma il rilascio del codice Grade in Production. Restano da eseguire i test funzionali autenticati end-to-end della modalità Grade su mobile e desktop; lo smoke test HTTP non li sostituisce.
+
+## 15. Rifinitura Grade e contenimento liste lunghe — 18 novembre 2026
+
+### Implementazione repository
+- Commit applicativo su `main`: `50c6ed119541066011a1e4be863e6e30cbbe4347`.
+- `components/create-renq-form.tsx`: impostazioni Grade con aggiunta/rimozione etichette, nomi iniziali Win/High/Safe/Low e cambio criterio che conserva il numero e i nomi delle etichette.
+- `components/saved-renq-detail.tsx`: stessi controlli nell'editor del Grade pubblicato; le etichette vuote non vengono mostrate.
+- `components/grade-experience.tsx`: nomi iniziali aggiornati e gestione sicura di etichette senza nome.
+- `components/saved-renq-detail.tsx`, `components/renq-reveal.tsx` e `app/(platform)/platform.css`: etichette rese come badge colorati, con maggiore risalto nella pagina pubblicata e nel Reveal.
+- `app/(platform)/platform.css`: contenimento delle liste dinamiche (builder, cataloghi, ranking, Grade e non valutati) con scroll interno e vincoli di altezza; nota di pubblicazione parziale distanziata dal pulsante.
+- `components/profile-dashboard.tsx` e `components/my-renqs-browser.tsx`: etichetta esplicita Grade per i Renq creati con questa modalità.
+- Nessuna modifica al database o alle migrazioni. Il limite dei 100 elementi resta invariato.
+
+### Verifiche e produzione
+- GitHub Actions Code quality run **#44387730519** sul commit `50c6ed119541066011a1e4be863e6e30cbbe4347`: **success**; TypeScript, ESLint e build di produzione superati.
+- Vercel Production deployment `dpl_BB1dnVnJ73uY3km7HpXbGRU2b7E8`: **READY**, commit `50c6ed119541066011a1e4be863e6e30cbbe4347`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app` associati.
+- Smoke test anonimo: `/login` risponde 200; `/create` e `/home` vengono reindirizzate a `/login`, coerentemente con la piattaforma chiusa.
+- Il collaudo funzionale autenticato delle nuove impostazioni Grade, delle liste lunghe e delle card profilo resta da eseguire su mobile e desktop.
