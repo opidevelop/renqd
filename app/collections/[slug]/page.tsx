@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireApprovedUser } from "@/lib/supabase/authorization";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import { ArrowLeft, ArrowUpRight, Globe2, LockKeyhole, Trophy } from "lucide-react";
 
@@ -8,8 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function CollectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await requireApprovedUser();
   const { data: collection } = await supabase.from("profile_collections").select("*").eq("slug", slug).maybeSingle();
   if (!collection) notFound();
   const isOwner = collection.owner_id === user?.id;
