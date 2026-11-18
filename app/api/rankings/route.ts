@@ -205,6 +205,8 @@ export async function POST(request:Request){
   const settings={...(ranking.settings as Record<string,unknown>),coverImagePath,coverImageUrl,coverPosition};
   const {error}=await supabase.from("rankings").update({settings}).eq("id",rankingId).eq("user_id",user.id);
   if(error)return jsonError(error.message,500);
+  const {error:revisionError}=await supabase.rpc("renqd_record_revision",{p_ranking_id:rankingId,p_change_summary:"Modifica copertina"});
+  if(revisionError){await supabase.from("rankings").update({settings:ranking.settings}).eq("id",rankingId).eq("user_id",user.id);return jsonError(revisionError.message,500);}
   return NextResponse.json({ok:true});
  }
  if(body.action==="edit-saved-renq"){
