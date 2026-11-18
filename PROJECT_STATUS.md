@@ -7,7 +7,7 @@
 > **Aggiornato:** 18 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Commit HEAD al momento dell'aggiornamento:** `3051e8fe3510722c6e4230716c351e079b0c2b79`
+> **Ultimo commit applicativo analizzato:** `70cc1ee6a267c930c38e1bf93453ca49f354ce59`
 
 ## 1. Sintesi esecutiva
 
@@ -183,7 +183,7 @@ Queste modifiche sono nel repository; non sono ancora tutte validate da test fun
 
 - Branch operativo: `main`.
 - Commit HEAD al momento dell'aggiornamento: `34a39eaebc19f94142e7eda26c49a5736cfc32ee`.
-- Workflow CI: `Code quality`. Il primo controllo ha confermato `npm ci` e `npx tsc --noEmit`; ESLint ha trovato 4 errori (uno JSX e tre relativi a setState negli effect). Le correzioni sono state applicate su `main`; il nuovo run per il commit HEAD `3051e8f` è in coda/in avvio. ESLint e build di produzione non sono ancora confermati verdi.
+- Workflow CI: `Code quality`. Il run sul commit `16aad741a054585ea0e02ca5e02df3721786e24d` è terminato con successo: `npm ci`, `npx tsc --noEmit`, ESLint e `npm run build` tutti verdi. ESLint ha lasciato warning non bloccanti (principalmente immagini `<img>` non ottimizzate e variabili/funzioni inutilizzate). È stata poi applicata un'ulteriore correzione al filtro di «I miei Renq» nel commit `70cc1ee`; il relativo run CI deve ancora concludersi.
 - Vercel: deployment recenti bloccati dal limite giornaliero `api-deployments-free-per-day`. Il check Vercel restituisce failure con indicazione di riprovare dopo circa 24 ore.
 - **Non affermare che il commit HEAD sia in produzione.** Verificare un deployment Vercel Production `READY` che riporti esattamente il commit HEAD.
 - Non creare branch per aggirare il limite e non fare deploy ripetuti durante il blocco.
