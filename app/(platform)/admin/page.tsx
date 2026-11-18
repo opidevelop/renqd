@@ -11,7 +11,7 @@ export default async function AdminPage({
 }: {
   searchParams: Promise<{ section?: string; view?: string; q?: string }>;
 }) {
-  const { supabase, profile } = await requireApprovedUser();
+  const { supabase, user, profile } = await requireApprovedUser();
   const isAdmin = profile.role === "OWNER" || profile.role === "ADMIN";
   const isModerator = profile.role === "MODERATOR";
   if (!isAdmin && !isModerator) redirect("/home");
