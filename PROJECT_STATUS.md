@@ -183,7 +183,8 @@ Il commit `ae93d38` è stato compilato e distribuito da Vercel in Production con
 ## 5. Stato GitHub e deployment
 
 - Branch operativo: `main`.
-- Commit HEAD su `main`: `ae93d384154f70db05b8105b2524334ecbc60961` (`Fix duplicate revisionError declaration in rankings route`).
+- Ultimo commit applicativo su `main` (incluso nel deployment Production): `ae93d384154f70db05b8105b2524334ecbc60961` (`Fix duplicate revisionError declaration in rankings route`).
+- Commit documentale creato aggiornando questo stato dell'arte: `dbd3d1512826d503d6de925889a07f85a4abe60a`.
 - Workflow CI: `Code quality`. Il run sul commit `16aad741a054585ea0e02ca5e02df3721786e24d` e quello sul commit successivo `70cc1ee6a267c930c38e1bf93453ca49f354ce59` sono terminati con successo: `npm ci`, `npx tsc --noEmit`, ESLint e `npm run build` tutti verdi. ESLint lascia warning non bloccanti (principalmente immagini `<img>` non ottimizzate e alcune variabili/funzioni inutilizzate). I commit successivi riguardano soltanto la documentazione di progetto.
 - File applicativo modificato nell'ultimo commit: `app/api/rankings/route.ts` (rimosse 2 righe duplicate).
 - **Vercel Production:** deployment `dpl_H8pTtS1CE4cbFLJjVRsPo5wsKnAj`, target `production`, stato `READY`, alias assegnati senza errori. Il deployment riporta esattamente il commit `ae93d384154f70db05b8105b2524334ecbc60961` su `main`.
@@ -224,7 +225,6 @@ Questi sono rilievi da analizzare, non modifiche da applicare automaticamente. L
 9. Testare autenticazione e permessi con account in stati diversi, assicurandosi che ogni pagina interna rimandi al login quando manca la sessione.
 10. Verificare invio email e configurazioni Resend/Supabase.
 11. Eseguire il collaudo end-to-end completo su mobile e desktop.
-12. Eseguire il collaudo end-to-end su mobile e desktop.
 
 ## 8. Come aggiornare questo documento
 
