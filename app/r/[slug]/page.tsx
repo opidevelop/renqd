@@ -8,12 +8,17 @@ export const dynamic = "force-dynamic";
 export default async function PublicRenqPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
-  let { data: ranking } = await supabase.from("rankings").select("id,user_id,public_slug,title,mode,settings,visibility,status").eq("public_slug", slug).is("deleted_at",null).maybeSingle();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) notFound();
+  const { data: actor } = await supabase.from("profiles").select("role,status").eq("id", user.id).maybeSingle();
+  const isStaff = actor?.status === "APPROVED" && ["OWNER","ADMIN","MODERATOR"].includes(actor.role);
+  let { data: ranking } = await supabase.from("rankings").select("id,user_id,public_slug,title,mode,settings,visibility,status,hidden_at,deleted_at").eq("public_slug", slug).maybeSingle();
   if (!ranking && /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(slug)) {
-    const result = await supabase.from("rankings").select("id,user_id,public_slug,title,mode,settings,visibility,status").eq("id", slug).is("deleted_at",null).maybeSingle();
+    const result = await supabase.from("rankings").select("id,user_id,public_slug,title,mode,settings,visibility,status,hidden_at,deleted_at").eq("id", slug).maybeSingle();
     ranking = result.data;
   }
-  if (!ranking || ranking.status !== "COMPLETED" || ranking.visibility !== "LIVE" || (ranking.settings as Record<string,unknown>)?.access === "private") notFound();
+  if (!ranking || ranking.status !== "COMPLETED") notFound();
+  if (!isStaff && (ranking.hidden_at || ranking.deleted_at || ranking.visibility !== "LIVE" || (ranking.settings as Record<string,unknown>)?.access === "private")) notFound();
   const settings = (ranking.settings ?? {}) as Record<string,unknown>;
   const snapshot = (settings.savedSnapshot ?? {}) as { items?: { id?:string; title:string; image_url?:string|null; description?:string|null; rank_position?:number|null }[] };
   const items = (snapshot.items ?? []).slice().sort((a,b)=>(a.rank_position??999)-(b.rank_position??999));

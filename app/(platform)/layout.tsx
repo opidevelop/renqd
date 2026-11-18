@@ -6,6 +6,7 @@ import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import "./platform.css";
 import "./profile-phase5.css";
 import "./admin-management.css";
+import "./moderation.css";
 export const dynamic = "force-dynamic";
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
