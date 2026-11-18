@@ -63,6 +63,12 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!profileEditorOpen) return;
+    const editor = document.getElementById("profile-editor-panel");
+    editor?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [profileEditorOpen]);
+
+  useEffect(() => {
     const query = collectionSearchQuery.trim();
     if (!collectionSearchTarget || query.length < 2) {
       setCollectionSearchResults([]);
@@ -161,7 +167,8 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       void banner_display_url;
       const { error: saveError } = await supabase.from("public_profiles").upsert({ ...persisted, user_id: user.id, username: profile.username }, { onConflict: "user_id" });
       if (saveError) throw saveError;
-      setProfile(next); setMessage("Profilo aggiornato.");
+      setProfile(next); setProfileEditorOpen(false); setMessage("Profilo aggiornato.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) { setError(e instanceof Error ? e.message : "Non è stato possibile salvare il profilo."); }
     finally { setSavingProfile(false); }
   }
@@ -374,7 +381,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       {badges.length > 0 && <div className="profile-badges-section"><div className="profile-badges-heading"><span>TRAGUARDI</span><strong>I tuoi badge</strong></div><div className="profile-badge-list">{badges.map(badge => <span key={badge}><BadgeCheck size={15}/>{badge}</span>)}</div></div>}
     </section>
 
-    {profileEditorOpen && <section className="profile-editor-panel">
+    {profileEditorOpen && <section id="profile-editor-panel" className="profile-editor-panel">
       <div className="profile-section-heading"><div><span>PERSONALIZZAZIONE</span><h2>Il tuo profilo</h2></div><Sparkles size={20}/></div>
       <div className="profile-image-editors">
         <label className="profile-image-upload">{profile.avatar_display_url ? <img src={profile.avatar_display_url} alt=""/> : <Camera size={20}/>}<span>Avatar</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={event => void updateProfileImage(event.target.files?.[0] ?? null, "avatar_url")}/></label>
