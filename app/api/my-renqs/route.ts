@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     return {
       id: ranking.id, public_slug: ranking.public_slug, title: ranking.title, mode: ranking.mode, deleted_at: ranking.deleted_at,
       elapsedSeconds: ranking.mode === "SPEED_RENQ" && ranking.started_at && ranking.completed_at ? Math.max(0, Math.round((new Date(ranking.completed_at).getTime() - new Date(ranking.started_at).getTime()) / 1000)) : null,
-      created_at: String(settings.savedAt ?? ranking.completed_at ?? ranking.created_at),
+      created_at: ranking.created_at,
       rows, category: String(settings.category ?? "custom"),
       coverImage: signed?.signedUrl ?? (typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : rows.find(row => row.image_url)?.image_url ?? null),
       coverPosition: settings.coverPosition && typeof settings.coverPosition === "object" ? settings.coverPosition as { x: number; y: number } : { x: 50, y: 50 }
