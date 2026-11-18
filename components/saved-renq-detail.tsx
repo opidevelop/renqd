@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Heart, MessageCircle, Pencil, Play, RotateCcw, Send, Share2, Trophy, Trash2, X } from "lucide-react";
 import { RenqCoverPicker } from "@/components/renq-cover-picker";
