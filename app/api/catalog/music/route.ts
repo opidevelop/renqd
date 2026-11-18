@@ -38,6 +38,23 @@ async function musicBrainzJson<T>(url: string): Promise<T> {
   return task;
 }
 
+async function browseMusicBrainzReleases(artistId:string,include:string):Promise<MusicBrainzRelease[]>{
+  const all:MusicBrainzRelease[]=[];
+  let offset=0;
+  for(let page=0;page<10;page++){
+    const params=new URLSearchParams({artist:artistId,inc:include,fmt:"json",limit:"100",offset:String(offset)});
+    const data=await musicBrainzJson<{releases?:MusicBrainzRelease[];"release-count"?:number}>(`${MUSICBRAINZ}/release?${params}`);
+    const releases=data.releases??[];
+    if(!releases.length)break;
+    all.push(...releases);
+    offset+=releases.length;
+    const total=Number(data["release-count"]??0);
+    if(total&&offset>=total)break;
+    if(!total&&releases.length<100)break;
+  }
+  return all;
+}
+
 async function itunesJson<T>(url: string): Promise<T> {
   const response = await fetch(url, {
     headers: { Accept: "application/json" },
@@ -274,9 +291,8 @@ async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):
   }catch{}
  }
  try{
-  const releaseParams=new URLSearchParams({artist:id,inc:"recordings+release-groups",fmt:"json",limit:"100"});
-  const releaseData=await musicBrainzJson<{releases?:MusicBrainzRelease[]}>(`${MUSICBRAINZ}/release?${releaseParams}`);
-  const releases=(releaseData.releases??[]).filter(release=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";});
+  const releaseData=await browseMusicBrainzReleases(id,"recordings+release-groups");
+  const releases=releaseData.filter(release=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";});
   const tracks=releases.flatMap(release=>(release.media??[]).flatMap(medium=>(medium.tracks??[]).flatMap(track=>{
    const title=track.recording?.title??track.title;
    if(!title||!release.id)return[];
@@ -316,10 +332,9 @@ async function loadMusicBrainzItems(payload:Record<string,unknown>,contentType:s
  }
  const id=payload.artistId;
  if(typeof id!=="string"||!/^[0-9a-f-]{36}$/i.test(id))throw new Error("Invalid MusicBrainz artist identifier");
- const params=new URLSearchParams({artist:id,inc:"release-groups",fmt:"json",limit:"100"});
- const data=await musicBrainzJson<{releases?:MusicBrainzRelease[]}>(`${MUSICBRAINZ}/release?${params}`);
+ const data=await browseMusicBrainzReleases(id,"release-groups");
  const artistName=typeof payload.artistName==="string"?payload.artistName:"";
- return(data.releases??[]).filter(release=>Boolean(release.id&&release.title)&&(()=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";})()).map(release=>({
+ return data.filter(release=>Boolean(release.id&&release.title)&&(()=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";})()).map(release=>({
   id:release.id as string,title:release.title as string,subtitle:[release["release-group"]?.["primary-type"],release.date?.slice(0,4),release.country].filter(Boolean).join(" · ")||undefined,
   imageUrl:"https://coverartarchive.org/release/"+release.id+"/front-250",spotifyUrl:spotifySearchUrl(`${artistName} ${release.title}`)
  }));
