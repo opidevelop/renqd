@@ -858,3 +858,8 @@
 .renq-trash-actions button.renq-trash-delete{border-color:#f0d8d4;color:#a94f45}
 .renq-trash-actions button:disabled{opacity:.55;cursor:wait}
 @media(max-width:680px){.renq-trash-page .my-renqs-header{align-items:flex-start;flex-direction:column}.renq-trash-bulk-actions{width:100%;justify-content:flex-start}.renq-trash-item{align-items:stretch;flex-direction:column}.renq-trash-actions{width:100%}.renq-trash-actions button{flex:1}}
+
+
+/* Global fixed-feeling application header */
+.platform-topbar{position:sticky!important;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px)}
+#profile-editor-panel{scroll-margin-top:92px}
