@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowUpRight, BadgeCheck, Camera, FolderPlus, Globe2, Heart, ImagePlus, LockKeyhole, Plus, Save, Share2, Sparkles, Trash2, Trophy, Users, Pencil, Search, LoaderCircle, X } from "lucide-react";
 
@@ -57,6 +58,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   profile: PublicProfile; collections: Collection[]; rankings: Renq[]; favorites: Renq[];
   followerCount: number; followingCount: number; likeCount: number;
 }) {
+  const router=useRouter();
   const [profile, setProfile] = useState(initialProfile);
   const [collections, setCollections] = useState(initialCollections);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -205,6 +207,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       if (saveError) throw saveError;
       setProfile(next); setProfileEditorOpen(false); setMessage("Profilo aggiornato.");
       window.scrollTo({ top: 0, behavior: "smooth" });
+      router.refresh();
     } catch (e) { setError(e instanceof Error ? e.message : "Non è stato possibile salvare il profilo."); }
     finally { setSavingProfile(false); }
   }
