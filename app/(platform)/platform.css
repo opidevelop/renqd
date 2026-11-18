@@ -911,3 +911,9 @@
 @media(max-width:680px){.profile-media-crop-grid{grid-template-columns:1fr}.profile-media-crop-grid label{grid-template-columns:78px minmax(0,1fr) auto}}
 
 @keyframes renqd-toast-center-out{0%,78%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,10px);pointer-events:none}}
+
+
+.saved-renq-edit-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.saved-renq-edit-settings label{display:grid;gap:7px;color:#96785f;font-size:10px;font-weight:850}
+.saved-renq-edit-settings select{width:100%;min-height:42px;padding:9px 11px;border:1px solid #e9dfd5;border-radius:10px;background:#fff;color:#302820;font:inherit;font-size:12px}
+@media(max-width:560px){.saved-renq-edit-settings{grid-template-columns:1fr}}
