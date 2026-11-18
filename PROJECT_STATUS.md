@@ -86,7 +86,7 @@ Audit moderazione Renq — 18 novembre 2026:
 - `content_reports` è predisposta per segnalazioni di ranking, ma la lettura/modifica è riservata a `service_role`; non esiste ancora una console moderazione.
 - La pagina `/r/[slug]` controlla completamento, visibilità e accesso privato ma non lo stato di moderazione. Il layout `/r` mantiene l'autenticazione prevista dal modello chiuso.
 - Decisione confermata: un Renq nascosto è invisibile anche al suo autore e resta visibile soltanto a OWNER, ADMIN e MODERATOR. La funzione non è ancora implementata.
-- Prima dell'implementazione va definito il perimetro dell'elenco moderazione (tutti i Renq pubblicati o solo quelli segnalati); non sono state applicate modifiche al database per questa funzionalità.
+- Perimetro confermato: la console deve mostrare tutti i Renq pubblicati e offrire un filtro dedicato alle segnalazioni. La funzionalità non è ancora implementata; non sono state applicate modifiche al database.
 
 ### Fase 3 — Database e conservazione dei dati
 
