@@ -184,10 +184,10 @@ export async function POST(request:Request){
  }
  if(body.action==="save-renq"){
   const {rankingId}=body as {rankingId:string};const {data:ranking}=await supabase.from("rankings").select("*").eq("id",rankingId).eq("user_id",user.id).is("deleted_at",null).single();if(!ranking||ranking.status!=="COMPLETED")return jsonError("Completa il Renq prima di salvarlo.");
-  const {data:rows,error}=await supabase.from("ranking_items").select("id,title_snapshot,rank_position,tie_group_id,custom_item_id,score,tie_order").eq("ranking_id",rankingId).order("rank_position").order("tie_order").order("sort_order");if(error||!rows)return jsonError(error?.message??"Impossibile leggere il risultato.",500);
+  const {data:rows,error}=await supabase.from("ranking_items").select("id,title_snapshot,rank_position,tie_group_id,custom_item_id,score,tie_order").eq("ranking_id",rankingId).order("rank_position",{ascending:true,nullsFirst:false}).order("tie_order").order("sort_order");if(error||!rows)return jsonError(error?.message??"Impossibile leggere il risultato.",500);
   const customIds=rows.map(x=>x.custom_item_id).filter(Boolean);const {data:custom}=customIds.length?await supabase.from("custom_items").select("id,title,image_url,description,metadata").in("id",customIds):{data:[]};const lookup=new Map((custom??[]).map(x=>[x.id,x]));
   const savedSnapshot={items:rows.map(x=>({id:x.id,title:lookup.get(x.custom_item_id)?.title??x.title_snapshot,image_url:lookup.get(x.custom_item_id)?.image_url??null,description:lookup.get(x.custom_item_id)?.description??null,rank_position:x.rank_position,tie_group_id:x.tie_group_id,score:x.score,tie_order:x.tie_order,metadata:lookup.get(x.custom_item_id)?.metadata??{}}))};
-  const settings={...(ranking.settings??{}),savedAt:new Date().toISOString(),savedSnapshot,...(ranking.mode==="GRADE"?{gradeAverage:Number((rows.reduce((sum,x)=>sum+Number(x.score??0),0)/Math.max(rows.length,1)).toFixed(1))}:{})};
+  const ratedRows=rows.filter(x=>x.score!==null);const settings={...(ranking.settings??{}),savedAt:new Date().toISOString(),savedSnapshot,...(ranking.mode==="GRADE"?{gradeAverage:ratedRows.length?Number((ratedRows.reduce((sum,x)=>sum+Number(x.score),0)/ratedRows.length).toFixed(1)):null}:{})};
   const {data:version,error:saveError}=await supabase.rpc("renqd_save_ranking_snapshot",{p_ranking_id:rankingId,p_settings:settings});if(saveError)return jsonError(saveError.message,500);return NextResponse.json({ok:true,version});
  }
  if(body.action==="restart-renq"){
