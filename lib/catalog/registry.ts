@@ -66,7 +66,7 @@ const booksProvider: CatalogProvider = {
 const providers: CatalogProvider[] = [musicProvider("itunes"), musicProvider("musicbrainz"), gamesProvider, filmProvider, booksProvider];
 
 function normalizeMusicSearchValue(value: string) {
-  return value.normalize("NFKD").replace(/\\p{Diacritic}/gu, "").toLocaleLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return value.normalize("NFKD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
 export async function searchCatalog(query: string, category: CatalogCategory, contentType: string, offset = 0, discipline = "") {
