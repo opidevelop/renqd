@@ -200,7 +200,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         for(const item of editItems){if(item.score===null||item.score===undefined||!Number.isFinite(Number(item.score))||Number(item.score)<0||Number(item.score)>10||Math.round(Number(item.score)*10)!==Number(item.score)*10)throw new Error("Ogni elemento deve avere un voto valido da 0 a 10 con un decimale.");scores[item.id]=Number(item.score);}
         const tieOrder=Object.fromEntries(editItems.map((item,index)=>[item.id,item.tie_order??index]));
         const result=await post({action:"update-grade",rankingId:ranking.id,title:cleanTitle,scores,tieOrder,gradeConfig:editGradeConfig});
-        const nextItems=(result.items as SavedItem[]).map(item=>({...item,title:item.title??item.title_snapshot??"",score:Number(item.score),tie_order:Number(item.tie_order??0)}));
+        const nextItems=(result.items as SavedItem[]).map(item=>({...item,title:item.title,score:Number(item.score),tie_order:Number(item.tie_order??0)}));
         setDisplayItems(nextItems);setEditItems(nextItems);setCurrentTitle(cleanTitle);setEditing(false);setSelectedIds([]);setMessage("Voti ed etichette aggiornati nella cronologia.");router.refresh();return;
       }
       const result=await post({action:"update-published-renq",rankingId:ranking.id,title:cleanTitle,orderedIds:editItems.map(item=>item.id),tieMap:editTieMap});
