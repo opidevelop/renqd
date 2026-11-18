@@ -99,9 +99,8 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   useEffect(() => {
     const query = collectionSearchQuery.trim();
     if (!collectionSearchTarget || query.length < 2) {
-      setCollectionSearchResults([]);
-      setCollectionSearchLoading(false);
-      return;
+      const reset = window.setTimeout(() => { setCollectionSearchResults([]); setCollectionSearchLoading(false); }, 0);
+      return () => window.clearTimeout(reset);
     }
     const controller = new AbortController();
     const timeout = window.setTimeout(async () => {
@@ -141,7 +140,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
 
   function renderCollectionSearch(target: string) {
     const selectedIds = target === "new" ? selectedRenqIds : collectionSelections[target] ?? [];
-    const results = target === collectionSearchTarget ? collectionSearchResults : [];
+    const results = target === collectionSearchTarget && collectionSearchQuery.trim().length >= 2 ? collectionSearchResults : [];
     return <div className="profile-collection-search">
       <label><Search size={15}/><input value={target === collectionSearchTarget ? collectionSearchQuery : ""} onFocus={() => setCollectionSearchTarget(target)} onChange={event => { setCollectionSearchTarget(target); setCollectionSearchQuery(event.target.value); }} placeholder="Cerca tra i tuoi Renq…"/></label>
       {target === collectionSearchTarget && collectionSearchLoading && <small className="profile-search-status"><LoaderCircle size={13}/> Ricerca in corso…</small>}
