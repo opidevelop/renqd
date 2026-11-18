@@ -17,12 +17,15 @@ export default async function PlatformLayout({ children }: { children: React.Rea
     const status = profile.status === "PENDING" ? "pending" : profile.status === "REJECTED" ? "rejected" : "suspended";
     redirect("/login?status=" + status);
   }
-  let { data: publicProfile } = await supabase.from("public_profiles").select("user_id, avatar_url, display_name").eq("user_id", user.id).maybeSingle();
+  let { data: publicProfile } = await supabase.from("public_profiles").select("user_id, avatar_url, display_name, media_settings").eq("user_id", user.id).maybeSingle();
   if (!publicProfile) {
-    const { data: created } = await supabase.from("public_profiles").insert({ user_id: user.id, username: profile.username, display_name: profile.username }).select("user_id, avatar_url, display_name").single();
+    const { data: created } = await supabase.from("public_profiles").insert({ user_id: user.id, username: profile.username, display_name: profile.username }).select("user_id, avatar_url, display_name, media_settings").single();
     publicProfile = created;
   }
   const metadataAvatar = user.user_metadata?.avatar_url ?? user.user_metadata?.picture;
   const avatarUrl = publicProfile?.avatar_url ? await getProfileMediaUrl(supabase, publicProfile.avatar_url) : (typeof metadataAvatar === "string" ? metadataAvatar : null);
-  return <PlatformShell avatarUrl={avatarUrl} displayName={publicProfile?.display_name ?? profile.username} username={profile.username} role={profile.role}>{children}</PlatformShell>;
+  const mediaSettings=(publicProfile as {media_settings?:{avatar?:{x?:number;y?:number;zoom?:number}}}|null)?.media_settings?.avatar;
+  const avatarPosition={x:Math.max(0,Math.min(100,Number(mediaSettings?.x??50))),y:Math.max(0,Math.min(100,Number(mediaSettings?.y??50)))};
+  const avatarZoom=Math.max(100,Math.min(200,Number(mediaSettings?.zoom??100)));
+  return <PlatformShell avatarUrl={avatarUrl} avatarPosition={avatarPosition} avatarZoom={avatarZoom} displayName={publicProfile?.display_name ?? profile.username} username={profile.username} role={profile.role}>{children}</PlatformShell>;
 }
