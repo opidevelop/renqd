@@ -21,9 +21,10 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
   const [sortOrder,setSortOrder] = useState("newest");
   const [loading,setLoading] = useState(false);
   const [error,setError] = useState("");
+  const [message,setMessage] = useState("");
 
   useEffect(() => {
-    if (!query.trim() && !category && !mode) return;
+    if (!query.trim() && !category && !mode) { setItems(initialItems); return; }
     const controller = new AbortController();
     const timeout = window.setTimeout(async () => {
       setLoading(true); setError("");
@@ -44,7 +45,7 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
     return () => { window.clearTimeout(timeout); controller.abort(); };
   }, [query,category,mode,initialItems]);
 
-  const filteredItems = !query.trim() && !category && !mode ? initialItems : items;
+  const filteredItems = items;
   const visibleItems = [...filteredItems].sort((a,b) => {
     if (sortOrder === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     if (sortOrder === "title_asc") return a.title.localeCompare(b.title, "it", { sensitivity: "base" });
@@ -52,6 +53,17 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
   const reset = () => { setQuery(""); setCategory(""); setMode(""); setSortOrder("newest"); };
+  async function deleteRenq(item:RenqCard) {
+    if(!window.confirm("Spostare questo Renq nel cestino? Potrai ripristinarlo in seguito."))return;
+    setError("");setMessage("");
+    try{
+      const response=await fetch("/api/rankings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"delete-renq",rankingId:item.id})});
+      const result=await response.json();
+      if(!response.ok)throw new Error(result.error??"Non è stato possibile eliminare il Renq.");
+      setItems(current=>current.filter(row=>row.id!==item.id));
+      setMessage("Renq spostato nel cestino.");
+    }catch(cause){setError(cause instanceof Error?cause.message:"Non è stato possibile eliminare il Renq.");}
+  }
   return <div className="my-renqs-page">
     <header className="my-renqs-header"><div><span className="page-eyebrow"><Trophy size={14}/> LA TUA COLLEZIONE</span><h1>Renq</h1><p>Le classifiche che hai deciso di conservare, tutte in un unico posto.</p></div><div className="my-renqs-header-actions"><Link href="/rankings/trash" className="my-renqs-trash-link"><Trash2 size={16}/> Cestino</Link><Link href="/create" className="my-renqs-create"><Plus size={17}/> Crea un Renq</Link></div></header>
     <div className="my-renqs-summary" aria-live="polite"><div className="my-renqs-results-count"><strong>{visibleItems.length.toLocaleString("it-IT")}</strong><span>{visibleItems.length === 1 ? "classifica" : "classifiche"}</span></div><p>{loading ? "Aggiornamento dei risultati…" : query || category || mode ? "Risultati aggiornati in base alla tua ricerca." : "Le tue classifiche, raccolte in un unico spazio."}</p></div>
@@ -63,10 +75,13 @@ export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
       {(query||category||mode||sortOrder!=="newest") && <button type="button" className="my-renqs-reset" onClick={reset}>Azzera filtri</button>}
     </section>
     {loading && <p className="my-renqs-loading">Aggiornamento risultati…</p>}
-    {error && <p className="my-renqs-error" role="alert">{error}</p>}
-    {!visibleItems.length ? <div className="my-renqs-empty"><span className="my-renqs-empty-icon"><Trophy size={25}/></span><h2>{query||category||mode ? "Nessun Renq trovato." : "La tua collezione inizia da qui."}</h2><p>{query||category||mode ? "Prova a cambiare i termini di ricerca o i filtri." : "Quando completi un Renq e scegli “Conferma e salva”, lo troverai in questa pagina."}</p>{!(query||category||mode) && <Link href="/create">Crea il tuo primo Renq <ArrowUpRight size={16}/></Link>}</div> : <div className="my-renqs-grid">{visibleItems.map(item=>{
+    {error && <p className="my-renqs-error" role="alert">{error}</p>}{message && <p className="my-renqs-feedback" role="status">{message}</p>}
+    {!visibleItems.length ? <div className="my-renqs-empty"><span className="my-renqs-empty-icon"><Trophy size={25}/></span><h2>{query||category||mode ? "Nessun Renq trovato." : "La tua collezione inizia da qui."}</h2><p>{query||category||mode ? "Prova a cambiare i termini di ricerca o i filtri." : "Quando completi un Renq, lo troverai automaticamente in questa pagina."}</p>{!(query||category||mode) && <Link href="/create">Crea il tuo primo Renq <ArrowUpRight size={16}/></Link>}</div> : <div className="my-renqs-grid">{visibleItems.map(item=>{
       const Icon = categoryIcons[item.category] ?? Trophy;
-      return <Link href={"/renq/" + (item.public_slug || item.id)} className="my-renq-card" key={item.id}><div className="my-renq-card-art">{item.coverImage ? <img src={item.coverImage} alt="" loading="lazy" style={{objectPosition:item.coverPosition.x+"% "+item.coverPosition.y+"%"}}/> : <span><Icon size={25}/></span>}<div className="my-renq-card-art-shade"/><div className="my-renq-card-top"><span className="my-renq-category"><Icon size={14}/>{categoryLabels[item.category] ?? "Renq"}</span><span className="my-renq-mode">{modeLabels[item.mode] ?? "Renq"}</span></div></div><h2>{item.title}</h2><p className="my-renq-card-meta">{item.rows.length} elementi{item.mode==="SPEED_RENQ"&&item.elapsedSeconds!=null?" · Tempo: "+Math.floor(item.elapsedSeconds/60)+"m "+String(item.elapsedSeconds%60).padStart(2,"0")+"s":""} <i>·</i> Salvato il {new Date(item.created_at).toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"})}</p><div className="my-renq-preview">{item.rows.slice(0,3).map((row,index)=><div key={index}><span>{String(row.rank_position??index+1).padStart(2,"0")}</span><strong>{row.title}</strong></div>)}</div><div className="my-renq-card-bottom"><span>Apri classifica</span><ArrowUpRight size={17}/></div></Link>;
+      return <article className="my-renq-card-shell" key={item.id}>
+        <Link href={"/renq/" + (item.public_slug || item.id)} className="my-renq-card"><div className="my-renq-card-art">{item.coverImage ? <img src={item.coverImage} alt="" loading="lazy" style={{objectPosition:item.coverPosition.x+"% "+item.coverPosition.y+"%"}}/> : <span><Icon size={25}/></span>}<div className="my-renq-card-art-shade"/><div className="my-renq-card-top"><span className="my-renq-category"><Icon size={14}/>{categoryLabels[item.category] ?? "Renq"}</span><span className="my-renq-mode">{modeLabels[item.mode] ?? "Renq"}</span></div></div><h2>{item.title}</h2><p className="my-renq-card-meta">{item.rows.length} elementi{item.mode==="SPEED_RENQ"&&item.elapsedSeconds!=null?" · Tempo: "+Math.floor(item.elapsedSeconds/60)+"m "+String(item.elapsedSeconds%60).padStart(2,"0")+"s":""} <i>·</i> Creato il {new Date(item.created_at).toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"})}</p><div className="my-renq-preview">{item.rows.slice(0,3).map((row,index)=><div key={index}><span>{String(row.rank_position??index+1).padStart(2,"0")}</span><strong>{row.title}</strong></div>)}</div><div className="my-renq-card-bottom"><span>Apri classifica</span><ArrowUpRight size={17}/></div></Link>
+        <button type="button" className="my-renq-card-delete" onClick={()=>void deleteRenq(item)} aria-label={"Sposta "+item.title+" nel cestino"}><Trash2 size={15}/></button>
+      </article>;
     })}</div>}
   </div>;
 }
