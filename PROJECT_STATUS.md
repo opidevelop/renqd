@@ -88,6 +88,7 @@ Audit moderazione Renq — 18 novembre 2026:
 - Decisione confermata: un Renq nascosto è invisibile anche al suo autore e resta visibile soltanto a OWNER, ADMIN e MODERATOR. La funzione non è ancora implementata.
 - Perimetro confermato: la console deve mostrare tutti i Renq pubblicati e offrire un filtro dedicato alle segnalazioni. La funzionalità non è ancora implementata; non sono state applicate modifiche al database.
 - Nuova decisione confermata: quando un MODERATOR nasconde o sposta nel cestino un Renq, tutte le segnalazioni aperte relative a quel contenuto devono essere chiuse automaticamente come risolte. La chiusura dovrà essere atomica con l'azione di moderazione e tracciata nell'audit log. Implementazione e migrazione ancora da progettare; nessuna modifica applicativa o database eseguita.
+- Nuova decisione confermata: la lista generale del MODERATOR include tutti i Renq pubblicati, anche quelli nascosti; i Renq nel cestino sono consultabili separatamente tramite sezione/filtro dedicato. UI e query non ancora implementate.
 
 ### Fase 3 — Database e conservazione dei dati
 
