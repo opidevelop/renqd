@@ -271,6 +271,18 @@ async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):
    }
   }catch{}
  }
+ try{
+  const releaseParams=new URLSearchParams({artist:id,inc:"recordings+release-groups",fmt:"json",limit:"100"});
+  const releaseData=await musicBrainzJson<{releases?:Array<{id?:string;title?:string;"release-group"?:{"primary-type"?:string};media?:Array<{tracks?:Array<{id?:string;position?:number;title?:string;recording?:{id?:string;title?:string}}>}>}>(`${MUSICBRAINZ}/release?${releaseParams}`);
+  const releases=(releaseData.releases??[]).filter(release=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";});
+  const tracks=releases.flatMap(release=>(release.media??[]).flatMap(medium=>(medium.tracks??[]).flatMap(track=>{
+   const title=track.recording?.title??track.title;
+   if(!title||!release.id)return[];
+   const idPart=track.recording?.id??track.id??String(track.position??title);
+   return[{id:release.id+":"+idPart,title,subtitle:release.title||artist||undefined,imageUrl:"https://coverartarchive.org/release/"+release.id+"/front-250",spotifyUrl:spotifySearchUrl(`${artist} ${title}`)}];
+  })));
+  if(tracks.length)return tracks;
+ }catch{}
  const params=new URLSearchParams({query:"arid:"+id,fmt:"json",limit:"100"});
  const data=await musicBrainzJson<{recordings?:Array<{id?:string;title?:string}>}>(`${MUSICBRAINZ}/recording?${params}`);
  return(data.recordings??[]).flatMap(recording=>recording.id&&recording.title?[{id:recording.id,title:recording.title,subtitle:artist||undefined,spotifyUrl:spotifySearchUrl(`${artist} ${recording.title}`)}]:[]);
