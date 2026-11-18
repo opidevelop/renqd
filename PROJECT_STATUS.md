@@ -512,8 +512,8 @@ Revisione della migrazione di hardening:
 ### Database e verifiche
 - Migrazione applicata a Supabase; versione registrata `20261118201740`.
 - Vincolo live verificato: `CHECK (sort_order >= 1)`; la funzione RPC live non contiene più il controllo `jsonb_array_length(items) > 100`.
-- Test SQL transazionale con 101 elementi: `renqd_create_ranking_with_items` ha creato correttamente il Renq di prova; transazione annullata con `ROLLBACK` e verifica successiva: zero ranking di test persistenti.
+- Test SQL transazionale end-to-end con 101 elementi: `renqd_create_ranking_with_items` e `renqd_complete_ranking` hanno completato correttamente il Renq; il risultato include la posizione 101. Transazione annullata con `ROLLBACK` e verifica successiva: zero ranking di test persistenti.
 - GitHub Actions Code quality run **#116 / 44389478763** sul commit applicativo: **success**; TypeScript, ESLint e build di produzione superati.
-- Il commit successivo di riallineamento del nome file migrazione è `02de964156d9f62eeaa6e96f30b551d6aa90c6fe`; il relativo run CI #117 e il deployment Vercel erano ancora in corso al momento di questo aggiornamento documentale.
-- Vercel Production deployment `dpl_BZ7x2z5ans6WFXCJCTYgEusbauGe`: **READY**, commit applicativo `6cba817dc3721c91da66655002b4ceaa82e30c97`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app` associati.
+- Il commit di riallineamento del nome file migrazione è `02de964156d9f62eeaa6e96f30b551d6aa90c6fe`; GitHub Actions Code quality run **#117 / 44389589575**: **success**. Il successivo aggiornamento documentale è `6f09f272dd577f807ee4574df830d93d791fbca0`; run **#118 / 44389889808**: **success**.
+- Vercel Production deployment applicativo `dpl_BZ7x2z5ans6WFXCJCTYgEusbauGe`: **READY**, commit `6cba817dc3721c91da66655002b4ceaa82e30c97`. Ultimo deployment Production `dpl_H9czuSkMJ9bDDGMHxaRBxdLMXK8w`: **READY**, commit `6f09f272dd577f807ee4574df830d93d791fbca0`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app` associati.
 - Test funzionale dal browser autenticato per la creazione e la pubblicazione di Renq con oltre 100 elementi resta da eseguire. Il test SQL verifica la RPC e il database, ma non sostituisce il collaudo UI end-to-end.
