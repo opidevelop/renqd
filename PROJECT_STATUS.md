@@ -7,7 +7,7 @@
 > **Aggiornato:** 18 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato:** `70cc1ee6a267c930c38e1bf93453ca49f354ce59`
+> **Ultimo commit applicativo analizzato:** `ae93d384154f70db05b8105b2524334ecbc60961`
 
 ## 1. Sintesi esecutiva
 
@@ -15,8 +15,8 @@
 - Il lavoro viene svolto esclusivamente su `main`.
 - Renqd è una piattaforma chiusa: le pagine e i contenuti interni richiedono autenticazione e approvazione quando prevista.
 - Le fasi di amministrazione, lifecycle dei dati, motore Renq e profilo/cataloghi/collezioni hanno ricevuto implementazioni sostanziali. La verifica funzionale end-to-end complessiva è ancora da eseguire.
-- È stato aggiunto un workflow GitHub Actions per eseguire TypeScript, ESLint e build di produzione. Il run relativo all'ultimo commit è in corso; non è ancora un esito positivo.
-- **La produzione Vercel non è allineata all'ultimo codice di `main`**: Vercel ha rifiutato i nuovi deployment per il limite giornaliero `api-deployments-free-per-day` (retry indicato dopo circa 24 ore). Non dichiarare online le modifiche recenti finché non esiste un deployment Production `READY` del commit corrente.
+- È presente un workflow GitHub Actions per TypeScript, ESLint e build di produzione; gli ultimi esiti CI documentati sono verdi sui commit `16aad74` e `70cc1ee`. Non è stato verificato separatamente un nuovo run CI per `ae93d38`.
+- **Produzione Vercel allineata a `main`:** il commit `ae93d384154f70db05b8105b2524334ecbc60961` è stato distribuito con deployment Production `READY`; gli alias includono `https://renqd.app`. Il rilascio è confermato, ma non equivale al collaudo funzionale end-to-end.
 - L'audit Supabase del 18 novembre ha rilevato uno scostamento tra migrazioni presenti nel repository e migrazioni applicate al database, oltre a warning di sicurezza da analizzare.
 
 ## 2. Stack e servizi
@@ -176,17 +176,19 @@ Tutte le modifiche elencate sono state effettuate direttamente su `main`.
 4. **Discografie:** in modalità Tracks le occorrenze duplicate per titolo normalizzato vengono mantenute, ma solo la prima parte selezionata; le copie successive partono deselezionate.
 5. **Catalogo musicale:** la ricerca della discografia privilegia MusicBrainz per evitare il limite di 200 brani di iTunes; quando un provider raggiunge un limite che impedisce di garantire completezza, il codice deve segnalare il limite anziché dichiarare una discografia completa.
 6. **CI:** aggiunto `.github/workflows/code-quality.yml`, che esegue `npm ci`, `npx tsc --noEmit`, `npm run lint` e `npm run build`.
+7. **Correzione build rankings API:** in `app/api/rankings/route.ts` è stata rimossa una dichiarazione duplicata di `revisionError`, che impediva la compilazione TypeScript (`the name revisionError is defined multiple times`). La correzione è stata committata su `main` con `ae93d384154f70db05b8105b2524334ecbc60961`.
 
-Queste modifiche sono nel repository; non sono ancora tutte validate da test funzionali né da un deployment Production.
+Il commit `ae93d38` è stato compilato e distribuito da Vercel in Production con stato `READY`. Le funzionalità applicative non sono state ancora sottoposte a un collaudo end-to-end in questa sessione.
 
 ## 5. Stato GitHub e deployment
 
 - Branch operativo: `main`.
-- Commit HEAD al momento dell'aggiornamento: `34a39eaebc19f94142e7eda26c49a5736cfc32ee`.
+- Commit HEAD su `main`: `ae93d384154f70db05b8105b2524334ecbc60961` (`Fix duplicate revisionError declaration in rankings route`).
 - Workflow CI: `Code quality`. Il run sul commit `16aad741a054585ea0e02ca5e02df3721786e24d` e quello sul commit successivo `70cc1ee6a267c930c38e1bf93453ca49f354ce59` sono terminati con successo: `npm ci`, `npx tsc --noEmit`, ESLint e `npm run build` tutti verdi. ESLint lascia warning non bloccanti (principalmente immagini `<img>` non ottimizzate e alcune variabili/funzioni inutilizzate). I commit successivi riguardano soltanto la documentazione di progetto.
-- Vercel: deployment recenti bloccati dal limite giornaliero `api-deployments-free-per-day`. Il check Vercel restituisce failure con indicazione di riprovare dopo circa 24 ore.
-- **Non affermare che il commit HEAD sia in produzione.** Verificare un deployment Vercel Production `READY` che riporti esattamente il commit HEAD.
-- Non creare branch per aggirare il limite e non fare deploy ripetuti durante il blocco.
+- File applicativo modificato nell'ultimo commit: `app/api/rankings/route.ts` (rimosse 2 righe duplicate).
+- **Vercel Production:** deployment `dpl_H8pTtS1CE4cbFLJjVRsPo5wsKnAj`, target `production`, stato `READY`, alias assegnati senza errori. Il deployment riporta esattamente il commit `ae93d384154f70db05b8105b2524334ecbc60961` su `main`.
+- Alias di produzione verificati: `https://renqd.app`, `https://renqd.vercel.app`, `https://www.renqd.app`.
+- La precedente condizione di blocco per quota giornaliera non è più attuale per questo rilascio. Lo stato `READY` conferma il deploy, non il collaudo funzionale.
 
 ## 6. Stato Supabase e rilievi di sicurezza — 18 novembre 2026
 
@@ -210,7 +212,8 @@ Questi sono rilievi da analizzare, non modifiche da applicare automaticamente. L
 
 ## 7. Prossime attività — ordine consigliato
 
-1. Attendere e leggere il risultato del workflow CI sul commit HEAD; correggere eventuali errori TypeScript, lint o build prima di considerare il codice verificato.
+1. Eseguire/controllare il run GitHub Actions `Code quality` sul commit `ae93d38` e registrarne l'esito; il build Vercel Production è già riuscito.
+2. Eseguire uno smoke test autenticato su `https://renqd.app`: login, accesso alle aree interne e caricamento delle pagine principali.
 2. Recuperare dal database le due migrazioni mancanti e aggiungere i file SQL corrispondenti al repository, senza riapplicarli.
 3. Audit mirato delle 21 funzioni SECURITY DEFINER: controlli interni, ownership, ruoli e stato account.
 4. Analizzare le 11 tabelle RLS senza policy e la protezione password compromesse, distinguendo tabelle intenzionalmente non esposte da configurazioni errate.
@@ -220,7 +223,7 @@ Questi sono rilievi da analizzare, non modifiche da applicare automaticamente. L
 8. Verificare header, audio, feedback AJAX, selezione multipla e navigazione.
 9. Testare autenticazione e permessi con account in stati diversi, assicurandosi che ogni pagina interna rimandi al login quando manca la sessione.
 10. Verificare invio email e configurazioni Resend/Supabase.
-11. Quando la quota Vercel lo consente, effettuare un deployment cumulativo e controllare che Production sia `READY` sul commit corretto.
+11. Eseguire il collaudo end-to-end completo su mobile e desktop.
 12. Eseguire il collaudo end-to-end su mobile e desktop.
 
 ## 8. Come aggiornare questo documento
