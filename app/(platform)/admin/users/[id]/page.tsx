@@ -100,7 +100,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
     </section>
 
     <section className="admin-detail-section">
-      <div className="admin-section-heading"><div><span className="admin-eyebrow">CONTENUTI</span><h2>Classifiche <em>dell'utente.</em></h2><p>Ultime 50 classifiche salvate e bozze.</p></div><span className="admin-total-pill">{rankings.length} elementi</span></div>
+      <div className="admin-section-heading"><div><span className="admin-eyebrow">CONTENUTI</span><h2>Classifiche <em>dell&apos;utente.</em></h2><p>Ultime 50 classifiche salvate e bozze.</p></div><span className="admin-total-pill">{rankings.length} elementi</span></div>
       {rankings.length === 0 ? <div className="admin-empty"><FileText size={22}/><strong>Nessuna classifica presente</strong><span>Questo account non ha ancora salvato classifiche.</span></div> : <div className="admin-detail-ranking-list">{rankings.map(item => <article key={item.id} className="admin-detail-ranking">
         <div className="admin-detail-ranking-icon"><FileText size={17}/></div>
         <div className="admin-detail-ranking-main"><strong>{item.title || "Senza titolo"}</strong><span>{modeLabel(item.mode)} · {item.item_count} elementi · {date(item.completed_at ?? item.created_at)}</span><small>{item.likes} mi piace · {item.comments} commenti</small></div>
