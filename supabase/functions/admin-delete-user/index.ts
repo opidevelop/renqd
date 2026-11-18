@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { withSupabase } from "npm:@supabase/server";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -106,8 +107,7 @@ async function anonymizeUserAuditData(supabaseAdmin: any, userId: string) {
   }
 }
 
-export default {
-  fetch: withSupabase({ auth: "user" }, async (req, ctx) => {
+const handler = withSupabase({ auth: "user" }, async (req, ctx) => {
     if (req.method !== "POST") return fail("Metodo non consentito.", 405);
 
     const actorId = ctx.userClaims?.id;
@@ -205,5 +205,6 @@ export default {
       const message = error instanceof Error ? error.message : "Eliminazione non completata. Riprova.";
       return fail(message, 500);
     }
-  }),
-};
+  });
+
+export default { fetch: handler };
