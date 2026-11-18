@@ -96,7 +96,7 @@ Audit, moderazione e segnalazioni Renq — 18 novembre 2026:
 
 ### Fase 3 — Database e conservazione dei dati
 
-**Stato:** 33 migrazioni allineate tra repository e database; test dei flussi da completare.
+**Stato:** 34 migrazioni allineate tra repository e database; test dei flussi da completare.
 
 Risultano implementati:
 - soft delete dei Renq;
@@ -108,7 +108,7 @@ Risultano implementati:
 - migrazione `renqd_phase3_data_lifecycle`;
 - migrazione per il riavvio transazionale.
 
-**Disallineamento riconciliato il 18 novembre 2026:** il database aveva già applicato le migrazioni 20261117181748_renqd_battle_choice_undo e 20261117182046_renqd_speed_duration_up_to_180_minutes, ma i file mancavano dal repository. I due file sono stati ricostruiti dalle definizioni effettive delle funzioni e dai vincoli presenti nel database live, quindi aggiunti a main senza riapplicarli. Il repository contiene ora 33 file di migrazione, corrispondenti alle 33 migrazioni registrate nel database.
+**Disallineamento riconciliato il 18 novembre 2026:** il database aveva già applicato le migrazioni 20261117181748_renqd_battle_choice_undo e 20261117182046_renqd_speed_duration_up_to_180_minutes, ma i file mancavano dal repository. I due file sono stati ricostruiti dalle definizioni effettive delle funzioni e dai vincoli presenti nel database live, quindi aggiunti a main senza riapplicarli. Il repository contiene ora 34 file di migrazione, corrispondenti alle 34 migrazioni registrate nel database.
 
 Da verificare:
 - ripristino singolo e collettivo;
@@ -225,8 +225,8 @@ Il commit `ae93d38` è stato compilato e distribuito da Vercel in Production con
 Progetto Supabase: `Renqd` (`dgbogctuqtxzckigccbf`), stato rilevato `ACTIVE_HEALTHY`.
 
 ### Migrazioni
-- Database: 33 migrazioni applicate.
-- Repository: 33 file SQL sotto supabase/migrations (inclusi i due file storici ricostruiti).
+- Database: 34 migrazioni applicate.
+- Repository: 34 file SQL sotto supabase/migrations (inclusi i due file storici ricostruiti).
 - Il disallineamento storico è stato riconciliato: i due file Battle undo e Speed duration up to 180 minutes sono stati ricostruiti e aggiunti al repository senza riapplicarli.
 
 ### Security Advisors
@@ -409,10 +409,12 @@ Revisione della migrazione di hardening:
 - `components/platform-shell.tsx` e `app/(platform)/platform.css`: transizione breve al cambio di pathname per tutte le pagine interne.
 - `components/renq-experience.tsx`: nascosta l'azione Elimina Renq esclusivamente nella schermata iniziale della Battle non avviata.
 - `components/renq-ranking-ui.tsx` e `app/api/rankings/route.ts`: calcolo progressivo delle posizioni e normalizzazione dei gruppi ex aequo contigui nell'editor pubblicato.
+- `supabase/migrations/20261118161155_renqd_progressive_tie_positions.sql`: sostituisce le tre RPC Classic/riordino/Speed mantenendo le verifiche di ownership, approvazione, stato e hidden; i gruppi ex aequo condividono la posizione soltanto se consecutivi. Migrazione applicata al database live.
 - `app/(platform)/platform.css`: contenitori delle liste lunghe con scroll interno; `app/(auth)/auth.css`: animazione dello spinner con rispetto di prefers-reduced-motion.
 
 ### Verifiche e limiti
-- Modifiche preparate nel repository; non considerarle verificate finché la CI non ha completato TypeScript, ESLint e build.
-- Test funzionali ancora da eseguire: login pending state, priorità album/artista, cambio Album/Brani, creazione con barra di avanzamento, transizioni, scroll step, Battle iniziale, pari merito con gruppi numerosi e liste lunghe su mobile/desktop.
-- Nessuna migrazione SQL, modifica al database o dato applicativo prevista.
-- Nessun deployment Production da considerare completato prima della verifica del deployment Vercel e dei test funzionali.
+- Commit applicativo `eceec07122b21df7781a2e719f593eeb21be27d1`: GitHub Actions `Code quality` run #65 concluso con `success`; TypeScript, ESLint e build di produzione superati.
+- Vercel Production: deployment `dpl_8ixoBXpGGG99g26q9k2z3gSdtaSz`, commit `eceec07122b21df7781a2e719f593eeb21be27d1`, stato `READY`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app`.
+- Migrazione Supabase `20261118161155_renqd_progressive_tie_positions` applicata con successo. Verifica SQL read-only della regola progressiva: posizioni attese `1, 2, 2, 2, 3, 4, 4, 5` per due gruppi ex aequo consecutivi e un elemento isolato. Le definizioni live delle tre RPC contengono il nuovo criterio.
+- Advisor post-migrazione: nessun nuovo rilievo introdotto; restano i rilievi già noti (12 tabelle RLS senza policy, 26 funzioni SECURITY DEFINER eseguibili da authenticated, 27 FK senza indice, oltre agli altri warning già descritti nella sezione 6).
+- Test funzionali ancora da eseguire: login pending state, priorità album/artista sui cataloghi reali, cambio Album/Brani, creazione con barra di avanzamento, transizioni, scroll step, Battle iniziale, pari merito con gruppi numerosi e liste lunghe su mobile/desktop. Lo stato CI/Production READY non sostituisce questi test.
