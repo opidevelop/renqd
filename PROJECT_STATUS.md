@@ -7,7 +7,7 @@
 > **Aggiornato:** 18 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato:** `fcfae616f13941e70f81bc26297381e6be74f9d5`
+> **Ultimo commit su main analizzato:** `aa6a67ee7a40f55a69882693e9e9f23970c8bb1e`
 
 ## 1. Sintesi esecutiva
 
@@ -16,8 +16,8 @@
 - Renqd è una piattaforma chiusa: le pagine e i contenuti interni richiedono autenticazione e approvazione quando prevista.
 - Le fasi di amministrazione, lifecycle dei dati, motore Renq e profilo/cataloghi/collezioni hanno ricevuto implementazioni sostanziali. La verifica funzionale end-to-end complessiva è ancora da eseguire.
 - È presente un workflow GitHub Actions per TypeScript, ESLint e build di produzione; gli ultimi esiti CI documentati sono verdi sui commit `16aad74` e `70cc1ee`. Non è stato verificato separatamente un nuovo run CI per `ae93d38`.
-- **Produzione Vercel allineata a `main`:** il commit `ae93d384154f70db05b8105b2524334ecbc60961` è stato distribuito con deployment Production `READY`; gli alias includono `https://renqd.app`. Il rilascio è confermato, ma non equivale al collaudo funzionale end-to-end.
-- L'audit Supabase del 18 novembre ha rilevato uno scostamento tra migrazioni presenti nel repository e migrazioni applicate al database, oltre a warning di sicurezza da analizzare.
+- **Produzione Vercel:** il commit applicativo `64f3388aa0ad7cf5e81ae2f5607dd28594af404f` è stato distribuito con deployment Production `READY`; gli alias includono `https://renqd.app`, `https://renqd.vercel.app` e `https://www.renqd.app`. Il rilascio è confermato, ma non equivale al collaudo funzionale end-to-end. Il commit successivo `aa6a67e` corregge soltanto i terminatori SQL della migrazione e non cambia il codice applicativo.
+- Le quattro migrazioni amministrazione/moderazione/reporting/hardening sono ora applicate al database live. Le due migrazioni storiche già presenti nel database ma assenti dal repository sono state ricostruite e ripristinate in supabase/migrations per riallineare la cronologia. Restano warning generici dei Security/Performance Advisors da analizzare separatamente.
 
 ## 2. Stack e servizi
 
@@ -40,7 +40,7 @@ Sono stati analizzati repository, struttura Next.js, autenticazione, Supabase, s
 
 ### Fase 2 — Amministrazione
 
-**Stato:** dashboard unificata e flusso di segnalazione implementati nel repository su `main`; migrazioni Supabase non applicate e test funzionali da eseguire.
+**Stato:** dashboard unificata, flusso di segnalazione e migrazioni Supabase applicati al database live; test funzionali da eseguire.
 
 Decisioni approvate:
 - gerarchia OWNER > ADMIN > MODERATOR > USER; ADMIN non può gestire account ADMIN;
@@ -57,7 +57,7 @@ Rilievi di codice da correggere:
 - il flusso di moderazione Renq è stato implementato nel repository su `main` (commit `36312d1`); resta da applicare e verificare la migrazione Supabase;
 - manca una procedura server-side di cancellazione account completa, transazionale e protetta dall'eliminazione dell'ultimo OWNER.
 
-Le correzioni amministrative e la console di moderazione sono presenti nel repository, ma le migrazioni pertinenti non sono ancora applicate e i flussi non sono stati collaudati end-to-end. La cancellazione completa degli account resta da implementare: richiede prima una verifica di tutte le FK, dei file Storage e delle dipendenze Auth; non eseguire cancellazioni reali durante i test.
+Le correzioni amministrative e la console di moderazione sono presenti nel repository; le migrazioni di gerarchia ruoli, moderazione, reporting e hardening sono applicate al database live. I flussi non sono ancora stati collaudati end-to-end. La cancellazione completa degli account resta da implementare: richiede prima una verifica di tutte le FK, dei file Storage e delle dipendenze Auth; non eseguire cancellazioni reali durante i test.
 
 Risultano già presenti nel codice/database:
 - dashboard amministrativa;
@@ -88,10 +88,10 @@ Audit, moderazione e segnalazioni Renq — 18 novembre 2026:
 - La migrazione `20261118170000_renqd_ranking_reports.sql` aggiunge la creazione server-side delle segnalazioni, la verifica della segnalazione già inviata e un indice univoco che impone una sola segnalazione per reporter e Renq, anche dopo la risoluzione. La verifica read-only del database live non ha rilevato coppie duplicate esistenti.
 - Il flusso utente «Segnala questo Renq» è integrato nel menu secondario `⋯` della pagina Renq; è disponibile a utenti approvati diversi dall'autore e soltanto per contenuti Live, non nascosti e non cestinati. Include motivo, dettagli facoltativi, conferma e feedback.
 - Le funzioni di moderazione e reporting sono protette lato server/RPC. La creazione del report blocca il Renq con lock condiviso per evitare race con HIDE/TRASH: una segnalazione inserita prima della moderazione viene chiusa nella stessa transazione; una segnalazione avviata dopo il cambio di stato viene rifiutata.
-- **Nessuna delle due migrazioni di moderazione/reporting è stata applicata a Supabase**. Non effettuare deployment Production dell'applicazione finché le migrazioni non sono state applicate e verificate.
+- Le migrazioni di gerarchia ruoli, console di moderazione, reporting e hardening RLS sono state applicate con successo a Supabase il 18 novembre 2026. La migrazione di hardening è stata corretta nel repository per includere i terminatori SQL delle 14 funzioni SECURITY DEFINER; la versione corretta è quella applicata.
 - Il controllo read-only ha verificato che `content_reports` non contiene duplicati esistenti per coppia reporter/Renq.
-- GitHub Actions `Code quality` run #45 sul commit `fcfae616f13941e70f81bc26297381e6be74f9d5`: conclusione `success`; TypeScript, ESLint e build di produzione superati. I run precedenti #41, #42 e #44 avevano fallito per testo JSX con apostrofi non escapati; corretto e verificato nel run #45.
-- Nessun deployment Vercel è stato trovato per il commit `fcfae616f13941e70f81bc26297381e6be74f9d5`; il database live non è stato modificato.
+- GitHub Actions Code quality run #48 sul commit 64f3388: conclusione success; TypeScript, ESLint e build di produzione superati. Il run #47 sul commit 457a30ce è anch'esso success. Il run #49 per la sola correzione SQL aa6a67e è stato avviato; verificarne l'esito finale prima di chiudere la sessione.
+- Vercel ha un deployment Production READY sul commit 64f3388; dopo l'applicazione delle migrazioni, il portale e il database sono allineati per il collaudo. Verificare il deployment automatico relativo al commit aa6a67e e ai successivi aggiornamenti documentali.
 - Resta da verificare la copertura RLS effettiva sulle tabelle collegate ai ranking: la migrazione di moderazione crea policy restrittive su alcune tabelle per cui l'audit precedente non aveva confermato RLS abilitato. Non considerare conclusa la protezione dei dati collegati prima di aver verificato `relrowsecurity` e le policy per ogni tabella.
 
 ### Fase 3 — Database e conservazione dei dati
@@ -108,11 +108,7 @@ Risultano implementati:
 - migrazione `renqd_phase3_data_lifecycle`;
 - migrazione per il riavvio transazionale.
 
-**Disallineamento da risolvere:** il database Supabase elenca 29 migrazioni applicate, mentre il repository su `main` contiene 27 file SQL in `supabase/migrations`. Nel database risultano applicate anche:
-- `20261117181748_renqd_battle_choice_undo`;
-- `20261117182046_renqd_speed_duration_up_to_180_minutes`.
-
-I corrispondenti file SQL non risultano presenti nell'albero GitHub corrente. Recuperare le definizioni effettive dal database e versionarle nel repository senza riapplicarle alla produzione. Non creare migrazioni sostitutive alla cieca e non alterare lo schema per far tornare i conteggi.
+**Disallineamento riconciliato il 18 novembre 2026:** il database aveva già applicato le migrazioni 20261117181748_renqd_battle_choice_undo e 20261117182046_renqd_speed_duration_up_to_180_minutes, ma i file mancavano dal repository. I due file sono stati ricostruiti dalle definizioni effettive delle funzioni e dai vincoli presenti nel database live, quindi aggiunti a main senza riapplicarli. Il repository contiene ora 33 file di migrazione, corrispondenti alle 33 migrazioni registrate nel database.
 
 Da verificare:
 - ripristino singolo e collettivo;
@@ -229,8 +225,8 @@ Il commit `ae93d38` è stato compilato e distribuito da Vercel in Production con
 Progetto Supabase: `Renqd` (`dgbogctuqtxzckigccbf`), stato rilevato `ACTIVE_HEALTHY`.
 
 ### Migrazioni
-- Database: 29 migrazioni applicate.
-- Repository: 27 file SQL sotto `supabase/migrations`.
+- Database: 33 migrazioni applicate.
+- Repository: 33 file SQL sotto supabase/migrations (inclusi i due file storici ricostruiti).
 - Due migrazioni applicate risultano mancanti dal repository: Battle undo e Speed duration up to 180 minutes. Vedi Fase 3.
 
 ### Security Advisors
@@ -248,9 +244,9 @@ Questi sono rilievi da analizzare, non modifiche da applicare automaticamente. L
 
 1. Eseguire/controllare il run GitHub Actions `Code quality` sul commit `ae93d38` e registrarne l'esito; il build Vercel Production è già riuscito.
 2. Eseguire uno smoke test autenticato su `https://renqd.app`: login, accesso alle aree interne e caricamento delle pagine principali.
-2. Recuperare dal database le due migrazioni mancanti e aggiungere i file SQL corrispondenti al repository, senza riapplicarli.
-3. Audit mirato delle 21 funzioni SECURITY DEFINER: controlli interni, ownership, ruoli e stato account.
-4. Analizzare le 11 tabelle RLS senza policy e la protezione password compromesse, distinguendo tabelle intenzionalmente non esposte da configurazioni errate.
+2. Eseguire i test funzionali di moderazione/reporting e verificare i permessi per USER, autore, MODERATOR, ADMIN e OWNER.
+3. Proseguire l'audit delle funzioni SECURITY DEFINER: gli Advisors mostrano 26 funzioni eseguibili da authenticated; verificare i controlli interni senza revocare RPC necessarie all'app.
+4. Analizzare le 12 tabelle RLS senza policy, distinguendo le tabelle intenzionalmente accessibili soltanto tramite RPC/service role da configurazioni errate; valutare la protezione password compromesse.
 5. Completare le verifiche del lifecycle (cestino, restore, revisioni, transazioni).
 6. Completare le verifiche dei flussi Classic/Battle/Speed/Timed, editor, Reveal e medaglie.
 7. Verificare profilo, avatar/banner, collezioni e cataloghi, inclusa la discografia con duplicati.
@@ -314,3 +310,28 @@ Stato di verifica:
 Revisione della migrazione di hardening:
 - la cancellazione definitiva del cestino personale blocca ora la riga con `FOR UPDATE` e ripete il controllo di `deleted_at`, `deleted_by` e `hidden_at` nell'istruzione DELETE, evitando race con un ripristino o un'azione di moderazione concorrente;
 - modifica presente soltanto nel repository; database live invariato.
+
+## 10. Allineamento live moderazione/reporting — 18 novembre 2026
+
+### Database Supabase
+- Progetto dgbogctuqtxzckigccbf in stato ACTIVE_HEALTHY.
+- Applicate con successo, nell'ordine, le migrazioni:
+  1. 20261118120000_renqd_admin_role_hierarchy_status_guard.sql;
+  2. 20261118150000_renqd_moderation_console.sql;
+  3. 20261118170000_renqd_ranking_reports.sql;
+  4. 20261118180000_renqd_moderation_rls_hardening.sql.
+- Verifica post-migrazione: 13 policy restrittive sulle 13 tabelle collegate ai ranking; 3 guardie restrittive su custom_items; policy di hard delete diretto assente; il ruolo authenticated non ha più privilegi DELETE, TRUNCATE, TRIGGER o REFERENCES su rankings.
+- Il database non contiene al momento ranking nascosti o cestinati; nessun report duplicato è stato rilevato. Le regole di visibilità sono quindi state verificate strutturalmente, ma non ancora con scenari dati reali di hidden/trash.
+- Il primo tentativo di applicazione della migrazione di hardening è fallito per la mancanza dei terminatori SQL dopo le definizioni pg_get_functiondef; la migrazione è stata corretta nel repository (14 terminatori aggiunti) e applicata con successo in una seconda esecuzione. La transazione fallita non ha lasciato oggetti parziali.
+- Security Advisors: 12 tabelle con RLS ma senza policy e 26 funzioni SECURITY DEFINER eseguibili da authenticated. Sono warning generici da verificare: le tabelle sensibili sono intenzionalmente chiuse e le RPC devono validare ruolo/ownership internamente. Non revocare indiscriminatamente le RPC necessarie.
+- Performance Advisors: 27 foreign key senza indice dedicato, 2 warning di initplan RLS su profiles, 8 indici non ancora usati e 5 tabelle con più policy permissive. Da valutare separatamente, senza modifiche automatiche.
+
+### Verifica funzionale
+- Le verifiche SQL read-only confermano la presenza delle colonne hidden_at/hidden_by, della tabella audit, dell'indice univoco dei report e delle funzioni helper.
+- Verificati i controlli di visibilità hidden_at IS NULL nelle 14 RPC del lifecycle, il controllo del ranking padre in renqd_undo_battle_choice, e il vincolo deleted_by = auth.uid() per restore/cancellazione definitiva dell'autore.
+- Non sono stati creati dati di prova né modificati ranking esistenti. Il collaudo con account reali resta da eseguire dal portale.
+
+### Migrazioni storiche recuperate
+- 20261117181748_renqd_battle_choice_undo.sql ricostruita dalla definizione live di renqd_undo_battle_choice.
+- 20261117182046_renqd_speed_duration_up_to_180_minutes.sql ricostruita dalla definizione live di renqd_start_speed_session e dal vincolo duration_seconds <= 10800.
+- I file sono stati aggiunti al repository per riallineare la cronologia; non sono stati riapplicati al database.
