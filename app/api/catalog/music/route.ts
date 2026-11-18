@@ -293,15 +293,15 @@ async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):
 async function loadMusicBrainzItems(payload:Record<string,unknown>,contentType:string):Promise<MusicItem[]>{
  if(contentType==="Album"){
   const releaseId=payload.releaseId;
-  let tracks:Array<{id?:string;position?:number;title?:string;recording?:{id?:string;title?:string}}>=[];
+  let tracks:MusicBrainzTrack[]=[];
   if(typeof releaseId==="string"&&/^[0-9a-f-]{36}$/i.test(releaseId)){
-   const release=await musicBrainzJson<{media?:Array<{tracks?:Array<{id?:string;position?:number;title?:string;recording?:{id?:string;title?:string}}>}>}>(`${MUSICBRAINZ}/release/${releaseId}?inc=recordings&fmt=json`);
+   const release=await musicBrainzJson<{media?:Array<{tracks?:MusicBrainzTrack[]}>}>(`${MUSICBRAINZ}/release/${releaseId}?inc=recordings&fmt=json`);
    tracks=release.media?.flatMap(medium=>medium.tracks??[])??[];
   }else{
    const id=payload.releaseGroupId;
    if(typeof id!=="string"||!/^[0-9a-f-]{36}$/i.test(id))throw new Error("Invalid MusicBrainz release-group identifier");
    const params=new URLSearchParams({"release-group":id,inc:"recordings",fmt:"json",limit:"1"});
-   const data=await musicBrainzJson<{releases?:Array<{media?:Array<{tracks?:Array<{id?:string;position?:number;title?:string;recording?:{id?:string;title?:string}}>}>}>}>(`${MUSICBRAINZ}/release?${params}`);
+   const data=await musicBrainzJson<{releases?:Array<{media?:Array<{tracks?:MusicBrainzTrack[]}>}>}>(`${MUSICBRAINZ}/release?${params}`);
    tracks=data.releases?.[0]?.media?.flatMap(medium=>medium.tracks??[])??[];
   }
   const albumTitle=typeof payload.albumTitle==="string"?payload.albumTitle:"";
@@ -317,7 +317,7 @@ async function loadMusicBrainzItems(payload:Record<string,unknown>,contentType:s
  const id=payload.artistId;
  if(typeof id!=="string"||!/^[0-9a-f-]{36}$/i.test(id))throw new Error("Invalid MusicBrainz artist identifier");
  const params=new URLSearchParams({artist:id,inc:"release-groups",fmt:"json",limit:"100"});
- const data=await musicBrainzJson<{releases?:Array<{id:string;title:string;date?:string;country?:string;"release-group"?:{"primary-type"?:string}}> }>(`${MUSICBRAINZ}/release?${params}`);
+ const data=await musicBrainzJson<{releases?:MusicBrainzRelease[]}>(`${MUSICBRAINZ}/release?${params}`);
  const artistName=typeof payload.artistName==="string"?payload.artistName:"";
  return(data.releases??[]).filter(release=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";}).map(release=>({
   id:release.id,title:release.title,subtitle:[release["release-group"]?.["primary-type"],release.date?.slice(0,4),release.country].filter(Boolean).join(" · ")||undefined,
