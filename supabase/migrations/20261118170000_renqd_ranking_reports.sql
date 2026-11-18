@@ -62,7 +62,8 @@ begin
 
   select r.user_id, r.status::text, r.visibility::text, r.hidden_at, r.deleted_at, r.settings
     into v_author_id, v_status, v_visibility, v_hidden_at, v_deleted_at, v_settings
-  from public.rankings r where r.id = p_ranking_id;
+  from public.rankings r where r.id = p_ranking_id
+  for share;
 
   if not found or v_status <> 'COMPLETED' or v_visibility <> 'LIVE'
     or v_hidden_at is not null or v_deleted_at is not null

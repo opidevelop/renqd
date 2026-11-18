@@ -13,8 +13,8 @@ const reasons = [
   ["OTHER", "Altro"],
 ] as const;
 
-export default function ReportRenqMenu({ rankingId, slug, alreadyReported }: {
-  rankingId: string; slug: string; alreadyReported: boolean;
+export default function ReportRenqMenu({ rankingId, alreadyReported }: {
+  rankingId: string; alreadyReported: boolean;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -28,7 +28,7 @@ export default function ReportRenqMenu({ rankingId, slug, alreadyReported }: {
   function submit() {
     if (!reason || pending) return;
     startTransition(async () => {
-      const result = await createRankingReport(rankingId, slug, reason, details);
+      const result = await createRankingReport(rankingId, reason, details);
       if (!result.ok) {
         setFeedback({ type: "error", message: result.error ?? "Invio non riuscito." });
         setConfirming(false);

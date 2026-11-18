@@ -37,7 +37,7 @@ export default async function PublicRenqPage({ params }: { params: Promise<{ slu
     <section className="profile-renqs-section"><div className="profile-section-heading"><div><span>IL RISULTATO</span><h2>La classifica</h2></div><Trophy size={20}/></div>
       {items.length ? <div className="saved-renq-list">{items.map((item,index)=>{const rank=item.rank_position??index+1;const medal=rank<=3?["🥇","🥈","🥉"][rank-1]:null;return <article className={"saved-renq-row"+(rank<=3?" is-top-"+rank:"")} key={item.id??index}><span className="saved-renq-position">{String(rank).padStart(2,"0")}</span>{item.image_url?<img src={item.image_url} alt="" loading="lazy"/>:<span className="saved-renq-item-placeholder"><Trophy size={18}/></span>}<div className="saved-renq-item-copy"><strong>{item.title}</strong>{item.description&&<small>{item.description}</small>}</div>{medal&&<span className={"saved-renq-medal medal-"+rank}>{medal}</span>}</article>;})}</div> : <div className="profile-empty-state"><Trophy size={22}/><strong>Anteprima della classifica non disponibile</strong></div>}
     </section>
-    {canReport && <ReportRenqMenu rankingId={ranking.id} slug={ranking.public_slug ?? slug} alreadyReported={Boolean(reportStatus.data)}/>}
+    {canReport && <ReportRenqMenu rankingId={ranking.id} alreadyReported={Boolean(reportStatus.data)}/>}
     <div className="profile-public-footer">renqd<span>.</span></div>
   </main>;
 }

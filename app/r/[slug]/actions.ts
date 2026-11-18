@@ -9,14 +9,12 @@ const REPORT_REASONS = ["INAPPROPRIATE_CONTENT", "SPAM", "HARASSMENT", "COPYRIGH
 
 export async function createRankingReport(
   rankingId: string,
-  slug: string,
   reason: string,
   details: string,
 ): Promise<ReportResult> {
-  if (!UUID_PATTERN.test(rankingId)) return { ok: false, error: "Renq non valido." };
-  if (!REPORT_REASONS.includes(reason)) return { ok: false, error: "Seleziona un motivo valido." };
-  if (details.trim().length > 1000) return { ok: false, error: "I dettagli non possono superare 1.000 caratteri." };
-  if (typeof slug !== "string" || slug.length > 180) return { ok: false, error: "Renq non valido." };
+  if (typeof rankingId !== "string" || !UUID_PATTERN.test(rankingId)) return { ok: false, error: "Renq non valido." };
+  if (typeof reason !== "string" || !REPORT_REASONS.includes(reason)) return { ok: false, error: "Seleziona un motivo valido." };
+  if (typeof details !== "string" || details.trim().length > 1000) return { ok: false, error: "I dettagli non possono superare 1.000 caratteri." };
 
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -39,7 +37,7 @@ export async function createRankingReport(
     if (message.includes("insufficient privileges")) return { ok: false, error: "Non hai i permessi per inviare una segnalazione." };
     return { ok: false, error: "Non è stato possibile inviare la segnalazione. Riprova." };
   }
-  revalidatePath("/r/" + slug);
+  revalidatePath("/r/[slug]", "page");
   revalidatePath("/admin");
   return { ok: true };
 }
