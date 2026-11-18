@@ -50,6 +50,7 @@ async function browseMusicBrainzReleases(artistId:string,include:string):Promise
     offset+=releases.length;
     const total=Number(data["release-count"]??0);
     if(total&&offset>=total)break;
+    if(page===9&&total>offset)throw new Error("La discografia supera il limite di 1.000 pubblicazioni recuperabili in una singola richiesta. Riprova con una ricerca più specifica.");
   }
   return all;
 }
@@ -254,6 +255,7 @@ async function loadItunesDiscographyTracks(payload:Record<string,unknown>):Promi
  }
  const params=new URLSearchParams({id:String(id),entity:"song",limit:"200",country:"IT"});
  const data=await itunesJson<{results?:Array<Record<string,unknown>>}>(`${ITUNES}/lookup?${params}`);
+ if((data.results??[]).filter(entry=>entry.wrapperType==="track").length>=200)throw new Error("iTunes ha raggiunto il limite di 200 brani: non posso garantire una discografia completa. Riprova con il catalogo MusicBrainz.");
  return(data.results??[]).flatMap(entry=>{
   if(entry.wrapperType!=="track"||typeof entry.trackName!=="string")return[];
   return[{id:String(entry.trackId??entry.trackName),title:entry.trackName,subtitle:typeof entry.collectionName==="string"?entry.collectionName:artist,imageUrl:typeof entry.artworkUrl100==="string"?entry.artworkUrl100.replace("100x100","300x300"):undefined,previewUrl:typeof entry.previewUrl==="string"?entry.previewUrl:undefined,appleMusicUrl:typeof entry.trackViewUrl==="string"?entry.trackViewUrl:undefined,spotifyUrl:spotifySearchUrl(`${artist} ${entry.trackName}`)}];
