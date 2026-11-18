@@ -884,3 +884,10 @@
 .my-renqs-feedback{position:fixed;z-index:220;right:20px;bottom:22px;max-width:min(480px,calc(100vw - 40px));padding:12px 16px;border:1px solid #dce9dd;border-radius:13px;background:#fff;color:#54805e;font-size:11px;font-weight:750;box-shadow:0 12px 35px #3028201a;animation:renqd-toast-out 5.5s ease forwards}
 @keyframes renqd-toast-out{0%,78%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(10px);pointer-events:none}}
 @media(max-width:680px){.my-renq-card-delete{top:25px;right:25px;width:30px;height:30px}.my-renqs-feedback{right:12px;bottom:calc(78px + env(safe-area-inset-bottom));max-width:calc(100vw - 24px)}}
+
+
+/* Shared bottom toast treatment for feedback across Renqd */
+.renq-error,.saved-renq-feedback,.profile-feedback,.my-renqs-error,.renq-trash-feedback{position:fixed!important;z-index:230;left:50%;bottom:22px;max-width:min(560px,calc(100vw - 32px));margin:0!important;padding:12px 16px;border:1px solid #f0d9d5;border-radius:13px;background:#fff9f8;color:#a94f45;font-size:11px;font-weight:750;line-height:1.5;box-shadow:0 12px 35px #3028201a;transform:translateX(-50%);animation:renqd-toast-out 6s ease forwards}
+.saved-renq-feedback.is-success,.profile-feedback:not(.is-error),.renq-trash-feedback{border-color:#dce9dd;background:#f8fcf8;color:#54805e}
+.profile-feedback.is-error,.saved-renq-feedback.is-error,.renq-error,.my-renqs-error{border-color:#f0d9d5;background:#fff9f8;color:#a94f45}
+@media(max-width:680px){.renq-error,.saved-renq-feedback,.profile-feedback,.my-renqs-error,.renq-trash-feedback{bottom:calc(78px + env(safe-area-inset-bottom));max-width:calc(100vw - 24px)}}
