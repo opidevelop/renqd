@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { RenqExperience } from "@/components/renq-experience";
+import { GradeExperience } from "@/components/grade-experience";
 import { SavedRenqDetail } from "@/components/saved-renq-detail";
 import { highQualityImageUrl } from "@/lib/image-quality";
 
@@ -22,7 +23,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   const coverImagePath = typeof settings.coverImagePath === "string" ? settings.coverImagePath : null;
   const { data: signedCover } = coverImagePath ? await supabase.storage.from("renq-covers").createSignedUrl(coverImagePath, 60 * 60 * 24 * 7) : { data: null };
   const resolvedCoverImageUrl = signedCover?.signedUrl ?? (typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null);
-  const savedSnapshot = settings.savedSnapshot as { items?: Array<{ id: string; title: string; image_url?: string | null; description?: string | null; rank_position?: number | null; tie_group_id?: string | null }> } | undefined;
+  const savedSnapshot = settings.savedSnapshot as { items?: Array<{ id: string; title: string; image_url?: string | null; description?: string | null; rank_position?: number | null; tie_group_id?: string | null; score?: number | null; tie_order?: number | null }> } | undefined;
   const isSaved = ranking.status === "COMPLETED" && Boolean(settings.savedAt) && Array.isArray(savedSnapshot?.items);
 
   if (isSaved) {
@@ -47,7 +48,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     />;
   }
 
-  const { data: items } = await supabase.from("ranking_items").select("id,title_snapshot,sort_order,rank_position,tie_group_id,custom_item_id").eq("ranking_id", ranking.id).order("rank_position", { ascending: true, nullsFirst: false }).order("sort_order");
+  const { data: items } = await supabase.from("ranking_items").select("id,title_snapshot,sort_order,rank_position,tie_group_id,custom_item_id,score,tie_order").eq("ranking_id", ranking.id).order("rank_position", { ascending: true, nullsFirst: false }).order("sort_order");
   const customIds = (items ?? []).map(x => x.custom_item_id).filter(Boolean) as string[];
   const { data: custom } = customIds.length ? await supabase.from("custom_items").select("id,title,image_url,description,metadata").in("id", customIds) : { data: [] };
   const lookup = new Map((custom ?? []).map(x => [x.id, x]));
@@ -60,5 +61,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     apple_music_url: (lookup.get(x.custom_item_id)?.metadata as Record<string, unknown> | undefined)?.appleMusicUrl as string | null,
     spotify_url: (lookup.get(x.custom_item_id)?.metadata as Record<string, unknown> | undefined)?.spotifyUrl as string | null
   }));
-  return <RenqExperience ranking={{ ...ranking, settings: { ...settings, coverImageUrl: highQualityImageUrl(resolvedCoverImageUrl), coverPosition: settings.coverPosition ?? {x:50,y:50} } }} items={hydrated} />;
+  const experienceRanking={...ranking,settings:{...settings,coverImageUrl:highQualityImageUrl(resolvedCoverImageUrl),coverPosition:settings.coverPosition??{x:50,y:50}}};
+  if(ranking.mode==="GRADE")return <GradeExperience ranking={experienceRanking} items={hydrated}/>;
+  return <RenqExperience ranking={experienceRanking} items={hydrated} />;
 }
