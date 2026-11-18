@@ -179,6 +179,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     setError(""); setMessage("");
     try {
       const uploaded = await uploadImage(file, field === "avatar_url" ? "avatar" : "profile-banner");
+      if(field==="avatar_url")setAvatarUrlInput("");else setBannerUrlInput("");
       const displayField = field === "avatar_url" ? "avatar_display_url" : "banner_display_url";
       setProfile(current => ({ ...current, [field]: uploaded.path, [displayField]: uploaded.url }));
       setMessage("Immagine caricata. Salva il profilo per confermare.");
