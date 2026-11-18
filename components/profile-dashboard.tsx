@@ -18,6 +18,19 @@ function normalizeMediaSettings(value:unknown):ProfileMediaSettings{
   return {avatar:normalize(raw.avatar),banner:normalize(raw.banner)};
 }
 
+async function isLoadableImageUrl(value:string):Promise<boolean>{
+  return new Promise(resolve=>{
+    const image=new Image();
+    let settled=false;
+    const finish=(valid:boolean)=>{if(settled)return;settled=true;window.clearTimeout(timeout);resolve(valid);};
+    const timeout=window.setTimeout(()=>finish(false),10000);
+    image.referrerPolicy="no-referrer";
+    image.onload=()=>finish(true);
+    image.onerror=()=>finish(false);
+    image.src=value;
+  });
+}
+
 function isHttpsUrl(value: string) {
   try {
     const parsed = new URL(value);
@@ -182,6 +195,8 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       if (next.website_url && !isHttpsUrl(next.website_url)) throw new Error("Il sito web deve essere un URL HTTPS valido.");
       if (avatarUrlInput.trim() && !isHttpsUrl(avatarUrlInput.trim())) throw new Error("L'avatar deve usare un URL HTTPS valido.");
       if (bannerUrlInput.trim() && !isHttpsUrl(bannerUrlInput.trim())) throw new Error("Il banner del profilo deve usare un URL HTTPS valido.");
+      if (avatarUrlInput.trim() && !(await isLoadableImageUrl(avatarUrlInput.trim()))) throw new Error("L’URL avatar non restituisce un’immagine valida.");
+      if (bannerUrlInput.trim() && !(await isLoadableImageUrl(bannerUrlInput.trim()))) throw new Error("L’URL del banner non restituisce un’immagine valida.");
       const { avatar_display_url, banner_display_url, ...persisted } = next;
       void avatar_display_url;
       void banner_display_url;
@@ -214,6 +229,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       const bannerUpload = collectionFile ? await uploadImage(collectionFile, "collection") : null;
       const bannerUrl = bannerUpload?.path ?? (collectionBannerUrl.trim() || null);
       if (!bannerUpload && collectionBannerUrl.trim() && !isHttpsUrl(collectionBannerUrl.trim())) throw new Error("Il banner deve usare un URL HTTPS valido.");
+      if (!bannerUpload && collectionBannerUrl.trim() && !(await isLoadableImageUrl(collectionBannerUrl.trim()))) throw new Error("L’URL del banner non restituisce un’immagine valida.");
       const slugBase = collectionTitle.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 38) || "collezione";
       const slug = profile.username.toLowerCase() + "-" + slugBase + "-" + crypto.randomUUID().slice(0, 5);
       const { data: created, error: insertError } = await supabase.from("profile_collections").insert({
@@ -255,6 +271,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     if (!editingCollectionId || !editingCollectionTitle.trim()) return;
     const banner = editingCollectionBannerUrl.trim() || null;
     if (banner && !isHttpsUrl(banner)) { setError("Il banner deve usare un URL HTTPS valido."); return; }
+    if (banner && !(await isLoadableImageUrl(banner))) { setError("L’URL del banner non restituisce un’immagine valida."); return; }
     const patch: Partial<Pick<Collection, "title" | "description" | "visibility" | "banner_url">> = {
       title: editingCollectionTitle.trim().slice(0, 70),
       description: editingCollectionDescription.trim().slice(0, 240),
