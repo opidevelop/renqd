@@ -216,8 +216,9 @@ export default function AdminUsersPanel({
           const initials = (user.username || user.email || "R").slice(0, 1).toUpperCase();
           const isBusy = isPending && busyId === user.user_id;
           const isOwner = user.account_role === "OWNER";
+          const isProtectedTarget = isOwner || (actorRole === "ADMIN" && user.account_role === "ADMIN");
           const action = activeAction?.userId === user.user_id ? activeAction.type : null;
-          const canManageRole = !isOwner && (user.account_status === "APPROVED" || user.account_status === "SUSPENDED")
+          const canManageRole = !isProtectedTarget && (user.account_status === "APPROVED" || user.account_status === "SUSPENDED")
             && (actorRole === "OWNER" || user.account_role !== "ADMIN");
           const roleOptions: AccountRole[] = actorRole === "OWNER" ? ["USER", "MODERATOR", "ADMIN"] : ["USER", "MODERATOR"];
           const selectedRole = selectedRoles[user.user_id] ?? user.account_role;
@@ -245,16 +246,16 @@ export default function AdminUsersPanel({
                 <textarea id={"reason-" + user.user_id} value={reason} onChange={event => setReason(event.target.value)} maxLength={500} rows={2} placeholder="Spiega brevemente perché la richiesta non viene approvata."/>
                 <div className="admin-reject-footer"><small>{reason.length}/500 caratteri</small><button type="button" className="admin-button admin-button-quiet" onClick={() => { setActiveAction(null); setReason(""); }}>Annulla</button><button type="button" className="admin-button admin-button-danger" disabled={isBusy || !reason.trim()} onClick={() => review(user, "REJECTED")}>{isBusy ? <LoaderCircle size={15} className="admin-spin"/> : <X size={15}/>} Rifiuta account</button></div>
               </div> : <div className="admin-action-buttons">
-                <button type="button" className="admin-button admin-button-approve" disabled={isBusy || !user.email_confirmed_at || isOwner} title={!user.email_confirmed_at ? "L'utente deve prima verificare l'email" : undefined} onClick={() => review(user, "APPROVED")}>{isBusy ? <LoaderCircle size={15} className="admin-spin"/> : <Check size={15}/>} Approva</button>
-                <button type="button" className="admin-button admin-button-quiet" disabled={isBusy || isOwner} onClick={() => { setActiveAction({ userId: user.user_id, type: "reject" }); setReason(""); setFeedback(null); }}><X size={15}/> Rifiuta</button>
+                <button type="button" className="admin-button admin-button-approve" disabled={isBusy || !user.email_confirmed_at || isProtectedTarget} title={!user.email_confirmed_at ? "L'utente deve prima verificare l'email" : undefined} onClick={() => review(user, "APPROVED")}>{isBusy ? <LoaderCircle size={15} className="admin-spin"/> : <Check size={15}/>} Approva</button>
+                <button type="button" className="admin-button admin-button-quiet" disabled={isBusy || isProtectedTarget} onClick={() => { setActiveAction({ userId: user.user_id, type: "reject" }); setReason(""); setFeedback(null); }}><X size={15}/> Rifiuta</button>
               </div>}
             </div>}
 
             {(user.account_status === "APPROVED" || user.account_status === "SUSPENDED") && !isOwner && <div className="admin-management-actions">
               <div className="admin-management-row">
                 {user.account_status === "APPROVED"
-                  ? <button type="button" className="admin-button admin-button-danger" disabled={isBusy} onClick={() => { setActiveAction({ userId: user.user_id, type: "suspend" }); setReason(""); setFeedback(null); }}><PauseCircle size={15}/> Sospendi account</button>
-                  : <button type="button" className="admin-button admin-button-approve" disabled={isBusy} onClick={() => manageStatus(user, "APPROVED")}>{isBusy ? <LoaderCircle size={15} className="admin-spin"/> : <PlayCircle size={15}/>} Riattiva account</button>}
+                  ? <button type="button" className="admin-button admin-button-danger" disabled={isBusy || isProtectedTarget} onClick={() => { setActiveAction({ userId: user.user_id, type: "suspend" }); setReason(""); setFeedback(null); }}><PauseCircle size={15}/> Sospendi account</button>
+                  : <button type="button" className="admin-button admin-button-approve" disabled={isBusy || isProtectedTarget} onClick={() => manageStatus(user, "APPROVED")}>{isBusy ? <LoaderCircle size={15} className="admin-spin"/> : <PlayCircle size={15}/>} Riattiva account</button>}
                 {canManageRole && <div className="admin-role-editor">
                   <label htmlFor={"role-" + user.user_id}><UserCog size={14}/> Ruolo</label>
                   <select id={"role-" + user.user_id} value={selectedRole} disabled={isBusy} onChange={event => setSelectedRoles(current => ({ ...current, [user.user_id]: event.target.value as AccountRole }))}>
@@ -275,6 +276,7 @@ export default function AdminUsersPanel({
               </div>}
             </div>}
             {isOwner && <div className="admin-protected-note"><Shield size={14}/> Account OWNER protetto: nessuna modifica disponibile.</div>}
+            {!isOwner && isProtectedTarget && <div className="admin-protected-note"><Shield size={14}/> Gli account ADMIN possono essere gestiti soltanto dall’OWNER.</div>}
           </article>;
         })}
       </div>
