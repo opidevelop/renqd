@@ -14,6 +14,9 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const { data: profile } = await supabase.from("public_profiles").select("*").eq("username", username).maybeSingle();
   if (!profile || (profile.is_private && profile.user_id !== user?.id)) notFound();
   const isOwner = profile.user_id === user?.id;
+  const mediaSettings=(profile as unknown as {media_settings?:{avatar?:{x?:number;y?:number;zoom?:number};banner?:{x?:number;y?:number;zoom?:number}}}).media_settings??{};
+  const avatarCrop={x:Math.max(0,Math.min(100,Number(mediaSettings.avatar?.x??50))),y:Math.max(0,Math.min(100,Number(mediaSettings.avatar?.y??50))),zoom:Math.max(100,Math.min(200,Number(mediaSettings.avatar?.zoom??100)))};
+  const bannerCrop={x:Math.max(0,Math.min(100,Number(mediaSettings.banner?.x??50))),y:Math.max(0,Math.min(100,Number(mediaSettings.banner?.y??50))),zoom:Math.max(100,Math.min(200,Number(mediaSettings.banner?.zoom??100)))};
   const [profileAvatarUrl, profileBannerUrl] = await Promise.all([
     getProfileMediaUrl(supabase, profile.avatar_url),
     getProfileMediaUrl(supabase, profile.banner_url),
@@ -28,11 +31,11 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const { count: followerCount } = isOwner ? await supabase.from("user_follows").select("follower_id", { count: "exact", head: true }).eq("followed_id", profile.user_id).eq("status", "ACCEPTED") : { count: null };
   return <main className="public-profile-page">
     <Link href="/home" className="public-profile-back"><ArrowLeft size={15}/> Renqd</Link>
-    <section className="profile-cover public-profile-cover" style={profileBannerUrl ? { backgroundImage: "linear-gradient(90deg,rgba(18,14,11,.8),rgba(18,14,11,.2)),url(" + profileBannerUrl + ")" } : undefined}>
+    <section className="profile-cover public-profile-cover" style={profileBannerUrl ? { backgroundImage: "linear-gradient(90deg,rgba(18,14,11,.8),rgba(18,14,11,.2)),url(" + profileBannerUrl + ")", backgroundPosition: bannerCrop.x + "% " + bannerCrop.y + "%", backgroundSize: bannerCrop.zoom === 100 ? "cover" : bannerCrop.zoom + "% auto" } : undefined}>
       <div className="profile-cover-copy"><span>PROFILO RENQD</span><h1>{profile.display_name || profile.username}</h1><p>@{profile.username}</p></div>
     </section>
     <section className="profile-overview public-profile-overview">
-      <div className="profile-avatar-wrap">{profileAvatarUrl ? <img src={profileAvatarUrl} alt=""/> : <span>{(profile.display_name || profile.username).slice(0,1).toUpperCase()}</span>}</div>
+      <div className="profile-avatar-wrap">{profileAvatarUrl ? <img src={profileAvatarUrl} alt="" style={{objectPosition:avatarCrop.x+"% "+avatarCrop.y+"%",transform:"scale("+avatarCrop.zoom/100+")"}}/> : <span>{(profile.display_name || profile.username).slice(0,1).toUpperCase()}</span>}</div>
       <div className="profile-overview-copy"><h2>{profile.display_name || profile.username}</h2><p>@{profile.username}{profile.location ? " · " + profile.location : ""}</p>{profile.bio && <div className="profile-bio">{profile.bio}</div>}{profile.website_url && <a href={profile.website_url} target="_blank" rel="noreferrer">{profile.website_url}</a>}</div>
       <div className="public-profile-action">{isOwner ? <Link href="/profile">Modifica profilo <ArrowUpRight size={15}/></Link> : <ProfileFollowButton targetUserId={profile.user_id} isPrivate={profile.is_private}/>}</div>
     </section>
