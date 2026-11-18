@@ -213,7 +213,7 @@ Il commit `ae93d38` è stato compilato e distribuito da Vercel in Production con
 ## 5. Stato GitHub e deployment
 
 - Branch operativo: `main`.
-- Ultimo commit su `main`: `94152b4b94192d24a1c4ee9bd3fbc110c94d96d8` (aggiornamento documentale). Ultimo commit applicativo/Edge Function del gruppo cancellazione account: `54ba0ccbcde929ad7d2ceea32219dc28c1ec4d8e`.
+- Ultimo commit applicativo su `main`: `54ba0ccbcde929ad7d2ceea32219dc28c1ec4d8e`. I commit successivi sono aggiornamenti documentali e non modificano il codice applicativo.
 - Workflow CI: `Code quality`. I run #56, #57, #58, #59 e #60 sono terminati con `success`: `npm ci`, TypeScript, ESLint e build di produzione superati. I run #52–#55 sono stati tentativi intermedi falliti durante la correzione degli errori introdotti dal nuovo codice; gli errori sono stati risolti prima dei run #56–#60.
 - File applicativi del gruppo dashboard/cancellazione: `app/(platform)/admin/page.tsx`, `app/(platform)/admin/actions.ts`, `app/(platform)/admin/users/[id]/page.tsx`, `components/admin-users-panel.tsx`, `components/delete-account-button.tsx`, `components/platform-shell.tsx`, `app/(platform)/admin-management.css`, `supabase/functions/admin-delete-user/index.ts`, `supabase/config.toml` e `tsconfig.json`.
 - **Vercel Production:** deployment `dpl_4P4yHo6CKtewF9ppYyxtCiouFxxM`, target `production`, stato `READY`, commit `54ba0ccbcde929ad7d2ceea32219dc28c1ec4d8e`. Include l'interfaccia Dashboard e i controlli di eliminazione account; il codice applicativo era già incluso nel precedente deployment READY e questo deployment allinea anche il commit più recente.
