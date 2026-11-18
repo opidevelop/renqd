@@ -40,6 +40,7 @@ export default async function AdminPage({
             users={(usersResult.data ?? []) as AdminUser[]}
             auditLogs={auditResult.error ? [] : (auditResult.data ?? []) as AdminAuditLog[]}
             actorRole={profile.role as "OWNER" | "ADMIN"}
+            actorUserId={user.id}
             auditUnavailable={Boolean(auditResult.error)}
           />}
     </div>;

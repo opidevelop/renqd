@@ -143,3 +143,59 @@ export async function changeAdminUserRole(
   revalidatePath("/admin");
   return { ok: true };
 }
+
+export async function deleteAdminAccount(
+  targetUserId: string,
+  confirmation: string,
+): Promise<AdminActionResult> {
+  if (!UUID_PATTERN.test(targetUserId)) return { ok: false, error: "Account non valido." };
+  if (confirmation.trim().length < 3 || confirmation.trim().length > 30) {
+    return { ok: false, error: "Conferma non valida." };
+  }
+
+  const supabase = await createClient();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return { ok: false, error: "Sessione scaduta. Accedi di nuovo." };
+
+  const { data: actor, error: actorError } = await supabase
+    .from("profiles")
+    .select("role,status")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (actorError || !actor || actor.status !== "APPROVED" || actor.role !== "OWNER") {
+    return { ok: false, error: "Solo un OWNER può eliminare definitivamente gli account." };
+  }
+  if (targetUserId === user.id) {
+    return { ok: false, error: "Non puoi eliminare il tuo stesso account." };
+  }
+
+  const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+    body: { targetUserId, confirmation: confirmation.trim() },
+  });
+
+  if (error) {
+    let message = error.message || "Non è stato possibile eliminare l'account.";
+    const context = (error as { context?: Response }).context;
+    if (context && typeof context.clone === "function") {
+      try {
+        const payload = await context.clone().json() as { error?: string };
+        if (payload?.error) message = payload.error;
+      } catch {
+        // Keep the SDK error when the function response is not JSON.
+      }
+    }
+    return { ok: false, error: message };
+  }
+
+  if (!data?.ok) return { ok: false, error: data?.error || "Eliminazione non completata." };
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/users/" + targetUserId);
+  return {
+    ok: true,
+    ...(data.auditLogged === false
+      ? { error: "Account eliminato, ma non è stato possibile registrare l'evento nell'audit log." }
+      : {}),
+  };
+}

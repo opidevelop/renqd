@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, CalendarDays, CheckCircle2, Clock3, Eye, FileText, FolderOpen, Heart, History, LockKeyhole, MessageCircle, ShieldCheck, UserRound, Users } from "lucide-react";
 import { requireApprovedUser } from "@/lib/supabase/authorization";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
+import DeleteAccountButton from "@/components/delete-account-button";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ function eventLabel(event: string) {
 }
 
 export default async function AdminUserDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { supabase, profile: actor } = await requireApprovedUser();
+  const { supabase, user, profile: actor } = await requireApprovedUser();
   if (actor.role !== "OWNER" && actor.role !== "ADMIN") redirect("/home");
   const { id } = await params;
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) notFound();
@@ -90,6 +91,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
       </div>
       {profile?.bio && <p className="admin-detail-bio">{profile.bio}</p>}
     </section>
+    {actor.role === "OWNER" && account.user_id !== user.id && <div className="admin-detail-delete-zone"><DeleteAccountButton targetUserId={account.user_id} username={account.username} location="detail" /></div>}
 
     <section className="admin-detail-stats">
       <article><span><FileText size={16}/> Classifiche</span><strong>{stats.rankings_total}</strong><small>{stats.rankings_published} pubblicate · {stats.rankings_drafts} bozze</small></article>

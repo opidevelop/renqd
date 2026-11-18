@@ -12,6 +12,7 @@ import {
   manageAdminAccount,
   changeAdminUserRole,
 } from "@/app/(platform)/admin/actions";
+import DeleteAccountButton from "@/components/delete-account-button";
 
 type AccountStatus = "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
 type StatusFilter = "ALL" | AccountStatus;
@@ -87,11 +88,13 @@ export default function AdminUsersPanel({
   users,
   auditLogs,
   actorRole,
+  actorUserId,
   auditUnavailable = false,
 }: {
   users: AdminUser[];
   auditLogs: AdminAuditLog[];
   actorRole: "OWNER" | "ADMIN";
+  actorUserId: string;
   auditUnavailable?: boolean;
 }) {
   const router = useRouter();
@@ -276,6 +279,7 @@ export default function AdminUsersPanel({
               </div>}
             </div>}
             {isOwner && <div className="admin-protected-note"><Shield size={14}/> Account OWNER protetto: nessuna modifica disponibile.</div>}
+            {actorRole === "OWNER" && user.user_id !== actorUserId && <DeleteAccountButton targetUserId={user.user_id} username={user.username} location="list" />}
             {!isOwner && isProtectedTarget && <div className="admin-protected-note"><Shield size={14}/> Gli account ADMIN possono essere gestiti soltanto dall’OWNER.</div>}
           </article>;
         })}

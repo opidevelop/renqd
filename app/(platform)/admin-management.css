@@ -85,3 +85,26 @@
 .admin-detail-timeline p{color:#766a5f}
 @media(max-width:850px){.admin-detail-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.admin-detail-columns{grid-template-columns:1fr}}
 @media(max-width:600px){.admin-detail-banner{min-height:145px;gap:11px;padding:16px}.admin-detail-avatar{width:58px;height:58px;border-radius:18px}.admin-detail-identity h1{font-size:21px}.admin-detail-banner>.admin-status{position:absolute;top:14px;right:14px}.admin-detail-contact{grid-template-columns:repeat(2,minmax(0,1fr));padding:15px}.admin-detail-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-detail-ranking{gap:8px;padding:9px}.admin-detail-ranking-meta{display:none}.admin-detail-collections{grid-template-columns:1fr}}
+
+
+/* Permanent account deletion — OWNER only */
+.admin-delete-account{margin:13px 0 0 54px}
+.admin-delete-trigger{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border:1px solid #f0d5d0;border-radius:999px;background:#fff8f7;color:#b4473c;font:inherit;font-size:9px;font-weight:800;cursor:pointer;transition:background .18s,border-color .18s}
+.admin-delete-trigger:hover{border-color:#d99a91;background:#fff0ee}
+.admin-delete-trigger:disabled{opacity:.55;cursor:not-allowed}
+.admin-delete-confirmation{display:grid;gap:9px;max-width:480px;margin-top:10px;padding:13px;border:1px solid #efc9c3;border-radius:13px;background:#fff9f8}
+.admin-delete-confirmation>strong{color:#713a35;font-size:10px}
+.admin-delete-confirmation>p{margin:0;color:#8d6964;font-size:9px;line-height:1.6}
+.admin-delete-confirmation>label{color:#7c5b55;font-size:9px;font-weight:700}
+.admin-delete-confirmation>label b{color:#713a35}
+.admin-delete-confirmation input{width:100%;height:36px;padding:0 11px;border:1px solid #e8c9c4;border-radius:9px;background:#fff;color:#49332f;font:inherit;font-size:10px;outline:0}
+.admin-delete-confirmation input:focus{border-color:#c86b5f;box-shadow:0 0 0 3px #c86b5f18}
+.admin-delete-confirmation-footer{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.admin-delete-confirmation-footer button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:32px;padding:0 11px;border:1px solid #eee3de;border-radius:999px;background:#fff;color:#786b62;font:inherit;font-size:9px;font-weight:800;cursor:pointer}
+.admin-delete-confirmation-footer button.is-danger{border-color:#b94e43;background:#b94e43;color:#fff}
+.admin-delete-confirmation-footer button:disabled{opacity:.45;cursor:not-allowed}
+.admin-delete-feedback{color:#a23f36;font-size:9px;line-height:1.5}
+.admin-detail-delete-zone{display:flex;justify-content:flex-end;margin:12px 0}
+.admin-detail-delete-zone .admin-delete-account{margin:0}
+.admin-delete-account.is-detail .admin-delete-confirmation{max-width:560px}
+@media(max-width:600px){.admin-delete-account{margin-left:0}.admin-detail-delete-zone{justify-content:stretch}.admin-detail-delete-zone .admin-delete-account{width:100%}.admin-detail-delete-zone .admin-delete-trigger{width:100%;justify-content:center}.admin-delete-confirmation-footer{justify-content:stretch}.admin-delete-confirmation-footer button{flex:1}}
