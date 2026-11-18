@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAccountAccess } from "@/lib/supabase/authorization";
 
 type ItemInput={id:string;title:string;subtitle?:string;imageUrl?:string;previewUrl?:string;appleMusicUrl?:string;spotifyUrl?:string;source?:"catalog"|"manual";payload?:unknown};
-const modeMap:Record<string,string>={renq:"RENQ",battle:"BATTLE_RENQ",speed:"SPEED_RENQ"};
+const modeMap:Record<string,string>={renq:"RENQ",battle:"BATTLE_RENQ",speed:"SPEED_RENQ",grade:"GRADE"};
 const categoryMap:Record<string,string>={music:"MUSIC",games:"VIDEOGAME",film:"CINEMA",books:"BOOK",sport:"OTHER",food:"OTHER",travel:"OTHER",custom:"CUSTOM"};
 function jsonError(message:string,status=400){return NextResponse.json({error:message},{status});}
 function validHttpsUrl(value:unknown):value is string{if(typeof value!=="string"||value.length>2048)return false;try{const url=new URL(value);return url.protocol==="https:"&&!url.username&&!url.password;}catch{return false;}}
@@ -83,6 +83,24 @@ export async function POST(request:Request){
    return jsonError(saveError.message,500);
   }
   return NextResponse.json({ok:true,title:cleanTitle,version,items:nextItems});
+ }
+ if(body.action==="complete-grade"){
+  const {rankingId,scores,tieOrder={}}=body as {rankingId:string;scores:Record<string,number>;tieOrder?:Record<string,number>};
+  if(typeof rankingId!=="string"||!scores||typeof scores!=="object"||Array.isArray(scores))return jsonError("Valutazioni non valide.");
+  const {data,error}=await supabase.rpc("renqd_complete_grade",{p_ranking_id:rankingId,p_scores:scores,p_tie_order:tieOrder});
+  if(error)return jsonError(error.message,400);
+  return NextResponse.json(data??{ok:true});
+ }
+ if(body.action==="update-grade"){
+  const {rankingId,title,scores,tieOrder={},gradeConfig}=body as {rankingId:string;title:string;scores:Record<string,number>;tieOrder?:Record<string,number>;gradeConfig:Record<string,unknown>};
+  const cleanTitle=typeof title==="string"?title.trim():"";
+  if(!rankingId||!cleanTitle||cleanTitle.length>80||!scores||typeof scores!=="object"||Array.isArray(scores))return jsonError("Dati Grade non validi.");
+  if(!gradeConfig||!["score","position"].includes(String(gradeConfig.criterion))||!Array.isArray(gradeConfig.labels)||gradeConfig.labels.length>12)return jsonError("Configurazione delle etichette non valida.");
+  const labels=gradeConfig.labels as Array<Record<string,unknown>>;
+  if(labels.some(label=>typeof label.name!=="string"||!label.name.trim()||label.name.length>28||typeof label.min!=="number"||typeof label.max!=="number"||label.min<0||label.max>10||label.min>label.max||typeof label.color!=="string"||!/^#[0-9a-f]{6}$/i.test(label.color)))return jsonError("Una o più etichette non sono valide.");
+  const {data,error}=await supabase.rpc("renqd_update_grade_published",{p_ranking_id:rankingId,p_title:cleanTitle,p_scores:scores,p_tie_order:tieOrder,p_grade_config:gradeConfig});
+  if(error)return jsonError(error.message,400);
+  return NextResponse.json(data??{ok:true});
  }
  if(body.action==="start-battle"){
   const {rankingId,pairs,difficulty}=body as {rankingId:string;pairs:{a:string;b:string}[];difficulty:string};
@@ -166,10 +184,10 @@ export async function POST(request:Request){
  }
  if(body.action==="save-renq"){
   const {rankingId}=body as {rankingId:string};const {data:ranking}=await supabase.from("rankings").select("*").eq("id",rankingId).eq("user_id",user.id).is("deleted_at",null).single();if(!ranking||ranking.status!=="COMPLETED")return jsonError("Completa il Renq prima di salvarlo.");
-  const {data:rows,error}=await supabase.from("ranking_items").select("id,title_snapshot,rank_position,tie_group_id,custom_item_id").eq("ranking_id",rankingId).order("rank_position").order("sort_order");if(error||!rows)return jsonError(error?.message??"Impossibile leggere il risultato.",500);
+  const {data:rows,error}=await supabase.from("ranking_items").select("id,title_snapshot,rank_position,tie_group_id,custom_item_id,score,tie_order").eq("ranking_id",rankingId).order("rank_position").order("sort_order");if(error||!rows)return jsonError(error?.message??"Impossibile leggere il risultato.",500);
   const customIds=rows.map(x=>x.custom_item_id).filter(Boolean);const {data:custom}=customIds.length?await supabase.from("custom_items").select("id,title,image_url,description,metadata").in("id",customIds):{data:[]};const lookup=new Map((custom??[]).map(x=>[x.id,x]));
-  const savedSnapshot={items:rows.map(x=>({id:x.id,title:lookup.get(x.custom_item_id)?.title??x.title_snapshot,image_url:lookup.get(x.custom_item_id)?.image_url??null,description:lookup.get(x.custom_item_id)?.description??null,rank_position:x.rank_position,tie_group_id:x.tie_group_id,metadata:lookup.get(x.custom_item_id)?.metadata??{}}))};
-  const settings={...(ranking.settings??{}),savedAt:new Date().toISOString(),savedSnapshot};
+  const savedSnapshot={items:rows.map(x=>({id:x.id,title:lookup.get(x.custom_item_id)?.title??x.title_snapshot,image_url:lookup.get(x.custom_item_id)?.image_url??null,description:lookup.get(x.custom_item_id)?.description??null,rank_position:x.rank_position,tie_group_id:x.tie_group_id,score:x.score,tie_order:x.tie_order,metadata:lookup.get(x.custom_item_id)?.metadata??{}}))};
+  const settings={...(ranking.settings??{}),savedAt:new Date().toISOString(),savedSnapshot,...(ranking.mode==="GRADE"?{gradeAverage:Number((rows.reduce((sum,x)=>sum+Number(x.score??0),0)/Math.max(rows.length,1)).toFixed(1))}:{})};
   const {data:version,error:saveError}=await supabase.rpc("renqd_save_ranking_snapshot",{p_ranking_id:rankingId,p_settings:settings});if(saveError)return jsonError(saveError.message,500);return NextResponse.json({ok:true,version});
  }
  if(body.action==="restart-renq"){
@@ -273,13 +291,13 @@ export async function POST(request:Request){
  if(body.action==="cancel-renq"){
   const {rankingId}=body as {rankingId:string};const {data:ranking}=await supabase.from("rankings").select("id").eq("id",rankingId).eq("user_id",user.id).single();if(!ranking)return jsonError("Renq non trovato.",404);const {error}=await supabase.from("rankings").update({status:"CANCELLED"}).eq("id",rankingId);if(error)return jsonError(error.message,500);return NextResponse.json({ok:true});
  }
- const {title,mode,category,contentType,sportDiscipline,coverImageUrl,coverImagePath,defaultCoverImageUrl,coverTitle,participation,collaborators,visibility,access,allowTies,duration,battleDepth,items}=body as {title:string;mode:string;category:string;contentType:string;sportDiscipline?:string;coverImageUrl?:string|null;coverImagePath?:string|null;defaultCoverImageUrl?:string|null;coverTitle?:string;participation:string;collaborators:number;visibility:string;access:string;allowTies:boolean;duration:number;battleDepth:string;items:ItemInput[]};
+ const {title,mode,category,contentType,sportDiscipline,coverImageUrl,coverImagePath,defaultCoverImageUrl,coverTitle,participation,collaborators,visibility,access,allowTies,duration,battleDepth,gradeConfig,items}=body as {title:string;mode:string;category:string;contentType:string;sportDiscipline?:string;coverImageUrl?:string|null;coverImagePath?:string|null;defaultCoverImageUrl?:string|null;coverTitle?:string;participation:string;collaborators:number;visibility:string;access:string;allowTies:boolean;duration:number;battleDepth:string;gradeConfig?:Record<string,unknown>;items:ItemInput[]};
  if(!title?.trim()||!modeMap[mode]||!Array.isArray(items)||items.length<1||items.length>100)return jsonError("Completa il titolo e inserisci da 1 a 100 elementi.");
  if(coverImagePath!==undefined&&coverImagePath!==null&&(typeof coverImagePath!=="string"||!new RegExp("^"+user.id+"/[a-f0-9-]{36}\\.(jpg|png|webp)$","i").test(coverImagePath)))return jsonError("La copertina caricata non è valida.");
  if(coverImageUrl!==undefined&&coverImageUrl!==null&&!validHttpsUrl(coverImageUrl))return jsonError("L’URL della copertina deve usare HTTPS.");
  const slugBase=title.normalize("NFD").replace(/\p{Diacritic}/gu,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"renq";
  const publicSlug=slugBase+"-"+crypto.randomUUID().replace(/-/g,"").slice(0,6);
- const settings={category,contentType,sportDiscipline:sportDiscipline??null,coverImageUrl:coverImageUrl??null,coverImagePath:coverImagePath??null,defaultCoverImageUrl:defaultCoverImageUrl??null,coverTitle:coverTitle??title.trim(),access,collaborators:participation==="collab"?collaborators:1,durationSeconds:mode==="speed"?duration:null,battleDepth};
+ const safeGradeConfig=mode==="grade"?gradeConfig??{criterion:"score",labels:[]}:null;if(mode==="grade"&&(!safeGradeConfig||!["score","position"].includes(String(safeGradeConfig.criterion))||!Array.isArray(safeGradeConfig.labels)))return jsonError("Configurazione Grade non valida.");const settings={category,contentType,sportDiscipline:sportDiscipline??null,coverImageUrl:coverImageUrl??null,coverImagePath:coverImagePath??null,defaultCoverImageUrl:defaultCoverImageUrl??null,coverTitle:coverTitle??title.trim(),access,collaborators:participation==="collab"?collaborators:1,durationSeconds:mode==="speed"?duration:null,battleDepth,...(mode==="grade"?{gradeConfig:safeGradeConfig}:{})};
  const categoryCode=categoryMap[category]??"CUSTOM";
  const payload={public_slug:publicSlug,title:title.trim(),mode:modeMap[mode],participation_mode:participation==="collab"?"COLLAB":"SOLO",visibility:visibility==="live"?"LIVE":"REVEAL",allow_ties:Boolean(allowTies),category:categoryCode,contentType,settings};
  const rpcItems=items.map(item=>({title:item.title.trim(),subtitle:item.subtitle??null,imageUrl:item.imageUrl??null,previewUrl:item.previewUrl??null,appleMusicUrl:item.appleMusicUrl??null,spotifyUrl:item.spotifyUrl??null,source:item.source??"manual",provider:item.payload&&typeof item.payload==="object"?(item.payload as Record<string,unknown>).provider??null:null,externalId:item.id??null}));
