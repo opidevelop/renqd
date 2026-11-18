@@ -50,7 +50,6 @@ async function browseMusicBrainzReleases(artistId:string,include:string):Promise
     offset+=releases.length;
     const total=Number(data["release-count"]??0);
     if(total&&offset>=total)break;
-    if(!total&&releases.length<100)break;
   }
   return all;
 }
