@@ -332,3 +332,32 @@ Revisione della migrazione di hardening:
 - 20261117181748_renqd_battle_choice_undo.sql ricostruita dalla definizione live di renqd_undo_battle_choice.
 - 20261117182046_renqd_speed_duration_up_to_180_minutes.sql ricostruita dalla definizione live di renqd_start_speed_session e dal vincolo duration_seconds <= 10800.
 - I file sono stati aggiunti al repository per riallineare la cronologia; non sono stati riapplicati al database.
+
+## 11. Dashboard e cancellazione definitiva degli account — 18 novembre 2026
+
+### Decisioni
+- La voce di navigazione amministrativa è stata rinominata **Dashboard** nei menu laterale e profilo; la route resta `/admin`.
+- L'eliminazione definitiva è disponibile in entrambi i punti richiesti: elenco utenti e scheda account.
+- L'azione è riservata a OWNER, non è disponibile sul proprio account e richiede di digitare lo username esatto per confermare.
+- L'ultimo OWNER approvato/attivo è protetto.
+
+### Implementazione repository
+- `components/platform-shell.tsx`: etichetta Dashboard nei menu laterale e profilo.
+- `components/admin-users-panel.tsx`: controllo di cancellazione nella scheda di ciascun account, visibile soltanto a OWNER e non sul proprio account.
+- `app/(platform)/admin/users/[id]/page.tsx`: stesso controllo nella scheda dettagliata.
+- `components/delete-account-button.tsx`: componente riutilizzabile con doppio passaggio di conferma, digitazione dello username e feedback.
+- `app/(platform)/admin/actions.ts`: server action che ricontrolla sessione, ruolo OWNER e protezione self-delete, quindi invoca la funzione Edge.
+- `supabase/functions/admin-delete-user/index.ts`: funzione Edge autenticata con `@supabase/server`; verifica nuovamente OWNER approvato, account target, conferma username e protezione dell'ultimo OWNER. Elimina i file personali tramite Storage API in tutti i bucket, rimuove le segnalazioni collegate ai Renq eliminati e gli inviti pendenti legati all'email, anonimizza i dati descrittivi negli audit log e nelle attività conservate, quindi elimina l'utente tramite Supabase Auth Admin API. Registra infine un evento `ACCOUNT_DELETED` senza identificativi del target.
+- `supabase/config.toml`: configurazione della funzione `admin-delete-user`; la verifica dell'identità è gestita da `withSupabase({ auth: "user" })`, mentre i controlli di ruolo sono ripetuti lato funzione.
+- `tsconfig.json`: il codice Deno delle Edge Functions è escluso dal progetto TypeScript Next.js; la funzione viene compilata/deployata separatamente da Supabase.
+
+### Database e sicurezza
+- Non è stata applicata alcuna migrazione SQL: la cancellazione usa le relazioni FK già presenti, con cascade o SET NULL, e l'API Auth/Storage.
+- I riferimenti audit conservati vengono anonimizzati; i record di audit amministrativo restano consultabili senza username/email dell'account eliminato.
+- La verifica read-only del database live rileva attualmente **un solo OWNER approvato**. L'account OWNER corrente non può eliminare se stesso; gli altri account restano gestibili secondo i controlli di ruolo.
+
+### Verifica e produzione
+- Supabase Edge Function `admin-delete-user`: stato `ACTIVE`, versione 2, autenticazione utente gestita internamente da `withSupabase`.
+- GitHub Actions `Code quality`: run #56, #57 e #58 conclusi con `success`; TypeScript, ESLint e build di produzione superati.
+- Vercel Production: deployment `dpl_2afd4Kj3QbitL5UEz2JW2V9kdv49`, commit `0f47e48d689e1a3dfdfbd7e02faacf64f5c9eeca`, stato `READY`.
+- Nessun account è stato cancellato durante l'implementazione. Il flusso irreversibile non è stato provato su account reali: il collaudo funzionale va eseguito soltanto su un account di test sacrificabile, mai su un account o contenuto reale da conservare.

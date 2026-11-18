@@ -212,3 +212,8 @@
     - se il Renq viene cestinato da un MODERATOR, scompare anche dall'area dell'autore ed è accessibile e gestibile esclusivamente da OWNER, ADMIN e MODERATOR;
     - un Renq nascosto resta sempre invisibile agli utenti ordinari, autore compreso, ed è accessibile e gestibile esclusivamente dallo staff.
     Il ripristino dei contenuti cestinati dalla moderazione è gestito dallo staff tramite le RPC di moderazione; le RPC ordinarie dell'autore non possono ripristinarli o eliminarli definitivamente.
+
+### Decisioni approvate il 18 novembre 2026 — Dashboard e cancellazione account
+
+20. La voce di navigazione che conduce all'area amministrativa si chiama **«Dashboard»** in tutti i menu in cui viene mostrata. L'URL resta `/admin`; le sezioni interne e la gerarchia dei permessi non cambiano.
+21. L'azione **«Elimina definitivamente»** deve essere disponibile sia nell'elenco degli account sia nella scheda del singolo account, ma soltanto a OWNER. La conferma richiede di digitare lo username esatto dell'account da eliminare. Non è possibile eliminare il proprio account né l'ultimo OWNER attivo. La cancellazione deve rimuovere anche i file personali dai bucket Storage e i dati/contenuti collegati; gli audit log da conservare devono essere anonimizzati e deve restare un evento di audit non identificativo della cancellazione.
