@@ -284,3 +284,27 @@ Implementazione repository:
 - una nuova migrazione aggiunge RPC di creazione/verifica segnalazione e indice univoco per reporter/Renq. La verifica read-only del database live non ha rilevato coppie duplicate esistenti;
 - **migrazione non applicata a Supabase**; nessuna modifica al database live;
 - build/CI, test funzionali e deployment da verificare dopo il commit.
+
+
+## 9. Decisione sul cestino e hardening RLS — 18 novembre 2026
+
+Decisione utente confermata:
+- il soft delete dell'autore resta nel cestino personale ed è ripristinabile dall'autore;
+- il soft delete effettuato da MODERATOR è invisibile anche all'autore e resta accessibile/gestibile soltanto da OWNER, ADMIN e MODERATOR;
+- i Renq nascosti restano invisibili agli utenti ordinari, autore incluso;
+- la distinzione è basata su `deleted_by`, senza introdurre un nuovo stato.
+
+Migrazione aggiunta al repository:
+- `20261118180000_renqd_moderation_rls_hardening.sql`;
+- aggiorna `private.can_access_ranking_content` per distinguere contenuti visibili, cestino personale e cestino di moderazione;
+- protegge anche `custom_items`, collegati indirettamente ai Renq tramite `ranking_items`;
+- restringe le policy di lettura/inserimento/aggiornamento dei ranking e rimuove il percorso di hard delete diretto tramite policy/grant;
+- limita restore e cancellazione definitiva RPC dell'autore ai Renq cestinati dall'autore;
+- aggiunge controlli `hidden_at IS NULL` alle RPC SECURITY DEFINER del lifecycle e verifica esplicita del ranking padre nell'annullamento Battle;
+- revoca i privilegi non necessari `TRUNCATE`, `TRIGGER` e `REFERENCES` dalle cinque tabelle individuate nell'audit.
+
+Stato di verifica:
+- le definizioni delle RPC sono state recuperate in sola lettura dal database live e usate come base per le sostituzioni, così da preservare le versioni effettivamente installate;
+- la migrazione è soltanto nel repository: **non è stata applicata a Supabase**;
+- nessuna modifica è stata eseguita sul database live e nessun deployment Production è stato avviato;
+- restano da verificare CI, applicazione delle migrazioni in ambiente approvato e test funzionali dei permessi per autore, altro utente e staff.

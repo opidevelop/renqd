@@ -203,3 +203,12 @@
 
 17. Un utente approvato può inviare **una sola segnalazione per ciascun Renq**. Il vincolo vale anche dopo la chiusura della segnalazione: non è consentito inviarne una seconda sullo stesso Renq. La segnalazione è disponibile soltanto per contenuti pubblicati, Live, non nascosti e non cestinati, e non può essere inviata dall'autore.
 18. L'accesso amministrativo e di moderazione confluisce in una **dashboard unica «Amministrazione»**, raggiungibile da `/admin`. OWNER e ADMIN dispongono sia delle funzioni amministrative sia di tutte le funzioni MODERATOR; MODERATOR accede soltanto alla sezione di moderazione. USER e account non approvati non accedono alla dashboard. Le autorizzazioni restano verificate lato server e database; la gerarchia OWNER > ADMIN > MODERATOR > USER e i privilegi esclusivi dell'OWNER restano invariati.
+
+
+### Decisione approvata il 18 novembre 2026 — visibilità del cestino
+
+19. Il cestino distingue l'eliminazione effettuata dall'autore da quella effettuata dalla moderazione, usando il campo `deleted_by` senza introdurre un ulteriore stato:
+    - se il Renq viene cestinato dall'autore, resta visibile nel cestino personale dell'autore e può essere ripristinato dall'autore;
+    - se il Renq viene cestinato da un MODERATOR, scompare anche dall'area dell'autore ed è accessibile e gestibile esclusivamente da OWNER, ADMIN e MODERATOR;
+    - un Renq nascosto resta sempre invisibile agli utenti ordinari, autore compreso, ed è accessibile e gestibile esclusivamente dallo staff.
+    Il ripristino dei contenuti cestinati dalla moderazione è gestito dallo staff tramite le RPC di moderazione; le RPC ordinarie dell'autore non possono ripristinarli o eliminarli definitivamente.
