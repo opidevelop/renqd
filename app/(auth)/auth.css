@@ -19,3 +19,9 @@
 .auth-error{border-color:#f0d9d4;background:#fff2ef;color:#9a5146}
 .auth-back{display:inline-block;margin-top:24px;color:#918a80;font-size:10px}
 @media(max-width:480px){.auth-page{padding:18px}.auth-card{padding:27px 22px;border-radius:17px}}
+
+
+.auth-submit:disabled{cursor:wait;opacity:.82}
+.auth-submit-spinner{display:inline-block;vertical-align:middle;margin-right:8px;animation:authSubmitSpin .8s linear infinite}
+@keyframes authSubmitSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.auth-submit-spinner{animation:none}}

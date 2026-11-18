@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signIn, signOut } from "../actions";
 import TurnstileField from "@/components/auth/TurnstileField";
+import AuthSubmitButton from "@/components/auth-submit-button";
 import "./../auth.css";
 
 const messages: Record<string,string> = {
@@ -51,7 +52,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div className="auth-field"><label htmlFor="email">Email</label><input id="email" name="email" type="email" autoComplete="email" required /></div>
         <div className="auth-field"><label htmlFor="password">Password</label><input id="password" name="password" type="password" autoComplete="current-password" required /></div>
         <TurnstileField />
-        <button className="auth-submit" type="submit">Accedi</button>
+        <AuthSubmitButton />
       </form>
       <div className="auth-links"><Link href="/forgot-password">Password dimenticata?</Link><Link href="/register">Crea un account</Link></div>
     </>}

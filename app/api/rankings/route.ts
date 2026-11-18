@@ -32,22 +32,34 @@ export async function POST(request:Request){
   if(rows.length!==orderedIds.length||orderedIds.some(id=>!rowById.has(id)))return jsonError("La lista degli elementi non corrisponde alla classifica.");
   const safeTieMap=tieMap&&typeof tieMap==="object"?tieMap:{};
   const positions=new Map<string,number>();
-  const groups=new Map<string,number>();
   let nextPosition=0;
+  let previousInputGroup:string|null=null;
+  let currentOutputGroup:string|null=null;
+  let currentSegmentIds:string[]=[];
+  const seenInputGroups=new Set<string>();
+  const normalizedTieMap:Record<string,string>={};
+  const flushTieSegment=()=>{if(currentOutputGroup&&currentSegmentIds.length>1)for(const itemId of currentSegmentIds)normalizedTieMap[itemId]=currentOutputGroup;};
   for(const id of orderedIds){
    const group=typeof safeTieMap[id]==="string"&&safeTieMap[id]?safeTieMap[id]:null;
    if(group&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(group))return jsonError("Gruppo di pari merito non valido.");
-   let position:number;
-   if(group&&groups.has(group))position=groups.get(group)!;
-   else{position=++nextPosition;if(group)groups.set(group,position);}
-   positions.set(id,position);
+   if(!group||group!==previousInputGroup){
+    flushTieSegment();
+    nextPosition++;
+    currentOutputGroup=group?(seenInputGroups.has(group)?crypto.randomUUID():group):null;
+    if(group)seenInputGroups.add(group);
+    currentSegmentIds=[];
+   }
+   currentSegmentIds.push(id);
+   positions.set(id,nextPosition);
+   previousInputGroup=group;
   }
+  flushTieSegment();
   const settings=(ranking.settings??{}) as Record<string,unknown>;
   const savedSnapshot=settings.savedSnapshot as {items?:Array<Record<string,unknown>>}|undefined;
   const snapshotItems=savedSnapshot?.items;
   if(!Array.isArray(snapshotItems)||snapshotItems.length!==orderedIds.length)return jsonError("Snapshot della classifica non valido.",500);
   const snapshotById=new Map(snapshotItems.map(item=>[String(item.id),item]));
-  const nextItems=orderedIds.map(id=>{const item=snapshotById.get(id);return item?{...item,rank_position:positions.get(id)??null,tie_group_id:typeof safeTieMap[id]==="string"&&safeTieMap[id]?safeTieMap[id]:null}:null;});
+  const nextItems=orderedIds.map(id=>{const item=snapshotById.get(id);return item?{...item,rank_position:positions.get(id)??null,tie_group_id:normalizedTieMap[id]??null}:null;});
   if(nextItems.some(item=>item===null))return jsonError("Snapshot incompleto: impossibile salvare la modifica.",500);
 
   // Snapshot the previous published state before changing either ranking_items or savedSnapshot.
@@ -56,7 +68,7 @@ export async function POST(request:Request){
 
   const changedIds:string[]=[];
   for(const id of orderedIds){
-   const group=typeof safeTieMap[id]==="string"&&safeTieMap[id]?safeTieMap[id]:null;
+   const group=normalizedTieMap[id]??null;
    const {error:updateError}=await supabase.from("ranking_items").update({rank_position:positions.get(id),tie_group_id:group}).eq("id",id).eq("ranking_id",rankingId);
    if(updateError){
     for(const changedId of changedIds){const previous=rowById.get(changedId)!;await supabase.from("ranking_items").update({rank_position:previous.rank_position,tie_group_id:previous.tie_group_id}).eq("id",changedId).eq("ranking_id",rankingId);}

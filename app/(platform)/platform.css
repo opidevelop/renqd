@@ -938,3 +938,17 @@
 @keyframes renqd-confirm-fade{from{opacity:0}to{opacity:1}}
 @keyframes renqd-confirm-rise{from{opacity:0;transform:translateY(9px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:600px){.renqd-confirm-overlay{align-items:end;padding:12px}.renqd-confirm-dialog{width:100%;padding:22px 20px calc(20px + env(safe-area-inset-bottom));border-radius:22px 22px 16px 16px}.renqd-confirm-actions button{flex:1}}
+
+
+/* Renqd 18 Nov: page transitions, step positioning and contained long lists */
+.platform-route-transition{min-height:1px;animation:renqdRouteEnter .24s cubic-bezier(.2,.7,.2,1) both}
+@keyframes renqdRouteEnter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.builder-experience{scroll-margin-top:88px}
+.review-items-card .review-item-list,.renq-panel .renq-sort-list,.saved-renq-editor .renq-sort-list{max-height:min(64dvh,680px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:4px}
+.builder-submit-progress{display:grid;gap:8px;margin:14px 0 0;padding:12px 15px;border:1px solid var(--line);border-radius:12px;background:var(--surface,#fff)}
+.builder-submit-progress>span{font-size:11px;color:var(--muted);font-weight:650}
+.builder-submit-progress>div{height:5px;overflow:hidden;border-radius:99px;background:#eee8e1}
+.builder-submit-progress i{display:block;width:38%;height:100%;border-radius:inherit;background:var(--brand);animation:renqdProgressSweep 1.25s ease-in-out infinite}
+@keyframes renqdProgressSweep{0%{transform:translateX(-110%)}100%{transform:translateX(290%)}}
+@media(max-width:680px){.builder-experience{scroll-margin-top:70px}.review-items-card .review-item-list,.renq-panel .renq-sort-list,.saved-renq-editor .renq-sort-list{max-height:58dvh}}
+@media(prefers-reduced-motion:reduce){.platform-route-transition{animation:none}.builder-submit-progress i{animation:none;width:100%;opacity:.65}}

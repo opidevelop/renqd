@@ -217,3 +217,18 @@
 
 20. La voce di navigazione che conduce all'area amministrativa si chiama **«Dashboard»** in tutti i menu in cui viene mostrata. L'URL resta `/admin`; le sezioni interne e la gerarchia dei permessi non cambiano.
 21. L'azione **«Elimina definitivamente»** deve essere disponibile sia nell'elenco degli account sia nella scheda del singolo account, ma soltanto a OWNER. La conferma richiede di digitare lo username esatto dell'account da eliminare. Non è possibile eliminare il proprio account né l'ultimo OWNER attivo. La cancellazione deve rimuovere anche i file personali dai bucket Storage e i dati/contenuti collegati; gli audit log da conservare devono essere anonimizzati e deve restare un evento di audit non identificativo della cancellazione.
+
+
+## Decisioni UX e ordinamento approvate il 18 novembre 2026
+
+1. Il pulsante **Accedi** mostra lo stato di caricamento e una rotellina **all'interno del pulsante**, senza overlay a pagina intera.
+2. Nella ricerca musicale di album, la priorità è: **titolo album esatto → artista esatto → risultati parziali**.
+3. Cambiando la modalità di una discografia tra Album e Brani, la ricerca precedente, i risultati e la selezione vengono azzerati; vale anche tornando da Brani ad Album.
+4. La voce **Copertina personalizzata** viene rimossa integralmente dal flusso di creazione. La copertina si gestisce dopo la pubblicazione, nella pagina del Renq.
+5. Durante la creazione/pubblicazione del Renq viene mostrata una barra di avanzamento, non soltanto una rotellina o un testo.
+6. Le transizioni di pagina si applicano a **tutte le pagine interne** della piattaforma, mantenendo stabile l'header globale.
+7. Quando si passa a un nuovo passaggio del builder, la vista scorre automaticamente all'inizio del passaggio, sia su mobile sia su desktop.
+8. Il comando **Elimina Renq** non viene mostrato nella schermata iniziale di una Battle non ancora avviata; resta disponibile negli altri stati previsti.
+9. La numerazione dei pari merito è **progressiva** e globale: ad esempio **1, 2, 2, 3**. Il successivo gruppo occupa la posizione immediatamente successiva, indipendentemente dal numero di elementi nel gruppo precedente. I gruppi ex aequo devono essere contigui nell'ordine finale; gruppi separati non condividono la posizione.
+10. Le liste lunghe devono scorrere **all'interno del contenitore della lista**, mantenendo ferma la pagina circostante.
+

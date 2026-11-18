@@ -386,3 +386,33 @@ Revisione della migrazione di hardening:
 - Deployment Production: da verificare dopo il completamento della CI.
 - Test funzionali reali (modali, focus/keyboard, flusso Battle, cronologia, cestino e Speed Renq): da eseguire.
 - Nessuna migrazione SQL, modifica al database, dato applicativo o servizio esterno prevista da questo intervento.
+
+
+## 13. Rifinitura UX e ordinamento globale — 18 novembre 2026
+
+### Decisioni approvate
+- Spinner interno al pulsante Accedi.
+- Priorità catalogo Album: titolo esatto, artista esatto, risultati parziali.
+- Reset completo della ricerca passando tra Album e Brani.
+- Rimozione del campo Copertina personalizzata dal builder; copertina modificabile dopo la pubblicazione.
+- Barra di avanzamento durante la creazione del Renq.
+- Transizioni su tutte le pagine interne.
+- Scroll automatico all'inizio di ogni nuovo passaggio del builder su mobile e desktop.
+- Nascondere Elimina Renq nella schermata iniziale della Battle non avviata.
+- Pari merito con numerazione progressiva globale (1, 2, 2, 3).
+- Scroll interno delle liste lunghe, senza far scorrere la pagina circostante.
+
+### Implementazione repository
+- `components/auth-submit-button.tsx` e `app/(auth)/login/page.tsx`: stato pending con spinner dentro il pulsante Accedi.
+- `app/api/catalog/music/route.ts`: priorità ai match esatti del titolo album prima di cercare l'artista esatto e i risultati parziali, sia su iTunes sia su MusicBrainz.
+- `components/create-renq-form.tsx`: cambio Album/Brani con reset di query, risultati, selezione e paginazione; rimossa la copertina personalizzata dal builder; scroll automatico ai nuovi passaggi; barra di avanzamento durante la creazione.
+- `components/platform-shell.tsx` e `app/(platform)/platform.css`: transizione breve al cambio di pathname per tutte le pagine interne.
+- `components/renq-experience.tsx`: nascosta l'azione Elimina Renq esclusivamente nella schermata iniziale della Battle non avviata.
+- `components/renq-ranking-ui.tsx` e `app/api/rankings/route.ts`: calcolo progressivo delle posizioni e normalizzazione dei gruppi ex aequo contigui nell'editor pubblicato.
+- `app/(platform)/platform.css`: contenitori delle liste lunghe con scroll interno; `app/(auth)/auth.css`: animazione dello spinner con rispetto di prefers-reduced-motion.
+
+### Verifiche e limiti
+- Modifiche preparate nel repository; non considerarle verificate finché la CI non ha completato TypeScript, ESLint e build.
+- Test funzionali ancora da eseguire: login pending state, priorità album/artista, cambio Album/Brani, creazione con barra di avanzamento, transizioni, scroll step, Battle iniziale, pari merito con gruppi numerosi e liste lunghe su mobile/desktop.
+- Nessuna migrazione SQL, modifica al database o dato applicativo prevista.
+- Nessun deployment Production da considerare completato prima della verifica del deployment Vercel e dei test funzionali.

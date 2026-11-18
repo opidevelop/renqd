@@ -91,6 +91,18 @@ async function resolveArtistImage(name: string): Promise<string | undefined> {
 }
 async function searchItunes(query: string, contentType: string): Promise<MusicEntity[]> {
   const isAlbum = contentType === "Album";
+  const normalizedQuery = normalizeMusicText(query);
+  if (isAlbum) {
+    const exactParams = new URLSearchParams({ term: query, entity: "album", limit: "50", country: "IT" });
+    const exactData = await itunesJson<{ results?: Array<Record<string, unknown>> }>(`${ITUNES}/search?${exactParams}`);
+    const exactAlbums = (exactData.results ?? []).flatMap<MusicEntity>(entry => {
+      if (typeof entry.collectionId !== "number" || typeof entry.collectionName !== "string" || normalizeMusicText(entry.collectionName) !== normalizedQuery) return [];
+      const artistName = typeof entry.artistName === "string" ? entry.artistName : "Artista sconosciuto";
+      const year = typeof entry.releaseDate === "string" ? entry.releaseDate.slice(0, 4) : "";
+      return [{ id: String(entry.collectionId), title: entry.collectionName, subtitle: [artistName, year].filter(Boolean).join(" · "), imageUrl: typeof entry.artworkUrl100 === "string" ? entry.artworkUrl100.replace(/\\d+x\\d+bb\\./, "600x600bb.") : undefined, provider: "itunes" as const, payload: { collectionId: entry.collectionId, artistId: entry.artistId, artistName }, spotifyUrl: spotifySearchUrl(`${artistName} ${entry.collectionName}`) }];
+    });
+    if (exactAlbums.length) return exactAlbums;
+  }
   const countries = ["IT", "US", "GB"];
   const artistResponses = await Promise.allSettled(countries.map(async (country) => {
     const params = new URLSearchParams({ term: query, entity: "musicArtist", limit: "50", country });
@@ -105,7 +117,6 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
     }
   }
   const artists = [...artistsById.values()];
-  const normalizedQuery = normalizeMusicText(query);
   const exactArtists = artists.filter(artist => normalizeMusicText(String(artist.artistName)) === normalizedQuery);
   const selectedArtists = (exactArtists.length ? exactArtists : artists).slice(0, isAlbum ? 5 : 25);
 
@@ -174,10 +185,23 @@ async function searchItunes(query: string, contentType: string): Promise<MusicEn
 
 async function searchMusicBrainz(query: string, contentType: string): Promise<MusicEntity[]> {
   const isAlbum = contentType === "Album";
+  const normalizedQuery = normalizeMusicText(query);
+  if (isAlbum) {
+    const exactReleaseParams = new URLSearchParams({ query, fmt: "json", limit: "50" });
+    const exactReleaseData = await musicBrainzJson<Record<string, unknown>>(`${MUSICBRAINZ}/release-group?${exactReleaseParams}`);
+    const exactReleaseGroups = ((exactReleaseData["release-groups"] ?? []) as Array<Record<string, unknown>>).filter(group => group["primary-type"] === "Album" && typeof group.title === "string" && normalizeMusicText(group.title) === normalizedQuery);
+    if (exactReleaseGroups.length) return exactReleaseGroups.flatMap<MusicEntity>(group => {
+      if (typeof group.id !== "string" || typeof group.title !== "string") return [];
+      const credits = group["artist-credit"] as Array<{ name?: string; artist?: { name?: string } }> | undefined;
+      const artistName = artistCredit(credits);
+      const date = typeof group["first-release-date"] === "string" ? group["first-release-date"] : "";
+      const imageUrl = "https://coverartarchive.org/release-group/" + group.id + "/front-250";
+      return [{ id: group.id, title: group.title, subtitle: [artistName, date].filter(Boolean).join(" · "), imageUrl, provider: "musicbrainz" as const, payload: { releaseGroupId: group.id, imageUrl, albumTitle: group.title, artistName }, spotifyUrl: spotifySearchUrl(`${artistName} ${group.title}`) }];
+    });
+  }
   const params = new URLSearchParams({ query, fmt: "json", limit: "50" });
   const data = await musicBrainzJson<Record<string, unknown>>(`${MUSICBRAINZ}/artist?${params}`);
   const artists = ((data.artists ?? []) as Array<Record<string, unknown>>).sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0));
-  const normalizedQuery = normalizeMusicText(query);
   const exactArtists = artists.filter(artist => typeof artist.name === "string" && normalizeMusicText(artist.name) === normalizedQuery);
   const selectedArtists = (exactArtists.length ? exactArtists : artists).slice(0, isAlbum ? 5 : 25);
 
