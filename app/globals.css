@@ -389,3 +389,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .community-decoration span { font-size: 90px; }
   .site-footer { width: calc(100% - 38px); gap: 12px; flex-wrap: wrap; }
 }
+
+
+/* Route transitions for every route, including authenticated pages outside PlatformShell. */
+.platform-route-transition{min-height:1px;animation:renqdRouteEnter .24s cubic-bezier(.2,.7,.2,1) both}
+@keyframes renqdRouteEnter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.platform-route-transition{animation:none}}
