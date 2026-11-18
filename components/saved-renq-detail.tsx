@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, Heart, MessageCircle, Pencil, Play, Send, Share2, Trophy, Trash2, X } from "lucide-react";
+import { ArrowLeft, Check, Heart, MessageCircle, Pencil, Play, RotateCcw, Send, Share2, Trophy, Trash2, X } from "lucide-react";
 import { RenqCoverPicker } from "@/components/renq-cover-picker";
 import { highQualityImageUrl } from "@/lib/image-quality";
 import { RenqReveal } from "@/components/renq-reveal";
@@ -166,6 +166,19 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     setEditTieMap(next);
   }
 
+  async function repeatBattle() {
+    if(busy||!window.confirm("Avviare una nuova Battle? La classifica attuale resterà nella cronologia e potrai costruirne una nuova da zero."))return;
+    setBusy(true);setError("");setMessage("");
+    try{
+      await post({action:"repeat-battle",rankingId:ranking.id});
+      router.push("/renq/"+(ranking.public_slug??ranking.id));
+      router.refresh();
+    }catch(e){
+      setError(e instanceof Error?e.message:"Non è stato possibile ripetere la Battle.");
+      setBusy(false);
+    }
+  }
+
   async function savePublishedChanges() {
     if(busy)return;
     const cleanTitle=editTitle.trim();
@@ -253,6 +266,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
           <button type="button" onClick={cancelEditing} disabled={busy}><X size={16}/><span>Annulla</span></button>
           <button type="button" onClick={() => void savePublishedChanges()} disabled={busy || !editTitle.trim()}><Check size={16}/><span>{busy ? "Salvataggio…" : "Salva modifiche"}</span></button>
         </> : <button type="button" onClick={startEditing} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>}
+        {!editing && ranking.mode === "BATTLE_RENQ" && <button type="button" onClick={() => void repeatBattle()} disabled={busy}><RotateCcw size={16}/><span>Ripeti Battle</span></button>}
         {ranking.visibility === "REVEAL" && <button type="button" onClick={() => setShowReveal(true)}><Play size={17} /><span>Rivedi reveal</span></button>}
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
