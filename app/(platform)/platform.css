@@ -1035,22 +1035,3 @@
 .renq-reveal-unrated{display:grid;gap:8px;margin-top:18px;padding:14px;border:1px solid #ffffff24;border-radius:14px;background:#ffffff0a}
 .renq-reveal-unrated>span{color:#d2a878;font-size:9px;font-weight:850;letter-spacing:.13em}
 .renq-reveal-unrated>strong{color:#eee2d5;font-size:12px}
-
-
-/* Grade labels: editable count, playful presentation and contained long lists */
-.grade-label-edit-row{grid-template-columns:minmax(110px,1fr) 78px 78px 38px 30px}
-.grade-label-remove{display:grid;place-items:center;width:29px;height:29px;border:1px solid #eee2d6;border-radius:9px;background:#fff;color:#a78b75;cursor:pointer}
-.grade-label-remove:hover{border-color:#e5b28c;background:#fff4e9;color:#b75a0a}
-.grade-label-add{display:inline-flex;align-items:center;justify-content:center;gap:7px;justify-self:start;min-height:36px;margin-top:4px;padding:0 13px;border:1px dashed #dfb78f;border-radius:999px;background:#fff8f0;color:#a9632b;font-size:10px;font-weight:850;cursor:pointer}
-.grade-label-add:hover{background:#fff0df;border-color:#d98b39}
-.grade-label-empty{margin:4px 0;color:#9a8e80;font-size:10px;line-height:1.5}
-.grade-label-edit-row input:not([type=color]){min-width:0}
-.saved-grade-label{display:inline-flex;align-items:center;gap:5px;width:max-content;max-width:100%;margin-top:5px;padding:5px 9px;border:1px solid;border-radius:999px;font-size:9px;line-height:1.1;font-weight:850;letter-spacing:.025em;box-shadow:0 2px 8px rgba(55,39,20,.06)}
-.saved-grade-label::before{content:"✦";font-size:9px;line-height:1}
-.grade-publish-note{margin:20px 0 0;text-align:center;color:#a3988c;font-size:10px;line-height:1.6}
-.catalog-results,.artist-selected-list{max-height:min(45dvh,420px);min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
-.review-items-card .review-item-list,.renq-panel .renq-sort-list,.saved-renq-editor .renq-sort-list,.saved-renq-ranking .saved-renq-list,.grade-live-list,.grade-unrated,.grade-published-unrated{min-height:0;max-height:min(64dvh,680px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;align-content:start}
-.review-items-card .review-item-list{display:flex;flex-direction:column}
-.review-items-card .review-item-list>.review-item{flex:0 0 auto}
-.renq-reveal-grade-score span,.renq-reveal-grade-label{display:inline-flex;align-items:center;padding:6px 11px;border:1px solid currentColor;border-radius:999px;background:rgba(255,255,255,.1);font-size:10px;font-weight:850;letter-spacing:.03em}
-@media(max-width:680px){.grade-label-edit-row{grid-template-columns:minmax(85px,1fr) 65px 65px 34px 27px;gap:5px}.grade-label-edit-row input:not([type=color]){font-size:10px;padding:0 6px}.grade-label-remove{width:27px;height:27px}.review-items-card .review-item-list,.renq-panel .renq-sort-list,.saved-renq-editor .renq-sort-list,.saved-renq-ranking .saved-renq-list,.grade-live-list,.grade-unrated,.grade-published-unrated{max-height:58dvh}}

@@ -5,7 +5,7 @@ import { useConfirmDialog } from "@/components/confirm-dialog";
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, ChevronDown, Heart, MessageCircle, Pencil, Play, RotateCcw, Send, Share2, Trophy, Trash2, X } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, Heart, MessageCircle, Pencil, Play, Plus, RotateCcw, Send, Share2, Trophy, Trash2, X } from "lucide-react";
 import { RenqCoverPicker } from "@/components/renq-cover-picker";
 import { highQualityImageUrl } from "@/lib/image-quality";
 import { RenqReveal } from "@/components/renq-reveal";

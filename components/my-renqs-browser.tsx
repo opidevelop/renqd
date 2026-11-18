@@ -11,7 +11,7 @@ type RenqCard = {
   category: string; coverImage: string | null; coverPosition: { x: number; y: number };
 };
 const categoryLabels: Record<string,string> = { music:"Musica", games:"Videogiochi", film:"Film e serie", books:"Libri", sport:"Sport", food:"Cibo", travel:"Viaggi", custom:"Personalizzato" };
-const modeLabels: Record<string,string> = { RENQ:"Renq classico", BATTLE_RENQ:"Battle Renq", SPEED_RENQ:"Speed Renq", GRADE:"Grade" };
+const modeLabels: Record<string,string> = { RENQ:"Renq classico", BATTLE_RENQ:"Battle Renq", SPEED_RENQ:"Speed Renq" };
 const categoryIcons: Record<string,typeof Music2> = { music:Music2, games:Gamepad2, film:Clapperboard, books:BookOpen, sport:Trophy };
 
 export function MyRenqsBrowser({ initialItems }: { initialItems: RenqCard[] }) {
