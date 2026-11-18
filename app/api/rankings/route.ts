@@ -209,6 +209,31 @@ export async function POST(request:Request){
   if(revisionError){await supabase.from("rankings").update({settings:ranking.settings}).eq("id",rankingId).eq("user_id",user.id);return jsonError(revisionError.message,500);}
   return NextResponse.json({ok:true});
  }
+ if(body.action==="repeat-battle"){
+  const {rankingId}=body as {rankingId:string};
+  const {data:ranking,error:lookupError}=await supabase.from("rankings").select("id,status,mode,settings").eq("id",rankingId).eq("user_id",user.id).is("deleted_at",null).maybeSingle();
+  if(lookupError||!ranking||ranking.status!=="COMPLETED"||ranking.mode!=="BATTLE_RENQ")return jsonError("Battle Renq non trovato o non ripetibile.",404);
+  const {data:rows,error:rowsError}=await supabase.from("ranking_items").select("id,rank_position,tie_group_id").eq("ranking_id",rankingId);
+  if(rowsError||!rows)return jsonError(rowsError?.message??"Impossibile leggere gli elementi.",500);
+  const changed:string[]=[];
+  for(const row of rows){
+   const {error:updateError}=await supabase.from("ranking_items").update({rank_position:null,tie_group_id:null}).eq("id",row.id).eq("ranking_id",rankingId);
+   if(updateError){
+    for(const id of changed){const previous=rows.find(item=>item.id===id)!;await supabase.from("ranking_items").update({rank_position:previous.rank_position,tie_group_id:previous.tie_group_id}).eq("id",id).eq("ranking_id",rankingId);}
+    return jsonError(updateError.message,500);
+   }
+   changed.push(row.id);
+  }
+  const settings={...((ranking.settings??{}) as Record<string,unknown>)};
+  delete settings.savedAt;
+  delete settings.savedSnapshot;
+  const {error:updateRankingError}=await supabase.from("rankings").update({status:"DRAFT",started_at:null,completed_at:null,settings,updated_at:new Date().toISOString()}).eq("id",rankingId).eq("user_id",user.id);
+  if(updateRankingError){
+   for(const row of rows)await supabase.from("ranking_items").update({rank_position:row.rank_position,tie_group_id:row.tie_group_id}).eq("id",row.id).eq("ranking_id",rankingId);
+   return jsonError(updateRankingError.message,500);
+  }
+  return NextResponse.json({ok:true,repeated:true});
+ }
  if(body.action==="edit-saved-renq"){
   const {rankingId}=body as {rankingId:string};
   const {data:ranking}=await supabase.from("rankings").select("id,status,settings").eq("id",rankingId).eq("user_id",user.id).single();
