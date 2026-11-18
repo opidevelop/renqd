@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useMemo,useState} from "react";
+import {useMemo,useState} from "react";
 import {useRouter} from "next/navigation";
 import {Check,ChevronDown,ChevronUp,CircleDot,Trophy} from "lucide-react";
 import {RenqRankHeading} from "@/components/renq-ranking-ui";
@@ -15,7 +15,6 @@ function isValidGradeScore(value:string){return /^(10([,.]0)?|[0-9]([,.][0-9])?)
 
 function GradeScoreInput({value,onCommit,placeholder,ariaLabel}:{value:string;onCommit:(value:string)=>void;placeholder?:string;ariaLabel:string}){
  const [draft,setDraft]=useState(value);
- useEffect(()=>{setDraft(value);},[value]);
  function commit(){
   const clean=draft.trim();
   if(!clean){setDraft("");onCommit("");return;}

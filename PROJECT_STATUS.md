@@ -532,6 +532,6 @@ Revisione della migrazione di hardening:
 - La modifica riguarda l inserimento dei voti nella fase di creazione Grade; ordinamento, pari merito, media e validazione server restano invariati.
 
 ### Verifiche
-- Commit applicativo su `main`: in attesa di CI.
+- Primo run CI #121 / `44391151404`: TypeScript superato, ESLint ha segnalato la sincronizzazione dello stato locale tramite effect; rimossa la sincronizzazione ridondante, perché il componente mantiene e normalizza autonomamente la bozza al commit. Nuovo run CI sul commit correttivo: in attesa.
 - Test manuale autenticato per `10`, `7,5`, `7.5`, `0` e cancellazione del voto: da eseguire dopo il rilascio.
 - Nessuna modifica a database, migrazioni o dati applicativi.
