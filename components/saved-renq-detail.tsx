@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Heart, MessageCircle, Pencil, Play, Send, Share2, Trophy, Trash2 } from "lucide-react";
 import { RenqCoverPicker } from "@/components/renq-cover-picker";
 import { highQualityImageUrl } from "@/lib/image-quality";
 import { RenqReveal } from "@/components/renq-reveal";
+import { RenqSortableList, getRenqRankPositions } from "@/components/renq-ranking-ui";
 
 type SavedItem = {
   id: string;
@@ -20,7 +21,7 @@ type SavedItem = {
 type CommentItem = { id: string; body: string; created_at: string; author_id: string };
 type RevisionItem = { id: string; version: number; change_summary: string | null; created_at: string };
 type Props = {
-  ranking: { id: string; public_slug?: string; title: string; mode: string; settings: Record<string, unknown>; created_at: string; visibility?: string; started_at?: string | null; completed_at?: string | null };
+  ranking: { id: string; public_slug?: string; title: string; mode: string; settings: Record<string, unknown>; created_at: string; visibility?: string; allow_ties: boolean; started_at?: string | null; completed_at?: string | null };
   items: SavedItem[];
   coverImageUrl: string | null;
   coverImagePath: string | null;
@@ -49,6 +50,19 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const [showReveal, setShowReveal] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [currentTitle, setCurrentTitle] = useState(ranking.title);
+  const [displayItems, setDisplayItems] = useState(items);
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(ranking.title);
+  const [editItems, setEditItems] = useState(items);
+  const [editTieMap, setEditTieMap] = useState<Record<string,string>>(() => Object.fromEntries(items.filter(item => item.tie_group_id).map(item => [item.id, item.tie_group_id as string])));
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [draggedIds, setDraggedIds] = useState<string[]>([]);
+  const [dragIndex, setDragIndex] = useState<number|null>(null);
+  const latestEditItemsRef = useRef(items);
+  const dragStartRef = useRef<number|null>(null);
+  const draggedIdsRef = useRef<string[]>([]);
 
   async function post(body: Record<string, unknown>) {
     const response = await fetch("/api/rankings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -84,17 +98,92 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     } finally { setBusy(false); }
   }
 
-  async function editRanking() {
-    if (busy) return;
-    setBusy(true); setError("");
-    try {
-      await post({ action: "edit-saved-renq", rankingId: ranking.id });
-      router.push("/renq/" + (ranking.public_slug ?? ranking.id));
-      router.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Non è stato possibile modificare il Renq.");
-      setBusy(false);
+  function startEditing() {
+    setEditTitle(currentTitle);
+    setEditItems(displayItems);
+    latestEditItemsRef.current = displayItems;
+    setEditTieMap(Object.fromEntries(displayItems.filter(item => item.tie_group_id).map(item => [item.id, item.tie_group_id as string])));
+    setSelectedIds([]);
+    setEditing(true);
+    setError("");
+    setMessage("");
+  }
+
+  function cancelEditing() {
+    setEditing(false);
+    setSelectedIds([]);
+    setDraggedIds([]);
+    setDragIndex(null);
+    dragStartRef.current = null;
+    draggedIdsRef.current = [];
+  }
+
+  function moveEdit(index:number,direction:-1|1) {
+    const next=[...latestEditItemsRef.current];
+    const target=index+direction;
+    if(target<0||target>=next.length)return;
+    [next[index],next[target]]=[next[target],next[index]];
+    latestEditItemsRef.current=next;
+    setEditItems(next);
+  }
+
+  function shiftSelectedEdit(targetId:string) {
+    const current=latestEditItemsRef.current;
+    const movingIds=draggedIdsRef.current;
+    if(!movingIds.length||movingIds.includes(targetId))return;
+    const movingSet=new Set(movingIds);
+    const moving=current.filter(item=>movingSet.has(item.id));
+    const rest=current.filter(item=>!movingSet.has(item.id));
+    const target=rest.findIndex(item=>item.id===targetId);
+    if(target<0)return;
+    const next=[...rest.slice(0,target),...moving,...rest.slice(target)];
+    if(next.every((item,index)=>item.id===current[index]?.id))return;
+    latestEditItemsRef.current=next;
+    setEditItems(next);
+    setDragIndex(target);
+  }
+
+  function finishEditDrag() {
+    dragStartRef.current=null;
+    draggedIdsRef.current=[];
+    setDraggedIds([]);
+    setDragIndex(null);
+  }
+
+  function toggleEditTie(index:number) {
+    if(!ranking.allow_ties||index===0)return;
+    const current=editItems[index],previous=editItems[index-1],next={...editTieMap};
+    const currentGroup=next[current.id],previousGroup=next[previous.id];
+    if(currentGroup&&currentGroup===previousGroup){
+      delete next[current.id];
+      const remaining=Object.entries(next).filter(([,group])=>group===currentGroup);
+      if(remaining.length===1)delete next[remaining[0][0]];
+    }else{
+      const group=currentGroup??previousGroup??crypto.randomUUID();
+      for(const [id,value] of Object.entries(next))if(value===currentGroup||value===previousGroup)next[id]=group;
+      next[current.id]=group;next[previous.id]=group;
     }
+    setEditTieMap(next);
+  }
+
+  async function savePublishedChanges() {
+    if(busy)return;
+    const cleanTitle=editTitle.trim();
+    if(!cleanTitle||cleanTitle.length>80){setError("Il titolo deve contenere da 1 a 80 caratteri.");return;}
+    setBusy(true);setError("");setMessage("");
+    try{
+      const result=await post({action:"update-published-renq",rankingId:ranking.id,title:cleanTitle,orderedIds:editItems.map(item=>item.id),tieMap:editTieMap});
+      const positions=getRenqRankPositions(editItems,editTieMap);
+      const nextItems=editItems.map(item=>({...item,rank_position:positions[item.id]??null,tie_group_id:editTieMap[item.id]??null}));
+      setDisplayItems(nextItems);
+      setCurrentTitle(result.title??cleanTitle);
+      setEditing(false);
+      setSelectedIds([]);
+      setMessage("Modifiche salvate nella cronologia.");
+      router.refresh();
+    }catch(e){
+      setError(e instanceof Error?e.message:"Non è stato possibile salvare le modifiche.");
+    }finally{setBusy(false);}
   }
 
   async function deleteRanking() {
@@ -113,7 +202,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   async function shareRanking() {
     const url = window.location.href;
     try {
-      if (navigator.share) await navigator.share({ title: ranking.title, text: "La mia classifica su Renqd", url });
+      if (navigator.share) await navigator.share({ title: currentTitle, text: "La mia classifica su Renqd", url });
       else { await navigator.clipboard.writeText(url); setError("Link copiato negli appunti."); }
     } catch (e) {
       if (e instanceof Error && e.name !== "AbortError") setError("Non è stato possibile condividere il Renq.");
@@ -137,10 +226,10 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const settings = ranking.settings ?? {};
   const category = String(settings.category ?? "custom").replaceAll("_", " ");
   const contentType = String(settings.contentType ?? "Lista personalizzata");
-  const rawCover = currentCoverUrl || defaultCoverImageUrl || items.find(item => item.image_url)?.image_url || null;
+  const rawCover = currentCoverUrl || defaultCoverImageUrl || displayItems.find(item => item.image_url)?.image_url || null;
   const cover = highQualityImageUrl(rawCover);
 
-  if (showReveal) return <div className="saved-renq-page saved-renq-reveal-page"><button className="saved-renq-back" type="button" onClick={() => setShowReveal(false)}><ArrowLeft size={17}/> Torna alla classifica</button><RenqReveal title={ranking.title} mode={ranking.mode} category={String(settings.category ?? "custom")} contentType={contentType} coverImageUrl={rawCover} coverPosition={currentCoverPosition} allowTies={items.some(item => Boolean(item.tie_group_id))} items={items.map(item => ({id:item.id,title:item.title,image_url:item.image_url ?? null,description:item.description ?? null,rank_position:item.rank_position ?? null,tie_group_id:item.tie_group_id ?? null,preview_url:item.metadata?.previewUrl ?? null}))} actions={<button type="button" className="renq-save-button" onClick={() => setShowReveal(false)}>Torna alla classifica</button>} /></div>;
+  if (showReveal) return <div className="saved-renq-page saved-renq-reveal-page"><button className="saved-renq-back" type="button" onClick={() => setShowReveal(false)}><ArrowLeft size={17}/> Torna alla classifica</button><RenqReveal title={currentTitle} mode={ranking.mode} category={String(settings.category ?? "custom")} contentType={contentType} coverImageUrl={rawCover} coverPosition={currentCoverPosition} allowTies={displayItems.some(item => Boolean(item.tie_group_id))} items={displayItems.map(item => ({id:item.id,title:item.title,image_url:item.image_url ?? null,description:item.description ?? null,rank_position:item.rank_position ?? null,tie_group_id:item.tie_group_id ?? null,preview_url:item.metadata?.previewUrl ?? null}))} actions={<button type="button" className="renq-save-button" onClick={() => setShowReveal(false)}>Torna alla classifica</button>} /></div>;
 
   return (
     <main className="saved-renq-page">
@@ -154,11 +243,11 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         </div>
         <div className="saved-renq-hero-copy">
           <span>{modeLabels[ranking.mode] ?? "Renq"} · {category} · {contentType}</span>
-          <h1>{ranking.title}</h1>
-          <p>{items.length} elementi{ranking.mode === "SPEED_RENQ" && ranking.started_at && ranking.completed_at ? " · Tempo impiegato " + Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/60000) + "m " + String(Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/1000)%60).padStart(2,"0") + "s" : ""} · Salvato il {new Date(String(settings.savedAt ?? ranking.created_at)).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}</p>
+          <h1>{currentTitle}</h1>
+          <p>{displayItems.length} elementi{ranking.mode === "SPEED_RENQ" && ranking.started_at && ranking.completed_at ? " · Tempo impiegato " + Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/60000) + "m " + String(Math.floor(Math.max(0,new Date(ranking.completed_at).getTime()-new Date(ranking.started_at).getTime())/1000)%60).padStart(2,"0") + "s" : ""} · Salvato il {new Date(String(settings.savedAt ?? ranking.created_at)).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}</p>
         </div>
         <div className="saved-renq-toolbar">
-        <button type="button" onClick={() => void editRanking()} disabled={busy}><Pencil size={17} /><span>Modifica</span></button>
+        <button type="button" onClick={startEditing} disabled={busy || editing}><Pencil size={17} /><span>Modifica</span></button>
         {ranking.visibility === "REVEAL" && <button type="button" onClick={() => setShowReveal(true)}><Play size={17} /><span>Rivedi reveal</span></button>}
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
@@ -170,7 +259,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
       <section className="saved-renq-ranking">
         <div className="saved-renq-section-heading"><div><span>IL RISULTATO</span><h2>La tua classifica</h2></div><Trophy size={21} /></div>
         <div className="saved-renq-list">
-          {items.map((item, index) => {
+          {displayItems.map((item, index) => {
             const position = item.rank_position ?? index + 1;
             const medal = position <= 3 ? ["🥇", "🥈", "🥉"][position - 1] : null;
             return <article className={"saved-renq-row" + (position <= 3 ? " is-top-" + position : "")} key={item.id}>
