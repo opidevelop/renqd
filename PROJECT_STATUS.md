@@ -40,9 +40,21 @@ Sono stati analizzati repository, struttura Next.js, autenticazione, Supabase, s
 
 ### Fase 2 — Amministrazione
 
-**Stato:** implementazione sostanziale presente; collaudo operativo da completare.
+**Stato:** audit tecnico eseguito; decisioni funzionali aggiornate il 18 novembre 2026; implementazione delle correzioni ancora da completare.
 
-Risultano implementati nel codice/database:
+Decisioni approvate:
+- gerarchia OWNER > ADMIN > MODERATOR > USER; ADMIN non può gestire account ADMIN;
+- MODERATOR può moderare esclusivamente Renq pubblicati, nascondendoli o spostandoli nel cestino; nessuna gestione account/profili;
+- cancellazione account esclusiva OWNER, completa di tutti i Renq e dei dati collegati; audit conservabile solo anonimizzato; protezione dell'ultimo OWNER attivo.
+
+Rilievi di codice da correggere:
+- admin_manage_user consente attualmente ad ADMIN di sospendere/riattivare altri ADMIN: controllo da restringere anche nella RPC/database, non solo nel frontend;
+- manca il flusso completo di moderazione Renq per MODERATOR;
+- manca una procedura server-side di cancellazione account completa, transazionale e protetta dall'eliminazione dell'ultimo OWNER.
+
+Nessuna delle tre correzioni è ancora implementata né testata. La cancellazione completa richiede prima una verifica di tutte le FK, dei file Storage e delle dipendenze Auth; non eseguire cancellazioni reali durante i test.
+
+Risultano già presenti nel codice/database:
 - dashboard amministrativa;
 - elenco utenti con ricerca e filtri;
 - gestione degli utenti in attesa;
@@ -55,7 +67,7 @@ Risultano implementati nel codice/database:
 
 Da verificare:
 - invio e consegna reale delle email;
-- configurazione effettiva di `RESEND_API_KEY` e `RENQD_EMAIL_FROM` negli ambienti Vercel;
+- configurazione effettiva di RESEND_API_KEY e RENQD_EMAIL_FROM negli ambienti Vercel;
 - template Supabase effettivamente attivati e testati;
 - permessi reali per OWNER, ADMIN, utenti approvati, non approvati e sospesi;
 - comportamento dell'audit log e dei controlli server-side in test autenticati.
