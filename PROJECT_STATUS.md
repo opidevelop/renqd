@@ -7,7 +7,7 @@
 > **Aggiornato:** 18 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `54ba0ccbcde929ad7d2ceea32219dc28c1ec4d8e`
+> **Ultimo commit applicativo analizzato su main:** `e29b0bf7fccdc2738eaa86a1830e98f2664810dc`
 
 ## 1. Sintesi esecutiva
 
@@ -419,3 +419,44 @@ Revisione della migrazione di hardening:
 - Audit dati preesistenti: 51 Renq con risultati e 687 elementi classificati; **zero** posizioni non coerenti con la numerazione progressiva. Nessun dato applicativo è stato modificato dalla migrazione.
 - Advisor post-migrazione: nessun nuovo rilievo introdotto; restano i rilievi già noti (12 tabelle RLS senza policy, 26 funzioni SECURITY DEFINER eseguibili da authenticated, 27 FK senza indice, oltre agli altri warning già descritti nella sezione 6).
 - Test funzionali ancora da eseguire: login pending state, priorità album/artista sui cataloghi reali, cambio Album/Brani, creazione con barra di avanzamento, transizioni, scroll step, Battle iniziale, pari merito con gruppi numerosi e liste lunghe su mobile/desktop. CI e deployment non sostituiscono questi test.
+
+
+## 14. Nuova modalità Grade — 18 novembre 2026
+
+### Decisioni e comportamento
+- Grade è la quarta modalità del builder; supporta voti da 0 a 10 con un decimale.
+- La classifica usa il voto decrescente e assegna la stessa posizione ai voti uguali; l'ordine manuale è limitato al gruppo ex aequo.
+- Le etichette possono dipendere dalla posizione o dall'intervallo di voto, sono modificabili e non devono coprire necessariamente tutti i valori.
+- Il punteggio è visibile accanto alla posizione; la media è accanto al titolo e considera soltanto i voti presenti.
+- Gli elementi non valutati sono separati e non ricevono posizione/etichetta. La pubblicazione parziale è consentita se almeno un elemento è valutato; gli elementi senza voto restano nella sezione «Da valutare» anche dopo la pubblicazione.
+- La pagina pubblicata consente di modificare voti, ordine interno ai pari merito e configurazione etichette; ogni modifica crea una revisione.
+- Reveal include punteggi, etichette e una sezione separata per gli elementi non valutati.
+
+### Database Supabase
+- Progetto live: `dgbogctuqtxzckigccbf`.
+- Migrazioni Grade applicate:
+  - `20261118171627_renqd_grade_mode`: aggiunge `ranking_items.score numeric(3,1)`, `tie_order`, estende il vincolo modalità e aggiorna la RPC di creazione per accettare GRADE;
+  - `20261118171904_renqd_grade_score_validation`, `20261118171915_renqd_grade_decimal_regex_fix`, `20261118171924_renqd_grade_decimal_regex_corrected`: correzione progressiva del validatore decimale; la versione finale usa un pattern che accetta un decimale e rifiuta più di una cifra decimale;
+  - `20261118172157_renqd_grade_rpc_permissions`: limita le nuove RPC di Grade al ruolo authenticated, mantenendo i controlli di identità, approvazione e ownership;
+  - `20261118172359_renqd_grade_partial_publication`: consente di completare e modificare un Grade con un sottoinsieme di voti; gli elementi non valutati restano senza posizione e non entrano nella media.
+- Le RPC `renqd_complete_grade` e `renqd_update_grade_published` calcolano posizioni, pari merito, media e snapshot in modo transazionale.
+- La migrazione è additiva: non modifica i dati dei ranking preesistenti.
+
+### Repository
+- `components/create-renq-form.tsx`: quarta card Grade e configurazione etichette per posizione/voto.
+- `app/api/rankings/route.ts`: creazione GRADE, completamento, salvataggio snapshot e aggiornamento pubblicato.
+- `components/grade-experience.tsx`: inserimento voti, progressione, ordinamento live, gestione manuale dei pari merito e sezione elementi da valutare.
+- `app/(platform)/renq/[id]/page.tsx`: caricamento score e tie order e routing alla nuova esperienza.
+- `components/saved-renq-detail.tsx`: media accanto al titolo, punteggi/etichette, sezione separata non valutati e modifica del Grade pubblicato.
+- `components/renq-reveal.tsx`: punteggi/etichette e sezione non valutati nel Reveal.
+- `app/(platform)/platform.css`: stili Grade responsive.
+- Migrazioni versionate in `supabase/migrations`; il repository contiene 40 file SQL di migrazione al momento di questo aggiornamento.
+
+### Verifiche
+- Verificato sul database live: il vincolo `rankings_mode_check` accetta GRADE; `score` è `numeric(3,1)`; `tie_order` è integer; entrambe le RPC Grade esistono.
+- Verificato il validatore: `7.3` è accettato e `7.34` è rifiutato.
+- Test SQL transazionale con rollback: creazione di un Grade di prova con 4 elementi, 3 valutati e 1 non valutato; verificati pari merito, posizioni progressive, media 8,8 calcolata sui 3 voti, salvataggio snapshot e modifica pubblicata a 2 valutati/2 non valutati con media 9,0. Tutte le scritture del test sono state annullate; verifica successiva: zero ranking/elementi di test persistenti.
+- GitHub Actions: i run di qualità sui commit fino a `42a37b4100c41c9fc1507df50ecdb99acf31533c` risultano success; il run sul successivo file di migrazione `e29b0bf7fccdc2738eaa86a1830e98f2664810dc` era ancora in corso al momento della verifica.
+- Vercel Production: l'ultimo deployment READY osservato è sul commit `54f5d9109477eddf8650fdec092abb9dbbdf3cc5`; non comprende ancora tutte le modifiche Grade successive. Non considerare il rilascio finale completato finché un deployment del commit finale non risulta READY.
+- Test funzionali dal browser autenticato su mobile/desktop ancora da eseguire. Non sono stati creati dati reali di Grade.
+

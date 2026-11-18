@@ -232,3 +232,17 @@
 9. La numerazione dei pari merito è **progressiva** e globale: ad esempio **1, 2, 2, 3**. Il successivo gruppo occupa la posizione immediatamente successiva, indipendentemente dal numero di elementi nel gruppo precedente. I gruppi ex aequo devono essere contigui nell'ordine finale; gruppi separati non condividono la posizione.
 10. Le liste lunghe devono scorrere **all'interno del contenitore della lista**, mantenendo ferma la pagina circostante.
 
+
+
+## Decisioni approvate — modalità Grade (18 novembre 2026)
+
+1. **Grade è la quarta modalità** di Renqd, distinta da Renq, Battle Renq e Speed Renq. L'architettura delle modalità deve poter accogliere altre modalità future senza alterare i flussi esistenti.
+2. Il voto è compreso tra **0 e 10**, inclusi, con al massimo **un decimale**. Il valore 0 è un voto valido e distinto dall'assenza di voto.
+3. Le etichette supportano due criteri selezionabili: **posizione in classifica** oppure **intervallo di voto**. La copertura degli intervalli è facoltativa; gli elementi possono non avere etichetta.
+4. La classifica è ordinata per voto decrescente. I voti uguali condividono la stessa posizione secondo la numerazione progressiva globale già adottata da Renqd.
+5. L'ordine manuale è consentito esclusivamente all'interno dello stesso gruppo di pari merito; non modifica voto o posizione.
+6. Il voto è sempre visibile accanto alla posizione. Le etichette si aggiornano dinamicamente quando cambiano voto, posizione o configurazione.
+7. La media è mostrata in evidenza accanto al titolo nella pagina pubblicata, con una cifra decimale. Si calcola soltanto sugli elementi valutati.
+8. Gli elementi senza voto restano in una sezione separata, senza posizione e senza etichetta. **È consentito pubblicare Grade anche se alcuni elementi non sono ancora valutati**; devono essere presenti almeno un elemento valutato e una classifica effettiva. Gli elementi non valutati restano separati anche dopo la pubblicazione e non entrano nella media.
+9. La pagina pubblicata resta l'unico editor: è possibile modificare voti, ordine interno ai pari merito e configurazione delle etichette. Le modifiche aggiornano classifica, media e snapshot e generano una revisione.
+10. L'introduzione di Grade non deve modificare il comportamento di Renq, Battle Renq o Speed Renq.
