@@ -208,8 +208,6 @@ export async function POST(request:Request){
   if(lookupError||!ranking||ranking.status!=="COMPLETED"||ranking.mode!=="BATTLE_RENQ")return jsonError("Battle Renq non trovato o non ripetibile.",404);
   const {data:rows,error:rowsError}=await supabase.from("ranking_items").select("id,rank_position,tie_group_id").eq("ranking_id",rankingId);
   if(rowsError||!rows)return jsonError(rowsError?.message??"Impossibile leggere gli elementi.",500);
-  const {error:revisionError}=await supabase.rpc("renqd_record_revision",{p_ranking_id:rankingId,p_change_summary:"Avvio di una nuova Battle"});
-  if(revisionError)return jsonError(revisionError.message,500);
   const changed:string[]=[];
   for(const row of rows){
    const {error:updateError}=await supabase.from("ranking_items").update({rank_position:null,tie_group_id:null}).eq("id",row.id).eq("ranking_id",rankingId);
