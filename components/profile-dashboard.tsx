@@ -5,6 +5,19 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowUpRight, BadgeCheck, Camera, FolderPlus, Globe2, Heart, ImagePlus, LockKeyhole, Plus, Save, Share2, Sparkles, Trash2, Trophy, Users, Pencil, Search, LoaderCircle, X } from "lucide-react";
 
+type MediaCrop = { x:number; y:number; zoom:number };
+type ProfileMediaSettings = { avatar:MediaCrop; banner:MediaCrop };
+const defaultCrop:MediaCrop={x:50,y:50,zoom:100};
+function normalizeMediaSettings(value:unknown):ProfileMediaSettings{
+  const raw=value&&typeof value==="object"?value as Record<string,unknown>:{};
+  const normalize=(candidate:unknown):MediaCrop=>{
+    const item=candidate&&typeof candidate==="object"?candidate as Record<string,unknown>:{};
+    const x=Number(item.x),y=Number(item.y),zoom=Number(item.zoom);
+    return {x:Number.isFinite(x)?Math.max(0,Math.min(100,x)):50,y:Number.isFinite(y)?Math.max(0,Math.min(100,y)):50,zoom:Number.isFinite(zoom)?Math.max(100,Math.min(200,zoom)):100};
+  };
+  return {avatar:normalize(raw.avatar),banner:normalize(raw.banner)};
+}
+
 function isHttpsUrl(value: string) {
   try {
     const parsed = new URL(value);
@@ -17,7 +30,7 @@ function isHttpsUrl(value: string) {
 type PublicProfile = {
   user_id: string; username: string; display_name: string; bio: string;
   avatar_url: string | null; banner_url: string | null; avatar_display_url?: string | null; banner_display_url?: string | null; website_url: string | null;
-  location: string | null; is_private: boolean;
+  location: string | null; is_private: boolean; media_settings?: unknown;
 };
 type Collection = {
   id: string; title: string; slug: string; description: string; banner_url: string | null; banner_display_url?: string | null;
@@ -93,6 +106,13 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     return () => { window.clearTimeout(timeout); controller.abort(); };
   }, [collectionSearchTarget, collectionSearchQuery]);
 
+  function updateMediaCrop(target:"avatar"|"banner",key:keyof MediaCrop,value:number){
+    setProfile(current=>{const media=normalizeMediaSettings(current.media_settings);return {...current,media_settings:{...media,[target]:{...media[target],[key]:value}}};});
+  }
+  function resetMediaCrop(target:"avatar"|"banner"){
+    setProfile(current=>{const media=normalizeMediaSettings(current.media_settings);return {...current,media_settings:{...media,[target]:{...defaultCrop}}};});
+  }
+
   function toggleSearchSelection(id: string, target: string) {
     if (target === "new") {
       setSelectedRenqIds(current => current.includes(id) ? current.filter(value => value !== id) : [...current, id]);
@@ -158,7 +178,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Sessione scaduta. Accedi di nuovo.");
-      const next = { ...profile, display_name: displayName.trim().slice(0, 60), bio: bio.trim().slice(0, 280), website_url: websiteUrl.trim() || null, location: location.trim().slice(0, 80) || null, updated_at: new Date().toISOString() };
+      const next = { ...profile, media_settings: normalizeMediaSettings(profile.media_settings), display_name: displayName.trim().slice(0, 60), bio: bio.trim().slice(0, 280), website_url: websiteUrl.trim() || null, location: location.trim().slice(0, 80) || null, updated_at: new Date().toISOString() };
       if (next.website_url && !isHttpsUrl(next.website_url)) throw new Error("Il sito web deve essere un URL HTTPS valido.");
       if (avatarUrlInput.trim() && !isHttpsUrl(avatarUrlInput.trim())) throw new Error("L'avatar deve usare un URL HTTPS valido.");
       if (bannerUrlInput.trim() && !isHttpsUrl(bannerUrlInput.trim())) throw new Error("Il banner del profilo deve usare un URL HTTPS valido.");
@@ -357,15 +377,17 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     return (typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null) ?? snapshot?.items?.find(item => item.image_url)?.image_url ?? null;
   }
 
+  const mediaSettings=normalizeMediaSettings(profile.media_settings);
+
   return <div className="profile-dashboard">
-    <section className="profile-cover" style={profile.banner_display_url ? { backgroundImage: "linear-gradient(90deg,rgba(18,14,11,.78),rgba(18,14,11,.16)),url(" + profile.banner_display_url + ")" } : undefined}>
+    <section className="profile-cover" style={profile.banner_display_url ? { backgroundImage: "linear-gradient(90deg,rgba(18,14,11,.78),rgba(18,14,11,.16)),url(" + profile.banner_display_url + ")", backgroundPosition: mediaSettings.banner.x + "% " + mediaSettings.banner.y + "%", backgroundSize: mediaSettings.banner.zoom === 100 ? "cover" : mediaSettings.banner.zoom + "% auto" } : undefined}>
       <div className="profile-cover-copy"><span>IL TUO PROFILO SU RENQD</span><h1>{profile.display_name || profile.username}</h1><p>@{profile.username}</p></div>
       <button type="button" className="profile-share-button" onClick={() => void shareProfile()}><Share2 size={16}/> Condividi</button>
     </section>
 
     <section className="profile-overview">
       <div className="profile-avatar-wrap">
-        {profile.avatar_display_url ? <img src={profile.avatar_display_url} alt="Avatar profilo"/> : <span>{(profile.display_name || profile.username).slice(0, 1).toUpperCase()}</span>}
+        {profile.avatar_display_url ? <img src={profile.avatar_display_url} alt="Avatar profilo" style={{objectPosition:mediaSettings.avatar.x+"% "+mediaSettings.avatar.y+"%",transform:"scale("+mediaSettings.avatar.zoom/100+")"}}/> : <span>{(profile.display_name || profile.username).slice(0, 1).toUpperCase()}</span>}
       </div>
       <div className="profile-overview-copy"><h2>{profile.display_name || profile.username}</h2><p>@{profile.username}</p>{profile.bio && <div className="profile-bio">{profile.bio}</div>}</div>
       <div className="profile-overview-actions"><div className="profile-privacy-pill">{profile.is_private ? <><LockKeyhole size={14}/> Privato</> : <><Globe2 size={14}/> Pubblico</>}</div><button type="button" className="profile-edit-trigger" onClick={() => setProfileEditorOpen(value => !value)} aria-expanded={profileEditorOpen}><Pencil size={14}/> Modifica profilo</button></div>
@@ -384,12 +406,26 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     {profileEditorOpen && <section id="profile-editor-panel" className="profile-editor-panel">
       <div className="profile-section-heading"><div><span>PERSONALIZZAZIONE</span><h2>Il tuo profilo</h2></div><Sparkles size={20}/></div>
       <div className="profile-image-editors">
-        <label className="profile-image-upload">{profile.avatar_display_url ? <img src={profile.avatar_display_url} alt=""/> : <Camera size={20}/>}<span>Avatar</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={event => void updateProfileImage(event.target.files?.[0] ?? null, "avatar_url")}/></label>
+        <label className="profile-image-upload">{profile.avatar_display_url ? <img src={profile.avatar_display_url} alt="" style={{objectPosition:mediaSettings.avatar.x+"% "+mediaSettings.avatar.y+"%",transform:"scale("+mediaSettings.avatar.zoom/100+")"}}/> : <Camera size={20}/>}<span>Avatar</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={event => void updateProfileImage(event.target.files?.[0] ?? null, "avatar_url")}/></label>
         <label className="profile-image-upload profile-banner-upload"><ImagePlus size={20}/><span>Cambia banner</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={event => void updateProfileImage(event.target.files?.[0] ?? null, "banner_url")}/></label>
       </div>
       <div className="profile-edit-grid profile-url-fields">
         <label>URL HTTPS avatar<input type="url" value={avatarUrlInput} onChange={event => { setAvatarUrlInput(event.target.value); updateProfileImageUrl("avatar_url", event.target.value); }} placeholder="https://…"/></label>
         <label>URL HTTPS banner<input type="url" value={bannerUrlInput} onChange={event => { setBannerUrlInput(event.target.value); updateProfileImageUrl("banner_url", event.target.value); }} placeholder="https://…"/></label>
+      </div>
+      <div className="profile-media-crop-grid">
+        <section><strong>Posizionamento foto profilo</strong>
+          <label>Orizzontale <input type="range" min="0" max="100" value={mediaSettings.avatar.x} onChange={event=>updateMediaCrop("avatar","x",Number(event.target.value))}/></label>
+          <label>Verticale <input type="range" min="0" max="100" value={mediaSettings.avatar.y} onChange={event=>updateMediaCrop("avatar","y",Number(event.target.value))}/></label>
+          <label>Zoom <input type="range" min="100" max="200" step="1" value={mediaSettings.avatar.zoom} onChange={event=>updateMediaCrop("avatar","zoom",Number(event.target.value))}/><small>{mediaSettings.avatar.zoom}%</small></label>
+          <button type="button" onClick={()=>resetMediaCrop("avatar")}>Ripristina centratura</button>
+        </section>
+        <section><strong>Posizionamento copertina profilo</strong>
+          <label>Orizzontale <input type="range" min="0" max="100" value={mediaSettings.banner.x} onChange={event=>updateMediaCrop("banner","x",Number(event.target.value))}/></label>
+          <label>Verticale <input type="range" min="0" max="100" value={mediaSettings.banner.y} onChange={event=>updateMediaCrop("banner","y",Number(event.target.value))}/></label>
+          <label>Zoom <input type="range" min="100" max="200" step="1" value={mediaSettings.banner.zoom} onChange={event=>updateMediaCrop("banner","zoom",Number(event.target.value))}/><small>{mediaSettings.banner.zoom}%</small></label>
+          <button type="button" onClick={()=>resetMediaCrop("banner")}>Ripristina centratura</button>
+        </section>
       </div>
       <div className="profile-edit-grid">
         <label>Nome visualizzato<input value={displayName} maxLength={60} onChange={event => setDisplayName(event.target.value)} placeholder="Come vuoi apparire"/></label>
