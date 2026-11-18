@@ -19,8 +19,13 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   if (!profile || (profile.is_private && !isOwner)) notFound();
   const { data: links } = await supabase.from("profile_collection_items").select("ranking_id,position").eq("collection_id", collection.id).order("position");
   const ids = (links ?? []).map(item => item.ranking_id);
-  const { data: rankings } = ids.length ? await supabase.from("rankings").select("id,title,public_slug,mode,settings").in("id", ids).is("deleted_at",null) : { data: [] };
-  const ordered = (links ?? []).map(link => (rankings ?? []).find(ranking => ranking.id === link.ranking_id)).filter(Boolean);
+  const { data: rankings } = ids.length ? await supabase.from("rankings").select("id,title,public_slug,mode,settings,status,visibility").in("id", ids).is("deleted_at",null) : { data: [] };
+  const visibleRankings=(rankings??[]).filter(ranking=>{
+    if(isOwner)return true;
+    const settings=(ranking.settings as Record<string,unknown>|null)??{};
+    return ranking.status==="COMPLETED"&&ranking.visibility==="LIVE"&&settings.access!=="private"&&Boolean(settings.savedAt);
+  });
+  const ordered = (links ?? []).map(link => visibleRankings.find(ranking => ranking.id === link.ranking_id)).filter(Boolean);
   const firstSettings = ordered[0]?.settings as Record<string, unknown> | undefined;
   const firstSnapshot = firstSettings?.savedSnapshot as { items?: { image_url?: string | null }[] } | undefined;
   const collectionCover = collectionBannerUrl || (typeof firstSettings?.coverImageUrl === "string" ? firstSettings.coverImageUrl : null) || firstSnapshot?.items?.find(item => item.image_url)?.image_url || null;
