@@ -72,6 +72,36 @@ async function getRankingIds(supabaseAdmin: any, userId: string): Promise<string
   return ids;
 }
 
+async function detachOwnedCustomItems(supabaseAdmin: any, userId: string) {
+  const ids: string[] = [];
+  let offset = 0;
+
+  while (true) {
+    const { data, error } = await supabaseAdmin
+      .from("custom_items")
+      .select("id")
+      .eq("owner_id", userId)
+      .range(offset, offset + 999);
+    if (error) throw new Error("Impossibile verificare gli elementi personalizzati dell'account.");
+
+    const rows = data ?? [];
+    ids.push(...rows.map((row: { id: string }) => row.id));
+    if (rows.length < 1000) break;
+    offset += rows.length;
+  }
+
+  // ranking_items keeps title_snapshot, so detach references before the owner's custom_items cascade.
+  // This avoids the RESTRICT foreign key blocking deletion when another user's Renq reuses the item.
+  for (let index = 0; index < ids.length; index += 500) {
+    const batch = ids.slice(index, index + 500);
+    const { error } = await supabaseAdmin
+      .from("ranking_items")
+      .update({ custom_item_id: null })
+      .in("custom_item_id", batch);
+    if (error) throw new Error("Non è stato possibile preservare gli elementi riutilizzati da altri Renq.");
+  }
+}
+
 async function anonymizeUserAuditData(supabaseAdmin: any, userId: string) {
   const operations = [
     supabaseAdmin.from("role_audit_logs")
@@ -165,6 +195,7 @@ const handler = withSupabase({ auth: "user" }, async (req, ctx) => {
 
       // Storage objects are removed through the Storage API, never by deleting storage.objects rows.
       await removeUserStorageObjects(supabaseAdmin, targetUserId);
+      await detachOwnedCustomItems(supabaseAdmin, targetUserId);
 
       // Remove reports whose target is one of the deleted user's Renq.
       for (let index = 0; index < rankingIds.length; index += 500) {
