@@ -7,7 +7,7 @@
 > **Aggiornato:** 18 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `e29b0bf7fccdc2738eaa86a1830e98f2664810dc`
+> **Ultimo commit applicativo analizzato su main:** `d11378869280d25c27357d41a0d4005bddcdc9fe`
 
 ## 1. Sintesi esecutiva
 
@@ -460,3 +460,12 @@ Revisione della migrazione di hardening:
 - Vercel Production: l'ultimo deployment READY osservato è sul commit `54f5d9109477eddf8650fdec092abb9dbbdf3cc5`; non comprende ancora tutte le modifiche Grade successive. Non considerare il rilascio finale completato finché un deployment del commit finale non risulta READY.
 - Test funzionali dal browser autenticato su mobile/desktop ancora da eseguire. Non sono stati creati dati reali di Grade.
 
+
+
+### Esito finale CI e deployment Grade
+- GitHub Actions `Code quality` run **#44359022061** sul commit `d11378869280d25c27357d41a0d4005bddcdc9fe`: **success**. TypeScript, ESLint e build di produzione completati con esito positivo.
+- Database Supabase: 40 migrazioni registrate e 40 file nel repository. Le colonne Grade e le due RPC sono presenti; EXECUTE è consentito ad authenticated e negato ad anon. I dati live preesistenti restano 56 ranking e 809 elementi; nessun ranking Grade di test è rimasto persistito.
+- Il test SQL di rollback ha verificato la pubblicazione parziale, la media senza elementi non valutati, i pari merito, lo snapshot e la modifica pubblicata.
+- **Deployment Production non completato:** Vercel ha rifiutato la creazione del deployment sul commit finale con HTTP 402, codice `api-deployments-free-per-day`: limite giornaliero del piano Hobby superato (risposta Vercel: riprovare dopo 24 ore oppure risolvere il requisito di piano/billing). Il runtime locale non dispone del Vercel CLI, quindi non è disponibile un fallback CLI autenticato. Nessuna impostazione di piano o billing è stata modificata.
+- L'ultimo deployment Production READY osservato resta quello sul commit `54f5d9109477eddf8650fdec092abb9dbbdf3cc5`, precedente alle ultime modifiche Grade. **Non dichiarare Grade disponibile su `renqd.app` finché un deployment del commit finale non risulta READY.**
+- Per completare il rilascio: dopo il ripristino della quota Vercel, creare un deployment Production dal branch `main` al commit `d11378869280d25c27357d41a0d4005bddcdc9fe`, attendere READY e poi svolgere il test funzionale autenticato su mobile e desktop.
