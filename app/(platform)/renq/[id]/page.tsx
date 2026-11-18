@@ -33,7 +33,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
       supabase.from("ranking_revisions").select("id,version,change_summary,created_at").eq("ranking_id", ranking.id).order("version", { ascending: false }).limit(20)
     ]);
     return <SavedRenqDetail
-      ranking={{ id: ranking.id, public_slug: ranking.public_slug, title: ranking.title, mode: ranking.mode, settings, created_at: ranking.created_at, visibility: ranking.visibility, started_at: ranking.started_at, completed_at: ranking.completed_at }}
+      ranking={{ id: ranking.id, public_slug: ranking.public_slug, title: ranking.title, mode: ranking.mode, settings, created_at: ranking.created_at, visibility: ranking.visibility, allow_ties: ranking.allow_ties, started_at: ranking.started_at, completed_at: ranking.completed_at }}
       items={savedSnapshot?.items ?? []}
       coverImageUrl={resolvedCoverImageUrl}
       coverImagePath={coverImagePath}
