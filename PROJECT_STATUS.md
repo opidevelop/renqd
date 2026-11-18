@@ -354,10 +354,11 @@ Revisione della migrazione di hardening:
 ### Database e sicurezza
 - Non è stata applicata alcuna migrazione SQL: la cancellazione usa le relazioni FK già presenti, con cascade o SET NULL, e l'API Auth/Storage.
 - I riferimenti audit conservati vengono anonimizzati; i record di audit amministrativo restano consultabili senza username/email dell'account eliminato.
+- L'audit dei vincoli FK ha individuato `ranking_items.custom_item_id` con `ON DELETE RESTRICT`: prima della cancellazione la funzione scollega i riferimenti ai `custom_items` dell'utente impostando `custom_item_id = NULL` e conserva `title_snapshot`, così i Renq di altri utenti non bloccano l'eliminazione e mantengono il titolo. I `custom_items` del target vengono poi eliminati dal cascade Auth.
 - La verifica read-only del database live rileva attualmente **un solo OWNER approvato**. L'account OWNER corrente non può eliminare se stesso; gli altri account restano gestibili secondo i controlli di ruolo.
 
 ### Verifica e produzione
 - Supabase Edge Function `admin-delete-user`: stato `ACTIVE`, versione 2, autenticazione utente gestita internamente da `withSupabase`.
-- GitHub Actions `Code quality`: run #56, #57 e #58 conclusi con `success`; TypeScript, ESLint e build di produzione superati.
+- GitHub Actions `Code quality`: run #56, #57, #58, #59 e #60 conclusi con `success`; TypeScript, ESLint e build di produzione superati.
 - Vercel Production: deployment `dpl_2afd4Kj3QbitL5UEz2JW2V9kdv49`, commit `0f47e48d689e1a3dfdfbd7e02faacf64f5c9eeca`, stato `READY`.
 - Nessun account è stato cancellato durante l'implementazione. Il flusso irreversibile non è stato provato su account reali: il collaudo funzionale va eseguito soltanto su un account di test sacrificabile, mai su un account o contenuto reale da conservare.
