@@ -1129,3 +1129,12 @@ Revisione della migrazione di hardening:
 - Gli ID wiki ora includono anche la pagina sorgente, evitando collisioni tra nomi omonimi in pagine diverse.
 - Commit su `main`: Wheel `3163ae614ea79a68b95eef4bfded9127fad2dd7e`; helper reality `5581579358e07cd6283199fd0e6dca8b0c6f1cbd` e correzione ID `dc805b21d87a440cfcc8168c7356679e53f79bd5`; route catalogo `e0121107da3645f2b181f108c1a535806b7e1f5a`; aggiornamenti documentali successivi.
 - CI, verifica funzionale su GF VIP 6 e nuovo deployment Production: da verificare. Il deployment attualmente live contiene il precedente commit `ba0a03d`, non queste correzioni.
+
+
+## 49. Correzione CI Wheel — 19 novembre 2026
+
+- La prima correzione del portal usava un `useEffect` con aggiornamento sincrono di stato; la regola ESLint `react-hooks/set-state-in-effect` ha correttamente bloccato la CI.
+- Sostituito il flag locale con `useSyncExternalStore`: snapshot server `false`, snapshot client `true`, senza aggiornamento di stato dentro un effect. Il portal viene quindi attivato dopo l'idratazione client, mantenendo il rendering server compatibile.
+- Rimosso l'import non utilizzato era già risolto perché `useSyncExternalStore` viene ora usato.
+- Commit applicativo: `d55459a482b8a9e159c24fffb085c767764802c4`.
+- TypeScript, ESLint, Production Build e deploy Production: da verificare sulla nuova CI. Nessun deployment eseguito.
