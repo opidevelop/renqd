@@ -7,7 +7,7 @@ import { highQualityImageUrl } from "@/lib/image-quality";
 
 export const dynamic = "force-dynamic";
 
-type MultiplayerDetails={session:{mode:"COLLABORATIVE"|"COMPETITIVE";deadlineAt:string|null;sharedState:Record<string,unknown>|null};participants:Array<{userId:string;progressStatus:string}>};
+type MultiplayerDetails={session:{mode:"COLLABORATIVE"|"COMPETITIVE";status:string;deadlineAt:string|null;sharedState:Record<string,unknown>|null};participants:Array<{userId:string;progressStatus:string}>};
 
 export default async function RenqPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
