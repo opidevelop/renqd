@@ -673,3 +673,19 @@ Revisione della migrazione di hardening:
 - Confermato: le modifiche proposte alla classifica finale richiedono l'approvazione di tutti i partecipanti proprietari, incluso il proponente; un solo rifiuto respinge la proposta.
 - Le altre scelte operative del questionario multiplayer/social restano da consolidare e non sono registrate come decisioni approvate.
 - Le correzioni alle collezioni, al ritorno al profilo e all'allineamento dei metadati ranking sono in corso; non risultano ancora verificate da CI, deployment o test funzionali.
+
+## Decisioni social e multiplayer consolidate — 19 novembre 2026
+- Collaborativa: classifica condivisa, tutti modificano tutto in realtime. Competitiva: classifiche individuali nascoste; gli altri vedono solo Non iniziato/In corso/Finito.
+- Massimo 8 partecipanti totali incluso il creatore; stessa tipologia obbligatoria; inviti singoli, multipli e link revocabili; abbandono resta incompleto; chiusura automatica a completamento di tutti o anticipata dal creatore; incompleti esclusi dalla fusione.
+- Timer impostato dal creatore; alla scadenza sceglie Reveal o proroga; Reveal simultaneo e identico per tutti.
+- Fusione: Classic Borda + primi posti; Battle vittorie; Speed posizione media; Grade ex aequo.
+- Modifiche post-pubblicazione: approvazione di tutti, incluso il proponente; un rifiuto respinge.
+- Messaggistica tramite richieste, cooldown unilaterale di 30 giorni dopo rifiuto, chat completa con reazioni/risposte/modifica/cancellazione e conferme di lettura.
+- Social solo Follow, feed pubblico personalizzabile e Scopri personalizzato su follow/interessi/attività.
+
+## Verifica commit UI — 19 novembre 2026
+- Commit corrente: 843ed1302bf21a3e6a65d822fb1a5a8c865b8783 su main.
+- GitHub Actions Code quality run #174: TypeScript, ESLint e Production build completati con esito success.
+- Deployment Production automatico del commit annullato intenzionalmente; il commit non è pubblicato. Ultimo deployment Production READY precedente: commit 7ffa974dc88d3af65a96e000843157751af142da.
+- Le modifiche collezioni, ritorno al profilo e allineamento metadati sono presenti nel repository; test funzionali autenticati non ancora eseguiti.
+- Multiplayer, DM, social/feed e Scopri non sono ancora implementati. Non dichiarare completato né distribuire il rilascio cumulativo finché codice, migrazioni, RLS, realtime, build e test non siano verificati.

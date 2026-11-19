@@ -300,3 +300,28 @@
 - Allo scadere del timer competitivo il creatore decide se procedere al Reveal oppure concedere altro tempo.
 - Le modifiche proposte alla classifica finale competitiva richiedono l'approvazione di tutti i partecipanti proprietari, incluso il proponente.
 - Un solo rifiuto respinge la proposta di modifica.
+
+## Decisioni approvate — multiplayer, messaggistica e social (19 novembre 2026)
+
+### Multiplayer
+- Modalità Collaborativa: tutti contribuiscono alla stessa classifica condivisa, con modifiche sincronizzate in tempo reale; tutti possono modificare tutto.
+- Modalità Competitiva: ciascun partecipante crea la propria classifica individuale, invisibile agli altri. Durante la sessione gli altri vedono soltanto lo stato Non iniziato, In corso o Finito.
+- La modalità è comune a tutti e la tipologia di ranking deve essere la stessa per tutti i partecipanti.
+- Massimo 8 persone totali, creatore incluso. Inviti singoli, multipli e tramite link revocabile.
+- Il creatore imposta la durata. Alla scadenza decide se procedere al Reveal o concedere altro tempo. Il Reveal è unico, simultaneo e identico per tutti i partecipanti e per tutte e quattro le tipologie.
+- Chi abbandona resta nella sessione fino alla chiusura ma risulta incompleto. Chiusura automatica quando tutti completano oppure anticipata dal creatore. Gli incompleti sono esclusi dalla fusione; il risultato è condiviso tra chi completa.
+- Fusione: Classic con Borda e numero di primi posti; Battle con numero di vittorie; Speed con posizione media; Grade con ex aequo.
+- Dopo la pubblicazione tutti i partecipanti proprietari possono proporre modifiche. Ogni proposta richiede l'approvazione di tutti, incluso il proponente; un solo rifiuto la respinge.
+
+### Messaggistica diretta
+- Richiesta di messaggio consentita a chiunque; il destinatario la riceve in Attività e può accettare o rifiutare.
+- Dopo l'accettazione si apre la conversazione privata in Messaggi con aggiornamento in tempo reale.
+- Il rifiuto applica un cooldown unilaterale di 30 giorni al mittente verso lo stesso destinatario. Il destinatario può comunque inviare una richiesta al mittente in qualsiasi momento.
+- Chat completa: testo, emoji, reazioni, risposte, modifica e cancellazione dei messaggi e conferme di lettura.
+- Inbox unica con sezioni Messaggi e Attività, contatori non letti e realtime.
+
+### Social e Scopri
+- La relazione sociale usa esclusivamente Follow, senza una categoria separata Amici.
+- Follow/unfollow, richieste per profili privati e distinzione tra follower e seguiti.
+- Feed delle attività pubbliche degli utenti seguiti, personalizzabile per tipologia di attività.
+- Scopri con ricerca globale e suggerimenti basati su follow, interessi e attività.
