@@ -9,6 +9,7 @@ import "./profile-phase5.css";
 import "./inbox.css";
 import "./admin-management.css";
 import "./moderation.css";
+import "./social.css";
 export const dynamic = "force-dynamic";
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
