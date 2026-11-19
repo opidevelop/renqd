@@ -576,3 +576,11 @@ Revisione della migrazione di hardening:
 - L'area Attività mostra inviti Appunti con accettazione/rifiuto; la revoca aggiorna anche la notifica del destinatario.
 - Il salvataggio del documento usa la versione `updated_at` attesa per impedire che due collaboratori si sovrascrivano silenziosamente. In caso di conflitto, la richiesta viene respinta e le modifiche locali restano nell'editor.
 - Conteggio Supabase verificato dopo l'applicazione: 45 migrazioni. La sincronizzazione dei file SQL nel repository è completata con questo aggiornamento.
+
+
+## 20. Schede interne e integrità cartelle — 19 novembre 2026
+
+- Aggiunta la colonna `tabs` ai documenti Appunti: ogni documento può contenere fino a 30 schede interne, ciascuna con titolo e contenuto formattato; tutte le schede vengono salvate insieme con il controllo di versione.
+- L'editor consente di aggiungere, rinominare con doppio clic e rimuovere schede, mantenendo sempre almeno una scheda. Le esportazioni includono tutte le schede.
+- Aggiunto un trigger database per impedire cicli nella gerarchia delle cartelle.
+- Migrazione applicata e sincronizzata: `20261119081029_renqd_notes_document_tabs_and_folder_cycle_guard`.
