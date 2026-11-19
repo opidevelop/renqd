@@ -90,6 +90,6 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     ? [...baseHydrated].map(item=>({...item,...(personalById.get(item.id)??{})})).sort((a,b)=>Number(a.rank_position??999999)-Number(b.rank_position??999999)||Number(a.tie_order??a.sort_order)-Number(b.tie_order??b.sort_order))
     : baseHydrated;
   const experienceRanking={...ranking,settings:{...settings,coverImageUrl:highQualityImageUrl(resolvedCoverImageUrl),coverPosition:settings.coverPosition??{x:50,y:50}}};
-  if(ranking.mode==="GRADE")return <GradeExperience ranking={experienceRanking} items={hydrated} multiplayer={multiplayerContext}/>;
+  if(ranking.mode==="GRADE")return <GradeExperience ranking={experienceRanking} items={hydrated} multiplayer={multiplayerContext} isOwner={isOwner}/>;
   return <RenqExperience ranking={experienceRanking} items={hydrated} multiplayer={multiplayerContext} isOwner={isOwner}/>;
 }
