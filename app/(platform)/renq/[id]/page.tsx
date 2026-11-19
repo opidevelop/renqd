@@ -27,6 +27,9 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     multiplayerDetails=sessionDetails;
   }
   if(!isOwner&&!multiplayerDetails)notFound();
+  const {data:personalResult}=multiplayerDetails?.session.mode==="COMPETITIVE"
+    ? await supabase.from("ranking_session_results").select("result_snapshot,result_status").eq("ranking_id",ranking.id).eq("user_id",user.id).maybeSingle()
+    : {data:null};
   const multiplayerContext=multiplayerDetails?{
     mode:multiplayerDetails.session.mode,
     status:multiplayerDetails.session.status,
@@ -35,9 +38,6 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     sharedState:multiplayerDetails.session.sharedState??null,
     personalProgress:personalResult?.result_snapshot??null
   }:null;
-  const {data:personalResult}=multiplayerDetails?.session.mode==="COMPETITIVE"
-    ? await supabase.from("ranking_session_results").select("result_snapshot,result_status").eq("ranking_id",ranking.id).eq("user_id",user.id).maybeSingle()
-    : {data:null};
 
   const settings = (ranking.settings ?? {}) as Record<string, unknown>;
   const coverImagePath = typeof settings.coverImagePath === "string" ? settings.coverImagePath : null;
