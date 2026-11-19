@@ -53,7 +53,7 @@ async function searchEntities(query:string,contentType:string,page:number){
 async function loadRealitySeasonCast(showId:number,seasonNumber:number,showTitle:string){
  const path=`/tv/${showId}/season/${seasonNumber}`;
  const aggregate=await tmdb<TmdbAggregateCredits>(path+`/aggregate_credits`);
- let cast=aggregate.cast??[];
+ let cast:TmdbCastPerson[]=aggregate.cast??[];
  if(!cast.length){
   const credits=await tmdb<TmdbSeasonCredits>(path+`/credits`);
   cast=[...(credits.cast??[]),...(credits.guest_stars??[])];
