@@ -340,3 +340,13 @@ Restano obbligatori durante lo sviluppo:
 - nessun deploy Production intermedio; un solo rilascio cumulativo dopo completamento e collaudo finale.
 
 La decisione non modifica le specifiche funzionali già approvate per multiplayer, social, Follow e messaggistica, né autorizza a dichiarare collaudata una funzionalità prima della sessione finale.
+
+
+## Decisioni approvate — navigazione e flussi Renq (19 novembre 2026)
+
+- Sidebar desktop e header globale devono restare fissi; durante lo scroll si muove soltanto l'area del contenuto. Su mobile l'header resta fermo e scorre soltanto il contenuto.
+- La navigazione inferiore mobile contiene sempre e soltanto cinque voci, in quest'ordine: **Home, Scopri, Crea, Attività, Profilo**.
+- La voce Appunti non compare nella navigazione inferiore mobile; soltanto su mobile è disponibile nel menu a discesa aperto dall'avatar nell'header del profilo. Su desktop Appunti resta nella navigazione laterale.
+- Feed non è una pagina autonoma: tutte le sue attività, i filtri e il caricamento progressivo fanno parte di Scopri. Il percorso storico /feed reindirizza a /explore.
+- La ruota temporanea si chiama **Wheel**. Su mobile il launcher mostra soltanto l'emoji 🎲, senza testo o icona aggiuntiva.
+- Durante la creazione di un Renq, in tutte le modalità individuali, l'azione è **Annulla Renq**, posizionata in fondo sotto il pulsante principale del passaggio. Non deve apparire un'azione «Elimina Renq» in cima alla schermata. L'annullamento usa il flusso dedicato di cancellazione della bozza, non la cancellazione definitiva.
