@@ -603,3 +603,9 @@ Revisione della migrazione di hardening:
 
 - Chiarito il modello dei permessi: l'OWNER di piattaforma può consultare tutti gli Appunti in sola lettura senza diventare collaboratore; se riceve e accetta esplicitamente un invito, opera come collaboratore sui contenuti condivisi. Non acquisisce per questo la gestione della cartella originale o degli inviti altrui.
 - Migrazione applicata e sincronizzata: `20261119081709_renqd_notes_explicit_owner_collaboration`. Totale migrazioni Supabase: 49.
+
+
+## 24. Stato inviti in Attività — 19 novembre 2026
+
+- La risposta ad un invito (accettazione o rifiuto) viene ora registrata anche nel payload della notifica, così l'esito resta visibile dopo un nuovo accesso all'area Attività; anche la revoca è mostrata come tale.
+- Migrazione applicata e sincronizzata: `20261119081742_renqd_notes_invitation_response_status`. Totale migrazioni Supabase: 50.
