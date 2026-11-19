@@ -362,3 +362,12 @@ La decisione non modifica le specifiche funzionali già approvate per multiplaye
 - Multiplayer: Reveal è obbligatorio per tutte le sessioni. Non mostrare le scelte Live/Reveal né Pubblico/Privato; server e database devono impostare Reveal e visibilità privata, con accesso al risultato per i partecipanti secondo le regole della sessione.
 - La scadenza del timer mantiene la decisione già approvata: il creatore può svelare oppure prorogare; la regola di Reveal automatico vale quando tutti i partecipanti attivi completano prima della scadenza.
 - La lobby multiplayer deve avere una gerarchia visiva più curata e rendere immediatamente leggibili partecipanti, stati, timer e risultato pronto.
+
+
+### Decisioni approvate — Wheel persistente, navigazione mobile e copertina lobby (19 novembre 2026)
+
+- Wheel è una utility flottante dell’area autenticata: il launcher resta sempre ancorato al viewport in basso a destra, indipendentemente dallo scroll o dal cambio pagina. Il pannello resta spostabile/ridimensionabile e il suo contenuto rimane temporaneo.
+- Il launcher desktop è un pulsante compatto con icona e testo allineati; la label non deve riutilizzare lo stile assoluto delle etichette disposte sulla ruota. Su mobile il launcher mostra esclusivamente 🎲.
+- La Wheel deve restare disponibile nelle impostazioni di creazione e durante le esperienze di ranking/modifica; viene montata una sola volta nel guscio autenticato, non nelle singole pagine.
+- La navigazione inferiore mobile deve rimanere fissata al bordo inferiore del viewport durante tutto lo scroll del contenuto.
+- La lobby multiplayer mostra la copertina del contenuto rankato, usando prima la copertina caricata/selezionata, poi la copertina predefinita della categoria. La palette della copertina alimenta lo sfondo dinamico della lobby; in assenza di immagine resta un fallback grafico coerente.

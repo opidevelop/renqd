@@ -1,2 +1,2 @@
 import {CreateRenqForm} from "@/components/create-renq-form";
-import { RenqdWheel } from "@/components/renqd-wheel";export default async function CreatePage({searchParams}:{searchParams:Promise<{category?:string}>}){const {category}=await searchParams;return <><div className="platform-page-heading"><h1>Crea un Renq.</h1></div><CreateRenqForm initialCategory={category}/><RenqdWheel/></>}
+export default async function CreatePage({searchParams}:{searchParams:Promise<{category?:string}>}){const {category}=await searchParams;return <><div className="platform-page-heading"><h1>Crea un Renq.</h1></div><CreateRenqForm initialCategory={category}/></>}

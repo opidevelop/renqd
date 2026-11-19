@@ -1050,3 +1050,20 @@ Revisione della migrazione di hardening:
 - Verifica browser autenticata desktop/mobile e test multiplayer con due account: da eseguire nel collaudo finale unico.
 - Database: nessuna migrazione SQL prevista da queste modifiche; il flusso di creazione usa RPC multiplayer già esistenti.
 - Deployment Production: da avviare direttamente sul commit risultante dopo CI, senza deployment Preview intermedi.
+
+
+## 44. Wheel persistente, menu mobile fisso e copertina lobby — 19 novembre 2026
+
+### Modifiche repository
+- `components/platform-shell.tsx`: Wheel montata una sola volta nel guscio autenticato, così resta disponibile tra impostazioni, ranking e modifica del Renq senza duplicazioni al cambio pagina.
+- `app/(platform)/create/page.tsx`: rimossa l’istanza locale della Wheel per evitare doppio launcher.
+- `components/renqd-wheel.tsx`: corretta la collisione CSS tra il testo del launcher e le etichette della ruota; il pulsante desktop torna a essere un controllo compatto, leggibile e allineato. Il launcher mobile conserva esclusivamente 🎲.
+- `app/(platform)/platform.css`: launcher fissato al viewport in basso a destra con livello visivo superiore al contenuto; menu mobile fissato al bordo inferiore e Wheel posizionata sopra la barra.
+- `app/(platform)/multiplayer/[rankingId]/page.tsx` e `components/multiplayer-session-panel.tsx`: risolta la copertina salvata/predefinita dalle impostazioni del ranking, con URL firmato per gli asset privati.
+- `app/(platform)/multiplayer.css`: copertina sfumata nella testata lobby, con palette estratta dall’immagine tramite `DynamicCoverTheme` e fallback grafico senza immagine.
+
+### Verifiche
+- Database: nessuna modifica prevista; si riutilizzano le impostazioni e lo storage bucket `renq-covers` già esistenti.
+- CI TypeScript, ESLint e Production Build: da eseguire sul commit risultante.
+- Test browser desktop/mobile, persistenza Wheel durante navigazione, posizione viewport durante scroll e copertina lobby con immagine privata/pubblica: da eseguire nel collaudo finale unico.
+- Nessun deployment Production intermedio.
