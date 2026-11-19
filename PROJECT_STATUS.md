@@ -1004,3 +1004,29 @@ Revisione della migrazione di hardening:
 - GitHub Actions **#271** (contatori Inbox), **#272** e **#273** (documentazione): success.
 - GitHub Actions **#274** sul commit `7c879db791594c874d1e59ec0ba316431dde430f`: in attesa di completamento.
 - Nessun deploy Production; il collaudo end-to-end resta nella sessione finale unica.
+
+
+## 42. Rifinitura navigazione, Scopri e annullamento Renq — 19 novembre 2026
+
+### Navigazione e scroll
+- Separata la navigazione desktop da quella mobile: la sidebar desktop mantiene Home, Scopri, Crea, Renq, Appunti, Attività e Profilo (più Dashboard per lo staff).
+- La navigazione inferiore mobile è limitata a cinque voci fisse: Home, Scopri, Crea, Attività e Profilo.
+- Appunti è disponibile nel menu avatar dell'header soltanto su mobile; resta nella sidebar desktop.
+- Il layout applicativo usa un contenitore a viewport fissa: sidebar e header restano fermi e lo scroll verticale è confinato all'area del contenuto.
+
+### Scopri e Feed
+- Integrato il Feed direttamente in /explore, mantenendo ricerca, suggerimenti, filtri delle attività e caricamento progressivo.
+- /feed reindirizza a /explore per mantenere validi i collegamenti esistenti senza offrire una seconda pagina.
+- La lettura iniziale del Feed continua a usare la RPC protetta renqd_get_social_feed; nessuna modifica al database o alle policy.
+
+### Wheel
+- Il pannello flottante è disponibile nel builder e la denominazione visibile è stata aggiornata a **Wheel**.
+- Su mobile il launcher è circolare e mostra esclusivamente l'emoji 🎲, evitando sovrapposizioni con il contenuto.
+
+### Annullamento del ranking
+- Rimossa l'azione «Elimina Renq» dalla parte superiore dell'esperienza.
+- Aggiunta «Annulla Renq» sotto l'azione principale in Classic, Battle, Speed e Grade per le creazioni individuali.
+- L'azione usa l'endpoint esistente cancel-renq, che porta la bozza allo stato CANCELLED; non esegue soft-delete né cancellazione definitiva.
+- Nessuna migrazione SQL aggiuntiva prevista per queste modifiche.
+- CI e build: da verificare sul commit risultante.
+- Nessun deployment Production eseguito; il collaudo browser finale resta necessario.
