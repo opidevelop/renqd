@@ -1163,3 +1163,5 @@
 .collection-detail-add>button:not(.profile-save-button){display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-size:10px;text-align:left;cursor:pointer}.collection-detail-add>button.is-selected{border-color:#e8b78f;background:#fff7f0;color:#a45e2c}
 .collection-detail-feedback{margin:0;color:#34835b;font-size:10px}.collection-detail-feedback.is-error{color:#b34e43}
 @media(max-width:640px){.collection-detail-manager{padding:12px}.collection-detail-manager-top{align-items:flex-start;flex-direction:column}.collection-detail-manager-top>button{width:100%;justify-content:center}}
+
+.multiplayer-duration-field{display:grid;gap:7px;margin-top:14px;padding:14px 16px;border:1px solid #e9e1d8;border-radius:14px;background:#fcfaf7;color:#62564b;font-size:11px;font-weight:800}.multiplayer-duration-field input{width:100%;height:40px;padding:0 11px;border:1px solid #e5d8c9;border-radius:10px;background:white;color:#3e342c;font:inherit;font-size:14px}.multiplayer-duration-field small{color:#96887a;font-size:9px;font-weight:500}
