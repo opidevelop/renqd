@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useConfirmDialog } from "@/components/confirm-dialog";
+import { ProfileFollowLists } from "@/components/profile-follow-lists";
 import { ArrowUpRight, BadgeCheck, Camera, FolderPlus, Globe2, Heart, ImagePlus, LockKeyhole, Plus, Save, Share2, Sparkles, Trash2, Trophy, Users, Pencil, Search, LoaderCircle, X } from "lucide-react";
 
 type MediaCrop = { x:number; y:number; zoom:number };
@@ -55,10 +56,11 @@ type Collection = {
 };
 type Renq = { id: string; title: string; public_slug: string; mode: string; settings: Record<string, unknown> };
 type CollectionSearchResult = { id: string; title: string; coverImage: string | null; rows: { title: string; image_url?: string | null; rank_position?: number | null }[] };
+type FollowProfile = { userId: string; username: string | null; displayName: string; avatarUrl: string | null };
 
-export function ProfileDashboard({ profile: initialProfile, collections: initialCollections, rankings, favorites, followerCount, followingCount, likeCount }: {
+export function ProfileDashboard({ profile: initialProfile, collections: initialCollections, rankings, favorites, followerCount, followingCount, followerProfiles, followingProfiles, likeCount }: {
   profile: PublicProfile; collections: Collection[]; rankings: Renq[]; favorites: Renq[];
-  followerCount: number; followingCount: number; likeCount: number;
+  followerCount: number; followingCount: number; followerProfiles: FollowProfile[]; followingProfiles: FollowProfile[]; likeCount: number;
 }) {
   const router=useRouter();
   const { confirm, dialog } = useConfirmDialog();
@@ -359,7 +361,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
         return <Link key={ranking.id} href={"/renq/" + (ranking.public_slug || ranking.id)} className="profile-renq-card"><div style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.75),rgba(15,12,10,.05)),url(" + cover + ")" } : undefined}><span>{profileModeLabels[String(ranking.mode)]??"Renq"}</span><ArrowUpRight size={17}/></div><strong>{ranking.title}</strong></Link>;
       })}</div> : <div className="profile-empty-state"><Trophy size={24}/><strong>Il tuo primo Renq ti aspetta</strong><p>Quando completi una classifica, la ritroverai qui.</p><Link href="/create">Crea un Renq <ArrowUpRight size={15}/></Link></div>}
     </section>
-    <div className="profile-social-meta"><span><Users size={14}/> Segui {followingCount} profili</span><span><Heart size={14}/> {likeCount} apprezzamenti ricevuti</span><Link href={"/u/" + profile.username}>Apri il profilo pubblico <ArrowUpRight size={14}/></Link></div>
+    <div className="profile-social-meta"><ProfileFollowLists followerCount={followerCount} followingCount={followingCount} followers={followerProfiles} following={followingProfiles}/><span><Heart size={14}/> {likeCount} apprezzamenti ricevuti</span><Link href={"/u/" + profile.username}>Apri il profilo pubblico <ArrowUpRight size={14}/></Link></div>
     {(message || error) && <p className={"profile-feedback" + (error ? " is-error" : "")} role="status">{error || message}</p>}
     {dialog}
   </div>;

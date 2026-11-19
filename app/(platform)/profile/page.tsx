@@ -45,13 +45,32 @@ export default async function ProfilePage() {
   }));
   const { count: followerCount } = await supabase.from("user_follows").select("follower_id", { count: "exact", head: true }).eq("followed_id", user.id).eq("status", "ACCEPTED");
   const { count: followingCount } = await supabase.from("user_follows").select("followed_id", { count: "exact", head: true }).eq("follower_id", user.id).eq("status", "ACCEPTED");
+  const [{ data: followerRelations }, { data: followingRelations }] = await Promise.all([
+    supabase.from("user_follows").select("follower_id,created_at").eq("followed_id", user.id).eq("status", "ACCEPTED").order("created_at", { ascending: false }).limit(100),
+    supabase.from("user_follows").select("followed_id,created_at").eq("follower_id", user.id).eq("status", "ACCEPTED").order("created_at", { ascending: false }).limit(100),
+  ]);
+  const followProfileIds = [...new Set([...(followerRelations ?? []).map(row => row.follower_id), ...(followingRelations ?? []).map(row => row.followed_id)])];
+  const { data: followProfiles } = followProfileIds.length
+    ? await supabase.from("public_profiles").select("user_id,username,display_name,avatar_url").in("user_id", followProfileIds)
+    : { data: [] };
+  const followProfileEntries = await Promise.all((followProfiles ?? []).map(async item => ({
+    userId: item.user_id,
+    username: item.username,
+    displayName: item.display_name || item.username,
+    avatarUrl: await getProfileMediaUrl(supabase, item.avatar_url),
+  })));
+  const mapFollowEntries = (ids: string[]) => ids.map(id => followProfileEntries.find(item => item.userId === id) ?? ({
+    userId: id, username: null, displayName: "Profilo privato", avatarUrl: null,
+  }));
   const { data: likedRows } = await supabase.from("ranking_likes").select("ranking_id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(24);
   const likedIds = (likedRows ?? []).map(item => item.ranking_id);
   const { data: likedRankings } = likedIds.length ? await supabase.from("rankings").select("id,title,public_slug,mode,settings").in("id", likedIds).eq("status", "COMPLETED").eq("visibility", "LIVE").is("deleted_at",null).filter("settings->>access", "eq", "public") : { data: [] };
   const favorites = likedIds.flatMap(id => { const match = (likedRankings ?? []).find(item => item.id === id); return match ? [match] : []; });
   const rankingIds = rankings.map(item => item.id);
   const { count: likeCount } = rankingIds.length ? await supabase.from("ranking_likes").select("ranking_id", { count: "exact", head: true }).in("ranking_id", rankingIds) : { count: 0 };
+  const followerProfiles = mapFollowEntries((followerRelations ?? []).map(row => row.follower_id));
+  const followingProfiles = mapFollowEntries((followingRelations ?? []).map(row => row.followed_id));
   return <div className="profile-page">
-    <ProfileDashboard profile={profileForUi} collections={enrichedCollections} rankings={rankings} favorites={favorites} followerCount={followerCount ?? 0} followingCount={followingCount ?? 0} likeCount={likeCount ?? 0}/>
+    <ProfileDashboard profile={profileForUi} collections={enrichedCollections} rankings={rankings} favorites={favorites} followerCount={followerCount ?? 0} followingCount={followingCount ?? 0} followerProfiles={followerProfiles} followingProfiles={followingProfiles} likeCount={likeCount ?? 0}/>
   </div>;
 }
