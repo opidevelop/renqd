@@ -289,7 +289,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         {!isMultiplayer&&<div className="saved-renq-cover-controls">
           <button type="button" className="saved-renq-cover-edit" onClick={() => setCoverEditorOpen(value => !value)} aria-label="Modifica copertina" aria-expanded={coverEditorOpen}><Pencil size={17} /></button>
           {coverEditorOpen && <div className="saved-renq-cover-editor"><RenqCoverPicker value={currentCoverUrl ?? defaultCoverImageUrl ?? displayItems.find(item => item.image_url)?.image_url ?? null} onChange={(path,url) => void saveCover(path,url)} onFocusPreview={position => setCurrentCoverPosition(position)} onFocusChange={position => void saveCover(currentCoverPath,currentCoverUrl,position)} focusPosition={currentCoverPosition} onReset={() => void saveCover(null,null,{x:50,y:50})} canReset={Boolean(currentCoverPath)||(Boolean(currentCoverUrl)&&currentCoverUrl!==defaultCoverImageUrl)||currentCoverPosition.x!==50||currentCoverPosition.y!==50} variant="overlay"/></div>}
-        </div>
+        </div>}
         <div className="saved-renq-hero-copy">
           <span>{modeLabels[ranking.mode] ?? "Renq"} · {category} · {contentType}</span>
           <div className="saved-renq-title-line"><h1>{currentTitle}</h1>{ranking.mode==="GRADE"&&<strong className="saved-grade-average">{currentGradeAverage===null?"—":currentGradeAverage.toFixed(1).replace(".",",")}<small>/10</small></strong>}</div>
