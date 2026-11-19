@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAccountAccess } from "@/lib/supabase/authorization";
 import type { CatalogEntity, CatalogItem } from "@/lib/catalog/types";
+import { loadRealityContestants } from "@/lib/catalog/reality-sources";
 
 type TmdbImage = string | null | undefined;
 type TmdbMovie = { id:number; title:string; original_title?:string; release_date?:string; poster_path?:TmdbImage; overview?:string };
@@ -51,6 +52,8 @@ async function searchEntities(query:string,contentType:string,page:number){
  throw new Error("Unsupported film and TV catalog type");
 }
 async function loadRealitySeasonCast(showId:number,seasonNumber:number,showTitle:string){
+ const wikiItems=await loadRealityContestants(showTitle,seasonNumber);
+ if(wikiItems.length)return wikiItems.map(person=>({id:person.id,title:person.title,subtitle:person.subtitle,payload:{tmdbId:showId,mediaType:"reality-contestant",sourceProvider:person.sourceProvider,sourceUrl:person.sourceUrl}}));
  const path=`/tv/${showId}/season/${seasonNumber}`;
  const aggregate=await tmdb<TmdbAggregateCredits>(path+`/aggregate_credits`);
  let cast:TmdbCastPerson[]=aggregate.cast??[];
@@ -63,6 +66,8 @@ async function loadRealitySeasonCast(showId:number,seasonNumber:number,showTitle
  return [...unique.values()].map(person=>({id:`tmdb-person-${person.id}`,title:person.name,subtitle:`${showTitle} · Stagione ${seasonNumber}`,imageUrl:image(person.profile_path),payload:{tmdbId:showId,tmdbPersonId:person.id,seasonNumbers:[seasonNumber],mediaType:"reality-contestant"}}));
 }
 async function loadAllRealityCast(showId:number,showTitle:string){
+ const wikiItems=await loadRealityContestants(showTitle);
+ if(wikiItems.length)return wikiItems.map(person=>({id:person.id,title:person.title,subtitle:person.subtitle,payload:{tmdbId:showId,mediaType:"reality-contestant",sourceProvider:person.sourceProvider,sourceUrl:person.sourceUrl}}));
  const details=await tmdb<TmdbShowDetails>(`/tv/${showId}`);
  const resolvedShowTitle=details.name||showTitle;
  const seasons=(details.seasons??[]).filter(season=>season.season_number>0);
