@@ -1,10 +1,42 @@
 "use client";
-import {useState} from "react";
+import {useEffect,useState} from "react";
 import {Bell,Check,CheckCheck,FileText,Users,X} from "lucide-react";
+import {createClient} from "@/lib/supabase/client";
 type Notice={id:string;actor_id:string|null;notification_type:string;payload:Record<string,unknown>;read_at:string|null;created_at:string};
 export function ActivityInbox({notifications}:{notifications:Notice[]}){
  const[items,setItems]=useState(notifications);const[busy,setBusy]=useState<string|null>(null);const[error,setError]=useState("");
- async function respond(inviteId:string,accept:boolean,notificationId:string){setBusy(inviteId);setError("");try{const response=await fetch("/api/notes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"respond-invite",inviteId,accept})});const result=await response.json();if(!response.ok)throw new Error(result.error??"Non è stato possibile rispondere all'invito.");setItems(current=>current.map(item=>item.id===notificationId?{...item,read_at:new Date().toISOString(),payload:{...item.payload,response:accept?"ACCEPTED":"DECLINED"}}:item));}catch(e){setError(e instanceof Error?e.message:"Errore.");}finally{setBusy(null);}}
+ useEffect(()=>{
+  const supabase=createClient();let active=true;let channel:ReturnType<typeof supabase.channel>|null=null;
+  void supabase.auth.getUser().then(({data:{user}})=>{
+   if(!active||!user)return;
+   channel=supabase.channel("renqd-inbox-"+user.id).on("postgres_changes",{event:"*",schema:"public",table:"user_notifications",filter:"recipient_id=eq."+user.id},payload=>{
+    const row=(payload.new??payload.old) as Notice;
+    if(payload.eventType==="INSERT")setItems(current=>current.some(item=>item.id===row.id)?current:[row,...current].sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,100));
+    else if(payload.eventType==="UPDATE")setItems(current=>current.map(item=>item.id===row.id?row:item));
+    else if(payload.eventType==="DELETE")setItems(current=>current.filter(item=>item.id!==row.id));
+   }).subscribe();
+  });
+  return()=>{active=false;if(channel)void supabase.removeChannel(channel);};
+ },[]);
+ async function respondInvite(inviteId:string,accept:boolean,notificationId:string){
+  setBusy(inviteId);setError("");
+  try{const response=await fetch("/api/notes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"respond-invite",inviteId,accept})});const result=await response.json();if(!response.ok)throw new Error(result.error??"Non è stato possibile rispondere all'invito.");setItems(current=>current.map(item=>item.id===notificationId?{...item,read_at:new Date().toISOString(),payload:{...item.payload,response:accept?"ACCEPTED":"DECLINED"}}:item));}
+  catch(e){setError(e instanceof Error?e.message:"Errore.");}finally{setBusy(null);}
+ }
+ async function respondFollow(followerId:string,accept:boolean,notificationId:string){
+  setBusy(followerId);setError("");
+  try{const supabase=createClient();const {error:rpcError}=await supabase.rpc("renqd_respond_follow_request",{p_follower_id:followerId,p_accept:accept});if(rpcError)throw rpcError;setItems(current=>current.map(item=>item.id===notificationId?{...item,read_at:new Date().toISOString(),payload:{...item.payload,response:accept?"ACCEPTED":"DECLINED"}}:item));}
+  catch(e){setError(e instanceof Error?e.message:"Non è stato possibile gestire la richiesta.");}finally{setBusy(null);}
+ }
  const unread=items.filter(item=>!item.read_at).length;
- return <div className="inbox-page"><div className="platform-page-heading"><div><div className="platform-overline">IL PUNTO DI INCONTRO</div><h1>La tua attività.</h1><p>Inviti e aggiornamenti sui tuoi spazi Renqd.</p></div></div><section className="inbox-welcome"><div className="inbox-welcome-icon"><Bell size={22}/></div><div><span>LA TUA INBOX</span><h2>{unread?unread+" notifiche da leggere":"Sei aggiornato."}</h2><p>Qui trovi gli inviti a collaborare e le novità che ti riguardano.</p></div><div className="inbox-welcome-mark"><CheckCheck size={34}/></div></section>{error&&<p className="notes-global-error" role="alert">{error}</p>}<div className="activity-notifications">{items.map(item=>{const isInvite=item.notification_type==="NOTES_INVITATION";const inviteId=String(item.payload.inviteId??"");const response=String(item.payload.response??"");const accepted=response==="ACCEPTED";const declined=response==="DECLINED";return <article className={"activity-notification"+(!item.read_at?" is-unread":"")} key={item.id}><span className="activity-notification-icon">{isInvite?<FileText size={19}/>:<Bell size={19}/>}</span><div className="activity-notification-copy">{isInvite?<><strong>@{String(item.payload.actorUsername??"Un utente Renqd")} ti ha invitato a collaborare</strong><p>{String(item.payload.resourceType)==="FOLDER"?"Cartella":"Documento"}: <b>{String(item.payload.resourceTitle??"Appunto")}</b></p></>:<><strong>Aggiornamento Renqd</strong><p>{item.notification_type}</p></>}<small>{new Date(item.created_at).toLocaleString("it-IT")}</small>{isInvite&&!response&&!item.read_at&&<div className="activity-notification-actions"><button type="button" disabled={busy===inviteId} onClick={()=>void respond(inviteId,true,item.id)}><Check size={15}/> Accetta</button><button type="button" disabled={busy===inviteId} onClick={()=>void respond(inviteId,false,item.id)}><X size={15}/> Rifiuta</button></div>}{isInvite&&response&&<small className="activity-response">{accepted?"Invito accettato":declined?"Invito rifiutato":response==="REVOKED"?"Invito revocato":"Invito aggiornato"}</small>}</div>{!item.read_at&&<i/>}</article>;})}{!items.length&&<div className="notes-empty"><Users size={28}/><strong>Ancora nessuna attività.</strong><p>Quando riceverai un invito, lo troverai qui.</p></div>}</div></div>;
+ return <div className="inbox-page"><div className="platform-page-heading"><div><div className="platform-overline">IL PUNTO DI INCONTRO</div><h1>La tua attività.</h1><p>Inviti e aggiornamenti che ti riguardano.</p></div></div><section className="inbox-welcome"><div className="inbox-welcome-icon"><Bell size={22}/></div><div><span>LA TUA INBOX</span><h2>{unread?unread+" notifiche da leggere":"Sei aggiornato."}</h2><p>Qui trovi inviti, richieste Follow e aggiornamenti Renqd.</p></div><div className="inbox-welcome-mark"><CheckCheck size={34}/></div></section>{error&&<p className="notes-global-error" role="alert">{error}</p>}<div className="activity-notifications">{items.map(item=>{
+  const isInvite=item.notification_type==="NOTES_INVITATION";const isFollowRequest=item.notification_type==="FOLLOW_REQUEST";const isFollowAccepted=item.notification_type==="FOLLOW_ACCEPTED";const response=String(item.payload.response??"");const accepted=response==="ACCEPTED";const declined=response==="DECLINED";const inviteId=String(item.payload.inviteId??"");const followerId=String(item.payload.followerId??"");
+  return <article className={"activity-notification"+(!item.read_at?" is-unread":"")} key={item.id}><span className="activity-notification-icon">{isInvite?<FileText size={19}/>:isFollowRequest||isFollowAccepted?<Users size={19}/>:<Bell size={19}/>}</span><div className="activity-notification-copy">
+   {isInvite?<><strong>@{String(item.payload.actorUsername??"Un utente Renqd")} ti ha invitato a collaborare</strong><p>{String(item.payload.resourceType)==="FOLDER"?"Cartella":"Documento"}: <b>{String(item.payload.resourceTitle??"Appunto")}</b></p></>:isFollowRequest?<><strong>@{String(item.payload.followerUsername??"Un utente Renqd")} vuole seguirti</strong><p>Richiesta di follow per il tuo profilo.</p></>:isFollowAccepted?<><strong>La tua richiesta di follow è stata accettata</strong><p>@{String(item.payload.followedUsername??"Un utente Renqd")} ora ti segue.</p></>:<><strong>Aggiornamento Renqd</strong><p>{item.notification_type}</p></>}
+   <small>{new Date(item.created_at).toLocaleString("it-IT")}</small>
+   {isInvite&&!response&&<div className="activity-notification-actions"><button type="button" disabled={busy===inviteId} onClick={()=>void respondInvite(inviteId,true,item.id)}><Check size={15}/> Accetta</button><button type="button" disabled={busy===inviteId} onClick={()=>void respondInvite(inviteId,false,item.id)}><X size={15}/> Rifiuta</button></div>}
+   {isFollowRequest&&!response&&<div className="activity-notification-actions"><button type="button" disabled={busy===followerId} onClick={()=>void respondFollow(followerId,true,item.id)}><Check size={15}/> Accetta</button><button type="button" disabled={busy===followerId} onClick={()=>void respondFollow(followerId,false,item.id)}><X size={15}/> Rifiuta</button></div>}
+   {response&&<small className="activity-response">{accepted?"Richiesta accettata":declined?"Richiesta rifiutata":response==="REVOKED"?"Invito revocato":"Invito aggiornato"}</small>}
+  </div>{!item.read_at&&<i/>}</article>;
+ })}{!items.length&&<div className="notes-empty"><Users size={28}/><strong>Ancora nessuna attività.</strong><p>Quando riceverai un invito o una richiesta, la troverai qui.</p></div>}</div></div>;
 }
