@@ -72,7 +72,7 @@ export function DirectMessages({
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(Boolean(initialConversationId));
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [mobileChatOpen, setMobileChatOpen] = useState(Boolean(initialConversationId));
@@ -115,7 +115,6 @@ export function DirectMessages({
     conversationId: string,
     otherUserId: string,
   ) => {
-    setLoading(true);
     setError("");
     const supabase = createClient();
     const [{ data, error: messageError }, { data: readRows }] = await Promise.all([
@@ -379,6 +378,7 @@ export function DirectMessages({
               key={item.id}
               className={"dm-conversation-item" + (activeId === item.id ? " is-active" : "")}
               onClick={() => {
+                setLoading(true);
                 setActiveId(item.id);
                 setMobileChatOpen(true);
               }}
