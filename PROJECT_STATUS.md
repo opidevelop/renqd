@@ -1030,3 +1030,23 @@ Revisione della migrazione di hardening:
 - Nessuna migrazione SQL aggiuntiva prevista per queste modifiche.
 - CI e build: da verificare sul commit risultante.
 - Nessun deployment Production eseguito; il collaudo browser finale resta necessario.
+
+
+## 43. Rifinitura scroll, Scopri, discografia e lobby multiplayer — 19 novembre 2026
+
+### Modifiche repository
+- `components/renqd-wheel.tsx`: mantenuto il launcher desktop nella presentazione già approvata; il launcher mobile resta circolare con sola emoji.
+- `app/(platform)/platform.css`: ripristinato lo scroll naturale del documento; header e sidebar restano fissi su desktop, header e navigazione inferiore restano fissi su mobile. Rimossa la dipendenza dallo scroll interno permanente del contenitore centrale.
+- `app/(platform)/explore/page.tsx` e `app/(platform)/social.css`: Scopri ridisegnata a mosaico con ricerca/suggerimenti e Feed affiancati; rimossi i vecchi blocchi introduttivi e le categorie.
+- `components/create-renq-form.tsx`: esclusi checkbox e radio dallo scroll automatico al focus, evitando il riposizionamento della pagina durante la selezione dei brani.
+- `components/multiplayer-session-panel.tsx`: aggiornamento automatico periodico e al ritorno sulla scheda; il partecipante che termina resta in lobby; quando la sessione è svelata il risultato viene aperto automaticamente, mantenendo un CTA grande come fallback.
+- `app/(platform)/multiplayer.css`: lobby ridisegnata con gerarchia visiva, card e stato del risultato più evidenti.
+- `app/api/rankings/route.ts` e `components/create-renq-form.tsx`: per qualsiasi sessione multiplayer la visibilità viene imposta lato server a `REVEAL` e l’accesso viene forzato a privato; i relativi selettori non vengono mostrati nel builder multiplayer.
+- Aggiornato `PROJECT_DECISIONS.md` con le nuove decisioni approvate.
+
+### Verifiche
+- Implementazione repository: modifiche preparate su main.
+- Build/TypeScript/ESLint: da verificare tramite GitHub Actions sul commit risultante.
+- Verifica browser autenticata desktop/mobile e test multiplayer con due account: da eseguire nel collaudo finale unico.
+- Database: nessuna migrazione SQL prevista da queste modifiche; il flusso di creazione usa RPC multiplayer già esistenti.
+- Deployment Production: da avviare direttamente sul commit risultante dopo CI, senza deployment Preview intermedi.

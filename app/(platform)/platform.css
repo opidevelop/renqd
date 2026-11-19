@@ -1194,3 +1194,7 @@
  .renqd-wheel-desktop-icon,.renqd-wheel-label{display:none!important}
  .renqd-wheel-mobile-emoji{display:inline!important;font-size:23px;line-height:1}
 }
+
+
+/* Natural document scrolling: only the desktop sidebar and global header stay fixed. */
+.platform-frame{height:auto!important;min-height:100vh!important;overflow:visible!important}.platform-main{display:block!important;height:auto!important;min-height:100vh!important;overflow:visible!important}.platform-sidebar{position:fixed!important;inset:0 auto 0 0!important}.platform-topbar{position:sticky!important;top:0!important;z-index:100!important;flex:none!important}.platform-content{flex:none!important;min-height:auto!important;overflow:visible!important;overscroll-behavior:auto!important;scrollbar-gutter:auto!important}@media(max-width:680px){.platform-frame{height:auto!important;min-height:100vh!important;overflow:visible!important}.platform-main{display:block!important;height:auto!important;min-height:100vh!important;overflow:visible!important;padding-bottom:calc(70px + env(safe-area-inset-bottom))!important}.platform-topbar{position:sticky!important;top:0!important;z-index:100!important;height:58px!important;min-height:58px!important}.platform-content{width:100%!important;flex:none!important;min-height:auto!important;overflow:visible!important;padding:20px 16px 30px!important}}

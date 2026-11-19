@@ -350,3 +350,15 @@ La decisione non modifica le specifiche funzionali già approvate per multiplaye
 - Feed non è una pagina autonoma: tutte le sue attività, i filtri e il caricamento progressivo fanno parte di Scopri. Il percorso storico /feed reindirizza a /explore.
 - La ruota temporanea si chiama **Wheel**. Su mobile il launcher mostra soltanto l'emoji 🎲, senza testo o icona aggiuntiva.
 - Durante la creazione di un Renq, in tutte le modalità individuali, l'azione è **Annulla Renq**, posizionata in fondo sotto il pulsante principale del passaggio. Non deve apparire un'azione «Elimina Renq» in cima alla schermata. L'annullamento usa il flusso dedicato di cancellazione della bozza, non la cancellazione definitiva.
+
+
+### Decisioni approvate — rifinitura desktop, Scopri e multiplayer (19 novembre 2026)
+
+- Desktop: header globale e sidebar restano fissi; lo scroll torna a essere quello naturale del documento e compare soltanto quando il contenuto supera l’altezza disponibile. Non deve esserci una scrollbar verticale permanente confinata al contenitore centrale. Su mobile resta fisso l’header e scorre il documento.
+- Wheel: mantenere il launcher desktop con la presentazione già approvata; su mobile il launcher resta circolare con la sola emoji 🎲.
+- Scopri: rimuovere integralmente i blocchi introduttivi «Trova il tuo prossimo mondo» ed «Esplora per categoria». La pagina diventa un layout a mosaico che distribuisce ricerca/suggerimenti e Feed nello spazio disponibile.
+- Discografia/Brani: selezionare o deselezionare una traccia non deve provocare scroll automatico o riposizionamento della pagina. Lo scroll assistito resta riservato ai campi di testo e agli altri controlli che ne hanno effettiva necessità.
+- Multiplayer: l’avvio della sessione deve propagarsi automaticamente a tutti i partecipanti senza richiedere «Aggiorna stato». Chi termina per primo resta nella lobby in attesa; al completamento dell’ultimo partecipante attivo il Reveal viene aperto automaticamente a tutti. Resta un pulsante grande di accesso al risultato come fallback.
+- Multiplayer: Reveal è obbligatorio per tutte le sessioni. Non mostrare le scelte Live/Reveal né Pubblico/Privato; server e database devono impostare Reveal e visibilità privata, con accesso al risultato per i partecipanti secondo le regole della sessione.
+- La scadenza del timer mantiene la decisione già approvata: il creatore può svelare oppure prorogare; la regola di Reveal automatico vale quando tutti i partecipanti attivi completano prima della scadenza.
+- La lobby multiplayer deve avere una gerarchia visiva più curata e rendere immediatamente leggibili partecipanti, stati, timer e risultato pronto.
