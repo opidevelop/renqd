@@ -21,7 +21,7 @@ export function NotesWorkspace({initialFolders,initialDocuments,initialCollabora
  const folderChain=useMemo(()=>{return (id:string|null)=>{const ids:string[]=[];let current=id;while(current){if(ids.includes(current))break;ids.push(current);current=folders.find(folder=>folder.id===current)?.parent_folder_id??null;}return ids;};},[folders]);
  const folderShared=(id:string|null)=>folderChain(id).some(id=>collaborators.some(item=>item.resource_type==="FOLDER"&&item.folder_id===id&&item.invited_user_id===userId&&item.status==="ACCEPTED"));
  const directDocumentShared=(id:string)=>collaborators.some(item=>item.resource_type==="DOCUMENT"&&item.document_id===id&&item.invited_user_id===userId&&item.status==="ACCEPTED");
- const canEdit=Boolean(activeDocument&&(activeDocument.owner_id===userId||folderChain(activeDocument.folder_id).some(id=>folders.find(folder=>folder.id===id)?.owner_id===userId)||(role!=="OWNER"&&(directDocumentShared(activeDocument.id)||folderShared(activeDocument.folder_id)))));
+ const canEdit=Boolean(activeDocument&&(activeDocument.owner_id===userId||folderChain(activeDocument.folder_id).some(id=>folders.find(folder=>folder.id===id)?.owner_id===userId)||(directDocumentShared(activeDocument.id)||folderShared(activeDocument.folder_id))));
  const ownerViewer=Boolean(role==="OWNER"&&activeDocument&&!canEdit);
  const canCreate=folderId===null||activeFolder?.owner_id===userId||folderShared(folderId);
  const canManageFolder=Boolean(activeFolder&&(activeFolder.owner_id===userId||folderChain(folderId).some(id=>folders.find(folder=>folder.id===id)?.owner_id===userId)));

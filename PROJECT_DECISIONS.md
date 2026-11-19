@@ -274,7 +274,7 @@
 - Consentire inviti a collaborare su una singola cartella o su un singolo documento. Gli inviti sono notificati nell'area «Attività» e l'accesso decorre soltanto dopo accettazione.
 - La condivisione di una cartella comprende automaticamente documenti e sottocartelle esistenti e futuri.
 - Il proprietario può modificare, eliminare e gestire gli inviti. Il collaboratore può modificare i contenuti condivisi, ma non eliminare la cartella originale né revocare gli accessi degli altri collaboratori.
-- OWNER di piattaforma può consultare tutti gli Appunti senza diventare automaticamente collaboratore.
+- OWNER di piattaforma può consultare tutti gli Appunti senza diventare automaticamente collaboratore; se invitato e accetta, può modificare i contenuti condivisi come collaboratore, senza acquisire la gestione della cartella originale o degli inviti altrui.
 ### Anteprima musicale
 - Nella selezione dei brani della discografia deve essere disponibile la stessa anteprima audio già utilizzata nella visualizzazione delle classifiche album.
 - Riutilizzare i metadati preview già disponibili e mantenere un solo audio attivo globalmente; non introdurre un sistema audio parallelo.

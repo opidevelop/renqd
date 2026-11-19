@@ -597,3 +597,9 @@ Revisione della migrazione di hardening:
 
 - Rafforzata la funzione SQL di sanitizzazione per neutralizzare anche i caratteri di controllo usati come marcatori temporanei: test specifico verificato, il tentativo di ricostruire un tag HTML tramite tali caratteri resta testo inerte.
 - Migrazione applicata e sincronizzata: `20261119081550_renqd_notes_sanitizer_control_character_guard`. Totale migrazioni Supabase: 48.
+
+
+## 23. Collaborazione esplicita per OWNER — 19 novembre 2026
+
+- Chiarito il modello dei permessi: l'OWNER di piattaforma può consultare tutti gli Appunti in sola lettura senza diventare collaboratore; se riceve e accetta esplicitamente un invito, opera come collaboratore sui contenuti condivisi. Non acquisisce per questo la gestione della cartella originale o degli inviti altrui.
+- Migrazione applicata e sincronizzata: `20261119081709_renqd_notes_explicit_owner_collaboration`. Totale migrazioni Supabase: 49.
