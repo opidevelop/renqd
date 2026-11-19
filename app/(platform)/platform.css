@@ -1136,3 +1136,8 @@
 .notes-toolbar button:active,.notes-tabbar button:active{transform:scale(.96)}
 .notes-item-card:focus-visible,.notes-folder-row:focus-visible,.notes-tag-filter:focus-visible{outline:2px solid #e99a58;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.notes-folder-row,.notes-item-card,.notes-toolbar button,.notes-tabbar button,.notes-primary,.notes-list-actions button,.notes-create-folder button{transition:none}}
+
+
+@keyframes notes-panel-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.notes-breadcrumb,.notes-editor-top,.notes-toolbar,.notes-document-tags,.notes-tabbar,.notes-editor,.notes-editor-footer,.notes-list-heading,.notes-folder-tags-editor,.notes-items,.notes-share-panel{animation:notes-panel-enter .24s cubic-bezier(.2,.75,.25,1) both}
+@media(prefers-reduced-motion:reduce){.notes-breadcrumb,.notes-editor-top,.notes-toolbar,.notes-document-tags,.notes-tabbar,.notes-editor,.notes-editor-footer,.notes-list-heading,.notes-folder-tags-editor,.notes-items,.notes-share-panel{animation:none}}
