@@ -87,6 +87,16 @@ export async function POST(request:Request){
   const {data,error}=await supabase.rpc("renqd_multiplayer_battle_choice",{p_ranking_id:rankingId,p_winner_item_id:body.isTie?null:body.winnerId,p_is_tie:body.isTie});
   if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
  }
+ if(body.action==="submit-proposal"){
+  if(!rankingId||!body.proposedSnapshot||typeof body.proposedSnapshot!=="object"||Array.isArray(body.proposedSnapshot))return jsonError("Proposta non valida.");
+  const {data,error}=await supabase.rpc("renqd_submit_multiplayer_proposal",{p_ranking_id:rankingId,p_proposed_snapshot:body.proposedSnapshot});
+  if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
+ }
+ if(body.action==="vote-proposal"){
+  if(typeof body.proposalId!=="string"||!UUID_PATTERN.test(body.proposalId)||!["APPROVED","REJECTED"].includes(body.decision))return jsonError("Voto non valido.");
+  const {data,error}=await supabase.rpc("renqd_vote_multiplayer_proposal",{p_proposal_id:body.proposalId,p_decision:body.decision});
+  if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
+ }
  if(body.action==="revoke-invitation"){
   if(typeof body.participantId!=="string"||!UUID_PATTERN.test(body.participantId))return jsonError("Invito non valido.");
   const {error}=await supabase.rpc("renqd_revoke_multiplayer_invitation",{p_participant_id:body.participantId});
