@@ -284,3 +284,12 @@
 - La ruota permette aggiunta/rimozione elementi, colori assegnati o casuali, animazione di estrazione, evidenza del vincitore e coriandoli; suoni di rotazione/vincita attivabili o disattivabili.
 - Prevedere l'opzione per rimuovere il vincitore dalla ruota dopo l'estrazione.
 - Il multiplayer ranking resta rinviato fino al collaudo di queste funzionalità.
+
+
+## Decisioni approvate — rifinitura Appunti (19 novembre 2026)
+
+- Cartelle e documenti devono avere feedback di interazione evidente: cursore pointer, hover e transizioni leggere, rispettando `prefers-reduced-motion`.
+- Il modulo di creazione cartelle deve essere ridisegnato in modo coerente e leggibile.
+- L'editor deve supportare formattazione avanzata, inclusi colori del testo, evidenziazione e tabelle, mantenendo autosalvataggio, sincronizzazione e sanitizzazione server/database.
+- Cartelle e documenti possono avere tag. I tag assegnati a una cartella sono ereditati da tutte le sottocartelle e dai documenti discendenti; ogni documento può inoltre avere tag propri.
+- La sezione «I tuoi tag» compare sotto «Le tue cartelle» e filtra i contenuti accessibili all'utente, senza esporre nomi o contenuti di risorse non accessibili.
