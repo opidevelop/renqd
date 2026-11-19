@@ -1,6 +1,6 @@
 import type { CatalogCategory, CatalogEntity, CatalogItem, CatalogProvider } from "./types";
 
-async function requestCatalog<T>(path: string, provider: string, action: "search" | "items" | "seasons, contentType: string, values: Record<string, string>): Promise<T> {
+async function requestCatalog<T>(path: string, provider: string, action: "search" | "items" | "seasons", contentType: string, values: Record<string, string>): Promise<T> {
   const params = new URLSearchParams({ provider, action, contentType, ...values });
   const response = await fetch(path + "?" + params.toString());
   if (!response.ok) {
