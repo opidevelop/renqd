@@ -931,6 +931,10 @@
 .renqd-confirm-cancel{background:transparent;color:var(--ink,#292521)}
 .renqd-confirm-submit{border-color:#c7793d!important;background:#c7793d;color:#fff}
 .renqd-confirm-dialog.is-danger .renqd-confirm-submit{border-color:#b64e42!important;background:#b64e42}
+.notes-input-dialog>label,.notes-table-fields label{display:grid;gap:7px;margin:18px 0;color:var(--muted,#81786f);font-size:12px;font-weight:700}
+.notes-input-dialog input{width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--line,#ded8d0);border-radius:10px;padding:11px 12px;background:var(--surface,#fff);color:var(--ink,#292521);font:inherit;font-size:14px}
+.notes-table-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 20px}
+.notes-table-fields label{margin:0}
 .renqd-confirm-actions button:focus-visible,.saved-renq-history-toggle:focus-visible{outline:3px solid rgba(199,121,61,.32);outline-offset:3px}
 .saved-renq-history-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;margin:8px 0 0;padding:12px 0;border:0;border-top:1px solid var(--border);background:transparent;color:var(--muted-foreground);font:inherit;font-size:12px;font-weight:750;text-align:left;cursor:pointer}
 .saved-renq-history-toggle svg{transition:transform .2s ease}
