@@ -621,3 +621,9 @@ Revisione della migrazione di hardening:
 
 - Abilitata la tabella `notes_collaborators` su Supabase Realtime. L'elenco dei collaboratori e lo stato degli inviti si aggiornano anche quando un altro utente accetta, rifiuta o riceve una revoca mentre la cartella/documento è aperto.
 - Migrazione applicata e sincronizzata: `20261119082218_renqd_notes_collaborators_realtime`. Totale migrazioni Supabase: 52.
+
+
+## 27. Gate RLS per account approvati — 19 novembre 2026
+
+- Rafforzate tutte le policy RLS e le funzioni di accesso/modifica Appunti: ogni operazione di lettura, creazione, modifica, eliminazione o consultazione delle collaborazioni richiede ora un account APPROVED. Il controllo è applicato anche alle richieste dirette a Supabase, non soltanto alle pagine Next.js e alle API applicative.
+- Migrazione applicata e sincronizzata: `20261119082439_renqd_notes_approved_account_rls_gate`. Totale migrazioni Supabase: 53.
