@@ -55,12 +55,13 @@ async function loadRealitySeasonCast(showId:number,seasonNumber:number,showTitle
 }
 async function loadAllRealityCast(showId:number,showTitle:string){
  const details=await tmdb<TmdbShowDetails>(`/tv/${showId}`);
+ const resolvedShowTitle=details.name||showTitle;
  const seasons=(details.seasons??[]).filter(season=>season.season_number>0);
  const credits:TmdbSeasonCredits[]=[];
  for(let index=0;index<seasons.length;index+=4){const batch=await Promise.all(seasons.slice(index,index+4).map(season=>tmdb<TmdbSeasonCredits>(`/tv/${showId}/season/${season.season_number}/credits`)));credits.push(...batch);}
  const people=new Map<number,{person:TmdbCastPerson;seasons:number[]}>();
  credits.forEach((entry,index)=>{const seasonNumber=seasons[index].season_number;for(const person of [...(entry.cast??[]),...(entry.guest_stars??[])]){if(!person?.id||!person.name)continue;const existing=people.get(person.id);if(existing){if(!existing.seasons.includes(seasonNumber))existing.seasons.push(seasonNumber);}else people.set(person.id,{person,seasons:[seasonNumber]});}});
- return [...people.values()].map(({person,seasons:seasonNumbers})=>({id:`tmdb-person-${person.id}`,title:person.name,subtitle:`${showTitle} · ${seasonNumbers.map(n=>`S${n}`).join(", ")}`,imageUrl:image(person.profile_path),payload:{tmdbId:showId,tmdbPersonId:person.id,seasonNumbers,mediaType:"reality-contestant"}}));
+ return [...people.values()].map(({person,seasons:seasonNumbers})=>({id:`tmdb-person-${person.id}`,title:person.name,subtitle:`${resolvedShowTitle} · ${seasonNumbers.map(n=>`S${n}`).join(", ")}`,imageUrl:image(person.profile_path),payload:{tmdbId:showId,tmdbPersonId:person.id,seasonNumbers,mediaType:"reality-contestant"}}));
 }
 async function loadItems(payload:Record<string,unknown>,contentType:string){
  const id=Number(payload.tmdbId);
