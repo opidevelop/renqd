@@ -1097,3 +1097,25 @@ Revisione della migrazione di hardening:
 - `components/renqd-wheel.tsx`: il launcher e il pannello vengono ora renderizzati con `createPortal` direttamente in `document.body`, dopo il mount client. Il nodo non è più discendente di `.platform-frame` né di contenitori applicativi che possano alterare il containing block di `position: fixed`.
 - La posizione del launcher resta gestita da CSS `position: fixed` rispetto al viewport; il pannello conserva lo stato di apertura, trascinamento e gli elementi temporanei.
 - Nessuna modifica al database. CI e build di produzione da verificare sul commit risultante; deploy Production da eseguire solo dopo CI verde e autorizzazione dell'utente.
+
+
+## 47. Fonti Reality TV e pagina attribuzioni — 19 novembre 2026
+
+### Catalogo Reality TV
+- Aggiunto `lib/catalog/reality-sources.ts` con interrogazione delle API MediaWiki di Wikipedia italiana e Big Brother Wiki su Fandom.
+- Il recupero dei concorrenti prova prima Wikipedia e poi Fandom; se entrambe non restituiscono una lista utilizzabile, resta il fallback TMDB già presente.
+- La ricerca del programma, le stagioni e le immagini continuano a utilizzare TMDB.
+- Gli elementi recuperati da Wikipedia/Fandom conservano nei payload `sourceProvider` e `sourceUrl`, oltre all'identificativo TMDB del programma.
+- L'estrazione automatica si basa sulle sezioni e sulle righe tabellari delle pagine wiki; copertura e correttezza devono essere collaudate su edizioni reali, perché la struttura delle pagine non è uniforme.
+
+### Attribuzioni e interfaccia
+- Aggiunta la pagina autenticata `/attributions` con sezioni per Wikipedia, Fandom Big Brother Wiki e TMDB, licenze/condizioni e link alle fonti.
+- Aggiunta nel solo footer della Home autenticata `/home` una piccola icona informativa ⓘ che apre la pagina.
+- Nessun collegamento alle attribuzioni è stato aggiunto al footer globale o alle altre pagine.
+- Aggiornato `PROJECT_DECISIONS.md` con l'ordine delle fonti e i vincoli di collocazione dell'icona.
+
+### Verifiche e rilascio
+- Commit applicativi/documentali: da consolidare e verificare.
+- TypeScript, ESLint e Production Build: da verificare tramite CI.
+- Test funzionale su Grande Fratello VIP 6 e su un reality internazionale: da eseguire; non considerare ancora validata la copertura dell'estrazione wiki.
+- Deployment Production: richiesto dall'utente, da eseguire dopo CI verde e verifica del limite giornaliero Vercel.
