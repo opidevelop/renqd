@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
 import { usePathname } from "next/navigation";
-import { House, Compass, Inbox, Plus, UserRound, LogOut, Trophy, ChevronDown, ShieldCheck } from "lucide-react";
-const nav=[{href:"/home",label:"Home",icon:House},{href:"/explore",label:"Scopri",icon:Compass},{href:"/create",label:"Crea",icon:Plus},{href:"/rankings",label:"Renq",icon:Trophy},{href:"/inbox",label:"Attività",icon:Inbox},{href:"/profile",label:"Profilo",icon:UserRound}];
+import { House, Compass, Inbox, Plus, UserRound, FileText, LogOut, Trophy, ChevronDown, ShieldCheck } from "lucide-react";
+const nav=[{href:"/home",label:"Home",icon:House},{href:"/explore",label:"Scopri",icon:Compass},{href:"/create",label:"Crea",icon:Plus},{href:"/rankings",label:"Renq",icon:Trophy},{href:"/notes",label:"Appunti",icon:FileText},{href:"/inbox",label:"Attività",icon:Inbox},{href:"/profile",label:"Profilo",icon:UserRound}];
 export function PlatformShell({children,avatarUrl,avatarPosition={x:50,y:50},avatarZoom=100,displayName,username,role}:{children:React.ReactNode;avatarUrl:string|null;avatarPosition?:{x:number;y:number};avatarZoom?:number;displayName:string;username:string;role:string}){
  const pathname=usePathname();const [menuOpen,setMenuOpen]=useState(false);const menuRef=useRef<HTMLDivElement>(null);const isStaff=role==="OWNER"||role==="ADMIN"||role==="MODERATOR";const visibleNav=[...nav,...(isStaff?[{href:"/admin",label:"Dashboard",icon:ShieldCheck}]:[])];
  useEffect(()=>{if(!menuOpen)return;const close=(event:PointerEvent)=>{if(!menuRef.current?.contains(event.target as Node))setMenuOpen(false);};const key=(event:KeyboardEvent)=>{if(event.key==="Escape")setMenuOpen(false);};document.addEventListener("pointerdown",close);document.addEventListener("keydown",key);return()=>{document.removeEventListener("pointerdown",close);document.removeEventListener("keydown",key);};},[menuOpen]);
