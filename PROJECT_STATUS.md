@@ -627,3 +627,13 @@ Revisione della migrazione di hardening:
 
 - Rafforzate tutte le policy RLS e le funzioni di accesso/modifica Appunti: ogni operazione di lettura, creazione, modifica, eliminazione o consultazione delle collaborazioni richiede ora un account APPROVED. Il controllo è applicato anche alle richieste dirette a Supabase, non soltanto alle pagine Next.js e alle API applicative.
 - Migrazione applicata e sincronizzata: `20261119082439_renqd_notes_approved_account_rls_gate`. Totale migrazioni Supabase: 53.
+
+
+## 27. Chiusura controlli tecnici e deploy — 19 novembre 2026
+
+- Branch di lavoro: `main`; commit applicativo verificato: `62da44d8bbe3f935d9910871a906e9dd1f754d57` (`Track active folder in notes realtime subscription`).
+- GitHub Actions Code quality: TypeScript check, ESLint e Production build completati con esito `success` sul commit applicativo.
+- Vercel Production: deployment `dpl_2ZtBNLvwZqifzrd5C6hwHsMu8Ejo` in stato `READY`; alias `renqd.app` verificato e associato allo stesso deployment.
+- Supabase: 53 migrazioni registrate; repository: 53 file SQL. Conteggio allineato.
+- La build include la route `/notes`; non sono stati eseguiti test end-to-end autenticati con due account reali. Condivisione, revoca e sincronizzazione richiedono ancora collaudo funzionale in ambiente utente.
+- Esito: controlli statici e build superati; deploy Production completato. Nessuna dichiarazione di test end-to-end.
