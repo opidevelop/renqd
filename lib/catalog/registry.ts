@@ -1,6 +1,6 @@
 import type { CatalogCategory, CatalogEntity, CatalogItem, CatalogProvider } from "./types";
 
-async function requestCatalog<T>(path: string, provider: string, action: "search" | "items", contentType: string, values: Record<string, string>): Promise<T> {
+async function requestCatalog<T>(path: string, provider: string, action: "search" | "items" | "seasons, contentType: string, values: Record<string, string>): Promise<T> {
   const params = new URLSearchParams({ provider, action, contentType, ...values });
   const response = await fetch(path + "?" + params.toString());
   if (!response.ok) {
@@ -43,7 +43,7 @@ const gamesProvider: CatalogProvider = {
 
 const filmProvider: CatalogProvider = {
   id: "tmdb",
-  supports: (category, contentType) => category === "film" && ["Film", "Serie TV", "Saghe cinematografiche", "Registi", "Attori", "Creatori"].includes(contentType),
+  supports: (category, contentType) => category === "film" && ["Film", "Serie TV", "Reality TV", "Reality TV - season", "Reality TV - all", "Saghe cinematografiche", "Registi", "Attori", "Creatori"].includes(contentType),
   async search(query, _category, contentType, offset = 1) {
     return requestCatalog<{ entities: CatalogEntity[]; hasMore?: boolean; nextOffset?: number }>("/api/catalog/film", "tmdb", "search", contentType, { query, offset: String(offset) });
   },
@@ -102,6 +102,11 @@ export async function searchCatalog(query: string, category: CatalogCategory, co
     hasMore,
     nextOffset,
   };
+}
+
+export async function loadRealitySeasons(entity:CatalogEntity){
+ const result=await requestCatalog<{entities:CatalogEntity[]}>("/api/catalog/film","tmdb","seasons","Reality TV",{payload:JSON.stringify(entity.payload??{})});
+ return result.entities;
 }
 
 export async function loadCatalogItems(entity: CatalogEntity, category: CatalogCategory, contentType: string, discographyMode: "albums" | "tracks" = "albums") {

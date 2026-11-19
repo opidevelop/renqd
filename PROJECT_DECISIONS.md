@@ -371,3 +371,13 @@ La decisione non modifica le specifiche funzionali già approvate per multiplaye
 - La Wheel deve restare disponibile nelle impostazioni di creazione e durante le esperienze di ranking/modifica; viene montata una sola volta nel guscio autenticato, non nelle singole pagine.
 - La navigazione inferiore mobile deve rimanere fissata al bordo inferiore del viewport durante tutto lo scroll del contenuto.
 - La lobby multiplayer mostra la copertina del contenuto rankato, usando prima la copertina caricata/selezionata, poi la copertina predefinita della categoria. La palette della copertina alimenta lo sfondo dinamico della lobby; in assenza di immagine resta un fallback grafico coerente.
+
+
+### Decisione approvata — catalogo Reality TV (19 novembre 2026)
+
+- In Film e serie è disponibile una tipologia autonoma **Reality TV**, distinta da Film, Serie TV, Registi, Attori e Creatori.
+- La selezione offre due modalità graficamente coerenti con il selettore Album/Brani della Discografia: **Per reality** e **Per stagione**.
+- Per stagione: si cerca il programma, si seleziona il reality, vengono mostrate le stagioni censite (es. Grande Fratello VIP 1, 2, …); scelta una stagione, gli elementi rankabili sono i partecipanti con nome e foto disponibili per quell'edizione.
+- Per reality: si cerca e seleziona il programma; gli elementi rankabili sono i partecipanti raccolti da tutte le stagioni censite, deduplicati per identificativo persona e con foto disponibili.
+- Il catalogo TMDB già integrato viene riutilizzato per ricerca programmi, stagioni e crediti/cast. La copertura dipende dai dati presenti nel provider; non dichiarare esaustivo un cast se il catalogo non lo documenta.
+- La lista di partecipanti viene caricata dinamicamente e può essere rivista nel riepilogo prima di avviare il Renq.

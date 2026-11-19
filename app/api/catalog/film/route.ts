@@ -9,6 +9,10 @@ type TmdbShow = { id:number; name:string; original_name?:string; first_air_date?
 type TmdbPerson = { id:number; name:string; known_for_department?:string; profile_path?:TmdbImage; known_for?:Array<{title?:string;name?:string}> };
 type TmdbCollection = { id:number; name:string; poster_path?:TmdbImage; parts?:TmdbMovie[] };
 type TmdbCredits = { cast?:Array<TmdbMovie & {character?:string}>; crew?:Array<TmdbMovie & {job?:string;department?:string}> };
+type TmdbSeason = {id:number;name:string;overview?:string;poster_path?:TmdbImage;season_number:number;air_date?:string;episode_count?:number};
+type TmdbShowDetails = {id:number;name:string;poster_path?:TmdbImage;seasons?:TmdbSeason[]};
+type TmdbCastPerson = {id:number;name:string;profile_path?:TmdbImage;known_for_department?:string};
+type TmdbSeasonCredits = {cast?:TmdbCastPerson[];guest_stars?:TmdbCastPerson[]};
 
 const API="https://api.themoviedb.org/3";
 const IMAGE="https://image.tmdb.org/t/p/w500";
@@ -37,10 +41,26 @@ async function searchPeople(query:string,contentType:string,page:number){const d
 async function searchCollections(query:string,page:number){const data=await tmdb<{results:TmdbCollection[];total_pages:number}>("/search/collection",{query,page:String(page)});return{entities:(data.results??[]).map(collectionEntity),hasMore:page<data.total_pages,nextOffset:page+1};}
 async function searchEntities(query:string,contentType:string,page:number){
  if(contentType==="Film")return searchMovies(query,page);
+ if(contentType==="Reality TV")return searchShows(query,page);
  if(contentType==="Serie TV")return searchShows(query,page);
  if(contentType==="Saghe cinematografiche")return searchCollections(query,page);
  if(["Registi","Attori","Creatori"].includes(contentType))return searchPeople(query,contentType,page);
  throw new Error("Unsupported film and TV catalog type");
+}
+async function loadRealitySeasonCast(showId:number,seasonNumber:number,showTitle:string){
+ const credits=await tmdb<TmdbSeasonCredits>(`/tv/${showId}/season/${seasonNumber}/credits`);
+ const unique=new Map<number,TmdbCastPerson>();
+ for(const person of [...(credits.cast??[]),...(credits.guest_stars??[])])if(person?.id&&person.name)unique.set(person.id,person);
+ return [...unique.values()].map(person=>({id:`tmdb-person-${person.id}`,title:person.name,subtitle:`${showTitle} · Stagione ${seasonNumber}`,imageUrl:image(person.profile_path),payload:{tmdbId:showId,tmdbPersonId:person.id,seasonNumbers:[seasonNumber],mediaType:"reality-contestant"}}));
+}
+async function loadAllRealityCast(showId:number,showTitle:string){
+ const details=await tmdb<TmdbShowDetails>(`/tv/${showId}`);
+ const seasons=(details.seasons??[]).filter(season=>season.season_number>0);
+ const credits:TmdbSeasonCredits[]=[];
+ for(let index=0;index<seasons.length;index+=4){const batch=await Promise.all(seasons.slice(index,index+4).map(season=>tmdb<TmdbSeasonCredits>(`/tv/${showId}/season/${season.season_number}/credits`)));credits.push(...batch);}
+ const people=new Map<number,{person:TmdbCastPerson;seasons:number[]}>();
+ credits.forEach((entry,index)=>{const seasonNumber=seasons[index].season_number;for(const person of [...(entry.cast??[]),...(entry.guest_stars??[])]){if(!person?.id||!person.name)continue;const existing=people.get(person.id);if(existing){if(!existing.seasons.includes(seasonNumber))existing.seasons.push(seasonNumber);}else people.set(person.id,{person,seasons:[seasonNumber]});}});
+ return [...people.values()].map(({person,seasons:seasonNumbers})=>({id:`tmdb-person-${person.id}`,title:person.name,subtitle:`${showTitle} · ${seasonNumbers.map(n=>`S${n}`).join(", ")}`,imageUrl:image(person.profile_path),payload:{tmdbId:showId,tmdbPersonId:person.id,seasonNumbers,mediaType:"reality-contestant"}}));
 }
 async function loadItems(payload:Record<string,unknown>,contentType:string){
  const id=Number(payload.tmdbId);
@@ -55,6 +75,11 @@ async function loadItems(payload:Record<string,unknown>,contentType:string){
   const unique=new Map<number,TmdbMovie>();for(const movie of movies)unique.set(movie.id,movie);
   return[...unique.values()].sort((a,b)=>(a.release_date??"").localeCompare(b.release_date??"")).map(movieItem);
  }
+ if(contentType==="Reality TV - season"){
+  const seasonNumber=Number(payload.seasonNumber);if(!Number.isSafeInteger(seasonNumber)||seasonNumber<1)throw new Error("Invalid reality season number");
+  return loadRealitySeasonCast(id,seasonNumber,String(payload.showTitle??"Reality TV"));
+ }
+ if(contentType==="Reality TV - all")return loadAllRealityCast(id,String(payload.showTitle??"Reality TV"));
  if(contentType==="Creatori"){
   const credits=await tmdb<TmdbCredits>("/person/"+id+"/tv_credits");
   const shows=(credits.crew??[]).filter(item=>["Creator","Co-Creator","Series Creator"].includes(item.job??""));
@@ -72,8 +97,15 @@ export async function GET(request:NextRequest){
  const params=request.nextUrl.searchParams;
  const action=params.get("action");
  const contentType=params.get("contentType")??"";
- if(params.get("provider")!=="tmdb"||!["Film","Serie TV","Saghe cinematografiche","Registi","Attori","Creatori"].includes(contentType))return Response.json({error:"Unsupported film and TV catalog request."},{status:400});
+ if(params.get("provider")!=="tmdb"||!["Film","Serie TV","Reality TV","Reality TV - season","Reality TV - all","Saghe cinematografiche","Registi","Attori","Creatori"].includes(contentType))return Response.json({error:"Unsupported film and TV catalog request."},{status:400});
  try{
+  if(action==="seasons"&&contentType==="Reality TV"){
+   const raw=params.get("payload");if(!raw||raw.length>2000)return Response.json({error:"Reality show payload is missing or invalid."},{status:400});
+   const payload=JSON.parse(raw) as Record<string,unknown>;const id=Number(payload.tmdbId);if(!Number.isSafeInteger(id)||id<=0)return Response.json({error:"Invalid TMDB identifier"},{status:400});
+   const details=await tmdb<TmdbShowDetails>(`/tv/${id}`);
+   const entities=(details.seasons??[]).filter(season=>season.season_number>0).sort((a,b)=>a.season_number-b.season_number).map(season=>({id:`${id}:season:${season.season_number}`,title:`${details.name} ${season.season_number}`,subtitle:[year(season.air_date),season.episode_count?`${season.episode_count} episodi`:""].filter(Boolean).join(" · ")||season.name,imageUrl:image(season.poster_path??details.poster_path),provider:"tmdb",payload:{tmdbId:id,seasonNumber:season.season_number,showTitle:details.name,seasonName:season.name}} as CatalogEntity));
+   return Response.json({entities,hasMore:false,nextOffset:0},{headers:{"Cache-Control":"private, max-age=300, stale-while-revalidate=600"}});
+  }
   if(action==="search"){
    const query=safeText(params.get("query")??"");
    if(query.length<2)return Response.json({error:"La ricerca deve contenere almeno 2 caratteri."},{status:400});

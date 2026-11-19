@@ -1067,3 +1067,17 @@ Revisione della migrazione di hardening:
 - CI TypeScript, ESLint e Production Build: da eseguire sul commit risultante.
 - Test browser desktop/mobile, persistenza Wheel durante navigazione, posizione viewport durante scroll e copertina lobby con immagine privata/pubblica: da eseguire nel collaudo finale unico.
 - Nessun deployment Production intermedio.
+
+
+## 45. Catalogo Reality TV — 19 novembre 2026
+
+### Implementazione
+- Aggiunta la tipologia Reality TV in Film e serie, con selettore Per reality / Per stagione coerente con Discografia Album / Brani.
+- Ricerca dei programmi TMDB; recupero delle stagioni e dei cast per stagione; aggregazione deduplicata dei partecipanti per la modalità Per reality.
+- Gli elementi rankabili sono i concorrenti con nome, immagine profilo quando disponibile e metadati della stagione di provenienza.
+- La copertura dipende dai dati presenti nel provider TMDB; i cast mancanti non vengono inventati.
+
+### Verifiche
+- Database: nessuna migrazione prevista; viene riutilizzata l'integrazione TMDB e le API server-side già presenti.
+- Build, TypeScript, ESLint e test funzionali del flusso Reality TV: da verificare dopo il commit.
+- Nessun deployment Production intermedio; il rilascio resta cumulativo dopo il collaudo finale.
