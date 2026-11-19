@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useMemo,useRef,useState} from "react";
+import {useEffect,useMemo,useRef,useState,useSyncExternalStore} from "react";
 import type {PointerEvent} from "react";
 import {createPortal} from "react-dom";
 import {Dices,Plus,RotateCcw,Volume2,VolumeX,X,Trash2,Grip,Shuffle} from "lucide-react";
@@ -12,7 +12,6 @@ function playTone(kind:"spin"|"winner"){
 export function RenqdWheel(){
  const[portalReady,setPortalReady]=useState(false),[open,setOpen]=useState(false),[entries,setEntries]=useState<Entry[]>([]),[draft,setDraft]=useState(""),[sound,setSound]=useState(true),[removeWinner,setRemoveWinner]=useState(false),[spinning,setSpinning]=useState(false),[rotation,setRotation]=useState(0),[winner,setWinner]=useState<Entry|null>(null),[confetti,setConfetti]=useState(false),[position,setPosition]=useState({x:0,y:0});
  const dragRef=useRef<{x:number;y:number;left:number;top:number}|null>(null);
- useEffect(()=>{setPortalReady(true);},[]);
  const gradient=useMemo(()=>entries.length?"conic-gradient("+entries.map((entry,index)=>entry.color+" "+(index/entries.length*100)+"% "+((index+1)/entries.length*100)+"%").join(",")+")":"conic-gradient(#34343d 0% 100%)",[entries]);
  useEffect(()=>{if(!open)return;const move=(event:globalThis.PointerEvent)=>{const drag=dragRef.current;if(!drag)return;setPosition({x:Math.max(-window.innerWidth+320,Math.min(0,drag.left+event.clientX-drag.x)),y:Math.max(-window.innerHeight+260,Math.min(0,drag.top+event.clientY-drag.y))});};const end=()=>{dragRef.current=null;};window.addEventListener("pointermove",move);window.addEventListener("pointerup",end);return()=>{window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",end);};},[open]);
  function addEntry(){const label=draft.trim();if(!label||entries.some(entry=>entry.label.toLocaleLowerCase()===label.toLocaleLowerCase()))return;setEntries(current=>[...current,{id:makeId(),label,color:palette[current.length%palette.length]}]);setDraft("");setWinner(null);}
