@@ -150,7 +150,7 @@ export async function GET(request:NextRequest){
    if(!raw||raw.length>2000)return Response.json({error:"Catalog item payload is missing or invalid."},{status:400});
    const payload=JSON.parse(raw) as Record<string,unknown>;
    const items=await loadItems(payload,contentType);
-   return Response.json({items},{headers:{"Cache-Control":"private, max-age=300, stale-while-revalidate=600"}});
+   return Response.json({items},{headers:{"Cache-Control":"private, no-store, max-age=0"}});
   }
   return Response.json({error:"Unsupported catalog action."},{status:400});
  }catch(error){
