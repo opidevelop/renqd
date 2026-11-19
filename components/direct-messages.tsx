@@ -187,7 +187,7 @@ export function DirectMessages({
         "postgres_changes",
         { event: "*", schema: "public", table: "direct_message_reactions" },
         () => {
-          void loadReactions(messages.map((item) => item.id));
+          void loadMessages(activeId, active.otherUserId);
         },
       )
       .on(
@@ -215,9 +215,9 @@ export function DirectMessages({
     active?.otherUserId,
     currentUserId,
     loadMessages,
+    loadMessages,
     loadReactions,
     markRead,
-    messages,
   ]);
 
   useEffect(() => {
