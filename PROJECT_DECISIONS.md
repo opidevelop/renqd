@@ -399,3 +399,9 @@ La decisione non modifica le specifiche funzionali già approvate per multiplaye
 - L'accesso alla pagina resta soggetto al modello chiuso di Renqd: autenticazione e account approvato.
 - L'unico collegamento visibile alla pagina è una piccola icona informativa ⓘ collocata nel footer della Home `/home`, dopo tutti i contenuti. Non aggiungere collegamenti alle attribuzioni nel footer globale o nelle altre pagine.
 - Le attribuzioni devono rispettare la licenza della specifica pagina/community Fandom e le condizioni TMDB; non presumere che immagini o media Fandom siano riutilizzabili.
+
+
+### Chiarimento approvato il 19 novembre 2026 — Reality TV per stagione
+- Quando si seleziona una singola stagione, la fonte wiki deve essere una pagina riferita a quella specifica edizione/stagione. Non usare una pagina generica del programma come sostituto, perché riproporrebbe lo stesso elenco per tutte le stagioni.
+- Se Wikipedia e Fandom non hanno una pagina stagionale identificabile e utilizzabile, usare il fallback TMDB già previsto, senza spacciare il cast generale per cast della stagione.
+- Le richieste alle API wiki e la risposta `items` del catalogo non devono conservare cache stale che impediscano di vedere risultati aggiornati.
