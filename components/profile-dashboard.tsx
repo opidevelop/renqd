@@ -79,11 +79,6 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   const [avatarUrlInput, setAvatarUrlInput] = useState(initialProfile.avatar_url?.startsWith("https://") ? initialProfile.avatar_url : "");
   const [bannerUrlInput, setBannerUrlInput] = useState(initialProfile.banner_url?.startsWith("https://") ? initialProfile.banner_url : "");
   const [collectionBannerUrl, setCollectionBannerUrl] = useState("");
-  const [editingCollectionId, setEditingCollectionId] = useState<string | null>(null);
-  const [editingCollectionTitle, setEditingCollectionTitle] = useState("");
-  const [editingCollectionDescription, setEditingCollectionDescription] = useState("");
-  const [editingCollectionVisibility, setEditingCollectionVisibility] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
-  const [editingCollectionBannerUrl, setEditingCollectionBannerUrl] = useState("");
   const [collectionTitle, setCollectionTitle] = useState("");
   const [collectionDescription, setCollectionDescription] = useState("");
   const [collectionVisibility, setCollectionVisibility] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
@@ -255,125 +250,6 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       setMessage("Collezione creata.");
     } catch (e) { setError(e instanceof Error ? e.message : "Non è stato possibile creare la collezione."); }
     finally { setCreatingCollection(false); }
-  }
-
-  async function updateCollection(id: string, patch: Partial<Pick<Collection, "is_featured" | "visibility" | "banner_url" | "title" | "description" | "sort_order">>) {
-    const supabase = createClient();
-    const { error: updateError } = await supabase.from("profile_collections").update(patch).eq("id", id);
-    if (updateError) { setError(updateError.message); return false; }
-    setCollections(current => current.map(item => item.id === id ? { ...item, ...patch } : item));
-    return true;
-  }
-
-  function startEditingCollection(collection: Collection) {
-    setEditingCollectionId(collection.id);
-    setEditingCollectionTitle(collection.title);
-    setEditingCollectionDescription(collection.description || "");
-    setEditingCollectionVisibility(collection.visibility);
-    setEditingCollectionBannerUrl(collection.banner_url?.startsWith("https://") ? collection.banner_url : "");
-  }
-
-  async function saveCollectionDetails() {
-    if (!editingCollectionId || !editingCollectionTitle.trim()) return;
-    const banner = editingCollectionBannerUrl.trim() || null;
-    if (banner && !isHttpsUrl(banner)) { setError("Il banner deve usare un URL HTTPS valido."); return; }
-    if (banner && !(await isLoadableImageUrl(banner))) { setError("L’URL del banner non restituisce un’immagine valida."); return; }
-    const patch: Partial<Pick<Collection, "title" | "description" | "visibility" | "banner_url">> = {
-      title: editingCollectionTitle.trim().slice(0, 70),
-      description: editingCollectionDescription.trim().slice(0, 240),
-      visibility: editingCollectionVisibility,
-    };
-    if (banner) patch.banner_url = banner;
-    const updated = await updateCollection(editingCollectionId, patch);
-    if (!updated) return;
-    if (banner) setCollections(current => current.map(item => item.id === editingCollectionId ? { ...item, banner_display_url: banner } : item));
-    setEditingCollectionId(null);
-    setMessage("Collezione aggiornata.");
-  }
-
-  async function removeRenqFromCollection(collection: Collection, rankingId: string) {
-    const supabase = createClient();
-    const { error: deleteError } = await supabase.from("profile_collection_items").delete().eq("collection_id", collection.id).eq("ranking_id", rankingId);
-    if (deleteError) { setError(deleteError.message); return; }
-    setCollections(current => current.map(item => item.id === collection.id ? {
-      ...item,
-      item_count: Math.max(0, item.item_count - 1),
-      item_ids: item.item_ids.filter(id => id !== rankingId),
-      item_titles: item.item_titles.filter(entry => entry.id !== rankingId),
-    } : item));
-    setMessage("Renq rimosso dalla collezione.");
-  }
-
-  async function reorderCollectionItem(collection: Collection, rankingId: string, direction: -1 | 1) {
-    const currentIds = [...collection.item_ids];
-    const index = currentIds.indexOf(rankingId);
-    const target = index + direction;
-    if (index < 0 || target < 0 || target >= currentIds.length) return;
-    [currentIds[index], currentIds[target]] = [currentIds[target], currentIds[index]];
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setError("Sessione scaduta."); return; }
-    const { error: deleteError } = await supabase.from("profile_collection_items").delete().eq("collection_id", collection.id);
-    if (deleteError) { setError(deleteError.message); return; }
-    const { error: insertError } = await supabase.from("profile_collection_items").insert(currentIds.map((id, position) => ({ collection_id: collection.id, ranking_id: id, owner_id: user.id, position })));
-    if (insertError) {
-      await supabase.from("profile_collection_items").insert(collection.item_ids.map((id, position) => ({ collection_id: collection.id, ranking_id: id, owner_id: user.id, position })));
-      setError(insertError.message);
-      return;
-    }
-    setCollections(current => current.map(item => item.id === collection.id ? {
-      ...item,
-      item_ids: currentIds,
-      item_titles: currentIds.map(id => item.item_titles.find(entry => entry.id === id)).filter((entry): entry is NonNullable<typeof entry> => Boolean(entry)),
-    } : item));
-    setMessage("Ordine dei Renq aggiornato.");
-  }
-
-  async function moveCollection(collection: Collection, direction: -1 | 1) {
-    const ordered = [...collections].sort((a,b) => a.sort_order - b.sort_order);
-    const index = ordered.findIndex(item => item.id === collection.id);
-    const target = index + direction;
-    if (index < 0 || target < 0 || target >= ordered.length) return;
-    [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
-    const supabase = createClient();
-    for (let position = 0; position < ordered.length; position++) {
-      const { error: updateError } = await supabase.from("profile_collections").update({ sort_order: position }).eq("id", ordered[position].id);
-      if (updateError) { setError(updateError.message); return; }
-    }
-    setCollections(ordered.map((item, sort_order) => ({ ...item, sort_order })));
-  }
-
-  async function addRenqsToCollection(collection: Collection) {
-    const ids = collectionSelections[collection.id] ?? [];
-    const newIds = ids.filter(id => !collection.item_ids.includes(id));
-    if (!newIds.length) return;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setError("Sessione scaduta."); return; }
-    const { error: insertError } = await supabase.from("profile_collection_items").insert(newIds.map((rankingId,index)=>({ collection_id: collection.id, ranking_id: rankingId, owner_id: user.id, position: collection.item_count + index })));
-    if (insertError) { setError(insertError.message); return; }
-    setCollections(current=>current.map(item=>item.id===collection.id?{...item,item_count:item.item_count+newIds.length,item_ids:[...item.item_ids,...newIds]}:item));
-    setCollectionSelections(current=>({...current,[collection.id]:[]}));
-    setMessage("Renq aggiunti alla collezione.");
-  }
-
-  async function updateCollectionBanner(collection: Collection, file: File | null) {
-    if (!file) return;
-    try {
-      const uploaded = await uploadImage(file,"collection-banner");
-      await updateCollection(collection.id,{banner_url:uploaded.path});
-      setCollections(current => current.map(item => item.id === collection.id ? { ...item, banner_display_url: uploaded.url } : item));
-      setMessage("Banner della collezione aggiornato.");
-    } catch (e) { setError(e instanceof Error ? e.message : "Non è stato possibile aggiornare il banner."); }
-  }
-
-  async function deleteCollection(id: string) {
-    if (!(await confirm({title:"Eliminare la collezione?",description:"La collezione verrà eliminata, ma i Renq al suo interno non verranno cancellati.",confirmLabel:"Elimina collezione",tone:"danger"}))) return;
-    const supabase = createClient();
-    const { error: deleteError } = await supabase.from("profile_collections").delete().eq("id", id);
-    if (deleteError) { setError(deleteError.message); return; }
-    setCollections(current => current.filter(item => item.id !== id));
-    setMessage("Collezione eliminata.");
   }
 
   async function shareProfile() {
