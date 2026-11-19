@@ -70,7 +70,7 @@ async function loadAllRealityCast(showId:number,showTitle:string){
  const people=new Map<number,{person:TmdbCastPerson;seasons:number[]}>();
  for(const person of aggregate.cast??[]){
   if(!person?.id||!person.name)continue;
-  const seasonNumbers=[...new Set((person.roles??[]).map(role=>role.season_number).filter((number):number is number=>Number.isInteger(number)&&number>0))].sort((a,b)=>a-b);
+  const seasonNumbers=[...new Set((person.roles??[]).map(role=>role.season_number).filter((number):number is number=>typeof number==="number"&&Number.isInteger(number)&&number>0))].sort((a,b)=>a-b);
   people.set(person.id,{person,seasons:seasonNumbers});
  }
  if(!people.size){
