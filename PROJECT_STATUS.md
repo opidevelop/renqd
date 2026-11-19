@@ -615,3 +615,9 @@ Revisione della migrazione di hardening:
 
 - La lista delle condivisioni mostra ora lo username Renqd del collaboratore, invece di un identificativo tecnico. Lo username è salvato insieme all'invito ed è visibile solo ai partecipanti autorizzati e all'OWNER.
 - Migrazione applicata e sincronizzata: `20261119082059_renqd_notes_collaborator_usernames`. Totale migrazioni Supabase: 51.
+
+
+## 26. Realtime collaboratori Appunti — 19 novembre 2026
+
+- Abilitata la tabella `notes_collaborators` su Supabase Realtime. L'elenco dei collaboratori e lo stato degli inviti si aggiornano anche quando un altro utente accetta, rifiuta o riceve una revoca mentre la cartella/documento è aperto.
+- Migrazione applicata e sincronizzata: `20261119082218_renqd_notes_collaborators_realtime`. Totale migrazioni Supabase: 52.
