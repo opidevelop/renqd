@@ -992,3 +992,15 @@ Revisione della migrazione di hardening:
 - GitHub Actions **#271** sul commit applicativo: success su TypeScript, ESLint e Production Build.
 - Il collaudo browser resta rinviato alla sessione finale unica richiesta dall'utente.
 - GitHub Actions **#270** (aggiornamento documentale precedente): success.
+
+## 41. Suggerimenti Scopri basati anche sull'attività recente — 19 novembre 2026
+
+- Esteso il punteggio di raccomandazione utenti di Scopri: oltre a follower in comune, follower totali e categorie di ranking condivise, considera ora le attività pubbliche degli ultimi 30 giorni.
+- Il contributo dell'attività recente è limitato a 5 punti, per evitare che un volume elevato di eventi domini gli altri segnali.
+- Le attività considerate sono quelle registrate in `ranking_activity`; il Feed e le raccomandazioni continuano a rispettare visibilità pubblica e privacy.
+- Migrazione applicata e presente su `main`: `20261119132748_renqd_social_discovery_activity_weight`.
+- Totale migrazioni: **92 nel repository e 92 su Supabase**, versioni e nomi allineati.
+- Verifica SQL della RPC di Scopri completata con account approvato.
+- GitHub Actions **#271** (contatori Inbox), **#272** e **#273** (documentazione): success.
+- GitHub Actions **#274** sul commit `7c879db791594c874d1e59ec0ba316431dde430f`: in attesa di completamento.
+- Nessun deploy Production; il collaudo end-to-end resta nella sessione finale unica.
