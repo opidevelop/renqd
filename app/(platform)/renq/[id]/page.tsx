@@ -32,7 +32,8 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     status:multiplayerDetails.session.status,
     progressStatus:multiplayerDetails.participants.find((participant:any)=>participant.userId===user.id)?.progressStatus??"NOT_STARTED",
     deadlineAt:multiplayerDetails.session.deadlineAt,
-    sharedState:multiplayerDetails.session.sharedState??null
+    sharedState:multiplayerDetails.session.sharedState??null,
+    personalProgress:personalResult?.result_snapshot??null
   }:null;
   const {data:personalResult}=multiplayerDetails?.session.mode==="COMPETITIVE"
     ? await supabase.from("ranking_session_results").select("result_snapshot,result_status").eq("ranking_id",ranking.id).eq("user_id",user.id).maybeSingle()
