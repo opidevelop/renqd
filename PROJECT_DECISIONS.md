@@ -381,3 +381,9 @@ La decisione non modifica le specifiche funzionali già approvate per multiplaye
 - Per reality: si cerca e seleziona il programma; gli elementi rankabili sono i partecipanti raccolti da tutte le stagioni censite, deduplicati per identificativo persona e con foto disponibili.
 - Il catalogo TMDB già integrato viene riutilizzato per ricerca programmi, stagioni e crediti/cast. La copertura dipende dai dati presenti nel provider; non dichiarare esaustivo un cast se il catalogo non lo documenta.
 - La lista di partecipanti viene caricata dinamicamente e può essere rivista nel riepilogo prima di avviare il Renq.
+
+
+### Decisione di implementazione — ancoraggio viewport Wheel (19 novembre 2026)
+
+- Il launcher Wheel viene renderizzato tramite React portal direttamente in `document.body`, fuori dall'albero DOM del guscio applicativo. In questo modo nessun contenitore del layout, trasformazione CSS o espansione dinamica del contenuto può diventare il containing block del launcher: `position: fixed` resta riferito al viewport.
+- Il pannello continua a mantenere il comportamento di apertura, trascinamento e ridimensionamento già esistente; la modifica riguarda il punto di montaggio DOM.
