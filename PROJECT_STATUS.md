@@ -927,3 +927,54 @@ Revisione della migrazione di hardening:
 - Ultimo commit applicativo: `af5796204ca82244da9ac5f325e6961a7ec3dd5a`.
 - Nessun deploy Production.
 - Il collaudo browser end-to-end resta rinviato all'unica sessione finale richiesta dall'utente. Feed/Scopri e i gap social elencati nella sezione 37 restano il prossimo lavoro.
+
+## 39. Feed social e Scopri — 19 novembre 2026
+
+### Feed
+- Aggiunta la pagina autenticata `/feed`, collegata alla navigazione desktop e mobile.
+- Il Feed mostra le attività pubbliche dei profili seguiti con relazione Follow in stato `ACCEPTED`.
+- Tipologie supportate e filtrabili: pubblicazione Renq, Mi piace e commento.
+- Filtri e caricamento progressivo lato server; limite di 50 eventi per pagina e cursore temporale.
+- Ogni scheda collega al profilo pubblico dell'autore e al Renq pubblicato.
+- Gli avatar vengono risolti tramite il servizio server-side `getProfileMediaUrl`, senza esporre percorsi privati grezzi.
+
+### Raccolta delle attività
+- Il trigger sulla prima pubblicazione registrata tramite `savedAt` crea `RANKING_PUBLISHED` soltanto per ranking completati, LIVE, pubblici, non nascosti/non eliminati e con profilo autore pubblico.
+- Trigger su `ranking_likes` e `ranking_comments` registrano rispettivamente `RANKING_LIKED` e `RANKING_COMMENTED`, solo quando il Renq è pubblicamente visibile.
+- I commenti già eliminati non generano eventi.
+- Backfill iniziale delle attività già esistenti: 14 pubblicazioni, 1 Mi piace e 2 commenti. Gli identificatori sorgente dei Mi piace/commenti evitano duplicazioni nelle successive registrazioni.
+- La tabella `ranking_activity` mantiene RLS; la lettura del Feed avviene esclusivamente tramite RPC server-side con controllo utente approvato, Follow accettato e visibilità pubblica del ranking e del profilo.
+
+### Scopri e ricerca
+- La pagina `/explore` ora integra ricerca globale di profili e Renq pubblicati.
+- In assenza di query propone profili e classifiche; i profili vengono ordinati considerando follower in comune, numero di follower e categorie di ranking condivise.
+- La ricerca mostra soltanto ranking completati, salvati, LIVE, pubblici e appartenenti a profili pubblici.
+- I profili privati non vengono esposti come profili pubblici: quando cercati per username, la preview restituisce soltanto username e indicazione di profilo privato, senza avatar, nome visualizzato, bio o altre informazioni. Dalla preview è possibile inviare la richiesta Follow; il database la registra come `PENDING` e genera la notifica in Attività.
+- I propri ranking non vengono proposti nella sezione Renq da scoprire.
+
+### Database e sicurezza
+- RPC aggiunte: `renqd_get_social_feed` e `renqd_discover_social`.
+- Entrambe richiedono account approvato; esecuzione concessa ad `authenticated` e negata ad `anon`.
+- Il Feed non restituisce attività di utenti non seguiti, profili privati o ranking non pubblici.
+- La ricerca dei profili privati applica la preview minima username-only. I dati completi restano protetti dalle policy RLS già presenti.
+- Migrazioni social registrate e allineate tra repository e Supabase: `20261119131125`, `20261119131159`, `20261119131442`, `20261119131659`, `20261119132118`.
+- Totale aggiornato: **91 migrazioni SQL** nel repository e **91** su Supabase, versioni e nomi allineati.
+
+### Test tecnici eseguiti
+- RPC Feed: accesso autenticato, filtro attività, Follow accettato e visibilità pubblica.
+- Verificata l'esclusione dal Feed quando il profilo autore diventa privato.
+- Test transazionale dei trigger di pubblicazione, Mi piace e commento; rollback verificato.
+- Test della ricerca privata: username-only e avatar nullo.
+- Test della richiesta Follow verso profilo privato: stato `PENDING` e notifica `FOLLOW_REQUEST`.
+- Test di esclusione dei propri ranking dai risultati di Scopri.
+- Test di privilegio: entrambe le RPC eseguibili da `authenticated`, non da `anon`.
+- Nessun dato di test è stato lasciato nel database.
+
+### CI, rilascio e verifiche residue
+- GitHub Actions **#265, #266 e #268**: success. La #267 aveva segnalato un aggiornamento di stato sincrono in un React effect durante la prima implementazione della paginazione; corretto nel commit successivo, verificato con CI #268.
+- CI **#269** sul commit `af4d193ade700304d9a9739a4cea981930deea68`: in corso al momento dell'aggiornamento.
+- Commit applicativo social: `39d796ac2ff81941d85ba09610f4aaab40216b73`.
+- Ultimo commit complessivo: `af4d193ade700304d9a9739a4cea981930deea68`.
+- Nessun deploy Production.
+- Nessun collaudo browser end-to-end eseguito: resta riservato all'unica sessione finale richiesta dall'utente.
+- Da rifinire ancora: badge complessivo Messaggi/Attività e sincronizzazione dei contatori inbox. Le funzionalità Appunti, anteprima discografia, Ruota, DM e multiplayer restano nel perimetro del collaudo finale.
