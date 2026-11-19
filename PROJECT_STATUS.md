@@ -1138,3 +1138,14 @@ Revisione della migrazione di hardening:
 - Rimosso l'import non utilizzato era già risolto perché `useSyncExternalStore` viene ora usato.
 - Commit applicativo: `d55459a482b8a9e159c24fffb085c767764802c4`.
 - TypeScript, ESLint, Production Build e deploy Production: da verificare sulla nuova CI. Nessun deployment eseguito.
+
+
+## 50. Correzioni anteprime brani, Wheel e creazione Appunti — 19 novembre 2026
+
+- **Classic / anteprime musicali:** il controllo audio viene mostrato accanto a ogni elemento quando il ranking è una lista di brani (album o modalità Discografia → Brani). Se il catalogo non fornisce un URL di anteprima per una specifica traccia, il controllo resta visibile ma disabilitato e indica che l'anteprima non è disponibile; non viene simulata una riproduzione inesistente. La riproduzione continua a interrompere le altre anteprime Renqd.
+- **Wheel:** aumentate dimensioni, contrasto, bordo e feedback focus/hover del pulsante «+» per rendere immediatamente riconoscibile l'azione di aggiunta.
+- **Appunti / RLS:** individuata la causa architetturale: la creazione diretta tramite INSERT dal client API dipendeva dalle policy RLS della tabella. Aggiunte due RPC SECURITY DEFINER, `renqd_create_notes_folder` e `renqd_create_notes_document`, che verificano sessione, account APPROVED e permesso sulla cartella padre prima di inserire con l'identità `auth.uid()`. L'accesso EXECUTE è concesso ad `authenticated` e negato ad `anon`; RLS resta attivo e non è stato disabilitato.
+- La route `app/api/notes/route.ts` usa ora le RPC per creare cartelle e documenti.
+- Migrazione applicata al progetto Supabase live e registrata nel repository: `20261119160000_renqd_notes_create_rpc_rls_fix.sql`.
+- Verifica database: entrambe le funzioni esistono come SECURITY DEFINER; `authenticated` può eseguirle e `anon` no. Test UI autenticato di creazione cartella/documento ancora da eseguire.
+- Commit applicativi/documentali di questo gruppo: da consolidare; CI e deploy Production da verificare dopo gli aggiornamenti documentali.
