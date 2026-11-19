@@ -4,15 +4,18 @@ import type {PointerEvent} from "react";
 import {createPortal} from "react-dom";
 import {Dices,Plus,RotateCcw,Volume2,VolumeX,X,Trash2,Grip,Shuffle} from "lucide-react";
 const palette=["#e88a45","#7b72d8","#48a58c","#d96d86","#5799c5","#c3a34e","#9b78b7","#5f8790"];
+const subscribeToMount=()=>()=>{};
+const getClientSnapshot=()=>true;
+const getServerSnapshot=()=>false;
 type Entry={id:string;label:string;color:string};
 function makeId(){return typeof crypto!=="undefined"&&"randomUUID"in crypto?crypto.randomUUID():String(Date.now())+Math.random();}
 function playTone(kind:"spin"|"winner"){
  try{const AudioContextClass=window.AudioContext??(window as typeof window&{webkitAudioContext?:typeof AudioContext}).webkitAudioContext;if(!AudioContextClass)return;const context=new AudioContextClass();const notes=kind==="winner"?[523.25,659.25,783.99]:[330,440,550];notes.forEach((frequency,index)=>{const oscillator=context.createOscillator();const gain=context.createGain();oscillator.type="sine";oscillator.frequency.value=frequency;gain.gain.setValueAtTime(.0001,context.currentTime+index*.11);gain.gain.exponentialRampToValueAtTime(kind==="winner"?.12:.045,context.currentTime+index*.11+.02);gain.gain.exponentialRampToValueAtTime(.0001,context.currentTime+index*.11+.18);oscillator.connect(gain);gain.connect(context.destination);oscillator.start(context.currentTime+index*.11);oscillator.stop(context.currentTime+index*.11+.2);});window.setTimeout(()=>void context.close(),1000);}catch{/* Audio is optional. */}
 }
 export function RenqdWheel(){
- const[portalReady,setPortalReady]=useState(false),[open,setOpen]=useState(false),[entries,setEntries]=useState<Entry[]>([]),[draft,setDraft]=useState(""),[sound,setSound]=useState(true),[removeWinner,setRemoveWinner]=useState(false),[spinning,setSpinning]=useState(false),[rotation,setRotation]=useState(0),[winner,setWinner]=useState<Entry|null>(null),[confetti,setConfetti]=useState(false),[position,setPosition]=useState({x:0,y:0});
+ const portalReady=useSyncExternalStore(subscribeToMount,getClientSnapshot,getServerSnapshot);
+ const[open,setOpen]=useState(false),[entries,setEntries]=useState<Entry[]>([]),[draft,setDraft]=useState(""),[sound,setSound]=useState(true),[removeWinner,setRemoveWinner]=useState(false),[spinning,setSpinning]=useState(false),[rotation,setRotation]=useState(0),[winner,setWinner]=useState<Entry|null>(null),[confetti,setConfetti]=useState(false),[position,setPosition]=useState({x:0,y:0});
  const dragRef=useRef<{x:number;y:number;left:number;top:number}|null>(null);
- useEffect(()=>{setPortalReady(true);},[]);
  const gradient=useMemo(()=>entries.length?"conic-gradient("+entries.map((entry,index)=>entry.color+" "+(index/entries.length*100)+"% "+((index+1)/entries.length*100)+"%").join(",")+")":"conic-gradient(#34343d 0% 100%)",[entries]);
  useEffect(()=>{if(!open)return;const move=(event:globalThis.PointerEvent)=>{const drag=dragRef.current;if(!drag)return;setPosition({x:Math.max(-window.innerWidth+320,Math.min(0,drag.left+event.clientX-drag.x)),y:Math.max(-window.innerHeight+260,Math.min(0,drag.top+event.clientY-drag.y))});};const end=()=>{dragRef.current=null;};window.addEventListener("pointermove",move);window.addEventListener("pointerup",end);return()=>{window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",end);};},[open]);
  function addEntry(){const label=draft.trim();if(!label||entries.some(entry=>entry.label.toLocaleLowerCase()===label.toLocaleLowerCase()))return;setEntries(current=>[...current,{id:makeId(),label,color:palette[current.length%palette.length]}]);setDraft("");setWinner(null);}
