@@ -263,3 +263,23 @@
 - Il limite deve essere rimosso in tutti i livelli coinvolti: interfaccia, API, funzioni RPC e vincoli del database.
 - Le etichette Grade basate sulla posizione devono poter coprire anche posizioni successive alla 100.
 - I limiti di un catalogo esterno o della piattaforma di trasporto sono distinti dal limite applicativo della classifica e devono essere dichiarati/gestiti separatamente.
+
+
+## Decisioni approvate — Appunti, anteprima discografia e ruota (19 novembre 2026)
+
+### Appunti
+- Introdurre un'area Appunti con cartelle annidabili e documenti modificabili con editor ricco, salvataggio automatico e sincronizzazione in tempo reale.
+- Consentire esportazione dei documenti in PDF e Word.
+- Consentire inviti a collaborare su una singola cartella o su un singolo documento. Gli inviti sono notificati nell'area «Attività» e l'accesso decorre soltanto dopo accettazione.
+- La condivisione di una cartella comprende automaticamente documenti e sottocartelle esistenti e futuri.
+- Il proprietario può modificare, eliminare e gestire gli inviti. Il collaboratore può modificare i contenuti condivisi, ma non eliminare la cartella originale né revocare gli accessi degli altri collaboratori.
+- OWNER di piattaforma può consultare tutti gli Appunti senza diventare automaticamente collaboratore.
+### Anteprima musicale
+- Nella selezione dei brani della discografia deve essere disponibile la stessa anteprima audio già utilizzata nella visualizzazione delle classifiche album.
+- Riutilizzare i metadati preview già disponibili e mantenere un solo audio attivo globalmente; non introdurre un sistema audio parallelo.
+### Ruota
+- Aggiungere nel builder un pannello flottante, spostabile e ridimensionabile, per organizzare uno spazio di lavoro e sorteggiare elementi.
+- Gli elementi, i colori e i risultati della ruota sono temporanei e non vengono salvati nel database.
+- La ruota permette aggiunta/rimozione elementi, colori assegnati o casuali, animazione di estrazione, evidenza del vincitore e coriandoli; suoni di rotazione/vincita attivabili o disattivabili.
+- Prevedere l'opzione per rimuovere il vincitore dalla ruota dopo l'estrazione.
+- Il multiplayer ranking resta rinviato fino al collaudo di queste funzionalità.

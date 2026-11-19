@@ -323,10 +323,32 @@ async function loadItunesAlbumTrackMetadata(albumTitle: string, artistName: stri
   } catch { return new Map<string, { previewUrl?: string; appleMusicUrl?: string }>(); }
 }
 
+
+async function loadItunesArtistPreviewMetadata(artistName:string):Promise<Map<string,{previewUrl?:string;appleMusicUrl?:string}>>{
+ const metadata=new Map<string,{previewUrl?:string;appleMusicUrl?:string}>();
+ if(!artistName)return metadata;
+ try{
+  const searchParams=new URLSearchParams({term:artistName,entity:"musicArtist",limit:"10",country:"IT"});
+  const search=await itunesJson<{results?:Array<Record<string,unknown>>}>(ITUNES+"/search?"+searchParams);
+  const wanted=normalizeMusicText(artistName);
+  const artist=(search.results??[]).find(entry=>typeof entry.artistId==="number"&&normalizeMusicText(String(entry.artistName??""))===wanted);
+  if(!artist||typeof artist.artistId!=="number")return metadata;
+  const lookupParams=new URLSearchParams({id:String(artist.artistId),entity:"song",limit:"200",country:"IT"});
+  const lookup=await itunesJson<{results?:Array<Record<string,unknown>>}>(ITUNES+"/lookup?"+lookupParams);
+  for(const track of lookup.results??[]){
+   if(track.wrapperType!=="track"||typeof track.trackName!=="string")continue;
+   const key=normalizeMusicText(track.trackName);
+   if(!metadata.has(key))metadata.set(key,{previewUrl:typeof track.previewUrl==="string"?track.previewUrl:undefined,appleMusicUrl:typeof track.trackViewUrl==="string"?track.trackViewUrl:undefined});
+  }
+ }catch{/* Preview metadata is optional: the discography remains usable without it. */}
+ return metadata;
+}
+
 async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):Promise<MusicItem[]>{
  const id=payload.artistId;
  if(typeof id!=="string"||!/^[0-9a-f-]{36}$/i.test(id))throw new Error("Invalid MusicBrainz artist identifier");
  const artist=typeof payload.artistName==="string"?payload.artistName:"";
+ const previewMetadata=await loadItunesArtistPreviewMetadata(artist);
  try{
   const releaseData=await browseMusicBrainzReleases(id,"recordings+release-groups");
   const releases=releaseData.filter(release=>{const type=release["release-group"]?.["primary-type"];return !type||type==="Album"||type==="EP";});
@@ -334,7 +356,8 @@ async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):
    const title=track.recording?.title??track.title;
    if(!title||!release.id)return[];
    const idPart=track.recording?.id??track.id??String(track.position??title);
-   return[{id:release.id+":"+idPart,title,subtitle:release.title||artist||undefined,imageUrl:"https://coverartarchive.org/release/"+release.id+"/front-250",spotifyUrl:spotifySearchUrl(`${artist} ${title}`)}];
+   const metadata=previewMetadata.get(normalizeMusicText(title));
+   return[{id:release.id+":"+idPart,title,subtitle:release.title||artist||undefined,imageUrl:"https://coverartarchive.org/release/"+release.id+"/front-250",previewUrl:metadata?.previewUrl,appleMusicUrl:metadata?.appleMusicUrl,spotifyUrl:spotifySearchUrl(artist+" "+title)}];
   })));
   if(tracks.length)return tracks;
  }catch(cause){if(cause instanceof Error&&cause.message.includes("supera il limite"))throw cause;}

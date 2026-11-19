@@ -538,3 +538,17 @@ Revisione della migrazione di hardening:
 - Vercel ha segnalato `build-rate-limit` (upgrade/build limit) e non ha creato un deployment per il commit correttivo. L'ultimo Production READY verificato resta `dpl_2RNXMoswPTfsfUbmS66Aw7ryEeM5` sul commit `6223a57e1f828809b42d377a09585831fa551989`; la correzione Grade è quindi su `main` ma non ancora disponibile su `renqd.app`.
 - Test manuale autenticato per `10`, `7,5`, `7.5`, `0` e cancellazione del voto: da eseguire dopo il rilascio.
 - Nessuna modifica a database, migrazioni o dati applicativi.
+
+
+## 18. Nuove funzionalità approvate — Appunti, anteprima discografia e ruota (19 novembre 2026)
+
+### Decisioni e perimetro
+- Approvate le specifiche di Appunti con cartelle/documenti, editor ricco, autosave, sincronizzazione realtime, esportazione PDF/Word e condivisione con invito/accettazione tramite Attività. Le autorizzazioni devono distinguere proprietario, collaboratore e OWNER di piattaforma; le cartelle condivise trasmettono l'accesso a contenuti futuri.
+- Approvata l'anteprima dei brani della discografia con comportamento identico a quello già usato nelle classifiche album, sfruttando i metadati musicali esistenti e l'esclusività globale della riproduzione.
+- Approvata una ruota temporanea nel builder, con pannello flottante spostabile/ridimensionabile, colori, animazione, vincitore, coriandoli e suoni opzionali. Nessun dato della ruota deve essere persistito.
+- Multiplayer ranking rinviato fino al test delle tre funzionalità.
+
+### Primo gruppo implementativo — anteprima e ruota
+- Repository aggiornato su `main` dal commit di partenza `89381a5248f624f4012ff4ecdc079959fe1b1400`.
+- La ruota e l'anteprima vengono implementate nel repository in questo gruppo. Nessuna migrazione Supabase prevista per queste due funzionalità.
+- Appunti resta il successivo gruppo implementativo: richiede schema, RLS, API transazionali, inviti, notifiche in Attività e test realtime; non dichiarare la funzionalità disponibile finché non sono completate e verificate queste parti.
