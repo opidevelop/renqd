@@ -246,6 +246,10 @@ export function DirectMessages({
                   supabase.rpc("renqd_direct_unread_counts"),
                 ])
               : [{ data: [] }, { data: [] }];
+            const typedUnreadRows = (unreadRows ?? []) as Array<{
+              conversation_id: string;
+              unread_count: number;
+            }>;
             setConversations((current) =>
               data.map((row) => {
                 const existing = current.find((item) => item.id === row.id);
@@ -253,7 +257,7 @@ export function DirectMessages({
                   (message) => message.conversation_id === row.id,
                 );
                 const unreadCount =
-                  (unreadRows ?? []).find((item) => item.conversation_id === row.id)
+                  typedUnreadRows.find((item) => item.conversation_id === row.id)
                     ?.unread_count ?? 0;
                 return {
                   id: row.id,
