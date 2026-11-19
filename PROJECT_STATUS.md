@@ -1119,3 +1119,13 @@ Revisione della migrazione di hardening:
 - TypeScript, ESLint e Production Build: da verificare tramite CI.
 - Test funzionale su Grande Fratello VIP 6 e su un reality internazionale: da eseguire; non considerare ancora validata la copertura dell'estrazione wiki.
 - Deployment Production: richiesto dall'utente, da eseguire dopo CI verde e verifica del limite giornaliero Vercel.
+
+
+## 48. Correzioni Wheel e fonti Reality TV — 19 novembre 2026
+
+- Individuato il motivo della scomparsa della Wheel: `portalReady` partiva da `false` ma non veniva mai impostato a `true`, quindi il componente restituiva sempre `null`. Aggiunto il mount effect che abilita il portal verso `document.body`.
+- Corretto il recupero dei reality per stagione: la ricerca ora considera più risultati MediaWiki e assegna priorità a titoli che identificano esplicitamente il numero/ordinale della stagione o edizione. Non accetta pagine generiche del programma come fonte per una stagione specifica; se non trova una pagina stagionale utilizzabile, lascia intervenire il fallback TMDB.
+- Rimosse le cache sulle richieste MediaWiki e sulla risposta API `items`, per evitare che un elenco precedente venga riproposto da cache.
+- Gli ID wiki ora includono anche la pagina sorgente, evitando collisioni tra nomi omonimi in pagine diverse.
+- Commit su `main`: Wheel `3163ae614ea79a68b95eef4bfded9127fad2dd7e`; helper reality `5581579358e07cd6283199fd0e6dca8b0c6f1cbd` e correzione ID `$(FIX_COMMIT)`; route catalogo `e0121107da3645f2b181f108c1a535806b7e1f5a`; aggiornamenti documentali successivi.
+- CI, verifica funzionale su GF VIP 6 e nuovo deployment Production: da verificare. Il deployment attualmente live contiene il precedente commit `ba0a03d`, non queste correzioni.
