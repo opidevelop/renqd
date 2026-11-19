@@ -7,7 +7,7 @@
 > **Aggiornato:** 19 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `3d07a97adbd4f3038aa89fdc2c2d89f90ab58a90`
+> **Ultimo commit applicativo analizzato su main:** `1f18b20638fe698f7995137cc09e026017ef67c4`
 
 ## 1. Sintesi esecutiva
 
@@ -746,4 +746,30 @@ Revisione della migrazione di hardening:
 - Restano da completare la UI di ricerca/Scopri e il feed personalizzato.
 - La pagina di profilo privato è accessibile solo dopo accettazione Follow; non è ancora disponibile una scheda minima del profilo privato per i non follower. Questa scelta resta da confermare prima di esporre informazioni o una preview in Scopri.
 - CI sul commit `3d07a97adbd4f3038aa89fdc2c2d89f90ab58a90`: TypeScript ed ESLint superati; build di produzione in esecuzione al momento dell'aggiornamento.
+- Nessun deployment Production eseguito.
+
+
+## 32. Inbox Messaggi/Attività e chat dirette — 19 novembre 2026
+
+### Implementazione repository
+- L'area `/inbox` è stata organizzata in due sezioni: **Messaggi** e **Attività**, con contatori non letti sincronizzati nello stato della UI.
+- La sezione Messaggi carica le conversazioni private, l'ultimo messaggio, il conteggio dei messaggi non letti e lo stato di lettura del destinatario.
+- Chat realtime: invio testo, emoji nel testo, risposte, reazioni rapide, modifica e cancellazione del proprio messaggio, ricevute di lettura.
+- La cancellazione è soft: il testo viene svuotato e resta il record per la coerenza della conversazione; un messaggio eliminato non può essere ripristinato.
+- In Attività sono gestite le richieste DM con Accetta/Rifiuta e apertura della chat dopo l'accettazione; sono mostrati gli esiti di accettazione/rifiuto.
+- Nei profili consultabili è presente l'azione per inviare una richiesta di messaggio oppure aprire una conversazione esistente.
+- La UI si adatta al mobile con elenco conversazioni e pannello chat separati.
+
+### Database e sicurezza
+- Migrazione `20261119104354_renqd_dm_participant_profile_access` allineata al versionamento Supabase `20261119103813`; la policy consente ai partecipanti a una conversazione DM di leggere il profilo dell'altro partecipante, anche se privato.
+- Migrazione `20261119104436_renqd_direct_message_delete_guard` applicata: impedisce il ripristino di messaggi eliminati e rende non alterabili i metadati di eliminazione/modifica.
+- Il database conta **61 migrazioni**; repository e database dovranno essere riconfermati allineati dopo la sincronizzazione di questo nuovo file.
+- Test SQL transazionali superati: invio richiesta, rifiuto e cooldown unilaterale 30 giorni; richiesta inversa consentita; accettazione e creazione conversazione; invio, modifica e soft-delete; reazioni e letture; lettura negata a utenti estranei; profilo privato visibile al partecipante DM ma non a estranei.
+- Nessun record di test persistente: tutte le prove sono state eseguite in transazioni annullate.
+
+### Verifiche ancora necessarie
+- La UI DM è implementata nel repository, ma non è ancora collaudata end-to-end con due account autenticati. Da testare: richieste e notifiche in Attività, chat simultanea su due browser, aggiornamenti Realtime, reply, reazioni, modifica/eliminazione e ricevute di lettura.
+- Il calcolo iniziale degli unread nella lista conversazioni usa un campione fino a 2.000 messaggi; va sostituito con conteggio lato database prima di considerarlo definitivo per conversazioni molto lunghe.
+- Il punto d'ingresso per inviare richieste a profili privati non follower resta limitato dalla decisione ancora da confermare sulla preview minima del profilo privato in Scopri.
+- CI #183 sul commit `7b01e84`: success per TypeScript, ESLint e build. I run #184/#185/#186 hanno rilevato un errore di sintassi JSX in `components/direct-messages.tsx`; la componente è stata riscritta in forma multilinea e corretta nei commit successivi. CI #187/#188 devono confermare la correzione.
 - Nessun deployment Production eseguito.
