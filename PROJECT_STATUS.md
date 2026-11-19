@@ -806,3 +806,12 @@ Revisione della migrazione di hardening:
 - L'anteprima dell'ultimo messaggio nell'elenco realtime usa una query batch limitata a 2.000 messaggi; da sostituire con una lettura per-conversazione lato database se il volume cresce.
 - Le tre verifiche prioritarie prima del multiplayer restano Appunti, anteprima discografia e ruota, tutte da collaudare end-to-end autenticato.
 - Nessun deployment Production eseguito. L'ultimo Production READY resta il commit `7ffa974dc88d3af65a96e000843157751af142da`.
+
+
+## 35. Piano di collaudo aggiornato — 19 novembre 2026
+
+- Su richiesta esplicita dell'utente, il collaudo manuale dell'interfaccia sarà concentrato in **un'unica sessione finale**, dopo il completamento di tutte le modifiche, multiplayer incluso.
+- È superato il precedente gate che subordinava l'avvio del multiplayer al collaudo manuale preliminare di Appunti, anteprima discografia e ruota. Le tre funzionalità restano incluse nel collaudo finale.
+- Non vengono sospesi i controlli tecnici durante lo sviluppo: CI completa (TypeScript, ESLint, build), audit DB, migrazioni allineate, test SQL transazionali, RLS/RPC/Realtime/Storage e verifiche di sicurezza restano obbligatori per ogni gruppo di modifiche.
+- Il test finale dell'utente dovrà coprire i flussi completi, compresi multiplayer collaborativo/competitivo, inviti, timer, Reveal, fusione risultati e proposte di modifica post-pubblicazione.
+- Nessun deployment Production intermedio. Un unico deploy cumulativo dopo completamento tecnico e collaudo finale.

@@ -325,3 +325,18 @@
 - Follow/unfollow, richieste per profili privati e distinzione tra follower e seguiti.
 - Feed delle attività pubbliche degli utenti seguiti, personalizzabile per tipologia di attività.
 - Scopri con ricerca globale e suggerimenti basati su follow, interessi e attività.
+
+## Decisione aggiornata — collaudo unico a sviluppo completo (19 novembre 2026)
+
+L'utente ha richiesto esplicitamente di completare tutte le modifiche pianificate, incluso il multiplayer, prima di svolgere il collaudo manuale dell'interfaccia. Il collaudo end-to-end guidato dall'utente sarà quindi **un'unica sessione finale**, dopo che tutte le funzionalità previste saranno implementate.
+
+Questa decisione aggiorna e sostituisce esclusivamente il precedente vincolo di sequenza che subordinava l'avvio del multiplayer al collaudo manuale di Appunti, anteprima discografia e ruota. Tali funzionalità restano nel perimetro del collaudo finale insieme a tutte le nuove funzionalità.
+
+Restano obbligatori durante lo sviluppo:
+- verifiche automatiche CI (TypeScript, ESLint e Production Build);
+- audit del codice, delle migrazioni e dello schema live;
+- test SQL transazionali e verifica di RLS, RPC, Storage e Realtime;
+- correzione dei problemi rilevati prima di proseguire;
+- nessun deploy Production intermedio; un solo rilascio cumulativo dopo completamento e collaudo finale.
+
+La decisione non modifica le specifiche funzionali già approvate per multiplayer, social, Follow e messaggistica, né autorizza a dichiarare collaudata una funzionalità prima della sessione finale.
