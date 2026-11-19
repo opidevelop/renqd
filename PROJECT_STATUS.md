@@ -584,3 +584,10 @@ Revisione della migrazione di hardening:
 - L'editor consente di aggiungere, rinominare con doppio clic e rimuovere schede, mantenendo sempre almeno una scheda. Le esportazioni includono tutte le schede.
 - Aggiunto un trigger database per impedire cicli nella gerarchia delle cartelle.
 - Migrazione applicata e sincronizzata: `20261119081029_renqd_notes_document_tabs_and_folder_cycle_guard`.
+
+
+## 21. Sanitizzazione contenuti Appunti — 19 novembre 2026
+
+- Aggiunto un trigger PostgreSQL che sanitizza sia il contenuto HTML principale sia quello di tutte le schede, anche in caso di scrittura diretta tramite API Supabase. Vengono rimossi script, elementi incorporati, attributi e tag non ammessi; restano i tag di formattazione supportati dall'editor.
+- Verificata la funzione di sanitizzazione con un test SQL contenente script, attributi evento, immagini e link JavaScript: il risultato conserva soltanto markup consentito e testo.
+- Migrazione applicata e sincronizzata: `20261119081512_renqd_notes_html_sanitization_guard`. Totale migrazioni Supabase: 47.
