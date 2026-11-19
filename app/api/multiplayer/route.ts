@@ -72,6 +72,11 @@ export async function POST(request:Request){
   const {data,error}=await supabase.rpc("renqd_multiplayer_update_shared_grade",{p_ranking_id:rankingId,p_scores:body.scores,p_tie_order:body.tieOrder??{}});
   if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
  }
+ if(body.action==="finish-shared-speed"){
+  if(!rankingId||!Array.isArray(body.orderedIds)||body.orderedIds.some((id:unknown)=>typeof id!=="string"))return jsonError("Ordine Speed non valido.");
+  const {data,error}=await supabase.rpc("renqd_multiplayer_finish_shared_speed",{p_ranking_id:rankingId,p_ordered_ids:body.orderedIds,p_tie_map:body.tieMap??{}});
+  if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
+ }
  if(body.action==="battle-start"){
   if(!rankingId||!Array.isArray(body.pairs))return jsonError("Confronti Battle non validi.");
   const {data,error}=await supabase.rpc("renqd_multiplayer_battle_start",{p_ranking_id:rankingId,p_pairs:body.pairs});
