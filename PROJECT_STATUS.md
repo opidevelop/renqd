@@ -609,3 +609,9 @@ Revisione della migrazione di hardening:
 
 - La risposta ad un invito (accettazione o rifiuto) viene ora registrata anche nel payload della notifica, così l'esito resta visibile dopo un nuovo accesso all'area Attività; anche la revoca è mostrata come tale.
 - Migrazione applicata e sincronizzata: `20261119081742_renqd_notes_invitation_response_status`. Totale migrazioni Supabase: 50.
+
+
+## 25. Identificazione collaboratori — 19 novembre 2026
+
+- La lista delle condivisioni mostra ora lo username Renqd del collaboratore, invece di un identificativo tecnico. Lo username è salvato insieme all'invito ed è visibile solo ai partecipanti autorizzati e all'OWNER.
+- Migrazione applicata e sincronizzata: `20261119082059_renqd_notes_collaborator_usernames`. Totale migrazioni Supabase: 51.
