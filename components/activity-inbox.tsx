@@ -3,7 +3,7 @@ import {useEffect,useState} from "react";
 import {Bell,Check,CheckCheck,FileText,Users,X,MessageCircle} from "lucide-react";
 import {createClient} from "@/lib/supabase/client";
 type Notice={id:string;actor_id:string|null;notification_type:string;payload:Record<string,unknown>;read_at:string|null;created_at:string};
-export function ActivityInbox({notifications,onUnreadCountChange}:{notifications:Notice[];onUnreadCountChange?:(count:number)=>void}){
+export function ActivityInbox({notifications}:{notifications:Notice[]}){
  const[items,setItems]=useState(notifications);const[busy,setBusy]=useState<string|null>(null);const[error,setError]=useState("");
  useEffect(()=>{
   const supabase=createClient();let active=true;let channel:ReturnType<typeof supabase.channel>|null=null;
@@ -36,7 +36,6 @@ export function ActivityInbox({notifications,onUnreadCountChange}:{notifications
   catch(e){setError(e instanceof Error?e.message:"Non è stato possibile gestire la richiesta.");}finally{setBusy(null);}
  }
  const unread=items.filter(item=>!item.read_at).length;
- useEffect(()=>{onUnreadCountChange?.(unread);},[unread,onUnreadCountChange]);
  return <div className="inbox-page"><div className="platform-page-heading"><div><div className="platform-overline">IL PUNTO DI INCONTRO</div><h1>La tua attività.</h1><p>Inviti e aggiornamenti che ti riguardano.</p></div></div><section className="inbox-welcome"><div className="inbox-welcome-icon"><Bell size={22}/></div><div><span>LA TUA INBOX</span><h2>{unread?unread+" notifiche da leggere":"Sei aggiornato."}</h2><p>Qui trovi inviti, richieste Follow e aggiornamenti Renqd.</p></div><div className="inbox-welcome-mark"><CheckCheck size={34}/></div></section>{error&&<p className="notes-global-error" role="alert">{error}</p>}<div className="activity-notifications">{items.map(item=>{
   const isInvite=item.notification_type==="NOTES_INVITATION";const isFollowRequest=item.notification_type==="FOLLOW_REQUEST";const isFollowAccepted=item.notification_type==="FOLLOW_ACCEPTED";const isDmRequest=item.notification_type==="DM_REQUEST";const isDmAccepted=item.notification_type==="DM_REQUEST_ACCEPTED";const isDmDeclined=item.notification_type==="DM_REQUEST_DECLINED";const response=String(item.payload.response??"");const accepted=response==="ACCEPTED";const declined=response==="DECLINED";const inviteId=String(item.payload.inviteId??"");const followerId=String(item.payload.followerId??"");const dmRequestId=String(item.payload.requestId??"");
   return <article className={"activity-notification"+(!item.read_at?" is-unread":"")} key={item.id}><span className="activity-notification-icon">{isInvite?<FileText size={19}/>:isFollowRequest||isFollowAccepted?<Users size={19}/>:isDmRequest||isDmAccepted||isDmDeclined?<MessageCircle size={19}/>:<Bell size={19}/>}</span><div className="activity-notification-copy">

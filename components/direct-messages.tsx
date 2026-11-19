@@ -58,12 +58,10 @@ export function DirectMessages({
   initialConversations,
   currentUserId,
   initialConversationId,
-  onUnreadCountChange,
 }: {
   initialConversations: Summary[];
   currentUserId: string;
   initialConversationId: string | null;
-  onUnreadCountChange?: (count: number) => void;
 }) {
   const [conversations, setConversations] = useState(initialConversations);
   const [activeId, setActiveId] = useState(initialConversationId);
@@ -364,9 +362,6 @@ export function DirectMessages({
     0,
   );
 
-  useEffect(() => {
-    onUnreadCountChange?.(unreadTotal);
-  }, [unreadTotal, onUnreadCountChange]);
 
   return (
     <div className={"dm-workspace" + (mobileChatOpen ? " is-chat-open" : "")}>
