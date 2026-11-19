@@ -890,3 +890,40 @@ Revisione della migrazione di hardening:
 - Il badge complessivo Messaggi/Attività e l'aggiornamento locale di tutti i contatori inbox richiedono ancora una rifinitura.
 - Appunti, anteprima discografia e Ruota restano incluse nel collaudo finale.
 - Nessun deployment Production intermedio: un unico rilascio cumulativo dopo completamento di tutte le modifiche e collaudo finale.
+
+
+## 38. Multiplayer: integrità dei risultati e stati terminali — 19 novembre 2026
+
+> Aggiornamento successivo alla sezione 37. Questo blocco sostituisce il conteggio migrazioni e il riferimento all'ultimo commit riportati nella sezione precedente.
+
+### Ulteriori protezioni server-side
+- `renqd_submit_multiplayer_result` valida che lo snapshot contenga tutti gli elementi una sola volta.
+- Grade competitivo: almeno un voto obbligatorio; valori limitati a 0–10 con precisione massima a un decimale.
+- Battle competitivo: ogni elemento deve avere un numero intero non negativo di vittorie.
+- Classic/Speed competitivi: posizioni intere nel range valido, progressive e senza salti; ex aequo consentiti solo se abilitati e con gruppi coerenti.
+- `renqd_save_multiplayer_progress` verifica la corrispondenza univoca degli elementi dello snapshot.
+- `renqd_mark_multiplayer_finished` controlla il completamento specifico della modalità: ordinamento Classic completo, confronti Battle conclusi, almeno un voto Grade. Speed può essere concluso soltanto tramite la RPC del timer condiviso.
+- La RPC Battle rifiuta sessioni che non sono di tipo Battle.
+- La RPC dell'ordine condiviso rifiuta mappe ex aequo non valide, gruppi singoli, elementi estranei e pari merito quando non consentiti.
+- Corretto un errore runtime nella verifica della mappa JSONB dei pari merito; la migrazione successiva sostituisce la funzione con il conteggio compatibile.
+
+### Stati terminali
+- Ripristinata dopo l'hardening la logica di Reveal, proroga, chiusura anticipata e annullamento delle sessioni senza completamenti.
+- Se tutti i partecipanti diventano incompleti senza che nessuno abbia completato, la sessione viene annullata e non viene pubblicato un risultato.
+- La chiusura anticipata del creatore svela il risultato se almeno un partecipante ha completato; altrimenti annulla la sessione.
+- Il Reveal alla scadenza con zero partecipanti completati annulla la sessione invece di tentare una fusione vuota.
+
+### Test tecnici aggiuntivi
+- Verificati nuovamente i quattro algoritmi competitivi con asserzioni sui piazzamenti finali.
+- Verificati i blocchi su Grade vuoto, posizioni fuori range, completamento collaborativo prematuro, Battle avviata su un ranking non Battle e Speed concluso senza timer.
+- Verificati pari merito consentiti e vietati in base alla configurazione.
+- Verificati completamento collaborativo Grade e Battle dopo i controlli server-side aggiornati.
+- Verificati chiusura anticipata, annullamento per zero completamenti e annullamento automatico quando tutti sono incompleti.
+- Tutti i test sono stati eseguiti in transazioni rollback.
+
+### Stato aggiornato
+- Totale: **86 migrazioni SQL** nel repository e **86** su Supabase, tutte allineate.
+- GitHub Actions **#260, #261 e #262**: success su TypeScript, ESLint e Production Build.
+- Ultimo commit applicativo: `af5796204ca82244da9ac5f325e6961a7ec3dd5a`.
+- Nessun deploy Production.
+- Il collaudo browser end-to-end resta rinviato all'unica sessione finale richiesta dall'utente. Feed/Scopri e i gap social elencati nella sezione 37 restano il prossimo lavoro.
