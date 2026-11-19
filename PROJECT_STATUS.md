@@ -637,3 +637,31 @@ Revisione della migrazione di hardening:
 - Supabase: 53 migrazioni registrate; repository: 53 file SQL. Conteggio allineato.
 - La build include la route `/notes`; non sono stati eseguiti test end-to-end autenticati con due account reali. Condivisione, revoca e sincronizzazione richiedono ancora collaudo funzionale in ambiente utente.
 - Esito: controlli statici e build superati; deploy Production completato. Nessuna dichiarazione di test end-to-end.
+
+
+## 28. Rifinitura Appunti: UX, editor avanzato e tag — 19 novembre 2026
+
+### Implementazione
+- Le righe di cartelle e documenti mostrano il cursore pointer, hover, feedback di attivazione e transizioni d'ingresso delle viste; le animazioni rispettano `prefers-reduced-motion`.
+- Ridisegnato il controllo di creazione cartelle con campo e pulsante dedicato, spaziature e allineamenti coerenti.
+- Estesa la toolbar dell'editor: formattazione già presente, evidenziazione del testo, selettore colore del testo e inserimento di tabelle con dimensioni configurabili.
+- L'HTML supportato include tabelle, celle, mark ed elementi font con colore esadecimale sicuro. Sanitizzazione applicata sia nell'API sia nel trigger PostgreSQL; gli attributi arbitrari e gli elementi attivi restano rimossi.
+- Aggiunta la sezione «I tuoi tag» sotto «Le tue cartelle». I tag possono essere assegnati alle cartelle e ai documenti; un tag di cartella viene ereditato dalle sottocartelle e dai documenti discendenti. Ogni documento può avere tag aggiuntivi propri.
+- I tag sono normalizzati in minuscolo, senza duplicati, massimo 20 per risorsa e 24 caratteri per tag. Il filtro mostra le risorse accessibili all'utente.
+- L'assegnazione dei tag usa le policy RLS già presenti sulle righe di cartelle e documenti: non sono state introdotte tabelle esposte né allargati i permessi di lettura/modifica.
+- File aggiornati: `components/notes-workspace.tsx`, `app/api/notes/route.ts`, `app/(platform)/notes/page.tsx`, `app/(platform)/platform.css`, `PROJECT_DECISIONS.md`.
+
+### Database e migrazioni
+- Aggiunte le colonne `tags text[] not null default '{}'` a `notes_folders` e `notes_documents`, con indici GIN e trigger di normalizzazione.
+- Aggiornata la sanitizzazione HTML del documento per conservare tabelle, evidenziazioni e colori del testo in forma sicura.
+- Migrazioni applicate a Supabase e allineate ai nomi nel repository:
+  - `20261119083928_renqd_notes_tags_and_rich_editor.sql`;
+  - `20261119084054_renqd_notes_tag_normalizer_hardening.sql`.
+- Totale: **55 migrazioni nel database e 55 file SQL nel repository**.
+- Verifiche SQL: colonne presenti e non nullable; RLS ancora abilitato su `notes_folders` e `notes_documents`; policy di lettura, inserimento, aggiornamento ed eliminazione invariate. Il test della normalizzazione conferma minuscole, rimozione duplicati e limite di lunghezza. Il test della sanitizzazione conserva tabella, mark e colore esadecimale e rimuove script e colori non sicuri.
+
+### Verifiche e produzione
+- GitHub Actions Code quality run **#170 / 44490200099** sul commit applicativo `778fb52d1e902ea32e944d7724ccfe0fc929f471`: **success**. `npm ci`, TypeScript, ESLint e Production build completati.
+- Vercel Production deployment `dpl_3CQnLgbaPvB28WEcijbpKXuNUFZv`, commit `778fb52d1e902ea32e944d7724ccfe0fc929f471`: **READY**. Alias verificati: `renqd.app`, `renqd.vercel.app`, `www.renqd.app`.
+- Smoke test HTTP: `/login` risponde 200; la richiesta anonima a `/notes` viene instradata alla pagina di login (`x-matched-path: /login`), coerentemente con l'accesso chiuso.
+- Non è stato eseguito un test end-to-end autenticato su account reali. Da collaudare dall'interfaccia: assegnazione tag a cartelle/documenti, ereditarietà su sottocartelle e documenti, filtro tag, colori, evidenziazioni, tabelle, autosalvataggio e collaborazione in tempo reale.
