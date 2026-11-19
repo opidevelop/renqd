@@ -387,3 +387,15 @@ La decisione non modifica le specifiche funzionali già approvate per multiplaye
 
 - Il launcher Wheel viene renderizzato tramite React portal direttamente in `document.body`, fuori dall'albero DOM del guscio applicativo. In questo modo nessun contenitore del layout, trasformazione CSS o espansione dinamica del contenuto può diventare il containing block del launcher: `position: fixed` resta riferito al viewport.
 - Il pannello continua a mantenere il comportamento di apertura, trascinamento e ridimensionamento già esistente; la modifica riguarda il punto di montaggio DOM.
+
+
+## Decisione approvata il 19 novembre 2026 — fonti Reality TV e attribuzioni
+
+- Per il catalogo Reality TV, **Wikipedia è la fonte primaria** per i concorrenti di tutte le edizioni, italiane e internazionali.
+- **Fandom Wiki è la fonte alternativa** quando Wikipedia non contiene informazioni sufficienti o non copre il reality/edizione. L'ordine di consultazione è Wikipedia → Fandom → fallback TMDB già esistente.
+- TMDB resta utilizzato per ricerca dei programmi, stagioni, locandine e immagini; non è la fonte primaria per i concorrenti.
+- I dati importati dai wiki devono conservare nei metadati dell'elemento il provider e l'URL della pagina sorgente, così da mantenere la provenienza verificabile.
+- Creare una pagina dedicata alle attribuzioni, raggiungibile all'URL `/attributions`. La pagina descrive fonti, licenze/condizioni e attribuzioni.
+- L'accesso alla pagina resta soggetto al modello chiuso di Renqd: autenticazione e account approvato.
+- L'unico collegamento visibile alla pagina è una piccola icona informativa ⓘ collocata nel footer della Home `/home`, dopo tutti i contenuti. Non aggiungere collegamenti alle attribuzioni nel footer globale o nelle altre pagine.
+- Le attribuzioni devono rispettare la licenza della specifica pagina/community Fandom e le condizioni TMDB; non presumere che immagini o media Fandom siano riutilizzabili.
