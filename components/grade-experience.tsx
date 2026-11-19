@@ -1,8 +1,9 @@
 "use client";
-import {useMemo,useState} from "react";
+import {useEffect,useMemo,useState} from "react";
 import {useRouter} from "next/navigation";
 import {Check,ChevronDown,ChevronUp,CircleDot,Trophy} from "lucide-react";
 import {RenqRankHeading} from "@/components/renq-ranking-ui";
+import {createClient} from "@/lib/supabase/client";
 
 type GradeItem={id:string;title:string;title_snapshot:string;sort_order:number;rank_position:number|null;tie_group_id?:string|null;image_url:string|null;description:string|null;score?:number|null;tie_order?:number|null};
 type GradeRanking={id:string;public_slug?:string;title:string;mode:string;status:string;visibility:string;participation_mode:string;allow_ties:boolean;settings:Record<string,unknown>;created_at:string;started_at?:string|null;completed_at?:string|null};
@@ -13,8 +14,8 @@ function readConfig(value:unknown):Config{if(!value||typeof value!=="object")ret
 function labelFor(score:number,position:number,config:Config){const value=config.criterion==="score"?score:position;return config.labels.find(label=>label.name.trim()&&value>=label.min&&value<=label.max)??null;}
 function isValidGradeScore(value:string){return /^(10([,.]0)?|[0-9]([,.][0-9])?)$/.test(value.trim());}
 
-function GradeScoreInput({value,onCommit,placeholder,ariaLabel}:{value:string;onCommit:(value:string)=>void;placeholder?:string;ariaLabel:string}){
- const [draft,setDraft]=useState(value);
+function GradeScoreInput({value,onCommit,placeholder,ariaLabel,disabled=false}:{value:string;onCommit:(value:string)=>void;placeholder?:string;ariaLabel:string;disabled?:boolean}){
+ const [draft,setDraft]=useState(value);useEffect(()=>setDraft(value),[value]);
  function commit(){
   const clean=draft.trim();
   if(!clean){setDraft("");onCommit("");return;}
@@ -26,7 +27,7 @@ function GradeScoreInput({value,onCommit,placeholder,ariaLabel}:{value:string;on
    setDraft(value);
   }
  }
- return <input type="text" inputMode="decimal" placeholder={placeholder} value={draft} aria-label={ariaLabel}
+ return <input type="text" inputMode="decimal" placeholder={placeholder} value={draft} aria-label={ariaLabel} disabled={disabled}
   onChange={event=>setDraft(event.target.value.replace(/[^0-9,.]/g,"").replace(/\\./g,","))}
   onBlur={commit}
   onKeyDown={event=>{if(event.key==="Enter")event.currentTarget.blur();}}/>;
@@ -35,6 +36,7 @@ function GradeScoreInput({value,onCommit,placeholder,ariaLabel}:{value:string;on
 type GradeMultiplayer={mode:"COLLABORATIVE"|"COMPETITIVE";status:string;progressStatus:string;deadlineAt:string|null};
 export function GradeExperience({ranking,items:initialItems,multiplayer}:{ranking:GradeRanking;items:GradeItem[];multiplayer?:GradeMultiplayer|null}){
  const router=useRouter();const config=readConfig(ranking.settings?.gradeConfig);const isMultiplayer=Boolean(multiplayer);const isCompetitive=multiplayer?.mode==="COMPETITIVE";const isCollaborative=multiplayer?.mode==="COLLABORATIVE";const [finished,setFinished]=useState(multiplayer?.progressStatus==="FINISHED"||multiplayer?.progressStatus==="INCOMPLETE");const [scores,setScores]=useState<Record<string,string>>(()=>Object.fromEntries(initialItems.map(item=>[item.id,item.score===null||item.score===undefined?"":String(item.score).replace(".",",")])));const [tieOrder,setTieOrder]=useState<Record<string,number>>(()=>Object.fromEntries(initialItems.map(item=>[item.id,item.tie_order&&item.tie_order>0?item.tie_order:item.sort_order])));const [busy,setBusy]=useState(false);const [error,setError]=useState("");
+ useEffect(()=>{if(!isCollaborative)return;const supabase=createClient();const refresh=async()=>{const {data}=await supabase.from("ranking_items").select("id,score,tie_order,sort_order").eq("ranking_id",ranking.id);if(!data)return;setScores(Object.fromEntries(data.map(row=>[row.id,row.score===null||row.score===undefined?"":String(row.score).replace(".",",")])));setTieOrder(Object.fromEntries(data.map(row=>[row.id,row.tie_order??row.sort_order])));};const channel=supabase.channel("renqd-grade-mp-"+ranking.id).on("postgres_changes",{event:"*",schema:"public",table:"ranking_items",filter:"ranking_id=eq."+ranking.id},()=>{void refresh();}).subscribe();return()=>{void supabase.removeChannel(channel);};},[isCollaborative,ranking.id]);
  const validScore=isValidGradeScore;
  const scoredCount=initialItems.filter(item=>isValidGradeScore(scores[item.id]??"")).length;
  const sorted=useMemo(()=>[...initialItems].sort((a,b)=>{const av=scores[a.id]?.trim()??"",bv=scores[b.id]?.trim()??"";const aValid=isValidGradeScore(av),bValid=isValidGradeScore(bv);if(aValid&&bValid){const diff=Number(av.replace(",","."))-Number(bv.replace(",","."));if(diff!==0)return -diff;}else if(aValid!==bValid)return aValid?-1:1;return (tieOrder[a.id]??a.sort_order)-(tieOrder[b.id]??b.sort_order)||a.sort_order-b.sort_order;}),[initialItems,scores,tieOrder]);
@@ -54,7 +56,7 @@ export function GradeExperience({ranking,items:initialItems,multiplayer}:{rankin
    <RenqRankHeading ranking={ranking as never} items={initialItems as never}/>
    <div className="grade-intro"><div><span>VALUTA OGNI ELEMENTO</span><h2>Che voto gli dai?</h2><p>Usa una scala da 0 a 10. Sono ammessi anche i decimali, con una sola cifra dopo la virgola.</p></div><Trophy/></div>
    <div className="grade-progress"><div><strong>{scoredCount} di {initialItems.length}</strong><span>elementi valutati</span></div><div className="grade-progress-track"><i style={{width:(scoredCount/Math.max(initialItems.length,1)*100)+"%"}}/></div></div>
-   <div className="grade-live-list">{sorted.filter(item=>validScore(scores[item.id]??"")).map(item=>{const score=scoreValue(item.id),rank=positionMap.get(item.id)??0,label=labelFor(score,rank,config);const group=sorted.filter(other=>isValidGradeScore(scores[other.id]??"")&&scoreValue(other.id)===score);const index=group.findIndex(other=>other.id===item.id);return <article className="grade-item-card" key={item.id}><span className="grade-item-position">{String(rank).padStart(2,"0")}</span>{item.image_url?<img src={item.image_url} alt=""/>:<span className="grade-item-art-placeholder"><CircleDot size={19}/></span>}<div className="grade-item-copy"><strong>{item.title}</strong>{label&&<small style={{color:label.color}}>{label.name}</small>}</div><label className="grade-item-score"><GradeScoreInput value={scores[item.id]??""} ariaLabel={"Voto per "+item.title} onCommit={value=>commitScore(item.id,value)}/><small>/10</small></label>{group.length>1&&<div className="grade-tie-controls"><button type="button" disabled={index===0} onClick={()=>moveTie(item.id,-1)} aria-label="Sposta su nel pari merito"><ChevronUp size={15}/></button><button type="button" disabled={index===group.length-1} onClick={()=>moveTie(item.id,1)} aria-label="Sposta giù nel pari merito"><ChevronDown size={15}/></button></div>}</article>;})}</div>
+   <div className="grade-live-list">{sorted.filter(item=>validScore(scores[item.id]??"")).map(item=>{const score=scoreValue(item.id),rank=positionMap.get(item.id)??0,label=labelFor(score,rank,config);const group=sorted.filter(other=>isValidGradeScore(scores[other.id]??"")&&scoreValue(other.id)===score);const index=group.findIndex(other=>other.id===item.id);return <article className="grade-item-card" key={item.id}><span className="grade-item-position">{String(rank).padStart(2,"0")}</span>{item.image_url?<img src={item.image_url} alt=""/>:<span className="grade-item-art-placeholder"><CircleDot size={19}/></span>}<div className="grade-item-copy"><strong>{item.title}</strong>{label&&<small style={{color:label.color}}>{label.name}</small>}</div><label className="grade-item-score"><GradeScoreInput value={scores[item.id]??""} ariaLabel={"Voto per "+item.title} onCommit={value=>commitScore(item.id,value)} disabled={finished} disabled={finished}/><small>/10</small></label>{group.length>1&&<div className="grade-tie-controls"><button type="button" disabled={finished||index===0} onClick={()=>moveTie(item.id,-1)} aria-label="Sposta su nel pari merito"><ChevronUp size={15}/></button><button type="button" disabled={finished||index===group.length-1} onClick={()=>moveTie(item.id,1)} aria-label="Sposta giù nel pari merito"><ChevronDown size={15}/></button></div>}</article>;})}</div>
    <div className="grade-unrated"><div className="grade-unrated-heading"><strong>Da valutare</strong><span>{initialItems.length-scoredCount}</span></div>{sorted.filter(item=>!validScore(scores[item.id]??"")).map(item=><article className="grade-unrated-row" key={item.id}>{item.image_url?<img src={item.image_url} alt=""/>:<span className="grade-item-art-placeholder"><CircleDot size={18}/></span>}<strong>{item.title}</strong><label><GradeScoreInput value={scores[item.id]??""} placeholder="—" ariaLabel={"Voto per "+item.title} onCommit={value=>commitScore(item.id,value)}/><span>/10</span></label></article>)}</div>
    {error&&<p className="renq-error" role="alert">{error}</p>}
    {finished?<div className="renq-finish"><Trophy/><h2>Hai completato il tuo Grade.</h2><p>Attendi che gli altri partecipanti terminino o che il creatore avvii il Reveal.</p><a className="renq-primary-button" href={"/multiplayer/"+ranking.id}>Torna alla sessione</a></div>:<button type="button" className="renq-primary-button renq-finish-button" onClick={()=>void finish()} disabled={busy||scoredCount===0}>{busy?"Salvataggio…":isMultiplayer?"Completa il Grade":"Pubblica Grade"} <Check/></button>}
