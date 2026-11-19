@@ -146,7 +146,9 @@ export function DirectMessages({
 
   useEffect(() => {
     if (!activeId || !active) return;
-    void loadMessages(activeId, active.otherUserId);
+    const loadTimer = window.setTimeout(() => {
+      void loadMessages(activeId, active.otherUserId);
+    }, 0);
 
     const supabase = createClient();
     const channel = supabase
@@ -204,6 +206,7 @@ export function DirectMessages({
       .subscribe();
 
     return () => {
+      window.clearTimeout(loadTimer);
       void supabase.removeChannel(channel);
     };
   }, [
