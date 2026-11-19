@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PlatformShell } from "@/components/platform-shell";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import "./platform.css";
+import "./multiplayer.css";
 import "./profile-phase5.css";
 import "./inbox.css";
 import "./admin-management.css";

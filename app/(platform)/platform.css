@@ -1165,3 +1165,5 @@
 @media(max-width:640px){.collection-detail-manager{padding:12px}.collection-detail-manager-top{align-items:flex-start;flex-direction:column}.collection-detail-manager-top>button{width:100%;justify-content:center}}
 
 .multiplayer-duration-field{display:grid;gap:7px;margin-top:14px;padding:14px 16px;border:1px solid #e9e1d8;border-radius:14px;background:#fcfaf7;color:#62564b;font-size:11px;font-weight:800}.multiplayer-duration-field input{width:100%;height:40px;padding:0 11px;border:1px solid #e5d8c9;border-radius:10px;background:white;color:#3e342c;font:inherit;font-size:14px}.multiplayer-duration-field small{color:#96887a;font-size:9px;font-weight:500}
+
+.saved-renq-session-link{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:#f0e7dd;color:#76563e;font-size:11px;font-weight:850;text-decoration:none}
