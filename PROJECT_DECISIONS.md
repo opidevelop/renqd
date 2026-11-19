@@ -268,7 +268,8 @@
 ## Decisioni approvate — Appunti, anteprima discografia e ruota (19 novembre 2026)
 
 ### Appunti
-- Introdurre un'area Appunti con cartelle annidabili e documenti modificabili con editor ricco, salvataggio automatico e sincronizzazione in tempo reale.
+- Introdurre un'area Appunti con cartelle annidabili e documenti modificabili con editor ricco, schede interne, salvataggio automatico e sincronizzazione in tempo reale.
+- Ogni documento può contenere fino a 30 schede interne; le schede vengono salvate e sincronizzate insieme al documento.
 - Consentire esportazione dei documenti in PDF e Word.
 - Consentire inviti a collaborare su una singola cartella o su un singolo documento. Gli inviti sono notificati nell'area «Attività» e l'accesso decorre soltanto dopo accettazione.
 - La condivisione di una cartella comprende automaticamente documenti e sottocartelle esistenti e futuri.
