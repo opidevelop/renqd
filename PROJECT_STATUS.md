@@ -7,7 +7,7 @@
 > **Aggiornato:** 19 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `6223a57e1f828809b42d377a09585831fa551989`
+> **Ultimo commit applicativo analizzato su main:** `7d91c25801a5a35126e1a7f55e9f9698c86cf833`
 
 ## 1. Sintesi esecutiva
 
@@ -15,9 +15,9 @@
 - Il lavoro viene svolto esclusivamente su `main`.
 - Renqd è una piattaforma chiusa: le pagine e i contenuti interni richiedono autenticazione e approvazione quando prevista.
 - Le fasi di amministrazione, lifecycle dei dati, motore Renq e profilo/cataloghi/collezioni hanno ricevuto implementazioni sostanziali. La verifica funzionale end-to-end complessiva è ancora da eseguire.
-- È presente un workflow GitHub Actions per TypeScript, ESLint e build di produzione; gli ultimi esiti CI documentati sono verdi sui commit `16aad74` e `70cc1ee`. Non è stato verificato separatamente un nuovo run CI per `ae93d38`.
-- **Produzione Vercel:** il commit applicativo `64f3388aa0ad7cf5e81ae2f5607dd28594af404f` è stato distribuito con deployment Production `READY`; gli alias includono `https://renqd.app`, `https://renqd.vercel.app` e `https://www.renqd.app`. Il rilascio è confermato, ma non equivale al collaudo funzionale end-to-end. Il commit successivo `aa6a67e` corregge soltanto i terminatori SQL della migrazione e non cambia il codice applicativo.
-- Le quattro migrazioni amministrazione/moderazione/reporting/hardening sono ora applicate al database live. Le due migrazioni storiche già presenti nel database ma assenti dal repository sono state ricostruite e ripristinate in supabase/migrations per riallineare la cronologia. Restano warning generici dei Security/Performance Advisors da analizzare separatamente.
+- GitHub Actions Code quality: run #178 e #179 completati con esito `success` (TypeScript, ESLint e Production Build); run #179 verifica il commit applicativo `7d91c25801a5a35126e1a7f55e9f9698c86cf833`.
+- **Produzione Vercel:** l'ultimo deployment Production `READY` resta il commit `7ffa974dc88d3af65a96e000843157751af142da`. Le modifiche successive su `main` non sono state pubblicate; i deploy automatici intermedi sono stati annullati per mantenere un unico rilascio cumulativo. Il collaudo funzionale end-to-end resta da completare.
+- Supabase live e `supabase/migrations` sono riallineati a 57 migrazioni. Le migrazioni `20261119102148_renqd_notes_identity_guard.sql` e `20261119102637_renqd_follow_privacy_requests_realtime.sql` sono applicate al database live e presenti nel repository. Restano warning generici dei Security/Performance Advisors da analizzare separatamente.
 
 ## 2. Stack e servizi
 
@@ -689,3 +689,34 @@ Revisione della migrazione di hardening:
 - Deployment Production automatico del commit annullato intenzionalmente; il commit non è pubblicato. Ultimo deployment Production READY precedente: commit 7ffa974dc88d3af65a96e000843157751af142da.
 - Le modifiche collezioni, ritorno al profilo e allineamento metadati sono presenti nel repository; test funzionali autenticati non ancora eseguiti.
 - Multiplayer, DM, social/feed e Scopri non sono ancora implementati. Non dichiarare completato né distribuire il rilascio cumulativo finché codice, migrazioni, RLS, realtime, build e test non siano verificati.
+
+## 30. Audit Appunti, Follow privati e realtime — 19 novembre 2026
+
+### Stato verificato su main
+- Commit applicativo verificato: `7d91c25801a5a35126e1a7f55e9f9698c86cf833`.
+- GitHub Actions Code quality run #179: TypeScript, ESLint e Production Build tutti `success`.
+- Le modifiche restano non pubblicate in Production. Ultimo deployment Production READY: commit `7ffa974dc88d3af65a96e000843157751af142da`.
+- Repository e database contengono 57 migrazioni SQL corrispondenti.
+
+### Appunti — hardening e UX
+- Migrazione `20261119102148_renqd_notes_identity_guard.sql` applicata.
+- Trigger BEFORE UPDATE impediscono di alterare owner, cartella e data di creazione di cartelle/documenti; `updated_by` viene imposto all'utente autenticato.
+- Test SQL transazionali superati: tentativi di modifica dei riferimenti identitari bloccati; `updated_by` corretto; record temporanei rimossi.
+- Normalizzazione tag e sanitizzazione HTML verificate con input di prova.
+- Nell'editor sono stati sostituiti i prompt/conferme native con dialoghi interni per eliminazione, rinomina schede e inserimento tabelle.
+- Le tabelle Appunti e collaboratori sono nella pubblicazione Realtime; il collaudo UI autenticato non è ancora stato eseguito.
+
+### Follow privati — hardening DB e Activity
+- Migrazione `20261119102637_renqd_follow_privacy_requests_realtime.sql` applicata.
+- Il database impone `PENDING` per i profili privati e `ACCEPTED` per quelli pubblici, indipendentemente dal valore inviato dal client; sono ammessi solo profili target approvati.
+- Le relazioni Follow non possono cambiare follower/destinatario; soltanto il destinatario può accettare una richiesta pendente. Il rifiuto elimina la richiesta tramite RPC protetta.
+- Le richieste private generano una notifica `FOLLOW_REQUEST`; l'accettazione genera `FOLLOW_ACCEPTED`.
+- `user_follows` e `user_notifications` sono nella pubblicazione Realtime. Activity gestisce le richieste Follow e si aggiorna in tempo reale; il pulsante Follow sincronizza lo stato via Realtime.
+- Test SQL transazionali superati: follow pubblico forzato ad ACCEPTED, follow privato forzato a PENDING, notifica generata, auto-approvazione del mittente bloccata, accettazione/rifiuto del destinatario funzionanti. Relazioni e notifiche di prova rimosse; privacy del profilo ripristinata.
+
+### Collaudi e blocchi ancora aperti
+- La ruota è integrata in `/create`; l'anteprima musicale è disponibile nell'elenco di selezione/riepilogo dei brani; Appunti è implementato. Queste tre funzionalità non hanno ancora un collaudo end-to-end autenticato su browser.
+- Il percorso `/u/[username]` continua a nascondere completamente i profili privati ai non proprietari. La richiesta Follow privata è protetta e gestibile lato database/Activity, ma manca ancora un punto d'ingresso UI per inviarla a un profilo privato.
+- Prima di completare Scopri serve definire cosa vede un non-follower di un profilo privato: solo un risultato minimo (username/nome/avatar e pulsante Follow) oppure nessuna scheda profilo e richiesta avviabile soltanto da un altro punto.
+- Feed personalizzato, DM 1:1 e interfaccia completa Messaggi/Attività non sono ancora implementati. Il multiplayer ranking resta subordinato al collaudo delle tre funzionalità prioritarie, come da decisioni di progetto.
+- Nessun deploy cumulativo Production eseguito.
