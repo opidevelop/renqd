@@ -213,7 +213,6 @@ export function DirectMessages({
     active?.otherUserId,
     currentUserId,
     loadMessages,
-    loadMessages,
     loadReactions,
     markRead,
   ]);
