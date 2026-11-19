@@ -987,6 +987,8 @@ Revisione della migrazione di hardening:
 - Il client aggiorna i conteggi in seguito a eventi Realtime su `user_notifications`, `direct_messages`, `direct_conversation_reads` e `direct_conversations`.
 - Il conteggio iniziale server-side resta il valore di avvio; il primo refresh autenticato riallinea lo stato al database.
 - Nessuna migrazione DB aggiuntiva e nessun deploy.
+- Verificata la presenza nella pubblicazione `supabase_realtime` di `user_notifications`, `direct_messages`, `direct_conversation_reads` e `direct_conversations`.
 - Commit applicativo: `adfda7b683b09d295d6e1cee7ea1f6fdf5797f31`.
-- GitHub Actions **#271** sul commit applicativo: in corso al momento dell'aggiornamento.
+- GitHub Actions **#271** sul commit applicativo: success su TypeScript, ESLint e Production Build.
 - Il collaudo browser resta rinviato alla sessione finale unica richiesta dall'utente.
+- GitHub Actions **#270** (aggiornamento documentale precedente): success.
