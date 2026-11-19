@@ -293,3 +293,10 @@
 - L'editor deve supportare formattazione avanzata, inclusi colori del testo, evidenziazione e tabelle, mantenendo autosalvataggio, sincronizzazione e sanitizzazione server/database.
 - Cartelle e documenti possono avere tag. I tag assegnati a una cartella sono ereditati da tutte le sottocartelle e dai documenti discendenti; ogni documento può inoltre avere tag propri.
 - La sezione «I tuoi tag» compare sotto «Le tue cartelle» e filtra i contenuti accessibili all'utente, senza esporre nomi o contenuti di risorse non accessibili.
+
+
+## Decisioni approvate — multiplayer competitivo (19 novembre 2026)
+
+- Allo scadere del timer competitivo il creatore decide se procedere al Reveal oppure concedere altro tempo.
+- Le modifiche proposte alla classifica finale competitiva richiedono l'approvazione di tutti i partecipanti proprietari, incluso il proponente.
+- Un solo rifiuto respinge la proposta di modifica.

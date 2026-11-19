@@ -32,7 +32,7 @@ export default async function PublicRenqPage({ params }: { params: Promise<{ slu
   const cover = typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null;
   const position = settings.coverPosition && typeof settings.coverPosition === "object" ? settings.coverPosition as {x:number;y:number} : {x:50,y:50};
   return <main className="public-profile-page public-renq-page">
-    {profile && <Link href={"/u/" + profile.username} className="public-profile-back"><ArrowLeft size={15}/> {profile.display_name || profile.username}</Link>}
+    {profile && <Link href={ranking.user_id === user.id ? "/profile" : "/u/" + profile.username} className="public-profile-back"><ArrowLeft size={15}/> {ranking.user_id === user.id ? "Il tuo profilo" : (profile.display_name || profile.username)}</Link>}
     <section className="profile-cover public-renq-cover" style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.85),rgba(15,12,10,.12)),url(" + cover + ")", backgroundPosition: position.x + "% " + position.y + "%" } : undefined}>
       <div className="profile-cover-copy"><span>{String(ranking.mode).replaceAll("_"," ")} · RENQD</span><h1>{ranking.title}</h1><p>{items.length} elementi · Classifica pubblicata</p></div>
     </section>

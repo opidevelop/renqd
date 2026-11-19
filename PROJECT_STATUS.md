@@ -665,3 +665,11 @@ Revisione della migrazione di hardening:
 - Vercel Production deployment `dpl_3CQnLgbaPvB28WEcijbpKXuNUFZv`, commit `778fb52d1e902ea32e944d7724ccfe0fc929f471`: **READY**. Alias verificati: `renqd.app`, `renqd.vercel.app`, `www.renqd.app`.
 - Smoke test HTTP: `/login` risponde 200; la richiesta anonima a `/notes` viene instradata alla pagina di login (`x-matched-path: /login`), coerentemente con l'accesso chiuso.
 - Non è stato eseguito un test end-to-end autenticato su account reali. Da collaudare dall'interfaccia: assegnazione tag a cartelle/documenti, ereditarietà su sottocartelle e documenti, filtro tag, colori, evidenziazioni, tabelle, autosalvataggio e collaborazione in tempo reale.
+
+
+## Specifiche confermate — multiplayer competitivo (19 novembre 2026)
+
+- Confermato: allo scadere del timer competitivo il creatore decide tra Reveal e proroga.
+- Confermato: le modifiche proposte alla classifica finale richiedono l'approvazione di tutti i partecipanti proprietari, incluso il proponente; un solo rifiuto respinge la proposta.
+- Le altre scelte operative del questionario multiplayer/social restano da consolidare e non sono registrate come decisioni approvate.
+- Le correzioni alle collezioni, al ritorno al profilo e all'allineamento dei metadati ranking sono in corso; non risultano ancora verificate da CI, deployment o test funzionali.
