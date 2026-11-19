@@ -978,3 +978,15 @@ Revisione della migrazione di hardening:
 - Nessun deploy Production.
 - Nessun collaudo browser end-to-end eseguito: resta riservato all'unica sessione finale richiesta dall'utente.
 - Da rifinire ancora: badge complessivo Messaggi/Attività e sincronizzazione dei contatori inbox. Le funzionalità Appunti, anteprima discografia, Ruota, DM e multiplayer restano nel perimetro del collaudo finale.
+
+## 40. Contatori Inbox in tempo reale — 19 novembre 2026
+
+- Aggiunto l'hook condiviso `useInboxUnreadCounts` per mantenere aggiornati i contatori delle schede Messaggi e Attività.
+- Il conteggio Attività viene riletto da `user_notifications` filtrando il destinatario corrente e le notifiche non lette.
+- Il conteggio Messaggi deriva dalla somma dei risultati della RPC protetta `renqd_direct_unread_counts`.
+- Il client aggiorna i conteggi in seguito a eventi Realtime su `user_notifications`, `direct_messages`, `direct_conversation_reads` e `direct_conversations`.
+- Il conteggio iniziale server-side resta il valore di avvio; il primo refresh autenticato riallinea lo stato al database.
+- Nessuna migrazione DB aggiuntiva e nessun deploy.
+- Commit applicativo: `adfda7b683b09d295d6e1cee7ea1f6fdf5797f31`.
+- GitHub Actions **#271** sul commit applicativo: in corso al momento dell'aggiornamento.
+- Il collaudo browser resta rinviato alla sessione finale unica richiesta dall'utente.
