@@ -1085,7 +1085,7 @@ Revisione della migrazione di hardening:
 - Nessuna modifica al database e nessuna nuova integrazione: resta TMDB.
 
 ### Verifiche
-- Commit applicativi: `19e3a15dd913d5c21b4881f41335278ec1184dcc` e correzione TypeScript `cb9cf5e856978ec7fa676ecb2c699b3e34166ae5`.
-- GitHub Actions Code quality #294 e #295: avviate, esito da verificare.
+- Commit applicativi: `19e3a15dd913d5c21b4881f41335278ec1184dcc`, `cb9cf5e856978ec7fa676ecb2c699b3e34166ae5` e correzione del narrowing TypeScript `5575d541e8ca6e7d693676eb668bd573bbcb865c`.
+- GitHub Actions Code quality #294 e #295: la build Vercel del commit `19e3a15` ha individuato un errore TypeScript nel narrowing dei numeri di stagione; corretto esplicitando il controllo `typeof number === "number"`. Nuova CI sul commit `5575d541` da verificare.
 - Test funzionale autenticato su Grande Fratello VIP e confronto effettivo dei cast per stagione: ancora da eseguire; la correzione è basata sulla semantica documentata degli endpoint TMDB.
 - Nessun deployment Production eseguito per questa correzione; richiede CI verde e autorizzazione esplicita dell'utente.
