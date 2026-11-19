@@ -35,6 +35,7 @@ begin
   select * into v_ranking from public.rankings where id=p_ranking_id;
   if v_ranking.mode not in ('RENQ','SPEED_RENQ') then raise exception 'Ordine non modificabile per questa tipologia' using errcode='22023'; end if;
   select count(*) into v_count from public.ranking_items where ranking_id=p_ranking_id;
+  update public.ranking_items set sort_order=sort_order+v_count+1 where ranking_id=p_ranking_id;
   if coalesce(array_length(p_ordered_ids,1),0)<>v_count or (select count(distinct x) from unnest(p_ordered_ids) x)<>v_count
     or exists(select 1 from unnest(p_ordered_ids) x where not exists(select 1 from public.ranking_items ri where ri.ranking_id=p_ranking_id and ri.id=x)) then
     raise exception 'Ordine degli elementi non valido' using errcode='22023';

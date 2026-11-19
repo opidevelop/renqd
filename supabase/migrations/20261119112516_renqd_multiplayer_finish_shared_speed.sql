@@ -19,6 +19,7 @@ begin
   if v_participant.progress_status='FINISHED' then return jsonb_build_object('ok',true,'alreadyFinished',true); end if;
   if v_session.shared_state->'speed' is null then raise exception 'Il timer Speed non è stato avviato' using errcode='22023'; end if;
   select count(*) into v_count from public.ranking_items where ranking_id=p_ranking_id;
+  update public.ranking_items set sort_order=sort_order+v_count+1 where ranking_id=p_ranking_id;
   if coalesce(array_length(p_ordered_ids,1),0)<>v_count or (select count(distinct x) from unnest(p_ordered_ids) x)<>v_count
     or exists(select 1 from unnest(p_ordered_ids) x where not exists(select 1 from public.ranking_items ri where ri.ranking_id=p_ranking_id and ri.id=x)) then
     raise exception 'Ordine degli elementi non valido' using errcode='22023';

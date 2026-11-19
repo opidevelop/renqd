@@ -1,0 +1,1 @@
+do $$ begin if not exists(select 1 from pg_constraint where conrelid='public.ranking_multiplayer_sessions'::regclass and conname='ranking_multiplayer_sessions_shared_state_object') then alter table public.ranking_multiplayer_sessions add constraint ranking_multiplayer_sessions_shared_state_object check (jsonb_typeof(shared_state)='object'); end if; end $$;
