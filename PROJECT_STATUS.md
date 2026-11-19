@@ -7,7 +7,7 @@
 > **Aggiornato:** 19 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `7d91c25801a5a35126e1a7f55e9f9698c86cf833`
+> **Ultimo commit applicativo analizzato su main:** `3d07a97adbd4f3038aa89fdc2c2d89f90ab58a90`
 
 ## 1. Sintesi esecutiva
 
@@ -720,3 +720,30 @@ Revisione della migrazione di hardening:
 - Prima di completare Scopri serve definire cosa vede un non-follower di un profilo privato: solo un risultato minimo (username/nome/avatar e pulsante Follow) oppure nessuna scheda profilo e richiesta avviabile soltanto da un altro punto.
 - Feed personalizzato, DM 1:1 e interfaccia completa Messaggi/Attività non sono ancora implementati. Il multiplayer ranking resta subordinato al collaudo delle tre funzionalità prioritarie, come da decisioni di progetto.
 - Nessun deploy cumulativo Production eseguito.
+
+
+## 31. Accesso profili privati, liste Follow e fondazione DM — 19 novembre 2026
+
+### Follow e profili privati
+- Migrazione `20261119103354_renqd_private_profile_accepted_followers` applicata a Supabase.
+- La policy RLS `public_profiles_read_approved` consente la lettura del profilo privato al proprietario e ai follower con relazione `ACCEPTED`; gli utenti non follower continuano a non ottenere righe.
+- La pagina `/u/[username]` verifica anche la relazione Follow accettata e mostra un'indicazione di profilo privato.
+- Test SQL con ruolo `authenticated`: follower accettato legge 1 profilo; utente non follower legge 0 profili. Test transazionale annullato senza modificare dati persistenti.
+- Nel profilo personale sono stati aggiunti elenchi distinti Follower e Seguiti, con apertura dei profili consultabili e fallback neutro per profili privati non accessibili all'utente corrente.
+
+### Messaggistica diretta — fondazione database
+- Migrazione `20261119103642_renqd_direct_messaging_foundation` applicata a Supabase.
+- Tabelle create: `direct_message_requests`, `direct_conversations`, `direct_messages`, `direct_message_reactions`, `direct_conversation_reads`.
+- RLS attiva e forzata su tutte le tabelle; lettura limitata ai partecipanti, invio/modifica/eliminazione messaggi al mittente, reazioni all'utente che le crea, letture al partecipante.
+- RPC protette per inviare una richiesta e per accettarla/rifiutarla. Il rifiuto registra `responded_at`; la richiesta successiva nella stessa direzione è bloccata per 30 giorni, mentre la direzione inversa resta indipendente.
+- L'accettazione crea una conversazione unica per la coppia; notifiche DM_REQUEST, DM_REQUEST_ACCEPTED e DM_REQUEST_DECLINED vengono registrate in Attività.
+- Trigger per impedire modifiche ai riferimenti del messaggio, verificare le risposte nella stessa conversazione, marcare modifiche/eliminazioni e aggiornare `last_message_at`.
+- Realtime abilitato per richieste, conversazioni, messaggi, reazioni e letture.
+- Test SQL transazionale: richiesta, accettazione, creazione conversazione, invio messaggio, reazione, lettura e isolamento da utente estraneo superati. Nessun dato di test persistente.
+
+### Stato ancora aperto
+- La UI di messaggistica (tab Messaggi, elenco conversazioni, chat, richieste DM in Attività, emoji/reazioni/risposte/modifica/eliminazione e conferme di lettura) non è ancora implementata. Il backend DM non va considerato funzionalità completa.
+- Restano da completare la UI di ricerca/Scopri e il feed personalizzato.
+- La pagina di profilo privato è accessibile solo dopo accettazione Follow; non è ancora disponibile una scheda minima del profilo privato per i non follower. Questa scelta resta da confermare prima di esporre informazioni o una preview in Scopri.
+- CI sul commit `3d07a97adbd4f3038aa89fdc2c2d89f90ab58a90`: TypeScript ed ESLint superati; build di produzione in esecuzione al momento dell'aggiornamento.
+- Nessun deployment Production eseguito.
