@@ -4,7 +4,7 @@
 >
 > Per le decisioni vincolanti consultare prima `PROJECT_DECISIONS.md`. Se questo documento descrive uno stato tecnico che contraddice una decisione, prevale `PROJECT_DECISIONS.md`.
 >
-> **Aggiornato:** 18 novembre 2026  
+> **Aggiornato:** 19 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
 > **Ultimo commit applicativo analizzato su main:** `6223a57e1f828809b42d377a09585831fa551989`
@@ -552,3 +552,19 @@ Revisione della migrazione di hardening:
 - Repository aggiornato su `main` dal commit di partenza `89381a5248f624f4012ff4ecdc079959fe1b1400`.
 - La ruota e l'anteprima vengono implementate nel repository in questo gruppo. Nessuna migrazione Supabase prevista per queste due funzionalità.
 - Appunti resta il successivo gruppo implementativo: richiede schema, RLS, API transazionali, inviti, notifiche in Attività e test realtime; non dichiarare la funzionalità disponibile finché non sono completate e verificate queste parti.
+
+
+## 18. Appunti collaborativi — 19 novembre 2026
+
+### Database e sicurezza
+- Applicate a Supabase le migrazioni `20261119075809_renqd_notes_workspace`, `20261119075835_renqd_notes_folder_owner_inheritance` e `20261119075936_renqd_notes_permissions_hardening`.
+- Create le tabelle `notes_folders`, `notes_documents` e `notes_collaborators`, con cartelle annidate, contenuti HTML limitati, inviti a livello cartella/documento e stati PENDING/ACCEPTED/DECLINED/REVOKED.
+- RLS attiva su tutte le tabelle. Accesso ereditato per le cartelle condivise e per i relativi contenuti futuri; l'OWNER di piattaforma può leggere senza diventare collaboratore. La modifica richiede proprietà o collaborazione accettata; la gestione/eliminazione delle cartelle resta al proprietario.
+- RPC transazionali per inviare inviti, accettare/rifiutare e revocare; l'invito genera una notifica `NOTES_INVITATION` in `user_notifications`. Le tabelle cartelle e documenti sono abilitate per Supabase Realtime.
+
+### Implementazione applicativa
+- Nuova area `/notes` collegata alla navigazione globale.
+- Editor con formattazione di base, autosalvataggio, sincronizzazione realtime, esportazione PDF tramite stampa del browser e documento Word compatibile `.doc`.
+- Inviti tramite username Renqd e gestione delle richieste nell'area `/inbox` / «Attività».
+- I controlli server-side e RLS restano la fonte effettiva dei permessi; la UI non sostituisce le policy.
+- Da completare: collaudo autenticato con account proprietario/collaboratore/OWNER, test su cartelle annidate e condivisione futura, verifica export in Word/PDF e test simultaneo realtime. Non considerare la funzionalità collaudata prima di questi test.
