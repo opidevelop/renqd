@@ -35,7 +35,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   const multiplayerContext=multiplayerDetails?{
     mode:multiplayerDetails.session.mode,
     status:multiplayerDetails.session.status,
-    progressStatus:multiplayerDetails.participants.find((participant:any)=>participant.userId===user.id)?.progressStatus??"NOT_STARTED",
+    progressStatus:multiplayerDetails.participants.find((participant)=>participant.userId===user.id)?.progressStatus??"NOT_STARTED",
     deadlineAt:multiplayerDetails.session.deadlineAt,
     sharedState:multiplayerDetails.session.sharedState??null,
     personalProgress:personalResult?.result_snapshot??null
