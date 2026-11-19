@@ -54,7 +54,7 @@ export async function POST(request:Request){
  if(body.action==="decide"){
   if(!rankingId||!["REVEAL","EXTEND"].includes(body.decision))return jsonError("Decisione non valida.");
   const extendMinutes=body.decision==="EXTEND"?Number(body.extendMinutes):null;
-  if(body.decision==="EXTEND"&&(!Number.isInteger(extendMinutes)||extendMinutes<1||extendMinutes>1440))return jsonError("La proroga deve essere compresa tra 1 e 1440 minuti.");
+  if(body.decision==="EXTEND"&&(extendMinutes===null||!Number.isInteger(extendMinutes)||extendMinutes<1||extendMinutes>1440))return jsonError("La proroga deve essere compresa tra 1 e 1440 minuti.");
   const {data,error}=await supabase.rpc("renqd_multiplayer_decide",{p_ranking_id:rankingId,p_action:body.decision,p_extend_minutes:extendMinutes});
   if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
  }
