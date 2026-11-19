@@ -7,7 +7,7 @@
 > **Aggiornato:** 19 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `30f04b7f6a6ef003cac6837feab81293a011c48e`
+> **Ultimo commit applicativo analizzato su main:** `449a4f787a33239e4f0551a49d4c73dad91f0f05`
 
 ## 1. Sintesi esecutiva
 
@@ -17,7 +17,7 @@
 - Le fasi di amministrazione, lifecycle dei dati, motore Renq e profilo/cataloghi/collezioni hanno ricevuto implementazioni sostanziali. La verifica funzionale end-to-end complessiva è ancora da eseguire.
 - GitHub Actions Code quality: run #199 sul commit `30f04b7f6a6ef003cac6837feab81293a011c48e` completato con esito `success` per TypeScript, ESLint e Production Build. I run precedenti #192–#198 includevano errori intermedi poi corretti; fanno fede i risultati del run #199 sul commit corrente.
 - **Produzione Vercel:** l'ultimo deployment Production `READY` resta il commit `7ffa974dc88d3af65a96e000843157751af142da`. Le modifiche successive su `main` non sono state pubblicate; i deploy automatici intermedi sono stati annullati per mantenere un unico rilascio cumulativo. Il collaudo funzionale end-to-end resta da completare.
-- Supabase live e `supabase/migrations` sono riallineati a 62 migrazioni. Le migrazioni più recenti per Appunti, Follow e DM sono applicate al database live e presenti nel repository. Restano warning generici dei Security/Performance Advisors da analizzare separatamente.
+- Supabase live e `supabase/migrations` sono riallineati a 64 migrazioni. Le migrazioni più recenti per Appunti, Follow e DM sono applicate al database live e presenti nel repository. Restano warning generici dei Security/Performance Advisors da analizzare separatamente.
 
 ## 2. Stack e servizi
 
@@ -815,3 +815,23 @@ Revisione della migrazione di hardening:
 - Non vengono sospesi i controlli tecnici durante lo sviluppo: CI completa (TypeScript, ESLint, build), audit DB, migrazioni allineate, test SQL transazionali, RLS/RPC/Realtime/Storage e verifiche di sicurezza restano obbligatori per ogni gruppo di modifiche.
 - Il test finale dell'utente dovrà coprire i flussi completi, compresi multiplayer collaborativo/competitivo, inviti, timer, Reveal, fusione risultati e proposte di modifica post-pubblicazione.
 - Nessun deployment Production intermedio. Un unico deploy cumulativo dopo completamento tecnico e collaudo finale.
+
+
+## 36. Fondazione multiplayer — schema sessioni, inviti e accessi (19 novembre 2026)
+
+### Database live
+- Applicata la migrazione `20261119110245_renqd_multiplayer_session_foundation`.
+- Aggiunte le tabelle `ranking_multiplayer_sessions`, `ranking_session_results`, `ranking_session_proposals`, `ranking_session_proposal_votes` e `ranking_invite_links`.
+- Estesa `ranking_participants` con avanzamento individuale (`NOT_STARTED`, `IN_PROGRESS`, `FINISHED`, `INCOMPLETE`), completamento, abbandono e ultima attività.
+- RLS abilitata e forzata sulle cinque nuove tabelle; accesso Data API concesso soltanto ad `authenticated` e letture governate da policy. Risultati competitivi leggibili dal proprietario prima del Reveal e da tutti i partecipanti soltanto dopo il Reveal.
+- Le nuove tabelle e quelle necessarie alla sincronizzazione sono state aggiunte a `supabase_realtime`; le verifiche SQL confermano RLS, FORCE RLS sulle nuove tabelle e presenza nella pubblicazione.
+- Aggiunti RPC protetti per creare una classifica multiplayer, invitare utenti approvati tramite username, rispondere agli inviti, creare/revocare link d'invito, unirsi tramite link, avviare la sessione, aggiornare lo stato e gestire Reveal/proroga.
+- Applicata la migrazione correttiva `20261119110324_renqd_multiplayer_invitation_hardening` per normalizzazione username, reinvito dopo rifiuto/revoca e validazione scadenza link.
+- Totale migrazioni live: **64**. Le due migrazioni devono essere aggiunte al repository con gli stessi nomi/versioni.
+
+### Architettura e limiti attuali
+- Le sessioni supportano modalità `COLLABORATIVE` e `COMPETITIVE`, durata configurabile 1–1440 minuti e limite massimo 8 partecipanti incluso il creatore.
+- La creazione della classifica e della sessione avviene in un'unica RPC transazionale; il creatore viene registrato come partecipante accettato.
+- Gli inviti nominativi sono per username di account approvati; i link condivisibili conservano soltanto SHA-256 del token e possono essere revocati.
+- La fusione dei risultati, il completamento automatico, la UI di sessione e la gestione delle proposte post-pubblicazione non sono ancora implementati. Le RPC di Reveal attuali portano allo stato `AWAITING_DECISION`; la finalizzazione effettiva sarà aggiunta nella fase successiva.
+- Nessun deploy Production. I test SQL di flusso completo saranno eseguiti dopo aver completato le RPC di finalizzazione e le relative integrazioni; il collaudo UI resta nella sessione unica finale richiesta dall'utente.
