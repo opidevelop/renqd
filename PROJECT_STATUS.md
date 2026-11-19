@@ -1071,13 +1071,21 @@ Revisione della migrazione di hardening:
 
 ## 45. Catalogo Reality TV — 19 novembre 2026
 
-### Implementazione
+### Implementazione iniziale
 - Aggiunta la tipologia Reality TV in Film e serie, con selettore Per reality / Per stagione coerente con Discografia Album / Brani.
 - Ricerca dei programmi TMDB; recupero delle stagioni e dei cast per stagione; aggregazione deduplicata dei partecipanti per la modalità Per reality.
 - Gli elementi rankabili sono i concorrenti con nome, immagine profilo quando disponibile e metadati della stagione di provenienza.
 - La copertura dipende dai dati presenti nel provider TMDB; i cast mancanti non vengono inventati.
 
+### Correzione del recupero cast — 19 novembre 2026
+- La prima implementazione interrogava gli endpoint TMDB `/credits` di stagione: per reality con crediti episodici incompleti questi endpoint possono restituire soltanto una parte del cast, spesso concentrata sulla stagione corrente.
+- Sostituiti come fonte primaria con gli endpoint `/aggregate_credits` sia a livello di serie sia a livello di stagione, che aggregano i crediti degli episodi appartenenti rispettivamente a tutte le stagioni o alla singola stagione.
+- In modalità Per reality il cast viene ora letto con una singola richiesta aggregata e deduplicato per ID persona; le stagioni di provenienza vengono ricavate dai ruoli aggregati. Se l'endpoint aggregato della serie non restituisce persone, viene usato il fallback sulle stagioni.
+- In modalità Per stagione viene usato l'aggregato della singola stagione, con fallback ai crediti standard quando l'aggregato è vuoto.
+- Nessuna modifica al database e nessuna nuova integrazione: resta TMDB.
+
 ### Verifiche
-- Database: nessuna migrazione prevista; viene riutilizzata l'integrazione TMDB e le API server-side già presenti.
-- Build, TypeScript, ESLint e test funzionali del flusso Reality TV: da verificare dopo il commit.
-- Nessun deployment Production intermedio; il rilascio resta cumulativo dopo il collaudo finale.
+- Commit applicativi: `19e3a15dd913d5c21b4881f41335278ec1184dcc` e correzione TypeScript `cb9cf5e856978ec7fa676ecb2c699b3e34166ae5`.
+- GitHub Actions Code quality #294 e #295: avviate, esito da verificare.
+- Test funzionale autenticato su Grande Fratello VIP e confronto effettivo dei cast per stagione: ancora da eseguire; la correzione è basata sulla semantica documentata degli endpoint TMDB.
+- Nessun deployment Production eseguito per questa correzione; richiede CI verde e autorizzazione esplicita dell'utente.
