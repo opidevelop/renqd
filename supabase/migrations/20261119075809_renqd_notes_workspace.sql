@@ -38,15 +38,9 @@ if v_target=v_actor then raise exception 'Non puoi invitare te stesso';end if;
 select username into v_actor_username from public.profiles where id=v_actor;
 if v_resource_type='FOLDER' then select owner_id,title into v_owner,v_title from public.notes_folders where id=p_resource_id;else select owner_id,title into v_owner,v_title from public.notes_documents where id=p_resource_id;end if;
 if v_owner is distinct from v_actor then raise exception 'Solo il proprietario può invitare collaboratori' using errcode='42501';end if;
-if v_resource_type='FOLDER' then
-insert into public.notes_collaborators(resource_type,folder_id,owner_id,invited_user_id,invited_by,status) values('FOLDER',p_resource_id,v_actor,v_target,v_actor,'PENDING')
-on conflict(folder_id,invited_user_id) where resource_type='FOLDER' do update set invited_by=excluded.invited_by,owner_id=excluded.owner_id,status='PENDING',responded_at=null,created_at=now() returning id into v_invite_id;
-else
-insert into public.notes_collaborators(resource_type,document_id,owner_id,invited_user_id,invited_by,status) values('DOCUMENT',p_resource_id,v_actor,v_target,v_actor,'PENDING')
-on conflict(document_id,invited_user_id) where resource_type='DOCUMENT' do update set invited_by=excluded.invited_by,owner_id=excluded.owner_id,status='PENDING',responded_at=null,created_at=now() returning id into v_invite_id;
-end if;
-insert into public.user_notifications(recipient_id,actor_id,notification_type,payload) values(v_target,v_actor,'NOTES_INVITATION',jsonb_build_object('inviteId',v_invite_id,'resourceType',v_resource_type,'resourceId',p_resource_id,'resourceTitle',v_title,'actorUsername',v_actor_username));
-return v_invite_id;end;$$;
+if v_resource_type='FOLDER' then insert into public.notes_collaborators(resource_type,folder_id,owner_id,invited_user_id,invited_by,status) values('FOLDER',p_resource_id,v_actor,v_target,v_actor,'PENDING') on conflict(folder_id,invited_user_id) where resource_type='FOLDER' do update set invited_by=excluded.invited_by,owner_id=excluded.owner_id,status='PENDING',responded_at=null,created_at=now() returning id into v_invite_id;
+else insert into public.notes_collaborators(resource_type,document_id,owner_id,invited_user_id,invited_by,status) values('DOCUMENT',p_resource_id,v_actor,v_target,v_actor,'PENDING') on conflict(document_id,invited_user_id) where resource_type='DOCUMENT' do update set invited_by=excluded.invited_by,owner_id=excluded.owner_id,status='PENDING',responded_at=null,created_at=now() returning id into v_invite_id;end if;
+insert into public.user_notifications(recipient_id,actor_id,notification_type,payload) values(v_target,v_actor,'NOTES_INVITATION',jsonb_build_object('inviteId',v_invite_id,'resourceType',v_resource_type,'resourceId',p_resource_id,'resourceTitle',v_title,'actorUsername',v_actor_username));return v_invite_id;end;$$;
 create or replace function public.renqd_respond_notes_invitation(p_invite_id uuid,p_accept boolean) returns void language plpgsql security definer set search_path=pg_catalog,public,private as $$
 declare v_invite public.notes_collaborators%rowtype;
 begin
@@ -54,22 +48,17 @@ if auth.uid() is null or not private.is_approved_user() then raise exception 'Ac
 select * into v_invite from public.notes_collaborators where id=p_invite_id and invited_user_id=auth.uid() for update;
 if not found or v_invite.status<>'PENDING' then raise exception 'Invito non disponibile';end if;
 update public.notes_collaborators set status=case when p_accept then 'ACCEPTED' else 'DECLINED' end,responded_at=now() where id=p_invite_id;
-update public.user_notifications set read_at=coalesce(read_at,now()) where recipient_id=auth.uid() and notification_type='NOTES_INVITATION' and payload->>'inviteId'=p_invite_id::text;
-end;$$;
+update public.user_notifications set read_at=coalesce(read_at,now()) where recipient_id=auth.uid() and notification_type='NOTES_INVITATION' and payload->>'inviteId'=p_invite_id::text;end;$$;
 create or replace function public.renqd_revoke_notes_invitation(p_invite_id uuid) returns void language plpgsql security definer set search_path=pg_catalog,public,private as $$
 begin
 if auth.uid() is null or not private.is_approved_user() then raise exception 'Account non autorizzato' using errcode='42501';end if;
 update public.notes_collaborators set status='REVOKED',responded_at=now() where id=p_invite_id and owner_id=auth.uid() and status in('PENDING','ACCEPTED');
-if not found then raise exception 'Invito non disponibile o non gestibile' using errcode='42501';end if;
-end;$$;
+if not found then raise exception 'Invito non disponibile o non gestibile' using errcode='42501';end if;end;$$;
 revoke all on function public.renqd_invite_notes_collaborator(text,uuid,text) from public,anon;
 revoke all on function public.renqd_respond_notes_invitation(uuid,boolean) from public,anon;
 revoke all on function public.renqd_revoke_notes_invitation(uuid) from public,anon;
 grant execute on function public.renqd_invite_notes_collaborator(text,uuid,text) to authenticated;
 grant execute on function public.renqd_respond_notes_invitation(uuid,boolean) to authenticated;
 grant execute on function public.renqd_revoke_notes_invitation(uuid) to authenticated;
-do $$begin
-if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='notes_documents') then alter publication supabase_realtime add table public.notes_documents;end if;
-if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='notes_folders') then alter publication supabase_realtime add table public.notes_folders;end if;
-end$$;
+do $$begin if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='notes_documents') then alter publication supabase_realtime add table public.notes_documents;end if;if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='notes_folders') then alter publication supabase_realtime add table public.notes_folders;end if;end$$;
 commit;

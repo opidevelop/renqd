@@ -568,3 +568,11 @@ Revisione della migrazione di hardening:
 - Inviti tramite username Renqd e gestione delle richieste nell'area `/inbox` / «Attività».
 - I controlli server-side e RLS restano la fonte effettiva dei permessi; la UI non sostituisce le policy.
 - Da completare: collaudo autenticato con account proprietario/collaboratore/OWNER, test su cartelle annidate e condivisione futura, verifica export in Word/PDF e test simultaneo realtime. Non considerare la funzionalità collaudata prima di questi test.
+
+
+## 19. Hardening finale Appunti — 19 novembre 2026
+
+- Aggiunta la migrazione `20261119080000_renqd_notes_owner_document_management`: il proprietario di una cartella può gestire anche i documenti creati sotto la propria gerarchia; le collaborazioni non attribuiscono ai collaboratori il potere di eliminare la cartella originale o revocare gli accessi altrui.
+- L'area Attività mostra inviti Appunti con accettazione/rifiuto; la revoca aggiorna anche la notifica del destinatario.
+- Il salvataggio del documento usa la versione `updated_at` attesa per impedire che due collaboratori si sovrascrivano silenziosamente. In caso di conflitto, la richiesta viene respinta e le modifiche locali restano nell'editor.
+- Conteggio Supabase verificato dopo l'applicazione: 45 migrazioni. La sincronizzazione dei file SQL nel repository è completata con questo aggiornamento.
