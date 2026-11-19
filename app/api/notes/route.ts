@@ -3,7 +3,7 @@ import {createClient} from "@/lib/supabase/server";
 import {getAccountAccess} from "@/lib/supabase/authorization";
 function error(message:string,status=400){return NextResponse.json({error:message},{status});}
 function cleanText(value:unknown,max:number){return typeof value==="string"?value.trim().slice(0,max):"";}
-function cleanTags(value:unknown){if(!Array.isArray(value))return [];const seen=new Set<string>();return value.filter((item):item is string=>typeof item==="string").map(item=>item.trim().replace(/\s+/g," ").slice(0,24)).filter(item=>{const key=item.toLocaleLowerCase("it-IT");if(!key||seen.has(key))return false;seen.add(key);return true;}).slice(0,20);}
+function cleanTags(value:unknown){if(!Array.isArray(value))return [];const seen=new Set<string>();return value.filter((item):item is string=>typeof item==="string").map(item=>item.trim().replace(/\s+/g," ").slice(0,24).toLocaleLowerCase("it-IT")).filter(item=>{const key=item.toLocaleLowerCase("it-IT");if(!key||seen.has(key))return false;seen.add(key);return true;}).slice(0,20);}
 function sanitizeNoteHtml(input:string){
  let html=input.replace(/<!--[\s\S]*?-->/g,"").replace(/<(script|style|iframe|object|embed|svg|math|form|textarea|input|button)[^>]*>[\s\S]*?<\/\s*\1\s*>/gi,"");
  const allowed=new Set(["p","br","strong","b","em","i","u","s","h1","h2","h3","ul","ol","li","blockquote","a","hr","pre","code","table","thead","tbody","tfoot","tr","th","td","mark","font"]);
