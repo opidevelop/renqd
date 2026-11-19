@@ -7,7 +7,7 @@
 > **Aggiornato:** 19 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `8995d5c03a5e341877fe674dfc4e50b5c711fda6`
+> **Ultimo commit applicativo analizzato su main:** `30f04b7f6a6ef003cac6837feab81293a011c48e`
 
 ## 1. Sintesi esecutiva
 
@@ -15,9 +15,9 @@
 - Il lavoro viene svolto esclusivamente su `main`.
 - Renqd è una piattaforma chiusa: le pagine e i contenuti interni richiedono autenticazione e approvazione quando prevista.
 - Le fasi di amministrazione, lifecycle dei dati, motore Renq e profilo/cataloghi/collezioni hanno ricevuto implementazioni sostanziali. La verifica funzionale end-to-end complessiva è ancora da eseguire.
-- GitHub Actions Code quality: run #178 e #179 completati con esito `success` (TypeScript, ESLint e Production Build); run #179 verifica il commit applicativo `7d91c25801a5a35126e1a7f55e9f9698c86cf833`.
+- GitHub Actions Code quality: run #199 sul commit `30f04b7f6a6ef003cac6837feab81293a011c48e` completato con esito `success` per TypeScript, ESLint e Production Build. I run precedenti #192–#198 includevano errori intermedi poi corretti; fanno fede i risultati del run #199 sul commit corrente.
 - **Produzione Vercel:** l'ultimo deployment Production `READY` resta il commit `7ffa974dc88d3af65a96e000843157751af142da`. Le modifiche successive su `main` non sono state pubblicate; i deploy automatici intermedi sono stati annullati per mantenere un unico rilascio cumulativo. Il collaudo funzionale end-to-end resta da completare.
-- Supabase live e `supabase/migrations` sono riallineati a 57 migrazioni. Le migrazioni `20261119102148_renqd_notes_identity_guard.sql` e `20261119102637_renqd_follow_privacy_requests_realtime.sql` sono applicate al database live e presenti nel repository. Restano warning generici dei Security/Performance Advisors da analizzare separatamente.
+- Supabase live e `supabase/migrations` sono riallineati a 62 migrazioni. Le migrazioni più recenti per Appunti, Follow e DM sono applicate al database live e presenti nel repository. Restano warning generici dei Security/Performance Advisors da analizzare separatamente.
 
 ## 2. Stack e servizi
 
@@ -784,3 +784,25 @@ Revisione della migrazione di hardening:
 - Test SQL transazionale superato: due richieste reciproche diventano ACCEPTED, viene creata una sola conversazione, unread passa da 1 a 0 dopo la lettura. Tutti i dati di test sono stati annullati con rollback.
 - Conteggio verificato: 62 file SQL nel repository e 62 migrazioni registrate su Supabase.
 - Ultimo commit verificato: `8995d5c03a5e341877fe674dfc4e50b5c711fda6`. CI #192 ancora in esecuzione; nessun deploy Production.
+
+
+## 34. Rifinitura tecnica inbox e chat realtime — 19 novembre 2026
+
+### Modifiche repository
+- La pagina server `/inbox` usa la RPC `renqd_direct_unread_counts` per i conteggi non letti; il risultato RPC è tipizzato esplicitamente per TypeScript strict.
+- L'apertura di una conversazione carica i messaggi senza aggiornamenti sincroni di stato dentro l'effect React. Il caricamento viene avviato dopo il mount e la selezione utente mostra lo stato di caricamento.
+- Gli aggiornamenti Realtime di `direct_conversations` ricaricano anteprima dell'ultimo messaggio, ordine delle conversazioni e conteggi unread dal database.
+- I controlli statici hanno richiesto diverse iterazioni; il run GitHub Actions **#199** sul commit `30f04b7f6a6ef003cac6837feab81293a011c48e` ha completato con successo **TypeScript, ESLint e Production Build**.
+
+### Verifiche Supabase
+- Confermate 62 migrazioni sia nel repository sia nel database live.
+- Le cinque tabelle DM (`direct_message_requests`, `direct_conversations`, `direct_messages`, `direct_message_reactions`, `direct_conversation_reads`) hanno RLS abilitata e forzata e sono nella pubblicazione `supabase_realtime`.
+- Le RPC `renqd_respond_direct_message_request` e `renqd_direct_unread_counts` sono eseguibili da `authenticated` e non da `anon`.
+
+### Stato non ancora concluso
+- Il collaudo end-to-end con due account autenticati non è stato eseguito: richieste DM, chat simultanea, realtime, reazioni, reply, modifica/eliminazione e conferme di lettura restano da verificare nel browser.
+- Il badge complessivo della tab Messaggi/Attività non è ancora sincronizzato con tutte le modifiche locali della rispettiva vista; i conteggi iniziali sono server-side e la lista chat aggiorna i propri conteggi realtime.
+- La preview dei profili privati per i non-follower resta non esposta, in attesa della decisione UX già indicata nella sezione 31.
+- L'anteprima dell'ultimo messaggio nell'elenco realtime usa una query batch limitata a 2.000 messaggi; da sostituire con una lettura per-conversazione lato database se il volume cresce.
+- Le tre verifiche prioritarie prima del multiplayer restano Appunti, anteprima discografia e ruota, tutte da collaudare end-to-end autenticato.
+- Nessun deployment Production eseguito. L'ultimo Production READY resta il commit `7ffa974dc88d3af65a96e000843157751af142da`.
