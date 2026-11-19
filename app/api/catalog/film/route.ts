@@ -13,6 +13,9 @@ type TmdbSeason = {id:number;name:string;overview?:string;poster_path?:TmdbImage
 type TmdbShowDetails = {id:number;name:string;poster_path?:TmdbImage;seasons?:TmdbSeason[]};
 type TmdbCastPerson = {id:number;name:string;profile_path?:TmdbImage;known_for_department?:string};
 type TmdbSeasonCredits = {cast?:TmdbCastPerson[];guest_stars?:TmdbCastPerson[]};
+type TmdbAggregateRole = {season_number?:number;episode_count?:number;character?:string};
+type TmdbAggregateCastPerson = TmdbCastPerson & {roles?:TmdbAggregateRole[];total_episode_count?:number};
+type TmdbAggregateCredits = {cast?:TmdbAggregateCastPerson[]};
 
 const API="https://api.themoviedb.org/3";
 const IMAGE="https://image.tmdb.org/t/p/w500";
@@ -48,20 +51,43 @@ async function searchEntities(query:string,contentType:string,page:number){
  throw new Error("Unsupported film and TV catalog type");
 }
 async function loadRealitySeasonCast(showId:number,seasonNumber:number,showTitle:string){
- const credits=await tmdb<TmdbSeasonCredits>(`/tv/${showId}/season/${seasonNumber}/credits`);
+ const path=`/tv/${showId}/season/${seasonNumber}`;
+ const aggregate=await tmdb<TmdbAggregateCredits>(path+`/aggregate_credits`);
+ let cast=aggregate.cast??[];
+ if(!cast.length){
+  const credits=await tmdb<TmdbSeasonCredits>(path+`/credits`);
+  cast=[...(credits.cast??[]),...(credits.guest_stars??[])];
+ }
  const unique=new Map<number,TmdbCastPerson>();
- for(const person of [...(credits.cast??[]),...(credits.guest_stars??[])])if(person?.id&&person.name)unique.set(person.id,person);
+ for(const person of cast)if(person?.id&&person.name)unique.set(person.id,person);
  return [...unique.values()].map(person=>({id:`tmdb-person-${person.id}`,title:person.name,subtitle:`${showTitle} · Stagione ${seasonNumber}`,imageUrl:image(person.profile_path),payload:{tmdbId:showId,tmdbPersonId:person.id,seasonNumbers:[seasonNumber],mediaType:"reality-contestant"}}));
 }
 async function loadAllRealityCast(showId:number,showTitle:string){
  const details=await tmdb<TmdbShowDetails>(`/tv/${showId}`);
  const resolvedShowTitle=details.name||showTitle;
  const seasons=(details.seasons??[]).filter(season=>season.season_number>0);
- const credits:TmdbSeasonCredits[]=[];
- for(let index=0;index<seasons.length;index+=4){const batch=await Promise.all(seasons.slice(index,index+4).map(season=>tmdb<TmdbSeasonCredits>(`/tv/${showId}/season/${season.season_number}/credits`)));credits.push(...batch);}
+ const aggregate=await tmdb<TmdbAggregateCredits>(`/tv/${showId}/aggregate_credits`);
  const people=new Map<number,{person:TmdbCastPerson;seasons:number[]}>();
- credits.forEach((entry,index)=>{const seasonNumber=seasons[index].season_number;for(const person of [...(entry.cast??[]),...(entry.guest_stars??[])]){if(!person?.id||!person.name)continue;const existing=people.get(person.id);if(existing){if(!existing.seasons.includes(seasonNumber))existing.seasons.push(seasonNumber);}else people.set(person.id,{person,seasons:[seasonNumber]});}});
- return [...people.values()].map(({person,seasons:seasonNumbers})=>({id:`tmdb-person-${person.id}`,title:person.name,subtitle:`${resolvedShowTitle} · ${seasonNumbers.map(n=>`S${n}`).join(", ")}`,imageUrl:image(person.profile_path),payload:{tmdbId:showId,tmdbPersonId:person.id,seasonNumbers,mediaType:"reality-contestant"}}));
+ for(const person of aggregate.cast??[]){
+  if(!person?.id||!person.name)continue;
+  const seasonNumbers=[...new Set((person.roles??[]).map(role=>role.season_number).filter((number):number is number=>Number.isInteger(number)&&number>0))].sort((a,b)=>a-b);
+  people.set(person.id,{person,seasons:seasonNumbers});
+ }
+ if(!people.size){
+  for(let index=0;index<seasons.length;index+=4){
+   const batch=await Promise.all(seasons.slice(index,index+4).map(season=>tmdb<TmdbAggregateCredits>(`/tv/${showId}/season/${season.season_number}/aggregate_credits`)));
+   batch.forEach((entry,batchIndex)=>{
+    const seasonNumber=seasons[index+batchIndex].season_number;
+    for(const person of entry.cast??[]){
+     if(!person?.id||!person.name)continue;
+     const existing=people.get(person.id);
+     if(existing){if(!existing.seasons.includes(seasonNumber))existing.seasons.push(seasonNumber);}
+     else people.set(person.id,{person,seasons:[seasonNumber]});
+    }
+   });
+  }
+ }
+ return [...people.values()].map(({person,seasons:seasonNumbers})=>({id:`tmdb-person-${person.id}`,title:person.name,subtitle:`${resolvedShowTitle} · ${seasonNumbers.length?seasonNumbers.map(n=>`S${n}`).join(", "):"Partecipante"}`,imageUrl:image(person.profile_path),payload:{tmdbId:showId,tmdbPersonId:person.id,seasonNumbers,mediaType:"reality-contestant"}}));
 }
 async function loadItems(payload:Record<string,unknown>,contentType:string){
  const id=Number(payload.tmdbId);
