@@ -36,13 +36,14 @@ type Props = {
   initialLiked: boolean;
   likeCount: number;
   revisions: RevisionItem[];
+  isMultiplayer?: boolean;
 };
 
 const modeLabels: Record<string, string> = { RENQ: "Renq", BATTLE_RENQ: "Battle Renq", SPEED_RENQ: "Speed Renq", GRADE: "Grade" };
 type GradeConfig={criterion:"score"|"position";labels:{name:string;min:number;max:number;color:string}[]};
 function gradeLabelFor(score:number| null|undefined,position:number,config:GradeConfig){if(score===null||score===undefined)return null;const value=config.criterion==="score"?score:position;return config.labels.find(label=>label.name.trim()&&value>=label.min&&value<=label.max)??null;}
 
-export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, coverPosition: initialCoverPosition, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount, revisions }: Props) {
+export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, coverPosition: initialCoverPosition, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount, revisions, isMultiplayer=false }: Props) {
   const router = useRouter();
   const { confirm, dialog } = useConfirmDialog();
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -285,7 +286,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
       <section className="saved-renq-hero">
         {cover ? <img className="saved-renq-cover" src={cover} alt="" style={{ objectPosition: `${currentCoverPosition.x}% ${currentCoverPosition.y}%` }} /> : <div className="saved-renq-cover saved-renq-cover-empty"><Trophy size={58} /></div>}
         <div className="saved-renq-cover-shade" />
-        <div className="saved-renq-cover-controls">
+        {!isMultiplayer&&<div className="saved-renq-cover-controls">
           <button type="button" className="saved-renq-cover-edit" onClick={() => setCoverEditorOpen(value => !value)} aria-label="Modifica copertina" aria-expanded={coverEditorOpen}><Pencil size={17} /></button>
           {coverEditorOpen && <div className="saved-renq-cover-editor"><RenqCoverPicker value={currentCoverUrl ?? defaultCoverImageUrl ?? displayItems.find(item => item.image_url)?.image_url ?? null} onChange={(path,url) => void saveCover(path,url)} onFocusPreview={position => setCurrentCoverPosition(position)} onFocusChange={position => void saveCover(currentCoverPath,currentCoverUrl,position)} focusPosition={currentCoverPosition} onReset={() => void saveCover(null,null,{x:50,y:50})} canReset={Boolean(currentCoverPath)||(Boolean(currentCoverUrl)&&currentCoverUrl!==defaultCoverImageUrl)||currentCoverPosition.x!==50||currentCoverPosition.y!==50} variant="overlay"/></div>}
         </div>
@@ -303,7 +304,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
         {ranking.visibility === "REVEAL" && <button type="button" onClick={() => setShowReveal(true)}><Play size={17} /><span>Rivedi reveal</span></button>}
         <button type="button" onClick={() => void shareRanking()}><Share2 size={17} /><span>Condividi</span></button>
         <button type="button" onClick={() => void toggleFavorite()} disabled={busy} className={liked ? "is-liked" : ""}><Heart size={17} fill={liked ? "currentColor" : "none"} /><span>{liked ? "Nei preferiti" : "Preferiti"}</span><small>{likes}</small></button>
-        <button type="button" className="saved-renq-delete" onClick={() => void deleteRanking()} disabled={busy}><Trash2 size={16}/><span>Elimina</span></button>
+        {isMultiplayer?<Link href={"/multiplayer/"+ranking.id} className="saved-renq-session-link"><Users size={16}/><span>Sessione multiplayer</span></Link>:<button type="button" className="saved-renq-delete" onClick={() => void deleteRanking()} disabled={busy}><Trash2 size={16}/><span>Elimina</span></button>}
 
         </div>
       </section>

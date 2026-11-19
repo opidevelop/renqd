@@ -15,9 +15,28 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
 
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
   const { data: ranking } = isUuid
-    ? await supabase.from("rankings").select("*").eq("id", id).eq("user_id", user.id).is("deleted_at",null).single()
-    : await supabase.from("rankings").select("*").eq("public_slug", id).eq("user_id", user.id).single();
+    ? await supabase.from("rankings").select("*").eq("id", id).is("deleted_at",null).maybeSingle()
+    : await supabase.from("rankings").select("*").eq("public_slug", id).maybeSingle();
   if (!ranking) notFound();
+  const isOwner=ranking.user_id===user.id;
+  const {data:multiplayerSessionRow}=await supabase.from("ranking_multiplayer_sessions").select("id").eq("ranking_id",ranking.id).maybeSingle();
+  let multiplayerDetails:any=null;
+  if(multiplayerSessionRow){
+    const {data:sessionDetails,error:sessionError}=await supabase.rpc("renqd_get_multiplayer_session",{p_ranking_id:ranking.id});
+    if(sessionError||!sessionDetails)notFound();
+    multiplayerDetails=sessionDetails;
+  }
+  if(!isOwner&&!multiplayerDetails)notFound();
+  const multiplayerContext=multiplayerDetails?{
+    mode:multiplayerDetails.session.mode,
+    status:multiplayerDetails.session.status,
+    progressStatus:multiplayerDetails.participants.find((participant:any)=>participant.userId===user.id)?.progressStatus??"NOT_STARTED",
+    deadlineAt:multiplayerDetails.session.deadlineAt,
+    sharedState:multiplayerDetails.session.sharedState??null
+  }:null;
+  const {data:personalResult}=multiplayerDetails?.session.mode==="COMPETITIVE"
+    ? await supabase.from("ranking_session_results").select("result_snapshot,result_status").eq("ranking_id",ranking.id).eq("user_id",user.id).maybeSingle()
+    : {data:null};
 
   const settings = (ranking.settings ?? {}) as Record<string, unknown>;
   const coverImagePath = typeof settings.coverImagePath === "string" ? settings.coverImagePath : null;
@@ -45,6 +64,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
       initialLiked={Boolean(liked)}
       likeCount={likeCount ?? 0}
       revisions={revisions ?? []}
+      isMultiplayer={Boolean(multiplayerDetails)}
     />;
   }
 
@@ -52,7 +72,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   const customIds = (items ?? []).map(x => x.custom_item_id).filter(Boolean) as string[];
   const { data: custom } = customIds.length ? await supabase.from("custom_items").select("id,title,image_url,description,metadata").in("id", customIds) : { data: [] };
   const lookup = new Map((custom ?? []).map(x => [x.id, x]));
-  const hydrated = (items ?? []).map(x => ({
+  const baseHydrated = (items ?? []).map(x => ({
     ...x,
     title: lookup.get(x.custom_item_id)?.title ?? x.title_snapshot,
     image_url: highQualityImageUrl(lookup.get(x.custom_item_id)?.image_url ?? null),
@@ -61,7 +81,12 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     apple_music_url: (lookup.get(x.custom_item_id)?.metadata as Record<string, unknown> | undefined)?.appleMusicUrl as string | null,
     spotify_url: (lookup.get(x.custom_item_id)?.metadata as Record<string, unknown> | undefined)?.spotifyUrl as string | null
   }));
+  const personalItems=Array.isArray(personalResult?.result_snapshot?.items)?personalResult.result_snapshot.items as Array<Record<string,unknown>>:[];
+  const personalById=new Map(personalItems.map((item:any)=>[String(item.id),item]));
+  const hydrated=multiplayerContext?.mode==="COMPETITIVE"&&personalItems.length
+    ? [...baseHydrated].map(item=>({...item,...(personalById.get(item.id)??{})})).sort((a,b)=>Number(a.rank_position??999999)-Number(b.rank_position??999999)||Number(a.tie_order??a.sort_order)-Number(b.tie_order??b.sort_order))
+    : baseHydrated;
   const experienceRanking={...ranking,settings:{...settings,coverImageUrl:highQualityImageUrl(resolvedCoverImageUrl),coverPosition:settings.coverPosition??{x:50,y:50}}};
-  if(ranking.mode==="GRADE")return <GradeExperience ranking={experienceRanking} items={hydrated}/>;
-  return <RenqExperience ranking={experienceRanking} items={hydrated} />;
+  if(ranking.mode==="GRADE")return <GradeExperience ranking={experienceRanking} items={hydrated} multiplayer={multiplayerContext}/>;
+  return <RenqExperience ranking={experienceRanking} items={hydrated} multiplayer={multiplayerContext} isOwner={isOwner}/>;
 }
