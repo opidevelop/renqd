@@ -112,7 +112,7 @@ async function readPage(source: WikiSource, title: string, showTitle: string, se
     ? "https://it.wikipedia.org/wiki/" + encodeURIComponent(title.replace(/ /g, "_"))
     : "https://bigbrother.fandom.com/wiki/" + encodeURIComponent(title.replace(/ /g, "_"));
   return names.map((name, index) => ({
-    id: `wiki-${source}-${normalize(title).replace(/\\s+/g, "-")}-${normalize(name).replace(/\\s+/g, "-")}-${index}`,
+    id: `wiki-${source}-${normalize(title).replace(/\s+/g, "-")}-${normalize(name).replace(/\s+/g, "-")}-${index}`,
     title: name,
     subtitle: seasonNumber ? `${showTitle} · Stagione ${seasonNumber}` : showTitle,
     sourceUrl: url,
