@@ -50,18 +50,44 @@ async function wikiRequest<T>(endpoint: string, params: Record<string, string>):
   for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
   const response = await fetch(url, {
     headers: { Accept: "application/json", "User-Agent": "Renqd/1.0 (reality catalog; attribution: https://renqd.app/attributions)" },
-    next: { revalidate: 86400 },
+    cache: "no-store",
   });
   if (!response.ok) throw new Error("Wiki provider returned " + response.status);
   return response.json() as Promise<T>;
 }
 
-async function findPage(source: WikiSource, query: string) {
-  const endpoint = WIKIS[source];
-  const result = await wikiRequest<WikiSearchResponse>(endpoint, {
-    action: "query", list: "search", srsearch: query, srlimit: "5", format: "json",
+function seasonOrdinal(number: number) {
+  const ordinals: Record<number, string> = {
+    1: "prima", 2: "seconda", 3: "terza", 4: "quarta", 5: "quinta",
+    6: "sesta", 7: "settima", 8: "ottava", 9: "nona", 10: "decima",
+  };
+  return ordinals[number] ?? String(number);
+}
+
+async function findPages(source: WikiSource, query: string) {
+  const result = await wikiRequest<WikiSearchResponse>(WIKIS[source], {
+    action: "query", list: "search", srsearch: query, srlimit: "10", format: "json",
   });
-  return result.query?.search?.[0]?.title ?? null;
+  return result.query?.search?.map((item) => item.title) ?? [];
+}
+
+function pageRelevance(title: string, showTitle: string, seasonNumber?: number) {
+  const normalizedTitle = normalize(title);
+  const normalizedShow = normalize(showTitle);
+  const showWords = normalizedShow.split(" ").filter((word) => word.length > 2);
+  const showMatches = showWords.filter((word) => normalizedTitle.includes(word)).length;
+  let score = showMatches * 5;
+  if (seasonNumber) {
+    const ordinal = normalize(seasonOrdinal(seasonNumber));
+    const hasNumber = new RegExp(`(?:^| )${seasonNumber}(?: |$)`).test(normalizedTitle);
+    const hasOrdinal = normalizedTitle.includes(ordinal);
+    const hasEdition = normalizedTitle.includes("edizione") || normalizedTitle.includes("stagione");
+    if (hasNumber) score += 20;
+    if (hasOrdinal) score += 24;
+    if (hasEdition) score += 8;
+    if (!hasNumber && !hasOrdinal) score -= 30;
+  }
+  return score;
 }
 
 async function readPage(source: WikiSource, title: string, showTitle: string, seasonNumber?: number) {
@@ -86,7 +112,7 @@ async function readPage(source: WikiSource, title: string, showTitle: string, se
     ? "https://it.wikipedia.org/wiki/" + encodeURIComponent(title.replace(/ /g, "_"))
     : "https://bigbrother.fandom.com/wiki/" + encodeURIComponent(title.replace(/ /g, "_"));
   return names.map((name, index) => ({
-    id: `wiki-${source}-${normalize(name).replace(/\s+/g, "-")}-${index}`,
+    id: `wiki-${source}-${normalize(title).replace(/\\s+/g, "-")}-${normalize(name).replace(/\\s+/g, "-")}-${index}`,
     title: name,
     subtitle: seasonNumber ? `${showTitle} · Stagione ${seasonNumber}` : showTitle,
     sourceUrl: url,
@@ -95,21 +121,41 @@ async function readPage(source: WikiSource, title: string, showTitle: string, se
 }
 
 export async function loadRealityContestants(showTitle: string, seasonNumber?: number) {
-  const seasonLabel = seasonNumber ? ` ${seasonNumber}` : "";
-  const queries = [
-    `"${showTitle}"${seasonLabel} concorrenti`,
-    `"${showTitle}"${seasonLabel} partecipanti`,
-    `"${showTitle}"${seasonLabel} cast`,
-  ];
+  const ordinal = seasonNumber ? seasonOrdinal(seasonNumber) : "";
+  const queries = seasonNumber
+    ? [
+        `${showTitle} ${ordinal} edizione concorrenti`,
+        `${showTitle} ${seasonNumber} edizione concorrenti`,
+        `${showTitle} stagione ${seasonNumber} concorrenti`,
+        `${showTitle} ${seasonNumber} concorrenti cast`,
+      ]
+    : [
+        `${showTitle} concorrenti reality cast`,
+        `${showTitle} partecipanti`,
+        `${showTitle} concorrenti`,
+      ];
+
   for (const source of ["wikipedia", "fandom"] as const) {
+    const candidates = new Map<string, number>();
     for (const query of queries) {
       try {
-        const title = await findPage(source, query);
-        if (!title) continue;
+        for (const title of await findPages(source, query)) {
+          const score = pageRelevance(title, showTitle, seasonNumber);
+          candidates.set(title, Math.max(candidates.get(title) ?? -Infinity, score));
+        }
+      } catch {
+        // Continue with the next query/provider.
+      }
+    }
+    const rankedPages = [...candidates.entries()]
+      .filter(([, score]) => !seasonNumber || score >= 5)
+      .sort((a, b) => b[1] - a[1]);
+    for (const [title] of rankedPages) {
+      try {
         const items = await readPage(source, title, showTitle, seasonNumber);
         if (items.length >= 2) return items;
       } catch {
-        // Try the next query/provider; the caller retains TMDB as a final fallback.
+        // Try another relevant page or provider.
       }
     }
   }
