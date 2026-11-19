@@ -19,6 +19,7 @@ export function NotesWorkspace({initialFolders,initialDocuments,initialCollabora
  const [folderDraft,setFolderDraft]=useState("");const [folderTagDraft,setFolderTagDraft]=useState("");const [documentTagDraft,setDocumentTagDraft]=useState("");const [activeTag,setActiveTag]=useState<string|null>(null);const [tagSaving,setTagSaving]=useState(false);const [inviteUsername,setInviteUsername]=useState("");const [notice,setNotice]=useState("");const [error,setError]=useState("");
  const editorRef=useRef<HTMLDivElement>(null);const editVersion=useRef(0);const savedSelection=useRef<Range|null>(null);
  const activeFolder=folders.find(folder=>folder.id===folderId)??null;const activeDocument=documents.find(doc=>doc.id===documentId)??null;
+ useEffect(()=>{if(activeFolder&&!tagSaving)setFolderTagDraft((activeFolder.tags??[]).join(", "));},[activeFolder?.id,activeFolder?.tags,tagSaving]);
  const folderChain=useMemo(()=>{return (id:string|null)=>{const ids:string[]=[];let current=id;while(current){if(ids.includes(current))break;ids.push(current);current=folders.find(folder=>folder.id===current)?.parent_folder_id??null;}return ids;};},[folders]);
  const folderShared=(id:string|null)=>folderChain(id).some(id=>collaborators.some(item=>item.resource_type==="FOLDER"&&item.folder_id===id&&item.invited_user_id===userId&&item.status==="ACCEPTED"));
  const directDocumentShared=(id:string)=>collaborators.some(item=>item.resource_type==="DOCUMENT"&&item.document_id===id&&item.invited_user_id===userId&&item.status==="ACCEPTED");
