@@ -591,3 +591,9 @@ Revisione della migrazione di hardening:
 - Aggiunto un trigger PostgreSQL che sanitizza sia il contenuto HTML principale sia quello di tutte le schede, anche in caso di scrittura diretta tramite API Supabase. Vengono rimossi script, elementi incorporati, attributi e tag non ammessi; restano i tag di formattazione supportati dall'editor.
 - Verificata la funzione di sanitizzazione con un test SQL contenente script, attributi evento, immagini e link JavaScript: il risultato conserva soltanto markup consentito e testo.
 - Migrazione applicata e sincronizzata: `20261119081512_renqd_notes_html_sanitization_guard`. Totale migrazioni Supabase: 47.
+
+
+## 22. Hardening aggiuntivo sanitizzazione — 19 novembre 2026
+
+- Rafforzata la funzione SQL di sanitizzazione per neutralizzare anche i caratteri di controllo usati come marcatori temporanei: test specifico verificato, il tentativo di ricostruire un tag HTML tramite tali caratteri resta testo inerte.
+- Migrazione applicata e sincronizzata: `20261119081550_renqd_notes_sanitizer_control_character_guard`. Totale migrazioni Supabase: 48.
