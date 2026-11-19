@@ -7,6 +7,8 @@ import { highQualityImageUrl } from "@/lib/image-quality";
 
 export const dynamic = "force-dynamic";
 
+type MultiplayerDetails={session:{mode:"COLLABORATIVE"|"COMPETITIVE";deadlineAt:string|null;sharedState:Record<string,unknown>|null};participants:Array<{userId:string;progressStatus:string}>};
+
 export default async function RenqPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
@@ -20,11 +22,11 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   if (!ranking) notFound();
   const isOwner=ranking.user_id===user.id;
   const {data:multiplayerSessionRow}=await supabase.from("ranking_multiplayer_sessions").select("id").eq("ranking_id",ranking.id).maybeSingle();
-  let multiplayerDetails:any=null;
+  let multiplayerDetails:MultiplayerDetails|null=null;
   if(multiplayerSessionRow){
     const {data:sessionDetails,error:sessionError}=await supabase.rpc("renqd_get_multiplayer_session",{p_ranking_id:ranking.id});
     if(sessionError||!sessionDetails)notFound();
-    multiplayerDetails=sessionDetails;
+    multiplayerDetails=sessionDetails as MultiplayerDetails;
   }
   if(!isOwner&&!multiplayerDetails)notFound();
   const {data:personalResult}=multiplayerDetails?.session.mode==="COMPETITIVE"
@@ -83,7 +85,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     spotify_url: (lookup.get(x.custom_item_id)?.metadata as Record<string, unknown> | undefined)?.spotifyUrl as string | null
   }));
   const personalItems=Array.isArray(personalResult?.result_snapshot?.items)?personalResult.result_snapshot.items as Array<Record<string,unknown>>:[];
-  const personalById=new Map(personalItems.map((item:any)=>[String(item.id),item]));
+  const personalById=new Map<string,Record<string,unknown>>(personalItems.map(item=>[String(item.id),item] as const));
   const hydrated=multiplayerContext?.mode==="COMPETITIVE"&&personalItems.length
     ? [...baseHydrated].map(item=>({...item,...(personalById.get(item.id)??{})})).sort((a,b)=>Number(a.rank_position??999999)-Number(b.rank_position??999999)||Number(a.tie_order??a.sort_order)-Number(b.tie_order??b.sort_order))
     : baseHydrated;
