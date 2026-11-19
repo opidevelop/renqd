@@ -51,6 +51,47 @@ export async function POST(request:Request){
   const {data,error}=await supabase.rpc("renqd_set_multiplayer_progress",{p_ranking_id:rankingId,p_progress_status:body.progressStatus});
   if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
  }
+ if(body.action==="save-progress"||body.action==="submit-result"){
+  if(!rankingId||!body.resultSnapshot||typeof body.resultSnapshot!=="object")return jsonError("Risultato non valido.");
+  const rpcName=body.action==="save-progress"?"renqd_save_multiplayer_progress":"renqd_submit_multiplayer_result";
+  const {data,error}=await supabase.rpc(rpcName,{p_ranking_id:rankingId,p_result_snapshot:body.resultSnapshot});
+  if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
+ }
+ if(body.action==="mark-finished"){
+  if(!rankingId)return jsonError("Renq non valido.");
+  const {data,error}=await supabase.rpc("renqd_mark_multiplayer_finished",{p_ranking_id:rankingId});
+  if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
+ }
+ if(body.action==="shared-order"){
+  if(!rankingId||!Array.isArray(body.orderedIds)||body.orderedIds.some((id:unknown)=>typeof id!=="string"))return jsonError("Ordine non valido.");
+  const {data,error}=await supabase.rpc("renqd_multiplayer_update_shared_order",{p_ranking_id:rankingId,p_ordered_ids:body.orderedIds,p_tie_map:body.tieMap??{}});
+  if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
+ }
+ if(body.action==="shared-grade"){
+  if(!rankingId||!body.scores||typeof body.scores!=="object"||Array.isArray(body.scores))return jsonError("Valutazioni non valide.");
+  const {data,error}=await supabase.rpc("renqd_multiplayer_update_shared_grade",{p_ranking_id:rankingId,p_scores:body.scores,p_tie_order:body.tieOrder??{}});
+  if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
+ }
+ if(body.action==="battle-start"){
+  if(!rankingId||!Array.isArray(body.pairs))return jsonError("Confronti Battle non validi.");
+  const {data,error}=await supabase.rpc("renqd_multiplayer_battle_start",{p_ranking_id:rankingId,p_pairs:body.pairs});
+  if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
+ }
+ if(body.action==="battle-choice"){
+  if(!rankingId||typeof body.isTie!=="boolean"||(!body.isTie&&(typeof body.winnerId!=="string"||!UUID_PATTERN.test(body.winnerId))))return jsonError("Scelta Battle non valida.");
+  const {data,error}=await supabase.rpc("renqd_multiplayer_battle_choice",{p_ranking_id:rankingId,p_winner_item_id:body.isTie?null:body.winnerId,p_is_tie:body.isTie});
+  if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
+ }
+ if(body.action==="revoke-invitation"){
+  if(typeof body.participantId!=="string"||!UUID_PATTERN.test(body.participantId))return jsonError("Invito non valido.");
+  const {error}=await supabase.rpc("renqd_revoke_multiplayer_invitation",{p_participant_id:body.participantId});
+  if(error)return jsonError(error.message,400);return NextResponse.json({ok:true});
+ }
+ if(body.action==="speed-start"){
+  if(!rankingId)return jsonError("Renq non valido.");
+  const {data,error}=await supabase.rpc("renqd_multiplayer_speed_start",{p_ranking_id:rankingId});
+  if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
+ }
  if(body.action==="decide"){
   if(!rankingId||!["REVEAL","EXTEND"].includes(body.decision))return jsonError("Decisione non valida.");
   const extendMinutes=body.decision==="EXTEND"?Number(body.extendMinutes):null;
