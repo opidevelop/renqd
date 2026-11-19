@@ -234,23 +234,48 @@ export function DirectMessages({
               .order("last_message_at", { ascending: false, nullsFirst: false });
 
             if (!data) return;
+            const conversationIds = data.map((row) => row.id);
+            const [{ data: latestMessages }, { data: unreadRows }] = conversationIds.length
+              ? await Promise.all([
+                  supabase
+                    .from("direct_messages")
+                    .select("id,conversation_id,sender_id,body,created_at,deleted_at")
+                    .in("conversation_id", conversationIds)
+                    .order("created_at", { ascending: false })
+                    .limit(2000),
+                  supabase.rpc("renqd_direct_unread_counts"),
+                ])
+              : [{ data: [] }, { data: [] }];
             setConversations((current) =>
-              data.map((row) =>
-                current.find((item) => item.id === row.id) ?? {
+              data.map((row) => {
+                const existing = current.find((item) => item.id === row.id);
+                const latest = (latestMessages ?? []).find(
+                  (message) => message.conversation_id === row.id,
+                );
+                const unreadCount =
+                  (unreadRows ?? []).find((item) => item.conversation_id === row.id)
+                    ?.unread_count ?? 0;
+                return {
                   id: row.id,
                   otherUserId:
                     row.participant_one_id === currentUserId
                       ? row.participant_two_id
                       : row.participant_one_id,
-                  username: null,
-                  displayName: "Nuova conversazione",
-                  avatarUrl: null,
-                  isPrivate: true,
-                  lastMessage: null,
-                  unreadCount: 0,
-                  otherReadAt: null,
-                },
-              ),
+                  username: existing?.username ?? null,
+                  displayName: existing?.displayName ?? "Nuova conversazione",
+                  avatarUrl: existing?.avatarUrl ?? null,
+                  isPrivate: existing?.isPrivate ?? true,
+                  lastMessage: latest
+                    ? {
+                        body: latest.deleted_at ? "Messaggio eliminato" : latest.body,
+                        senderId: latest.sender_id,
+                        createdAt: latest.created_at,
+                      }
+                    : null,
+                  unreadCount,
+                  otherReadAt: existing?.otherReadAt ?? null,
+                };
+              }),
             );
           })();
         },
