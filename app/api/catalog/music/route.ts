@@ -374,7 +374,7 @@ async function loadMusicBrainzDiscographyTracks(payload:Record<string,unknown>):
   total=Number(data["recording-count"]??offset);
  }while(offset<total);
  if(total>recordings.length)throw new Error("MusicBrainz ha restituito solo una parte della discografia. Non posso garantire un elenco completo: riprova più tardi.");
- return recordings.flatMap(recording=>recording.id&&recording.title?[{id:recording.id,title:recording.title,subtitle:artist||undefined,spotifyUrl:spotifySearchUrl(`${artist} ${recording.title}`)}]:[]);
+ return recordings.flatMap(recording=>{if(!recording.id||!recording.title)return[];const metadata=previewMetadata.get(normalizeMusicText(recording.title));return[{id:recording.id,title:recording.title,subtitle:artist||undefined,previewUrl:metadata?.previewUrl,appleMusicUrl:metadata?.appleMusicUrl,spotifyUrl:spotifySearchUrl(`${artist} ${recording.title}`)}];});
 }
 
 async function loadMusicBrainzItems(payload:Record<string,unknown>,contentType:string):Promise<MusicItem[]>{
