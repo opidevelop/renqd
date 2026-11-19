@@ -1,7 +1,6 @@
 import {notFound,redirect} from "next/navigation";
 import {createClient} from "@/lib/supabase/server";
 import {MultiplayerSessionPanel} from "@/components/multiplayer-session-panel";
-import "../multiplayer.css";
 export const dynamic="force-dynamic";
 export default async function MultiplayerPage({params}:{params:Promise<{rankingId:string}>}){
  const {rankingId}=await params;

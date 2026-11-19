@@ -1,7 +1,6 @@
 import {redirect} from "next/navigation";
 import {createClient} from "@/lib/supabase/server";
 import {MultiplayerJoin} from "@/components/multiplayer-join";
-import "../multiplayer.css";
 export const dynamic="force-dynamic";
 export default async function MultiplayerJoinPage({searchParams}:{searchParams:Promise<{token?:string}>}){
  const {token}=await searchParams;
