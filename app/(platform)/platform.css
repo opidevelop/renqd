@@ -1098,3 +1098,41 @@
 .notes-tabbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 0 2px;border-bottom:1px solid var(--line,#eee)}.notes-tabbar button{border:0;border-radius:8px;background:transparent;color:var(--muted,#888);padding:7px 10px;font-size:11px}.notes-tabbar button.is-active{background:#f0a05a20;color:#d58d4b;font-weight:700}.notes-tabbar .notes-tab-add{display:flex;align-items:center;gap:4px;border:1px dashed var(--line,#ddd)}.notes-tabbar .notes-tab-remove{display:grid;place-items:center;padding:7px;color:#c66c62}.notes-tabbar button:disabled{opacity:.35}
 
 .renqd-wheel-entry-edit{flex:1;min-width:0;width:100%;border:0;background:transparent;color:inherit;font:inherit;font-size:12px;outline:none}.renqd-wheel-entry-color{width:25px;height:25px;flex:none;padding:1px;border:1px solid #ffffff30;border-radius:6px;background:transparent;cursor:pointer}.renqd-wheel-entry-color::-webkit-color-swatch-wrapper{padding:2px}.renqd-wheel-entry-color::-webkit-color-swatch{border:0;border-radius:4px}
+
+
+/* Appunti: interazioni, tag ed editor esteso */
+.notes-folder-row,.notes-back-folder,.notes-item-card,.notes-toolbar button,.notes-tabbar button,.notes-primary,.notes-list-actions button,.notes-create-folder button,.notes-tags-sidebar button,.notes-folder-tags-editor button{cursor:pointer;transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
+.notes-folder-row:not(:disabled):hover,.notes-item-card:hover{background:var(--soft,#f5f3f0);border-color:#e9a15d88;transform:translateY(-1px);box-shadow:0 5px 18px #0000000a}
+.notes-folder-row:disabled,.notes-item-card:disabled,.notes-toolbar button:disabled{cursor:not-allowed;opacity:.55}
+.notes-create-folder{display:flex;flex-direction:column;gap:8px;margin-top:14px;padding-top:14px}
+.notes-create-folder input{width:100%;min-height:40px;border-radius:10px;padding:10px 12px;font-size:12px}
+.notes-create-folder button{width:100%;min-height:38px;justify-content:center;display:flex;align-items:center;gap:8px;border:0;border-radius:10px;background:#f0a05a;color:#241d19;font-size:12px;font-weight:700}
+.notes-create-folder button:hover,.notes-folder-tags-editor button:hover{background:#e99449;transform:translateY(-1px)}
+.notes-tags-sidebar{border-top:1px solid var(--line,#eee);margin-top:18px;padding-top:12px}
+.notes-tags-sidebar .notes-sidebar-heading{padding-bottom:8px}
+.notes-tags-sidebar>p{font-size:11px;line-height:1.5;color:var(--muted,#999);margin:4px 5px}
+.notes-tag-filter{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:0;border-radius:9px;background:transparent;color:inherit;text-align:left;font-size:12px}
+.notes-tag-filter:hover,.notes-tag-filter.is-active{background:#f0a05a18;color:#c77a35}
+.notes-tag-dot{width:7px;height:7px;border-radius:50%;background:#e99a58;flex:none}
+.notes-folder-tags-editor,.notes-document-tags{display:flex;flex-direction:column;gap:7px;margin:0 0 18px;padding:12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--soft,#faf9f7)}
+.notes-folder-tags-editor label,.notes-document-tags label{font-size:11px;font-weight:700}
+.notes-folder-tags-editor>div{display:flex;gap:8px}
+.notes-folder-tags-editor input,.notes-document-tags input{flex:1;min-width:0;border:1px solid var(--line,#ddd);border-radius:8px;padding:9px 11px;background:var(--surface,#fff);color:inherit;font:inherit;font-size:12px}
+.notes-folder-tags-editor button{border:0;border-radius:8px;padding:8px 12px;background:#f0a05a;color:#241d19;font-size:11px;font-weight:700}
+.notes-folder-tags-editor small,.notes-document-tags small{color:var(--muted,#999);font-size:10px}
+.notes-document-tags{margin:12px 0 8px;padding:10px 12px}
+.notes-document-tags input{width:100%}
+.notes-color-control{width:34px;height:30px;display:flex;align-items:center;justify-content:center;gap:2px;border:1px solid var(--line,#ddd);border-radius:7px;font-size:12px;font-weight:800;cursor:pointer}
+.notes-color-control input{width:14px;height:18px;padding:0;border:0;background:transparent;cursor:pointer}
+.notes-editor{overflow-wrap:anywhere}
+.notes-editor table{width:100%;border-collapse:collapse;margin:14px 0;table-layout:fixed}
+.notes-editor td,.notes-editor th{min-width:55px;border:1px solid var(--line,#d8d8dc);padding:8px 10px;text-align:left;vertical-align:top}
+.notes-editor th{background:var(--soft,#f3f2ef);font-weight:700}
+.notes-editor mark{background:#fff0a8;color:inherit;padding:0 .08em;border-radius:2px}
+.notes-editor font{font:inherit}
+.notes-editor a{color:#c77a35;text-decoration:underline}
+.notes-toolbar{flex-wrap:wrap}
+.notes-toolbar button:hover{background:var(--soft,#f3f3f3);color:#c77a35}
+.notes-toolbar button:active,.notes-tabbar button:active{transform:scale(.96)}
+.notes-item-card:focus-visible,.notes-folder-row:focus-visible,.notes-tag-filter:focus-visible{outline:2px solid #e99a58;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.notes-folder-row,.notes-item-card,.notes-toolbar button,.notes-tabbar button,.notes-primary,.notes-list-actions button,.notes-create-folder button{transition:none}}
