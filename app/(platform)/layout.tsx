@@ -5,6 +5,7 @@ import { PlatformShell } from "@/components/platform-shell";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import "./platform.css";
 import "./profile-phase5.css";
+import "./inbox.css";
 import "./admin-management.css";
 import "./moderation.css";
 export const dynamic = "force-dynamic";
