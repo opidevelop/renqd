@@ -1089,3 +1089,11 @@ Revisione della migrazione di hardening:
 - GitHub Actions Code quality #294 e #295: la build Vercel del commit `19e3a15` ha individuato un errore TypeScript nel narrowing dei numeri di stagione; corretto esplicitando il controllo `typeof number === "number"`. Nuova CI sul commit `5575d541` da verificare.
 - Test funzionale autenticato su Grande Fratello VIP e confronto effettivo dei cast per stagione: ancora da eseguire; la correzione è basata sulla semantica documentata degli endpoint TMDB.
 - Nessun deployment Production eseguito per questa correzione; richiede CI verde e autorizzazione esplicita dell'utente.
+
+
+## 46. Wheel isolata dal layout tramite portal — 19 novembre 2026
+
+- La registrazione utente ha confermato che lo spostamento fuori da `.platform-main` non risolveva il problema: la Wheel continuava a seguire l'espansione verticale del documento.
+- `components/renqd-wheel.tsx`: il launcher e il pannello vengono ora renderizzati con `createPortal` direttamente in `document.body`, dopo il mount client. Il nodo non è più discendente di `.platform-frame` né di contenitori applicativi che possano alterare il containing block di `position: fixed`.
+- La posizione del launcher resta gestita da CSS `position: fixed` rispetto al viewport; il pannello conserva lo stato di apertura, trascinamento e gli elementi temporanei.
+- Nessuna modifica al database. CI e build di produzione da verificare sul commit risultante; deploy Production da eseguire solo dopo CI verde e autorizzazione dell'utente.
