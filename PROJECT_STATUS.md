@@ -835,3 +835,58 @@ Revisione della migrazione di hardening:
 - Gli inviti nominativi sono per username di account approvati; i link condivisibili conservano soltanto SHA-256 del token e possono essere revocati.
 - La fusione dei risultati, il completamento automatico, la UI di sessione e la gestione delle proposte post-pubblicazione non sono ancora implementati. Le RPC di Reveal attuali portano allo stato `AWAITING_DECISION`; la finalizzazione effettiva sarà aggiunta nella fase successiva.
 - Nessun deploy Production. I test SQL di flusso completo saranno eseguiti dopo aver completato le RPC di finalizzazione e le relative integrazioni; il collaudo UI resta nella sessione unica finale richiesta dall'utente.
+
+
+## 37. Multiplayer: flussi completi, fusione, Reveal e proposte — 19 novembre 2026
+
+> Questa sezione aggiorna e supera le limitazioni riportate nella sezione 36: il multiplayer non è più soltanto una fondazione schema/inviti, ma è integrato nei flussi di creazione, ranking, sessione e pubblicazione.
+
+### Implementazione nel repository
+- La creazione da `/create` consente di scegliere sessione collaborativa o competitiva, durata della sessione e numero massimo di partecipanti. Ranking e sessione vengono creati con una singola RPC transazionale.
+- `/multiplayer/[rankingId]` gestisce lobby, inviti per username, link condivisibili, revoca di inviti/link, avvio, partecipanti e stati individuali.
+- `/multiplayer/join` gestisce l'accesso tramite link. Gli inviti ricevuti sono visibili in Attività, con Accetta/Rifiuta e apertura della sessione.
+- Le esperienze Classic, Battle, Speed e Grade ricevono il contesto multiplayer:
+  - **Collaborativa:** un'unica classifica condivisa, con aggiornamenti Realtime.
+  - **Competitiva:** risultati individuali separati; prima del Reveal ogni partecipante vede soltanto il proprio risultato e gli stati degli altri.
+- Speed usa il timer configurato nella classifica; in collaborativa il timer è condiviso, in competitiva è individuale.
+- Il creatore può concludere anticipatamente. Alla scadenza può svelare o prorogare; se nessuno ha completato, la sessione viene annullata senza pubblicare un risultato.
+- Il completamento di tutti i partecipanti attivi provoca il Reveal automatico. Gli incompleti sono esclusi dalla fusione.
+- Dopo il Reveal i partecipanti inclusi possono proporre modifiche. La proposta viene applicata soltanto con approvazione unanime, compreso il proponente; un solo rifiuto la respinge.
+- Le notifiche degli inviti pendenti vengono aggiornate a REVOCATO quando il creatore revoca l'invito o la sessione termina.
+
+### Fusione e regole applicate
+- Classic: Borda con spareggio sul numero di primi posti.
+- Battle: somma delle vittorie.
+- Speed: posizione media, con ex aequo.
+- Grade: media dei voti e conservazione degli ex aequo.
+- La fusione viene salvata una sola volta e il risultato pubblicato è identico per tutti i partecipanti.
+
+### Database, sicurezza e migrazioni
+- Applicate le migrazioni multiplayer dalla `20261119110245` alla `20261119121709`, comprese fusioni, collaborazione, progressi, timer Speed, proposte unanimi, protezioni sugli ordinamenti, stati terminali, chiusura anticipata, revoca notifiche e annullamento delle sessioni senza completamenti.
+- Totale: **83 migrazioni SQL** nel repository e **83** su Supabase; versioni e nomi allineati.
+- Le cinque tabelle multiplayer (`ranking_multiplayer_sessions`, `ranking_session_results`, `ranking_session_proposals`, `ranking_session_proposal_votes`, `ranking_invite_links`) hanno RLS abilitata e forzata e sono nella pubblicazione Realtime.
+- Tutte le RPC multiplayer verificate sono eseguibili da `authenticated` e non da `anon`.
+- Le funzioni impediscono di riaprire o modificare una partecipazione già FINISHED; le decisioni Reveal/proroga sono bloccate prima della scadenza; la chiusura anticipata richiede il creatore.
+- Le sessioni senza alcun partecipante FINISHED vengono annullate e non producono una classifica pubblicata.
+
+### Test tecnici eseguiti
+- Test SQL transazionali competitivi per tutti e quattro i tipi, con asserzioni sui risultati della fusione: Classic (Borda e primi posti), Battle (vittorie), Speed (posizione media) e Grade (media ed ex aequo).
+- Test SQL collaborativi per Classic, Battle, Speed e Grade, compresi aggiornamenti condivisi, completamento dei partecipanti e Reveal.
+- Test delle proposte post-pubblicazione: approvazione unanime con applicazione della modifica/revisione e rifiuto con classifica invariata.
+- Test di inviti per username, accettazione, link di invito, revoca del link, revoca automatica degli inviti pendenti e aggiornamento della relativa notifica.
+- Test dei terminal state: blocco modifiche dopo FINISHED, idempotenza del completamento, rifiuto del Reveal anticipato, chiusura anticipata e annullamento quando nessuno completa.
+- Test completati in transazioni annullate: nessun ranking, proposta o dato di prova è rimasto nel database.
+- RLS/FORCE RLS, Realtime e privilegi RPC verificati sulle tabelle e funzioni multiplayer.
+
+### CI e rilascio
+- GitHub Actions **#253, #254, #255, #256, #257, #258 e #259**: tutte concluse con successo su TypeScript, ESLint e Production Build.
+- Ultimo commit applicativo verificato: `586dc8e503e7d4210c2500febdc29587e1b3de90`.
+- Nessun deploy Production eseguito.
+
+### Verifiche ancora da fare e lavoro successivo
+- Il collaudo browser end-to-end con due account non è stato eseguito volutamente: sarà parte dell'unica sessione finale richiesta dall'utente.
+- Restano da implementare Feed e Scopri social: feed delle attività pubbliche dei seguiti, filtri per tipologia, ricerca globale e suggerimenti.
+- Resta da definire l'entry point UX minimo per inviare una richiesta Follow a un profilo privato non ancora seguito; la pagina del profilo privato continua correttamente a non essere visibile ai non-follower.
+- Il badge complessivo Messaggi/Attività e l'aggiornamento locale di tutti i contatori inbox richiedono ancora una rifinitura.
+- Appunti, anteprima discografia e Ruota restano incluse nel collaudo finale.
+- Nessun deployment Production intermedio: un unico rilascio cumulativo dopo completamento di tutte le modifiche e collaudo finale.
