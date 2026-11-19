@@ -15,6 +15,7 @@ export default async function InboxPage(){
   supabase.from("direct_messages").select("id,conversation_id,sender_id,body,created_at,deleted_at").in("conversation_id",ids).order("created_at",{ascending:false}).limit(2000),
   supabase.rpc("renqd_direct_unread_counts")
  ]):[{data:[]},{data:[]},{data:[]},{data:[]}];
+ const typedUnreadRows=(unreadRows??[]) as Array<{conversation_id:string;unread_count:number}>;
  const conversationsForUi=await Promise.all(rows.map(async row=>{
   const otherId=row.participant_one_id===user.id?row.participant_two_id:row.participant_one_id;
   const profile=(profiles??[]).find(item=>item.user_id===otherId);
@@ -23,7 +24,7 @@ export default async function InboxPage(){
   const otherRead=(reads??[]).find(item=>item.conversation_id===row.id&&item.user_id===otherId)?.last_read_at??null;
   const conversationMessages=(messages??[]).filter(item=>item.conversation_id===row.id);
   const latest=conversationMessages[0]??null;
-  const unreadCount=unreadRows?.find(item=>item.conversation_id===row.id)?.unread_count??0;
+  const unreadCount=typedUnreadRows.find(item=>item.conversation_id===row.id)?.unread_count??0;
   return {id:row.id,otherUserId:otherId,username:profile?.username??null,displayName:profile?.display_name||profile?.username||"Utente Renqd",avatarUrl,isPrivate:profile?.is_private??true,lastMessage:latest?{body:latest.deleted_at?"Messaggio eliminato":latest.body,senderId:latest.sender_id,createdAt:latest.created_at}:null,unreadCount,otherReadAt:otherRead};
  }));
  return <InboxWorkspace notifications={(notifications??[]) as Array<{id:string;actor_id:string|null;notification_type:string;payload:Record<string,unknown>;read_at:string|null;created_at:string}>} conversations={conversationsForUi} currentUserId={user.id}/>;
