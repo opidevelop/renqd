@@ -115,7 +115,6 @@ export function DirectMessages({
     conversationId: string,
     otherUserId: string,
   ) => {
-    setError("");
     const supabase = createClient();
     const [{ data, error: messageError }, { data: readRows }] = await Promise.all([
       supabase
@@ -378,6 +377,7 @@ export function DirectMessages({
               key={item.id}
               className={"dm-conversation-item" + (activeId === item.id ? " is-active" : "")}
               onClick={() => {
+                setError("");
                 setLoading(true);
                 setActiveId(item.id);
                 setMobileChatOpen(true);
