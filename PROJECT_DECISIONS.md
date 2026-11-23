@@ -405,3 +405,14 @@ La decisione non modifica le specifiche funzionali già approvate per multiplaye
 - Quando si seleziona una singola stagione, la fonte wiki deve essere una pagina riferita a quella specifica edizione/stagione. Non usare una pagina generica del programma come sostituto, perché riproporrebbe lo stesso elenco per tutte le stagioni.
 - Se Wikipedia e Fandom non hanno una pagina stagionale identificabile e utilizzabile, usare il fallback TMDB già previsto, senza spacciare il cast generale per cast della stagione.
 - Le richieste alle API wiki e la risposta `items` del catalogo non devono conservare cache stale che impediscano di vedere risultati aggiornati.
+
+
+## 2026-11-23 — Visual identity refresh and synchronized multiplayer Reveal
+
+- The uploaded Multiplayer Lobby reference image is the canonical visual reference for the platform refresh.
+- Visual direction: warm ivory canvas, black editorial typography, Renqd orange accents, soft translucent surfaces, rounded cards, restrained shadows, subtle brand watermarking, fixed desktop sidebar and centered wordmark in the top bar. Existing navigation labels and order remain exact.
+- Loading screen: Style 1, with the serpentina as the protagonist. Use the loading treatment on both initial loading and route transitions, and carry the motif subtly into section/hero surfaces.
+- Multiplayer completion: finishing a ranking returns each participant to the lobby. Results do not publish automatically. Each participant with a FINISHED result confirms Reveal in the lobby; INCOMPLETE participants are excluded. The last confirmation schedules one shared reveal timestamp (4 seconds ahead), and all clients transition at that same timestamp.
+- Multiplayer Reveal is a sequential, non-live presentation. Each placement compares every finished participant with display name, avatar and their individual position. Grade placements also show the fused arithmetic mean beside the placement; participant-level grades remain visible in the comparison.
+- Keep the existing route structure, session modes, invitations, ranking mechanics and navigation intact.
+- Original brand SVG files were not present in the current repository or current attachments. A CSS/inline-SVG fallback is used temporarily; replace it with the original supplied assets when they are re-uploaded.
