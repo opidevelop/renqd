@@ -158,12 +158,6 @@ export default function ModerationConsole({
 
   return (
     <div className="moderation-page">
-      <header className="moderation-heading">
-        <span className="moderation-eyebrow">RENQD TRUST & SAFETY</span>
-        <h1>Centro <em>moderazione.</em></h1>
-        <p>Gestisci i Renq pubblicati, le segnalazioni ricevute e i contenuti nel cestino.</p>
-      </header>
-
       <nav className="moderation-tabs" aria-label="Sezioni moderazione">
         {(["published", "reported", "trash"] as ModerationView[]).map(item => (
           <Link

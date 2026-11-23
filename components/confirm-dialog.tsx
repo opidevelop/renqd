@@ -28,7 +28,8 @@ export function useConfirmDialog() {
  },[pending,settle]);
  const dialog=pending?<div className="renqd-confirm-overlay" onMouseDown={event=>{if(event.target===event.currentTarget)settle(false);}}>
   <section ref={dialogRef} className={"renqd-confirm-dialog"+(pending.tone==="danger"?" is-danger":"")} role="alertdialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
-   <span className="renqd-confirm-icon"><AlertTriangle size={21}/></span><h2 id={titleId}>{pending.title}</h2><p id={descriptionId}>{pending.description}</p>
+   <header className="renqd-confirm-header"><span>CONFERMA OPERAZIONE</span><button type="button" onClick={()=>settle(false)} aria-label="Chiudi"><span aria-hidden="true">×</span></button></header>
+   <div className="renqd-confirm-copy"><span className="renqd-confirm-icon"><AlertTriangle size={21}/></span><h2 id={titleId}>{pending.title}</h2><p id={descriptionId}>{pending.description}</p></div>
    <div className="renqd-confirm-actions"><button type="button" className="renqd-confirm-cancel" ref={cancelRef} onClick={()=>settle(false)}>{pending.cancelLabel??"Annulla"}</button><button type="button" className="renqd-confirm-submit" onClick={()=>settle(true)}>{pending.confirmLabel??"Conferma"}</button></div>
   </section></div>:null;
  return {confirm,dialog};

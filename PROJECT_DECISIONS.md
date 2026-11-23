@@ -469,3 +469,18 @@ The user approved the following coordinated UI changes. They must preserve exist
 - The rule applies across the broader application, not only the Explore hero.
 
 No database migration, Supabase configuration change, role/permission change or external-service mutation is authorized by this UI batch.
+
+
+## 2026-11-23 — UI regressions and approved restoration
+
+The user approved the following corrections for the existing Renqd experience. Preserve current data, permissions, navigation and business logic except where explicitly stated:
+
+1. Restore a consistent approved Renqd visual treatment for all in-app confirmation dialogs and transient notifications/toasts, not only the Home «Svuota tutto» action.
+2. The «Segui la curiosità» Explore header must use only the official `public/brand/serpentina-podio.svg` and `public/brand/stellina.svg` assets as decorative motifs. Do not use improvised marks or broken inline image renderings.
+3. Remove the redundant «Centro moderazione» hero card. Keep the Administration dashboard, Moderazione / Utenti e accessi navigation, Published / Reported / Trash views, and every existing moderation capability unchanged.
+4. When changing the selected music album in the creation flow, update the automatically generated Renq title to the newly selected album. If the user manually edits the title, preserve that custom title instead of overwriting it.
+5. Participant standings in multiplayer Reveal must resolve and display each participant's profile photo, with the existing initials/fallback behavior when no photo is available.
+6. Use the published Renq header as the visual reference for the Multiplayer lobby session header. Provide the creator with a pencil action that opens the existing published Renq editor; do not introduce a parallel editor.
+7. Explore's followed-activity layout must remain within the viewport on tablets. Keep two columns when sufficient width exists and stack them when the available width is insufficient; mobile remains single-column.
+
+No database schema, migration, role, permission, authentication or external-service changes are authorized by this UI batch.

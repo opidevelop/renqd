@@ -1376,3 +1376,27 @@ The three existing Battle depths are implemented in `components/renq-experience.
 - Production aliases assigned by Vercel include `https://renqd.app`, `https://renqd.vercel.app`, and `https://www.renqd.app`.
 - Smoke check: `https://renqd.app` returned HTTP 200; `/home` resolved to the authenticated login surface when fetched without a user session. Interactive verification must be performed by the user in their authenticated browser.
 - No Supabase/database migration or schema change was included in this release.
+
+
+## 2026-11-23 — UI regression restoration batch (approved)
+
+### Implemented on `main`
+- Standardized the shared confirmation-dialog surface and all existing app toast surfaces (notification menu, Home resume and My Renq feedback) on the same Renqd notification visual language. Confirmations remain in-app and do not use browser-native alert/confirm dialogs.
+- Rebuilt the Explore «Segui la curiosità» decoration using only the official serpentina and stellina SVG assets. Removed the inline Next Image instances that were rendering as broken image placeholders.
+- Removed only the redundant «Centro moderazione» hero. Moderation tabs, lists, filters, actions and authorization behavior remain unchanged.
+- Fixed album title synchronization: selecting a different Album refreshes the generated `Artist - Album` title; manually edited titles are preserved. The automatic-title state resets when changing category or discography mode.
+- Multiplayer participant avatar storage paths are resolved to signed profile-media URLs on initial render and subsequent lobby refreshes; the client caches signed URLs for 50 minutes. Existing fallback initials remain available when no avatar exists.
+- Restyled the Multiplayer session header to match the published Renq hero and added a creator-only pencil link to the existing published Renq editor.
+- Made Explore's two-column mosaic stack below the tablet-width breakpoint and set the grid children to `min-width: 0` to prevent horizontal overflow.
+
+### Validation
+- `git diff --check`: passed.
+- `npx tsc --noEmit`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- No authenticated browser/device end-to-end test was run in the sandbox. The user will perform visual and functional verification on `https://renqd.app` after the Production deployment.
+
+### Release
+- User explicitly authorized deployment to Production from `main` on 23 November 2026.
+- The commit is being published directly to `main`; the existing GitHub-to-Vercel integration automatically deploys pushes to the production branch. Record the final commit and Vercel deployment ID/status after the push completes.
+- No database migration, Supabase configuration change, role/permission change or external-service mutation is part of this batch.
