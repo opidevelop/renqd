@@ -1296,3 +1296,11 @@ Tutte le modifiche restano locali nel sandbox sul branch main. Nessun commit, pu
 - Migrazione atomica `20261123140000_renqd_atomic_published_battle_operations.sql`: presente nel repository locale, NON applicata a Production.
 - Hardening locale di `supabase/functions/admin-delete-user/index.ts`: NON distribuito; la versione Production resta quella precedente.
 - Nessun commit, push o deployment Vercel effettuato. Il rilascio cumulativo resta in attesa della conferma esplicita dell'utente.
+
+
+## 2026-11-23 — Asset reference grafica canonica
+
+- Aggiunta a `docs/design/renqd-visual-reference.jpg` la fotografia originale di riferimento della Lobby Multiplayer (ottimizzata in JPEG per contenere le dimensioni del repository; composizione e direzione visiva preservate).
+- La reference è stata registrata in `PROJECT_DECISIONS.md` come riferimento visivo canonico per tutte le decisioni grafiche della piattaforma.
+- Non confondere questa immagine con lo screenshot successivo della copertina multiplayer: quest'ultimo resta un riferimento specifico per la presentazione della copertina nella card di sessione.
+- Questa modifica documentale non comporta modifiche al codice applicativo, database o deployment.

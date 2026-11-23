@@ -426,3 +426,12 @@ La decisione non modifica le specifiche funzionali già approvate per multiplaye
 - `app/icon.svg` usa il pittogramma ufficiale rifilato, con R nera e stellina arancione.
 - Sidebar desktop: pittogramma ufficiale centrato sopra la navigazione, senza modificare ordine e struttura delle voci. Header: wordmark SVG ufficiale centrato. Loading Style 1: serpentina SVG ufficiale protagonista e stellina ufficiale come accento.
 - Gli asset decorativi restano disponibili per l'uso coerente nelle altre superfici della piattaforma.
+
+
+## 2026-11-23 — Reference grafica canonica della piattaforma
+
+- La reference grafica approvata dall'utente è conservata in `docs/design/renqd-visual-reference.jpg`. È l'immagine della Lobby Multiplayer allegata nella conversazione del 23 novembre 2026; non va confusa con la seconda immagine allegata successivamente per la specifica copertina multiplayer.
+- Questa immagine è il riferimento visivo canonico e permanente per l'intera piattaforma. Ogni decisione grafica su pagine, componenti, sezioni, card, modali, navigazione e schermate deve consultarla e seguirla il più possibile.
+- La coerenza richiesta riguarda linguaggio visivo, palette, tipografia, gerarchia, spaziature, proporzioni, superfici, bordi, ombre, trasparenze, decorazioni e composizione. Non è sufficiente applicare soltanto colori simili.
+- La serpentina ufficiale Renqd è parte integrante della brand identity e deve essere utilizzata in modo coerente nelle diverse superfici, senza sovraccaricare l'interfaccia.
+- La reference non sostituisce le specifiche funzionali e non autorizza a modificarle. Ogni comportamento deve restare quello concordato, salvo richiesta esplicita dell'utente.
