@@ -164,3 +164,9 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 .multiplayer-summary-grid{display:none!important}
 @media(min-width:681px){.multiplayer-lobby-intro{grid-row:2}.multiplayer-participants{grid-row:3}.multiplayer-ready-panel{grid-row:3}}
 @media(max-width:680px){.multiplayer-session-tags{gap:6px;margin-top:14px}.multiplayer-session-tags span{padding:7px 10px;font-size:10px}}
+
+.platform-topbar{position:relative!important;display:flex!important;align-items:center!important}
+.platform-topbar>span:first-child{display:block;flex:1}
+.platform-header-logo{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;white-space:nowrap}
+.topbar-profile-menu{position:relative;z-index:2;margin-left:auto;justify-content:flex-end}
+@media(max-width:680px){.platform-topbar>span:first-child{flex:1}.topbar-profile-menu{flex:1}}
