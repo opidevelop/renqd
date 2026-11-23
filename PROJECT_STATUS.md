@@ -1385,7 +1385,7 @@ The three existing Battle depths are implemented in `components/renq-experience.
 - Rebuilt the Explore «Segui la curiosità» decoration using only the official serpentina and stellina SVG assets. Removed the inline Next Image instances that were rendering as broken image placeholders.
 - Removed only the redundant «Centro moderazione» hero. Moderation tabs, lists, filters, actions and authorization behavior remain unchanged.
 - Fixed album title synchronization: selecting a different Album refreshes the generated `Artist - Album` title; manually edited titles are preserved. The automatic-title state resets when changing category or discography mode.
-- Multiplayer participant avatar storage paths are resolved to signed profile-media URLs on initial render and subsequent lobby refreshes; the client caches signed URLs for 50 minutes. Existing fallback initials remain available when no avatar exists.
+- Multiplayer participant avatar storage paths are resolved to signed profile-media URLs both on the published Renq result page and in the lobby (including subsequent lobby refreshes); the client caches lobby signed URLs for 50 minutes. Existing fallback initials remain available when no avatar exists.
 - Restyled the Multiplayer session header to match the published Renq hero and added a creator-only pencil link to the existing published Renq editor.
 - Made Explore's two-column mosaic stack below the tablet-width breakpoint and set the grid children to `min-width: 0` to prevent horizontal overflow.
 

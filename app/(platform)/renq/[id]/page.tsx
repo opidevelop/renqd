@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import { RenqExperience } from "@/components/renq-experience";
 import { GradeExperience } from "@/components/grade-experience";
 import { SavedRenqDetail } from "@/components/saved-renq-detail";
@@ -29,6 +30,10 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     multiplayerDetails=sessionDetails as MultiplayerDetails;
   }
   if(!isOwner&&!multiplayerDetails)notFound();
+  if(multiplayerDetails){
+    const participants=await Promise.all(multiplayerDetails.participants.map(async person=>({...person,avatarUrl:await getProfileMediaUrl(supabase,person.avatarUrl)})));
+    multiplayerDetails={...multiplayerDetails,participants};
+  }
   const {data:personalResult}=multiplayerDetails?.session.mode==="COMPETITIVE"
     ? await supabase.from("ranking_session_results").select("result_snapshot,result_status").eq("ranking_id",ranking.id).eq("user_id",user.id).maybeSingle()
     : {data:null};
