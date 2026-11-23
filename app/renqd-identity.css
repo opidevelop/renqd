@@ -154,3 +154,13 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 .renq-reveal-participant-row>small{color:#b25b12;font-size:10px;font-weight:850}
 .renq-reveal-position-average{color:#ffb36c;font-size:inherit;font-weight:900}
 @media(max-width:680px){.renq-reveal-participant-comparison{padding:12px;margin-top:14px}.renq-reveal-participant-row{gap:7px}}
+
+.multiplayer-session-tags{display:flex;gap:9px;flex-wrap:wrap;margin-top:19px}
+.multiplayer-session-tags span{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(255,255,255,.17);color:#fff;font-size:11px;font-weight:750;backdrop-filter:blur(10px)}
+.multiplayer-lobby-intro{grid-column:1/-1;padding:1px 0 0}
+.multiplayer-lobby-intro h2{margin:0;color:#191614;font-size:clamp(25px,3vw,34px);font-weight:850;letter-spacing:-1.5px}
+.multiplayer-lobby-intro h2 span{color:var(--renqd-orange);font-size:.9em}
+.multiplayer-lobby-intro p{margin:5px 0 0;color:#766c63;font-size:13px}
+.multiplayer-summary-grid{display:none!important}
+@media(min-width:681px){.multiplayer-lobby-intro{grid-row:2}.multiplayer-participants{grid-row:3}.multiplayer-ready-panel{grid-row:3}}
+@media(max-width:680px){.multiplayer-session-tags{gap:6px;margin-top:14px}.multiplayer-session-tags span{padding:7px 10px;font-size:10px}}
