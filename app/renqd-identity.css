@@ -194,3 +194,60 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 .renqd-loading-serpentina{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 8px 22px rgba(198,94,0,.2));animation:renqd-serpentina-float 2.8s ease-in-out infinite}
 .renqd-loading-spark{position:absolute;top:-2px;right:10%;display:block;width:30px;height:30px;object-fit:contain;filter:brightness(0) saturate(100%) invert(48%) sepia(98%) saturate(2216%) hue-rotate(359deg) brightness(101%) contrast(106%);animation:renqd-spark-pulse 1.5s ease-in-out infinite}
 @media(max-width:680px){.platform-sidebar-brand{display:none}.platform-header-logo{width:126px;height:50px}.renqd-loading-brand-art{width:min(420px,88vw)}}
+
+/* November 23: notifications, home resume cards and shared lobby identity. */
+.renqd-notification-wrap{position:relative;display:flex;align-items:center}
+.renqd-notification-count{position:absolute;top:1px;right:0;min-width:17px;height:17px;padding:0 4px;display:grid;place-items:center;border:2px solid #fffaf5;border-radius:999px;background:var(--renqd-orange);color:#fff;font-size:9px;font-weight:850;line-height:1}
+.renqd-notification-menu{position:absolute;z-index:90;top:calc(100% + 12px);right:0;width:min(360px,calc(100vw - 28px));padding:12px;border:1px solid var(--renqd-line);border-radius:18px;background:rgba(255,252,248,.98);box-shadow:0 18px 55px rgba(46,31,17,.16);backdrop-filter:blur(18px)}
+.renqd-notification-head{display:flex;align-items:center;justify-content:space-between;padding:5px 5px 10px;color:var(--renqd-ink)}
+.renqd-notification-head>button{display:flex;align-items:center;gap:5px;border:0;background:none;color:var(--renqd-orange-dark);font-size:10px;font-weight:750;cursor:pointer}
+.renqd-notification-head>button:disabled{opacity:.4;cursor:default}
+.renqd-notification-item{display:flex;align-items:flex-start;gap:10px;padding:11px 8px;border-radius:11px;color:var(--renqd-ink);text-decoration:none}
+.renqd-notification-item:hover,.renqd-notification-item.is-unread{background:#fff3e7}
+.renqd-notification-dot{flex:none;width:7px;height:7px;margin-top:5px;border-radius:50%;background:transparent}
+.renqd-notification-item.is-unread .renqd-notification-dot{background:var(--renqd-orange)}
+.renqd-notification-item>span:last-child{display:grid;gap:4px;min-width:0}
+.renqd-notification-item strong{font-size:12px;font-weight:700;overflow-wrap:anywhere}
+.renqd-notification-item small{color:var(--renqd-muted);font-size:10px}
+.renqd-notification-empty{padding:18px 8px;color:var(--renqd-muted);font-size:12px;text-align:center}
+.renqd-notification-all{display:block;margin-top:7px;padding:10px;border-top:1px solid var(--renqd-line);color:var(--renqd-orange-dark);font-size:11px;font-weight:800;text-align:center;text-decoration:none}
+.renqd-notification-toast{position:fixed;z-index:10000;right:22px;bottom:22px;display:flex;align-items:center;gap:10px;max-width:min(380px,calc(100vw - 32px));padding:13px 15px;border:1px solid #f1d9c4;border-radius:14px;background:#fffaf5;color:var(--renqd-ink);box-shadow:0 12px 38px rgba(44,29,16,.16);font-size:12px;animation:renqd-toast-in .22s ease-out both}
+.renqd-notification-toast>svg{flex:none;color:var(--renqd-orange)}
+.renqd-notification-toast>span{flex:1}
+.renqd-notification-toast>button{border:0;background:none;color:var(--renqd-muted);font-size:20px;cursor:pointer}
+@keyframes renqd-toast-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.renqd-loading-mark{position:relative;display:grid;place-items:center;width:104px;height:104px}
+.renqd-loading-r{width:74px;height:74px;object-fit:contain}
+.renqd-loading-spark{position:absolute;top:0;right:0;width:29px;height:29px;object-fit:contain;animation:renqd-star-orbit 1.35s ease-in-out infinite}
+@keyframes renqd-star-orbit{0%,100%{transform:translate(0,0) rotate(0) scale(.88)}50%{transform:translate(7px,-7px) rotate(22deg) scale(1.12)}}
+.renqd-loading-serpentina{width:min(190px,55vw);height:auto;max-height:68px;object-fit:contain;opacity:.75;animation:renqd-serpentina-float 2.8s ease-in-out infinite}
+.home-resume-section{margin:0 auto 36px;max-width:1160px;padding:0 24px}
+.home-resume-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px;margin-top:16px}
+.home-resume-card{display:flex;align-items:center;gap:12px;min-width:0;padding:15px 16px;border:1px solid var(--renqd-line);border-radius:16px;background:var(--renqd-card);box-shadow:var(--renqd-shadow);color:var(--renqd-ink);text-decoration:none;transition:transform .18s,border-color .18s}
+.home-resume-card:hover{transform:translateY(-2px);border-color:#efbd91}
+.home-resume-icon{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:13px;background:#fff0e2;color:var(--renqd-orange-dark)}
+.home-resume-copy{display:grid;gap:4px;flex:1;min-width:0}
+.home-resume-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.home-resume-copy small{color:var(--renqd-muted);font-size:10px}
+.home-resume-card>svg:last-child{flex:none;color:var(--renqd-orange)}
+/* Public landing and staff dashboard share the approved lobby palette without changing navigation. */
+:where(.landing-page,.public-landing,.admin-dashboard,.admin-page,.inbox-workspace){color:var(--renqd-ink)}
+:where(.landing-page,.public-landing,.admin-dashboard,.admin-page) :where(section,article,.card,.panel){border-color:var(--renqd-line)}
+@media(max-width:680px){.renqd-notification-menu{right:-54px}.renqd-notification-toast{right:12px;bottom:calc(82px + env(safe-area-inset-bottom))}.home-resume-section{padding:0 16px}}
+
+/* Approved lobby identity applied to public landing, Activity and staff dashboard. */
+.public-home{background:var(--renqd-paper)!important;color:var(--renqd-ink)!important}
+.public-home-header{border-color:var(--renqd-line)!important;background:rgba(255,252,248,.88)!important;backdrop-filter:blur(16px)}
+.public-home-kicker,.admin-eyebrow{color:var(--renqd-orange-dark)!important;letter-spacing:1.4px;font-weight:850}
+.public-home-primary,.public-home-register{border-radius:999px!important;background:var(--renqd-orange)!important;color:#fff!important;box-shadow:0 8px 22px rgba(244,122,8,.2)!important}
+.public-home-secondary{border:1px solid var(--renqd-line)!important;border-radius:999px!important;background:#fffaf5!important;color:var(--renqd-ink)!important}
+.public-home-visual .visual-rank-card,.public-home-proof,.admin-dashboard-tabs,.inbox-workspace{border-color:var(--renqd-line)!important;border-radius:20px!important}
+.admin-page{max-width:1320px;margin-inline:auto;color:var(--renqd-ink)}
+.admin-page-heading{padding-bottom:18px;border-bottom:1px solid var(--renqd-line)}
+.admin-dashboard-tabs{display:flex;gap:6px;padding:6px;border:1px solid var(--renqd-line);background:#fffaf5}
+.admin-dashboard-tabs button{border-radius:12px!important;color:var(--renqd-muted)}
+.admin-dashboard-tabs button.is-active{background:#ffead8!important;color:var(--renqd-orange-dark)!important}
+.inbox-workspace{padding:clamp(14px,2vw,24px);background:rgba(255,252,248,.68)}
+@media(max-width:680px){.public-home-header{padding-inline:16px}.admin-page{padding-inline:14px}.inbox-workspace{padding:12px;border-radius:16px}}
+
+@media(max-width:680px){.platform-mobile-nav .mobile-create-link{position:relative;z-index:2;align-self:center;min-height:54px;height:54px;margin-top:-12px;overflow:visible}.platform-mobile-nav .mobile-create-link .mobile-nav-icon{width:34px;height:30px}.platform-mobile-nav .mobile-create-link .mobile-nav-icon svg{width:24px;height:24px;stroke-width:2.5}}

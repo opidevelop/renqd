@@ -4,18 +4,18 @@ import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 export default function PageTransition({children}:{children:ReactNode}){
  const pathname=usePathname();
- const [loading,setLoading]=useState(true);
+ const [settledPath,setSettledPath]=useState<string | null>(null);
+ const loading=settledPath!==pathname;
  useEffect(()=>{
-  setLoading(true);
-  const id=window.setTimeout(()=>setLoading(false),560);
+  const id=window.setTimeout(()=>setSettledPath(pathname),560);
   return ()=>window.clearTimeout(id);
  },[pathname]);
  return <>
   <div key={pathname} className="platform-route-transition">{children}</div>
   {loading&&<div className="renqd-loading-overlay" role="status" aria-live="polite" aria-label="Caricamento Renqd">
    <div className="renqd-loading-content">
-    <img className="renqd-loading-wordmark" src="/brand/renqd-logo.svg" alt="Renqd" />
-    <div className="renqd-loading-brand-art"><img className="renqd-loading-serpentina" src="/brand/serpentina-podio.svg" alt="" /><img className="renqd-loading-spark" src="/brand/stellina.svg" alt="" /></div>
+    <div className="renqd-loading-mark" aria-label="Renqd"><img className="renqd-loading-r" src="/brand/r-logo.svg" alt="" /><img className="renqd-loading-spark" src="/brand/stellina.svg" alt="" /></div>
+    <img className="renqd-loading-serpentina" src="/brand/serpentina-podio.svg" alt="" />
     <p>Le tue scelte, in ordine.</p>
    </div>
   </div>}

@@ -22,67 +22,13 @@ export async function POST(request:Request){
  if(body.action==="update-published-renq"){
   const {rankingId,title,orderedIds,tieMap={}}=body as {rankingId:string;title:string;orderedIds:string[];tieMap?:Record<string,string>};
   const cleanTitle=typeof title==="string"?title.trim():"";
-  if(!rankingId||!cleanTitle||cleanTitle.length>80)return jsonError("Il titolo deve contenere da 1 a 80 caratteri.");
-  if(!Array.isArray(orderedIds)||orderedIds.length<1||new Set(orderedIds).size!==orderedIds.length||orderedIds.some(id=>typeof id!=="string"))return jsonError("Ordine degli elementi non valido.");
-  const {data:ranking,error:rankingLookupError}=await supabase.from("rankings").select("id,title,status,settings").eq("id",rankingId).eq("user_id",user.id).is("deleted_at",null).maybeSingle();
-  if(rankingLookupError||!ranking||ranking.status!=="COMPLETED"||!(ranking.settings as Record<string,unknown>|null)?.savedAt)return jsonError("Renq pubblicato non trovato o non modificabile.",404);
-  const {data:rows,error:rowsError}=await supabase.from("ranking_items").select("id,rank_position,tie_group_id").eq("ranking_id",rankingId);
-  if(rowsError||!rows)return jsonError(rowsError?.message??"Impossibile leggere gli elementi.",500);
-  const rowById=new Map(rows.map(row=>[row.id,row]));
-  if(rows.length!==orderedIds.length||orderedIds.some(id=>!rowById.has(id)))return jsonError("La lista degli elementi non corrisponde alla classifica.");
-  const safeTieMap=tieMap&&typeof tieMap==="object"?tieMap:{};
-  const positions=new Map<string,number>();
-  let nextPosition=0;
-  let previousInputGroup:string|null=null;
-  let currentOutputGroup:string|null=null;
-  let currentSegmentIds:string[]=[];
-  const seenInputGroups=new Set<string>();
-  const normalizedTieMap:Record<string,string>={};
-  const flushTieSegment=()=>{if(currentOutputGroup&&currentSegmentIds.length>1)for(const itemId of currentSegmentIds)normalizedTieMap[itemId]=currentOutputGroup;};
-  for(const id of orderedIds){
-   const group=typeof safeTieMap[id]==="string"&&safeTieMap[id]?safeTieMap[id]:null;
-   if(group&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(group))return jsonError("Gruppo di pari merito non valido.");
-   if(!group||group!==previousInputGroup){
-    flushTieSegment();
-    nextPosition++;
-    currentOutputGroup=group?(seenInputGroups.has(group)?crypto.randomUUID():group):null;
-    if(group)seenInputGroups.add(group);
-    currentSegmentIds=[];
-   }
-   currentSegmentIds.push(id);
-   positions.set(id,nextPosition);
-   previousInputGroup=group;
-  }
-  flushTieSegment();
-  const settings=(ranking.settings??{}) as Record<string,unknown>;
-  const savedSnapshot=settings.savedSnapshot as {items?:Array<Record<string,unknown>>}|undefined;
-  const snapshotItems=savedSnapshot?.items;
-  if(!Array.isArray(snapshotItems)||snapshotItems.length!==orderedIds.length)return jsonError("Snapshot della classifica non valido.",500);
-  const snapshotById=new Map(snapshotItems.map(item=>[String(item.id),item]));
-  const nextItems=orderedIds.map(id=>{const item=snapshotById.get(id);return item?{...item,rank_position:positions.get(id)??null,tie_group_id:normalizedTieMap[id]??null}:null;});
-  if(nextItems.some(item=>item===null))return jsonError("Snapshot incompleto: impossibile salvare la modifica.",500);
-
-  // Snapshot the previous published state before changing either ranking_items or savedSnapshot.
-  const {data:version,error:revisionError}=await supabase.rpc("renqd_record_revision",{p_ranking_id:rankingId,p_change_summary:"Modifica classifica pubblicata"});
-  if(revisionError)return jsonError(revisionError.message,500);
-
-  const changedIds:string[]=[];
-  for(const id of orderedIds){
-   const group=normalizedTieMap[id]??null;
-   const {error:updateError}=await supabase.from("ranking_items").update({rank_position:positions.get(id),tie_group_id:group}).eq("id",id).eq("ranking_id",rankingId);
-   if(updateError){
-    for(const changedId of changedIds){const previous=rowById.get(changedId)!;await supabase.from("ranking_items").update({rank_position:previous.rank_position,tie_group_id:previous.tie_group_id}).eq("id",changedId).eq("ranking_id",rankingId);}
-    return jsonError(updateError.message,500);
-   }
-   changedIds.push(id);
-  }
-  const nextSettings={...settings,savedSnapshot:{...savedSnapshot,items:nextItems}};
-  const {error:saveError}=await supabase.from("rankings").update({title:cleanTitle,settings:nextSettings,updated_at:new Date().toISOString()}).eq("id",rankingId).eq("user_id",user.id);
-  if(saveError){
-   for(const id of changedIds){const previous=rowById.get(id)!;await supabase.from("ranking_items").update({rank_position:previous.rank_position,tie_group_id:previous.tie_group_id}).eq("id",id).eq("ranking_id",rankingId);}
-   return jsonError(saveError.message,500);
-  }
-  return NextResponse.json({ok:true,title:cleanTitle,version,items:nextItems});
+  const uuidPattern=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if(!uuidPattern.test(rankingId)||!cleanTitle||cleanTitle.length>80)return jsonError("Titolo o Renq non valido.");
+  if(!Array.isArray(orderedIds)||orderedIds.length<1||new Set(orderedIds).size!==orderedIds.length||orderedIds.some(id=>typeof id!=="string"||!uuidPattern.test(id)))return jsonError("Ordine degli elementi non valido.");
+  if(!tieMap||typeof tieMap!=="object"||Array.isArray(tieMap))return jsonError("Gruppi di pari merito non validi.");
+  const {data,error}=await supabase.rpc("renqd_update_published_ranking",{p_ranking_id:rankingId,p_title:cleanTitle,p_ordered_ids:orderedIds,p_tie_map:tieMap});
+  if(error)return jsonError(error.message,error.code==="42501"?403:error.code==="P0002"?404:error.code==="22023"?400:500);
+  return NextResponse.json(data??{ok:true});
  }
  if(body.action==="complete-grade"){
   const {rankingId,scores,tieOrder={}}=body as {rankingId:string;scores:Record<string,number>;tieOrder?:Record<string,number>};
@@ -119,42 +65,19 @@ export async function POST(request:Request){
    return NextResponse.json(data??{ok:true});
   }
   if(body.action==="battle-tie"){
-  const {sessionId}=body as {sessionId:string};const {data:session,error}=await supabase.from("ranking_battle_sessions").select("*").eq("id",sessionId).eq("user_id",user.id).single();
-  if(error||!session||session.status!=="ACTIVE")return jsonError("Sessione Battle non disponibile.",404);
-  const state=session.comparison_state as {pairs:{a:string;b:string}[];cursor:number;wins:Record<string,number>;tiePairs?:{a:string;b:string}[]};
-  const {data:choice,error:choiceError}=await supabase.rpc("renqd_record_battle_choice",{p_session_id:sessionId,p_winner_item_id:null,p_is_tie:true});
-  if(choiceError||!choice)return jsonError(choiceError?.message??"Impossibile registrare il pari merito.",500);
-  state.cursor=choice.cursor;state.wins=choice.wins??{};state.tiePairs=choice.tiePairs??[];
-  const completed=Boolean(choice.completed);
-  if(completed){const {data:allItems}=await supabase.from("ranking_items").select("id").eq("ranking_id",session.ranking_id);const ids=(allItems??[]).map(x=>x.id);const parent=new Map(ids.map(id=>[id,id]));const find=(id:string):string=>{const p=parent.get(id)??id;if(p===id)return id;const root=find(p);parent.set(id,root);return root;};for(const pair of state.tiePairs??[]){const a=find(pair.a),b=find(pair.b);if(a!==b)parent.set(b,a);}const members=new Map<string,string[]>();for(const id of ids){const root=find(id);const group=members.get(root)??[];group.push(id);members.set(root,group);}const tieGroups:Record<string,string>={};for(const group of members.values())if(group.length>1){const groupId=crypto.randomUUID();for(const id of group)tieGroups[id]=groupId;}const groups=[...members.values()].sort((a,b)=>Math.max(...b.map(id=>state.wins[id]??0))-Math.max(...a.map(id=>state.wins[id]??0)));let position=0;const rankPositions:Record<string,number>={};for(const group of groups){position++;for(const id of group)rankPositions[id]=position;}const {error:finalizeError}=await supabase.rpc("renqd_finalize_battle_ranking",{p_session_id:session.id,p_rank_positions:rankPositions,p_tie_groups:tieGroups});if(finalizeError)return jsonError(finalizeError.message,500);return NextResponse.json({completed,cursor:state.cursor,total:state.pairs.length,wins:state.wins,tiePairs:state.tiePairs,tieGroups,rankPositions});}
-  return NextResponse.json({completed,cursor:state.cursor,total:state.pairs.length,wins:state.wins,tiePairs:state.tiePairs??[]});
- }
- if(body.action==="battle-pick"){
-  const {sessionId,winnerId}=body;
-  const {data:session,error}=await supabase.from("ranking_battle_sessions").select("*").eq("id",sessionId).eq("user_id",user.id).single();
-  if(error||!session||session.status!=="ACTIVE")return jsonError("Sessione Battle non disponibile.",404);
-  const state=session.comparison_state as {pairs:{a:string;b:string}[];cursor:number;wins:Record<string,number>;tiePairs?:{a:string;b:string}[]};
-  const {data:choice,error:choiceError}=await supabase.rpc("renqd_record_battle_choice",{p_session_id:sessionId,p_winner_item_id:winnerId,p_is_tie:false});
-  if(choiceError||!choice)return jsonError(choiceError?.message??"Impossibile registrare la scelta.",500);
-  state.cursor=choice.cursor;state.wins=choice.wins??{};state.tiePairs=choice.tiePairs??[];
-  const completed=Boolean(choice.completed);
-  if(completed){
-   const {data:rankingTieSetting}=await supabase.from("rankings").select("allow_ties").eq("id",session.ranking_id).single();const rankingAllowsTies=Boolean(rankingTieSetting?.allow_ties);
-   const {data:allItems}=await supabase.from("ranking_items").select("id").eq("ranking_id",session.ranking_id);const ids=(allItems??[]).map(x=>x.id);
-   const parent=new Map(ids.map(id=>[id,id]));const find=(id:string):string=>{const p=parent.get(id)??id;if(p===id)return id;const root=find(p);parent.set(id,root);return root;};
-   if(rankingAllowsTies){const byWins=new Map<number,string[]>();for(const id of ids){const wins=state.wins[id]??0;const group=byWins.get(wins)??[];group.push(id);byWins.set(wins,group);}for(const group of byWins.values())if(group.length>1)for(let i=1;i<group.length;i++){const a=find(group[0]),b=find(group[i]);if(a!==b)parent.set(b,a);}
-    for(const pair of state.tiePairs??[]){const a=find(pair.a),b=find(pair.b);if(a!==b)parent.set(b,a);}
-   }
-   const members=new Map<string,string[]>();for(const id of ids){const root=find(id);const group=members.get(root)??[];group.push(id);members.set(root,group);}
-   const groups=[...members.values()].sort((a,b)=>Math.max(...b.map(id=>state.wins[id]??0))-Math.max(...a.map(id=>state.wins[id]??0)));
-   const tieGroups:Record<string,string>={},rankPositions:Record<string,number>={};let position=0;
-   for(const group of groups){position++;const groupId=group.length>1?crypto.randomUUID():null;for(const id of group){rankPositions[id]=position;if(groupId)tieGroups[id]=groupId;}}
-   const {error:finalizeError}=await supabase.rpc("renqd_finalize_battle_ranking",{p_session_id:session.id,p_rank_positions:rankPositions,p_tie_groups:tieGroups});
-   if(finalizeError)return jsonError(finalizeError.message,500);
-   return NextResponse.json({completed,cursor:state.cursor,total:state.pairs.length,wins:state.wins,tiePairs:state.tiePairs??[],tieGroups,rankPositions});
+   const {sessionId}=body as {sessionId:string};
+   if(typeof sessionId!=="string"||! /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sessionId))return jsonError("Sessione Battle non valida.");
+   const {data,error}=await supabase.rpc("renqd_record_battle_choice_and_finalize",{p_session_id:sessionId,p_winner_item_id:null,p_is_tie:true,p_auto_ties:false});
+   if(error)return jsonError(error.message,error.code==="42501"?403:error.code==="P0002"?404:400);
+   return NextResponse.json(data??{ok:true});
   }
-  return NextResponse.json({completed,cursor:state.cursor,total:state.pairs.length,wins:state.wins});
- }
+  if(body.action==="battle-pick"){
+   const {sessionId,winnerId}=body as {sessionId:string;winnerId:string};
+   if(typeof sessionId!=="string"||typeof winnerId!=="string"||! /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sessionId)||! /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(winnerId))return jsonError("Scelta Battle non valida.");
+   const {data,error}=await supabase.rpc("renqd_record_battle_choice_and_finalize",{p_session_id:sessionId,p_winner_item_id:winnerId,p_is_tie:false,p_auto_ties:true});
+   if(error)return jsonError(error.message,error.code==="42501"?403:error.code==="P0002"?404:400);
+   return NextResponse.json(data??{ok:true});
+  }
  if(body.action==="start-speed"){
   const {rankingId,durationSeconds}=body as {rankingId:string;durationSeconds:number};
   if(!Number.isInteger(durationSeconds)||durationSeconds<1||durationSeconds>10800)return jsonError("Durata non valida.");
@@ -219,43 +142,29 @@ export async function POST(request:Request){
  }
  if(body.action==="update-cover"){
   const {rankingId,coverImagePath}=body as {rankingId:string;coverImagePath:string|null};
-  const {data:ranking}=await supabase.from("rankings").select("id,status,settings").eq("id",rankingId).eq("user_id",user.id).single();
-  if(!ranking||ranking.status!=="COMPLETED"||!(ranking.settings as Record<string,unknown>|null)?.savedAt)return jsonError("Renq salvato non trovato.",404);
-  if(coverImagePath!==null&&(typeof coverImagePath!=="string"||!new RegExp("^"+user.id+"/[a-f0-9-]{36}\\.(jpg|png|webp)$","i").test(coverImagePath)))return jsonError("La copertina non è valida o non appartiene al tuo spazio.");
-  const coverImageUrl=(body as {coverImageUrl?:string|null}).coverImageUrl??null;if(coverImageUrl!==null&&!validHttpsUrl(coverImageUrl))return jsonError("Inserisci un URL HTTPS valido per la copertina.");
+  const uuidPattern=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if(typeof rankingId!=="string"||!uuidPattern.test(rankingId))return jsonError("Renq non valido.");
+  if(coverImagePath!==null&&(typeof coverImagePath!=="string"||!new RegExp("^"+user.id+"/[a-f0-9-]{36}\\\\.(jpg|png|webp)$","i").test(coverImagePath)))return jsonError("La copertina non è valida o non appartiene al tuo spazio.");
+  const coverImageUrl=(body as {coverImageUrl?:string|null}).coverImageUrl??null;
+  if(coverImageUrl!==null&&!validHttpsUrl(coverImageUrl))return jsonError("Inserisci un URL HTTPS valido per la copertina.");
   const rawPosition=(body as {coverPosition?:{x:number;y:number}}).coverPosition;
   const coverPosition=rawPosition&&Number.isInteger(rawPosition.x)&&Number.isInteger(rawPosition.y)&&rawPosition.x>=0&&rawPosition.x<=100&&rawPosition.y>=0&&rawPosition.y<=100?rawPosition:{x:50,y:50};
-  const settings={...(ranking.settings as Record<string,unknown>),coverImagePath,coverImageUrl,coverPosition};
-  const {error}=await supabase.from("rankings").update({settings}).eq("id",rankingId).eq("user_id",user.id);
-  if(error)return jsonError(error.message,500);
-  const {error:revisionError}=await supabase.rpc("renqd_record_revision",{p_ranking_id:rankingId,p_change_summary:"Modifica copertina"});
-  if(revisionError){await supabase.from("rankings").update({settings:ranking.settings}).eq("id",rankingId).eq("user_id",user.id);return jsonError(revisionError.message,500);}
-  return NextResponse.json({ok:true});
+  const {data,error}=await supabase.rpc("renqd_update_saved_cover",{p_ranking_id:rankingId,p_cover_image_path:coverImagePath,p_cover_image_url:coverImageUrl,p_cover_position:coverPosition});
+  if(error)return jsonError(error.message,error.code==="42501"?403:error.code==="P0002"?404:error.code==="22023"?400:500);
+  const previousPath=typeof data?.previousCoverPath==="string"?data.previousCoverPath:null;
+  let warning:string|null=null;
+  if(previousPath&&previousPath!==coverImagePath){
+   const {error:storageError}=await supabase.storage.from("renq-covers").remove([previousPath]);
+   if(storageError)warning="Copertina aggiornata, ma il vecchio file non è stato rimosso. La pulizia resta da completare.";
+  }
+  return NextResponse.json({ok:true,version:data?.version,warning});
  }
  if(body.action==="repeat-battle"){
   const {rankingId}=body as {rankingId:string};
-  const {data:ranking,error:lookupError}=await supabase.from("rankings").select("id,status,mode,settings").eq("id",rankingId).eq("user_id",user.id).is("deleted_at",null).maybeSingle();
-  if(lookupError||!ranking||ranking.status!=="COMPLETED"||ranking.mode!=="BATTLE_RENQ")return jsonError("Battle Renq non trovato o non ripetibile.",404);
-  const {data:rows,error:rowsError}=await supabase.from("ranking_items").select("id,rank_position,tie_group_id").eq("ranking_id",rankingId);
-  if(rowsError||!rows)return jsonError(rowsError?.message??"Impossibile leggere gli elementi.",500);
-  const changed:string[]=[];
-  for(const row of rows){
-   const {error:updateError}=await supabase.from("ranking_items").update({rank_position:null,tie_group_id:null}).eq("id",row.id).eq("ranking_id",rankingId);
-   if(updateError){
-    for(const id of changed){const previous=rows.find(item=>item.id===id)!;await supabase.from("ranking_items").update({rank_position:previous.rank_position,tie_group_id:previous.tie_group_id}).eq("id",id).eq("ranking_id",rankingId);}
-    return jsonError(updateError.message,500);
-   }
-   changed.push(row.id);
-  }
-  const settings={...((ranking.settings??{}) as Record<string,unknown>)};
-  delete settings.savedAt;
-  delete settings.savedSnapshot;
-  const {error:updateRankingError}=await supabase.from("rankings").update({status:"DRAFT",started_at:null,completed_at:null,settings,updated_at:new Date().toISOString()}).eq("id",rankingId).eq("user_id",user.id);
-  if(updateRankingError){
-   for(const row of rows)await supabase.from("ranking_items").update({rank_position:row.rank_position,tie_group_id:row.tie_group_id}).eq("id",row.id).eq("ranking_id",rankingId);
-   return jsonError(updateRankingError.message,500);
-  }
-  return NextResponse.json({ok:true,repeated:true});
+  if(typeof rankingId!=="string"||! /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rankingId))return jsonError("Battle Renq non valido.");
+  const {data,error}=await supabase.rpc("renqd_repeat_battle",{p_ranking_id:rankingId});
+  if(error)return jsonError(error.message,error.code==="42501"?403:error.code==="P0002"?404:400);
+  return NextResponse.json(data??{ok:true,repeated:true});
  }
  if(body.action==="edit-saved-renq"){
   const {rankingId}=body as {rankingId:string};
@@ -285,8 +194,12 @@ export async function POST(request:Request){
   const coverPath=typeof settings.coverImagePath==="string"?settings.coverImagePath:null;
   const {error}=await supabase.rpc("renqd_permanently_delete_ranking",{p_ranking_id:rankingId});
   if(error)return jsonError(error.message,500);
-  if(coverPath)await supabase.storage.from("renq-covers").remove([coverPath]);
-  return NextResponse.json({ok:true,permanentlyDeleted:true});
+  let cleanupWarning: string | null = null;
+  if(coverPath){
+   const {error:storageError}=await supabase.storage.from("renq-covers").remove([coverPath]);
+   if(storageError)cleanupWarning="Renq eliminato, ma non è stato possibile rimuovere la copertina. La pulizia del file resta da completare.";
+  }
+  return NextResponse.json({ok:true,permanentlyDeleted:true,warning:cleanupWarning});
  }
  if(body.action==="cancel-renq"){
   const {rankingId}=body as {rankingId:string};const {data:ranking}=await supabase.from("rankings").select("id").eq("id",rankingId).eq("user_id",user.id).single();if(!ranking)return jsonError("Renq non trovato.",404);const {error}=await supabase.from("rankings").update({status:"CANCELLED"}).eq("id",rankingId);if(error)return jsonError(error.message,500);return NextResponse.json({ok:true});

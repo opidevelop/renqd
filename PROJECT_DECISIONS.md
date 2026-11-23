@@ -83,7 +83,7 @@
 5. Le azioni che possono essere eseguite senza cambiare pagina devono usare aggiornamenti AJAX e mantenere il contesto dell'utente.
 6. Le notifiche temporanee di successo/errore devono essere uniformi e comparire nella parte bassa dell'interfaccia.
 7. Lo scroll non deve portare contenuti o controlli sotto l'header fisso. La richiesta di gestione globale automatica della posizione di scroll dopo ogni aggiornamento AJAX è **in pausa**: non introdurre una logica globale senza riaprire la decisione.
-8. Il comando/pulsante «Torna a →» è stato segnalato come non funzionante; la relativa correzione è da verificare, non va considerata risolta per supposizione.
+8. Il comando/pulsante «Torna a →» è stato corretto e l’utente ne ha confermato la risoluzione il 23 novembre 2026. Non riaprire la modifica.
 9. Il campo «aggiungi elemento manualmente» deve restare nascosto finché non viene scelta una sottocategoria pertinente.
 10. Nelle azioni standard usare «Annulla» e un'azione di salvataggio evidenziata in arancione, coerente con la UI.
 11. Il primo posto deve avere un'evidenza arancione; i pari merito devono mostrare un badge coerente con la posizione effettiva in classifica.
@@ -125,12 +125,12 @@
 3. È disponibile una durata personalizzata inserita in minuti; accettare soltanto numeri interi.
 4. La modalità personalizzata deve restare selezionata quando si riapre/modifica una bozza con una durata non standard.
 5. Timed Rank deve supportare il riordino drag-and-drop.
-6. Non considerare risolto il drag-and-drop Timed finché non è stato verificato nel flusso reale.
+6. Drag-and-drop Timed: COMPLETATO il 23 novembre 2026. Implementazione `RenqSortableList` con pointer events e handle dedicato verificata nel codice e con build/type-check; la prova manuale su dispositivo fisico non è stata eseguita in questa sessione.
 
 ## 9. Selezione multipla e ordinamento
 
 1. Dove è disponibile il drag-and-drop, deve essere disponibile anche la selezione multipla con **Ctrl** (e il corrispondente modificatore su Mac).
-2. La selezione multipla deve essere considerata anche su dispositivi mobili: non limitare la funzionalità alla tastiera desktop; definire e verificare un'interazione touch chiara.
+2. Selezione multipla mobile: COMPLETATA il 23 novembre 2026. Checkbox con target 22px mobile/20px desktop e `touch-action: manipulation`; verificata nel codice e nei controlli di build/type-check, senza prova manuale su dispositivo fisico in questa sessione.
 3. In «I miei Renq», l'ordinamento predefinito è dal più recente al meno recente.
 4. Sono disponibili anche:
    - dal meno recente al più recente;

@@ -179,15 +179,41 @@ const handler = withSupabase({ auth: "user" }, async (req, ctx) => {
       return fail("Il nome utente digitato non corrisponde. Controlla e riprova.");
     }
 
-    const { count: activeOwners, error: ownersError } = await supabaseAdmin
-      .from("profiles")
-      .select("id", { count: "exact", head: true })
-      .eq("role", "OWNER")
-      .eq("status", "APPROVED");
+    const lockToken = crypto.randomUUID();
+    const { data: claimData, error: claimError } = await supabaseAdmin.rpc(
+      "renqd_claim_admin_account_deletion",
+      {
+        p_actor_id: actorId,
+        p_target_user_id: targetUserId,
+        p_lock_token: lockToken,
+      },
+    );
 
-    if (ownersError) return fail("Impossibile verificare la protezione dell'ultimo OWNER.", 500);
-    if (target.role === "OWNER" && target.status === "APPROVED" && (activeOwners ?? 0) <= 1) {
-      return fail("Non è possibile eliminare l'ultimo OWNER attivo.", 403);
+    if (claimError) {
+      return fail("Impossibile verificare la protezione dell'ultimo OWNER.", 500);
+    }
+
+    const claim = claimData as { ok?: boolean; error_code?: string } | null;
+    if (!claim?.ok) {
+      const errorCode = claim?.error_code;
+      const message =
+        errorCode === "last_owner"
+          ? "Non è possibile eliminare l'ultimo OWNER attivo."
+          : errorCode === "deletion_in_progress"
+            ? "È già in corso un'altra eliminazione account. Riprova tra poco."
+            : errorCode === "forbidden"
+              ? "Solo un OWNER approvato può eliminare definitivamente gli account."
+              : errorCode === "self_delete"
+                ? "Non puoi eliminare il tuo stesso account."
+                : errorCode === "target_not_found"
+                  ? "Account non trovato."
+                  : "Non è stato possibile autorizzare l'eliminazione.";
+      const status =
+        errorCode === "deletion_in_progress" ? 409
+          : errorCode === "target_not_found" ? 404
+            : errorCode === "forbidden" || errorCode === "self_delete" || errorCode === "last_owner" ? 403
+              : 400;
+      return fail(message, status);
     }
 
     try {
@@ -235,6 +261,14 @@ const handler = withSupabase({ auth: "user" }, async (req, ctx) => {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Eliminazione non completata. Riprova.";
       return fail(message, 500);
+    } finally {
+      const { error: releaseError } = await supabaseAdmin.rpc(
+        "renqd_release_admin_account_deletion",
+        { p_lock_token: lockToken },
+      );
+      if (releaseError) {
+        console.error("Renqd account deletion lock could not be released; the lease will expire automatically.");
+      }
     }
   });
 

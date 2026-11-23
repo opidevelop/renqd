@@ -24,6 +24,7 @@ export function RenqTrashBrowser({ initialItems }: { initialItems: TrashItem[] }
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error ?? "Operazione non riuscita.");
+    return typeof result.warning === "string" ? result.warning : null;
   }
 
   async function action(item: TrashItem, actionName: TrashAction) {
@@ -31,9 +32,9 @@ export function RenqTrashBrowser({ initialItems }: { initialItems: TrashItem[] }
     if (actionName === "permanently-delete-renq" && !(await confirm({title:"Eliminare definitivamente il Renq?",description:"Il Renq e tutti i dati collegati verranno eliminati. Questa operazione non può essere annullata.",confirmLabel:"Elimina definitivamente",tone:"danger"}))) return;
     setBusyId(item.id); setError(""); setMessage("");
     try {
-      await runAction(item, actionName);
+      const warning = await runAction(item, actionName);
       setItems(current => current.filter(row => row.id !== item.id));
-      setMessage(actionName === "restore-renq" ? "Renq ripristinato." : "Renq eliminato definitivamente.");
+      setMessage(warning ?? (actionName === "restore-renq" ? "Renq ripristinato." : "Renq eliminato definitivamente."));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Operazione non riuscita.");
     } finally { setBusyId(null); }
@@ -45,9 +46,11 @@ export function RenqTrashBrowser({ initialItems }: { initialItems: TrashItem[] }
     setBusyAll(true); setError(""); setMessage("");
     const completed = new Set<string>();
     const failures: string[] = [];
+    const warnings: string[] = [];
     for (const item of items) {
       try {
-        await runAction(item, actionName);
+        const warning = await runAction(item, actionName);
+        if (warning) warnings.push(item.title + ": " + warning);
         completed.add(item.id);
       } catch (cause) {
         failures.push(item.title + ": " + (cause instanceof Error ? cause.message : "operazione non riuscita"));
@@ -56,6 +59,8 @@ export function RenqTrashBrowser({ initialItems }: { initialItems: TrashItem[] }
     setItems(current => current.filter(item => !completed.has(item.id)));
     if (failures.length) {
       setError("Operazione completata solo in parte. " + failures.slice(0, 3).join(" · ") + (failures.length > 3 ? " · e altri " + (failures.length - 3) : ""));
+    } else if (warnings.length) {
+      setMessage(warnings.slice(0, 2).join(" · ") + (warnings.length > 2 ? " · e altri " + (warnings.length - 2) : ""));
     } else {
       setMessage(actionName === "restore-renq" ? "Tutti i Renq sono stati ripristinati." : "Cestino svuotato.");
     }

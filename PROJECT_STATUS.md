@@ -4,10 +4,10 @@
 >
 > Per le decisioni vincolanti consultare prima `PROJECT_DECISIONS.md`. Se questo documento descrive uno stato tecnico che contraddice una decisione, prevale `PROJECT_DECISIONS.md`.
 >
-> **Aggiornato:** 19 novembre 2026  
+> **Aggiornato:** 23 novembre 2026
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `449a4f787a33239e4f0551a49d4c73dad91f0f05`
+> **Ultimo commit applicativo analizzato su main:** `162f3749f65ebc55f2ac32c13db083f9af0c1be6`
 
 ## 1. Sintesi esecutiva
 
@@ -15,9 +15,9 @@
 - Il lavoro viene svolto esclusivamente su `main`.
 - Renqd è una piattaforma chiusa: le pagine e i contenuti interni richiedono autenticazione e approvazione quando prevista.
 - Le fasi di amministrazione, lifecycle dei dati, motore Renq e profilo/cataloghi/collezioni hanno ricevuto implementazioni sostanziali. La verifica funzionale end-to-end complessiva è ancora da eseguire.
-- GitHub Actions Code quality: run #199 sul commit `30f04b7f6a6ef003cac6837feab81293a011c48e` completato con esito `success` per TypeScript, ESLint e Production Build. I run precedenti #192–#198 includevano errori intermedi poi corretti; fanno fede i risultati del run #199 sul commit corrente.
-- **Produzione Vercel:** l'ultimo deployment Production `READY` resta il commit `7ffa974dc88d3af65a96e000843157751af142da`. Le modifiche successive su `main` non sono state pubblicate; i deploy automatici intermedi sono stati annullati per mantenere un unico rilascio cumulativo. Il collaudo funzionale end-to-end resta da completare.
-- Supabase live e `supabase/migrations` sono riallineati a 64 migrazioni. Le migrazioni più recenti per Appunti, Follow e DM sono applicate al database live e presenti nel repository. Restano warning generici dei Security/Performance Advisors da analizzare separatamente.
+- Verifiche locali aggiornate al 23 novembre: TypeScript, ESLint e Production Build superati sul commit pubblicato e ripetuti dopo l'hardening della cancellazione account. ESLint mantiene warning preesistenti non bloccanti; la Edge Function è stata verificata anche con `deno check`.
+- **Produzione Vercel:** `renqd.app` è associato al deployment Production `READY` del commit `162f3749f65ebc55f2ac32c13db083f9af0c1be6` (23 novembre 2026). Non è stato creato un ulteriore deployment Vercel durante l'audit. Il collaudo funzionale end-to-end resta da completare.
+- Supabase live e `supabase/migrations` sono riallineati fino alla migrazione `20261123105438_renqd_admin_account_deletion_guard`. Le nuove RPC di protezione cancellazione sono riservate a `service_role`. Restano warning preesistenti dei Security Advisors da verificare per singola funzione; il nuovo guard RLS senza policy è intenzionale perché non è esposto agli utenti autenticati.
 
 ## 2. Stack e servizi
 
@@ -55,7 +55,7 @@ Prima correzione implementata nel repository:
 Rilievi di codice da correggere:
 - admin_manage_user consente attualmente ad ADMIN di sospendere/riattivare altri ADMIN: controllo da restringere anche nella RPC/database, non solo nel frontend;
 - il flusso di moderazione Renq è implementato su `main`; la migrazione Supabase è stata applicata e le policy RLS sono state verificate strutturalmente;
-- manca una procedura server-side di cancellazione account completa, transazionale e protetta dall'eliminazione dell'ultimo OWNER.
+- La cancellazione definitiva account è implementata in `supabase/functions/admin-delete-user/index.ts`, attiva su Supabase (versione 3) e richiamata dalla dashboard OWNER. L'audit del 23 novembre ha aggiunto un lock server-side con lease per impedire richieste concorrenti che potrebbero eliminare simultaneamente due OWNER. La migrazione è applicata al database live; la nuova versione della Edge Function è nel working tree e va distribuita nel rilascio cumulativo finale. Non sono stati eliminati account reali durante i test.
 
 Le correzioni amministrative e la console di moderazione sono presenti nel repository; le migrazioni di gerarchia ruoli, moderazione, reporting e hardening sono applicate al database live. I flussi non sono ancora stati collaudati end-to-end. La cancellazione completa degli account resta da implementare: richiede prima una verifica di tutte le FK, dei file Storage e delle dipendenze Auth; non eseguire cancellazioni reali durante i test.
 
@@ -140,8 +140,8 @@ Requisiti approvati da verificare end-to-end:
 - Battle modificabile senza ripetere i confronti, con funzione separata per ripetere la Battle;
 - ritorno alla scelta precedente fino alla conferma finale;
 - Speed con 30/60/90 secondi, predefinito 60 e durata personalizzata in minuti;
-- Timed Rank con drag-and-drop;
-- selezione multipla Ctrl/Cmd e supporto touch;
+- Timed Rank con drag-and-drop: COMPLETATO (RenqSortableList, pointer events e handle dedicato; codice/build verificati).
+- selezione multipla Ctrl/Cmd e supporto touch: COMPLETATA (target 22px mobile, 20px desktop; touch-action: manipulation).
 - audio preview mutuamente esclusivo;
 - Reveal aggiornato senza rendere visibile ai lettori uno storico Reveal;
 - medaglie coerenti in tutte le viste.
@@ -179,9 +179,9 @@ Aree da completare/verificare:
 - feedback AJAX uniformi e aggiornamenti senza refresh;
 - audio preview globale;
 - coerenza di medaglie e Reveal;
-- drag-and-drop Timed;
-- selezione multipla Ctrl/Cmd e interazione touch;
-- «Torna a →»;
+- drag-and-drop Timed: COMPLETATO (implementazione verificata nel codice e build).
+- selezione multipla Ctrl/Cmd e interazione touch: COMPLETATA (target mobile aumentati e CSS touch).
+- «Torna a →»: RISOLTO e confermato dall’utente il 23/11/2026.
 - modifica delle cartelle/collezioni e membership;
 - cestino completo e ripristino nella posizione originaria;
 - flusso completo di creazione, completamento, pubblicazione e modifica;
@@ -1180,3 +1180,119 @@ Revisione della migrazione di hardening:
 - CI/build: da verificare sul commit risultante.
 - Test visivo autenticato desktop/mobile e verifica favicon in browser: da eseguire nel collaudo finale.
 - Nessun deployment Production eseguito.
+
+
+## 2026-11-23 — Audit e hardening della cancellazione account
+
+- Verificata la discrepanza tra documentazione e codice: il flusso di eliminazione account era già presente in `app/(platform)/admin/actions.ts`, `components/delete-account-button.tsx` e `supabase/functions/admin-delete-user/index.ts`; la Edge Function `admin-delete-user` risulta attiva su Supabase, versione 3.
+- Verificate le foreign key verso `auth.users`: i dati proprietari principali usano `ON DELETE CASCADE`; i riferimenti di audit che devono sopravvivere usano `ON DELETE SET NULL`. La funzione preserva gli elementi personalizzati riutilizzati da altri Renq scollegando `ranking_items.custom_item_id` prima della cancellazione.
+- Verificato lo Storage live: tutti gli oggetti presenti nei bucket `profile-media` e `renq-covers` seguono il prefisso della cartella dell'utente proprietario; la funzione li rimuove tramite Storage API, senza cancellare direttamente righe da `storage.objects`.
+- Rilevato un rischio di concorrenza nella protezione dell'ultimo OWNER: due richieste simultanee potevano leggere lo stesso conteggio prima che una cancellazione fosse completata.
+- Aggiunta e applicata al database la migrazione `20261123105438_renqd_admin_account_deletion_guard.sql`. Crea una riga di lock singleton con lease di 10 minuti e due RPC non eseguibili da `anon` o `authenticated`: `renqd_claim_admin_account_deletion` e `renqd_release_admin_account_deletion`. Il lock serializza le cancellazioni e scade automaticamente in caso di interruzione della Edge Function.
+- Aggiornata localmente la Edge Function per acquisire il lock prima delle operazioni distruttive e rilasciarlo in `finally`; la distribuzione della nuova versione resta rinviata al rilascio cumulativo finale.
+- Test SQL non distruttivo superato: prima acquisizione consentita, seconda acquisizione concorrente rifiutata, rilascio riuscito. Verificato che il lock live sia nuovamente libero.
+- Il database live ha un solo OWNER approvato: non è stato eseguito alcun test di cancellazione reale e l'account OWNER non è stato toccato.
+- Verifiche locali sul working tree: `deno check` Edge Function, `npx tsc --noEmit`, `npm run lint`, `npm run build` e `git diff --check` completati senza errori bloccanti. ESLint segnala warning preesistenti in altri file.
+- Security Advisor: le nuove RPC di lock non risultano tra le funzioni SECURITY DEFINER eseguibili da `authenticated`. Il finding RLS senza policy sulla tabella di lock è intenzionale: la tabella è accessibile soltanto al backend privilegiato. Restano da analizzare separatamente i finding preesistenti.
+- Nessun deployment Vercel è stato creato durante questo intervento; la nuova Edge Function e le modifiche applicative restano da includere nel rilascio cumulativo concordato.
+
+
+## 2026-11-23 — Audit Fase 3: Cestino, cancellazione e revisioni
+
+### Cestino e ripristino — verifica sul database Production
+- Le RPC `renqd_soft_delete_ranking` e `renqd_restore_ranking` richiedono una sessione autenticata e un account approvato; operano esclusivamente sul Renq del proprietario e non consentono di spostare/ripristinare contenuti nascosti dalla moderazione.
+- Il soft delete modifica `deleted_at`/`deleted_by` senza cancellare il Renq, i suoi elementi, le revisioni o le associazioni alle collezioni. Il ripristino azzera i campi di eliminazione e conserva `created_at` e `profile_collection_items.position`: la collocazione originaria non viene ricostruita da zero, ma resta intatta.
+- Le query del Cestino sono limitate ai contenuti eliminati dall'utente e ordinano per `deleted_at` decrescente.
+
+### Eliminazione definitiva e relazioni
+- La RPC `renqd_permanently_delete_ranking` blocca la riga con `FOR UPDATE` e verifica proprietario, stato nel cestino, `deleted_by` e assenza di moderazione prima del `DELETE`.
+- Verificate su Production le FK: elementi, revisioni, attività, sessioni Battle/Speed, commenti, like, messaggi, multiplayer, partecipanti, risultati, proposte e voci delle collezioni hanno cancellazione `CASCADE`; i log di moderazione conservano la traccia con `ranking_id` a `NULL`. I riferimenti agli elementi catalogo/custom usano `RESTRICT`, ma gli elementi del Renq vengono eliminati in cascata nella stessa transazione prima che restino riferimenti orfani.
+- La RPC elimina inoltre gli elementi custom non riutilizzabili del proprietario che, dopo la cancellazione, non sono più referenziati.
+- Individuato e corretto un difetto applicativo: l'errore di rimozione della copertina da Storage veniva ignorato. Ora l'API segnala un avviso esplicito dopo che il Renq è stato eliminato; l'interfaccia rimuove correttamente la riga già eliminata e mostra l'avviso anche nelle operazioni multiple.
+
+### Revisioni
+- `renqd_record_revision` acquisisce un lock sulla riga del Renq prima di calcolare la versione successiva; l'indice univoco `(ranking_id, version)` protegge da duplicazioni. Lo snapshot contiene dati del Renq, elementi, custom item e catalog entity associati.
+- La cronologia attualmente espone versione, descrizione e data; non esiste una RPC o un'azione UI per ripristinare una revisione. Non risulta una decisione di prodotto che richieda il ripristino delle revisioni: resta una possibile estensione da confermare, distinta dal Cestino.
+
+### Verifiche e limiti
+- Verifiche sul database Production eseguite in sola lettura (definizioni RPC, colonne, FK, indici e policy RLS); nessun Renq o account reale è stato eliminato o modificato durante l'audit.
+- `npm run lint`: superato (restano warning preesistenti); `npx tsc --noEmit`: superato; `npm run build`: superato; `git diff --check`: da ricontrollare dopo questa annotazione.
+- Corretto anche il lint error React preesistente in `PageTransition`: lo stato del loader è ora derivato dal percorso stabilizzato, evitando `setState` sincrono nell'effect.
+- Nessun commit/push GitHub, nessun deploy Vercel e nessuna nuova migrazione Supabase in questa fase. Il lavoro resta nel named sandbox `renqd-phase3` in attesa del rilascio cumulativo.
+
+
+## 2026-11-23 — Hardening transazioni, dipendenze e audit configurazione
+
+### Integrità transazionale dei Renq
+- Aggiunta la migrazione locale 20261123140000_renqd_atomic_published_battle_operations.sql, non applicata a Supabase Production.
+- renqd_update_published_ranking: blocca la riga del Renq, verifica proprietà, stato, completezza e unicità degli ID, registra la revisione precedente e aggiorna in un'unica transazione titolo, posizioni, gruppi di pari merito e snapshot.
+- renqd_record_battle_choice_and_finalize: esegue l'ultima scelta Battle, calcola gruppi/posizioni e finalizza la classifica nella stessa transazione; se la finalizzazione fallisce, viene annullata anche l'ultima scelta.
+- renqd_update_saved_cover: registra la revisione precedente e aggiorna copertina e posizione in modo atomico; restituisce il vecchio percorso Storage per la pulizia successiva.
+- renqd_repeat_battle: verifica proprietà, modalità e stato e richiama il riavvio transazionale già esistente.
+- Rafforzata renqd_save_ranking_snapshot: prima del salvataggio verifica che lo snapshot contenga esattamente gli elementi correnti e che posizioni, punteggi e gruppi coincidano con il database.
+- Aggiornata app/api/rankings/route.ts per usare le nuove RPC nelle modifiche pubblicate, nelle scelte Battle, nella copertina e nella ripetizione Battle.
+- La rimozione di vecchie copertine e delle copertine eliminate definitivamente ora produce un avviso visibile in caso di errore Storage; il Cestino conserva il risultato corretto dell'eliminazione anche quando resta una pulizia file da completare.
+
+### Sicurezza e dipendenze
+- Aggiornati next ed eslint-config-next a 16.4.6.
+- Applicati gli aggiornamenti compatibili tramite npm audit fix e override mirato minimatch@3.1.5 → brace-expansion@^1.1.21.
+- Audit npm finale: 0 vulnerabilità critiche, 0 alte, 4 moderate. Le residue appartengono alla catena dev-only shadcn / ts-morph / minimatch; la correzione proposta richiede un major update di shadcn a 1.0.0, non applicato per evitare una modifica non compatibile non verificata agli strumenti di sviluppo.
+- Audit Supabase: 62 funzioni SECURITY DEFINER eseguibili da authenticated; 0 eseguibili da anon, 0 senza search_path fissato, 0 senza riferimento a auth.uid(). Le 7 funzioni che non corrispondono al controllo testuale generico applicano comunque controlli espliciti su profilo approvato/ruolo (OWNER, ADMIN o MODERATOR).
+- Le 13 tabelle segnalate da RLS senza policy non concedono SELECT a anon o authenticated; accesso riservato a service_role.
+
+### CAPTCHA, email e DNS
+- Verificato nel codice il componente Turnstile e il passaggio del token a Supabase Auth per login, registrazione e recupero password.
+- La variabile pubblica NEXT_PUBLIC_TURNSTILE_SITE_KEY risulta presente in Vercel Production. La configurazione CAPTCHA effettiva nelle impostazioni remote di Supabase Auth non è leggibile tramite i connettori disponibili e resta da verificare nel pannello Supabase; nessuna Secret Key è stata letta o spostata.
+- RESEND_API_KEY e RENQD_EMAIL_FROM risultano presenti nell'ambiente Production Vercel; non è stata effettuata una spedizione di prova.
+- DNS pubblico attuale: rsend.renqd.app risolve a rsend-euw1.forge.rmta.net; send.renqd.app risolve a send.forge.rmta.net. Nessun record DNS è stato modificato. Lo stato di verifica del dominio nel pannello Resend e il confronto con i record account-specifici restano da confermare.
+
+### Interazione e navigazione
+- La modalità Speed/Timed utilizza già RenqSortableList con drag handle e pointer handlers; le caselle di selezione multipla sono state ingrandite (20 px desktop, 22 px mobile) e rese touch-friendly.
+- Il drag-and-drop non è dichiarato collaudato: manca ancora una prova end-to-end reale su dispositivo touch e sul flusso completo.
+- Il comando «Torna a →» non è stato modificato: la richiesta storica non identifica la schermata di origine/destinazione e nel codice esistono più azioni di ritorno distinte. Serve indicare la schermata precisa per evitare di cambiare la navigazione sbagliata.
+
+### Verifiche e confini del rilascio
+- npm run lint: superato con warning preesistenti, soprattutto uso di img non ottimizzati.
+- npx tsc --noEmit: superato.
+- npm run build: superato.
+- deno check --node-modules-dir=auto supabase/functions/admin-delete-user/index.ts: superato.
+- Migrazione atomica validata in una transazione BEGIN/ROLLBACK; nessuna funzione della nuova migrazione è stata lasciata installata su Production.
+- Nessun account o Renq reale eliminato o modificato durante i test.
+- Nessun commit, push, branch develop, deployment Preview/Staging o deployment Production. Il codice e le migrazioni non applicate restano nel named sandbox renqd-phase3-recover in attesa della revisione e dell'autorizzazione esplicita al rilascio.
+
+- Ulteriore avviso Supabase Security Advisor: auth_leaked_password_protection è disabilitato. È una configurazione di Supabase Auth (disponibile sui piani Pro e superiori) e non è modificabile tramite le azioni del connettore disponibili; resta da abilitare e verificare nel pannello Auth Settings.
+- La Production Vercel resta sul deployment READY dpl_2ttceyTg9gj1iV5zwR2q2jFtLbsR, commit 162f3749f65ebc55f2ac32c13db083f9af0c1be6. La Edge Function admin-delete-user è ancora alla versione Production 3; la hardening locale non è stata distribuita.
+- La nota di recupero allegata menziona un branch develop, ma le decisioni più recenti del progetto impongono il flusso main-only senza Preview/Staging: nessun branch develop è stato creato.
+
+
+## Aggiornamento attività aperte — 23 novembre 2026
+
+### Attività precedentemente aperte, ora chiuse
+- «Torna a →»: RISOLTO. L'utente ha confermato il 23/11/2026 che il comportamento è già stato corretto. Nessun nuovo intervento sul pulsante.
+- Timed Rank — drag-and-drop: COMPLETATO. La lista utilizza RenqSortableList con pointer events e handle dedicato; l'interazione è stata ricontrollata nel codice.
+- Selezione multipla mobile: COMPLETATA. I target checkbox sono 22px su mobile (20px desktop) con touch-action: manipulation; resta parte dei test generali di regressione.
+
+### Richieste del 23 novembre — stato implementazione
+- Menu notifiche: IMPLEMENTATO — ultime quattro notifiche, badge delle non lette e toast in basso a destra, con aggiornamento Realtime.
+- Restyling Attività, Dashboard e Landing: IMPLEMENTATO — palette avorio/arancione, tipografia scura, superfici morbide; sidebar invariata.
+- Loading: IMPLEMENTATO — pittogramma R fermo, stellina animata e serpentina ridimensionata.
+- Valore massimo sentinella Grade: IMPLEMENTATO — campo mostra * e conserva il valore numerico interno.
+- Multiplayer: IMPLEMENTATO NEL CODICE — copertina dinamica già presente nella lobby; conferma individuale del Reveal, sblocco sincronizzato, presentazione animata tramite RenqReveal, piazzamenti con nomi/foto e media aritmetica Grade.
+- Home: IMPLEMENTATO — sezione «Riprendi Renq» per bozze recuperabili.
+- Creazione: IMPLEMENTATO — riepilogo dell’album selezionato mantenuto visibile nel passaggio dallo step 3 allo step 4.
+- Dado 3D: NON INDIVIDUATO nel codice sorgente attuale (ricerca su termini dice/dado/cube/Three.js/rotazioni 3D). Nessun componente da rimuovere in questo repository; non dichiarato rimosso.
+- Pulsante + mobile: IMPLEMENTATO — area centrale del Crea resa più leggibile e stabile nella barra mobile; controlli di aggiunta con target touch minimo 44px.
+
+### Stato rilascio
+Tutte le modifiche restano locali nel sandbox sul branch main. Nessun commit, push, deploy, applicazione di nuove migrazioni o modifica alla Production senza autorizzazione esplicita dell'utente.
+
+### Verifica tecnica e confini Production — 23 novembre 2026
+- `npm run lint`: superato (warning preesistenti, nessun errore).
+- `npx tsc --noEmit`: superato.
+- `npm run build`: superato.
+- `git diff --check`: superato.
+- Non sono stati eseguiti test browser end-to-end con account reali né test fisici su smartphone; le verifiche precedenti su Timed Rank e selezione touch sono di codice/build.
+- Migrazioni già presenti in Supabase Production e confermate: `20261123094548` (Reveal sincronizzato), `20261123094550` (guardrail Reveal), `20261123105438` (protezione cancellazione account).
+- Migrazione atomica `20261123140000_renqd_atomic_published_battle_operations.sql`: presente nel repository locale, NON applicata a Production.
+- Hardening locale di `supabase/functions/admin-delete-user/index.ts`: NON distribuito; la versione Production resta quella precedente.
+- Nessun commit, push o deployment Vercel effettuato. Il rilascio cumulativo resta in attesa della conferma esplicita dell'utente.
