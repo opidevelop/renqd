@@ -1,5 +1,5 @@
 "use client";
-import {useState} from "react";
+import {useEffect,useState} from "react";
 import Link from "next/link";
 import {Users,X,UserRound,ArrowUpRight} from "lucide-react";
 type FollowProfile={userId:string;username:string|null;displayName:string;avatarUrl:string|null};
@@ -7,6 +7,7 @@ export function ProfileFollowLists({followerCount,followingCount,followers,follo
  const[open,setOpen]=useState<"followers"|"following"|null>(null);
  const entries=open==="followers"?followers:following;
  const title=open==="followers"?"I tuoi follower":"I profili che segui";
+ useEffect(()=>{if(!open)return;const previous=document.body.style.overflow;document.body.style.overflow="hidden";return()=>{document.body.style.overflow=previous;};},[open]);
  return <div className="profile-follow-lists">
   <button type="button" onClick={()=>setOpen("followers")}><Users size={14}/><strong>{followerCount}</strong> Follower</button>
   <button type="button" onClick={()=>setOpen("following")}><UserRound size={14}/><strong>{followingCount}</strong> Seguiti</button>
