@@ -179,3 +179,5 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 .multiplayer-open-ranking:disabled,.multiplayer-mark-incomplete:disabled{opacity:.45;cursor:not-allowed}
 .multiplayer-ready-actions .multiplayer-decision{flex-basis:100%;margin-top:3px}
 @media(max-width:680px){.multiplayer-ready-actions{display:grid;grid-template-columns:1fr 1fr}.multiplayer-ready-actions .multiplayer-decision{grid-column:1/-1}}
+
+.platform-topbar{position:sticky!important;top:0!important;z-index:40!important}
