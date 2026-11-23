@@ -24,6 +24,7 @@ type SavedItem = {
 };
 type CommentItem = { id: string; body: string; created_at: string; author_id: string };
 type RevisionItem = { id: string; version: number; change_summary: string | null; created_at: string };
+type MultiplayerComparisonParticipant={userId:string;username:string;displayName:string;avatarUrl:string|null;placements:Record<string,{rankPosition:number|null;score:number|null}>};
 type Props = {
   ranking: { id: string; public_slug?: string; title: string; mode: string; settings: Record<string, unknown>; created_at: string; visibility?: string; allow_ties: boolean; started_at?: string | null; completed_at?: string | null };
   items: SavedItem[];
@@ -37,13 +38,14 @@ type Props = {
   likeCount: number;
   revisions: RevisionItem[];
   isMultiplayer?: boolean;
+  multiplayerComparison?:MultiplayerComparisonParticipant[];
 };
 
 const modeLabels: Record<string, string> = { RENQ: "Renq", BATTLE_RENQ: "Battle Renq", SPEED_RENQ: "Speed Renq", GRADE: "Grade" };
 type GradeConfig={criterion:"score"|"position";labels:{name:string;min:number;max:number;color:string}[]};
 function gradeLabelFor(score:number| null|undefined,position:number,config:GradeConfig){if(score===null||score===undefined)return null;const value=config.criterion==="score"?score:position;return config.labels.find(label=>label.name.trim()&&value>=label.min&&value<=label.max)??null;}
 
-export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, coverPosition: initialCoverPosition, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount, revisions, isMultiplayer=false }: Props) {
+export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, coverPosition: initialCoverPosition, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount, revisions, isMultiplayer=false, multiplayerComparison=[] }: Props) {
   const router = useRouter();
   const { confirm, dialog } = useConfirmDialog();
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -56,7 +58,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const [currentCoverPath, setCurrentCoverPath] = useState(coverImagePath);
   const [currentCoverPosition, setCurrentCoverPosition] = useState(initialCoverPosition);
   const [coverEditorOpen, setCoverEditorOpen] = useState(false);
-  const [showReveal, setShowReveal] = useState(false);
+  const [showReveal, setShowReveal] = useState(isMultiplayer);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -278,7 +280,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
   const sortableEditItems=editItems.map((item,index)=>({...item,title_snapshot:item.title,sort_order:index,image_url:item.image_url??null,description:item.description??null,rank_position:item.rank_position??null,preview_url:item.metadata?.previewUrl??null}));
   const editPositions=getRenqRankPositions(sortableEditItems,editTieMap);
 
-  if (showReveal) return <div className="saved-renq-page saved-renq-reveal-page"><button className="saved-renq-back" type="button" onClick={() => setShowReveal(false)}><ArrowLeft size={17}/> Torna alla classifica</button><RenqReveal title={currentTitle} mode={ranking.mode} category={String(settings.category ?? "custom")} contentType={contentType} coverImageUrl={rawCover} coverPosition={currentCoverPosition} allowTies={displayItems.some(item => Boolean(item.tie_group_id))} gradeAverage={currentGradeAverage} items={displayItems.map(item => {const position=item.rank_position??0;const label=ranking.mode==="GRADE"&&item.score!==null&&item.score!==undefined?gradeLabelFor(Number(item.score),position,(settings.gradeConfig as GradeConfig|undefined)??{criterion:"score",labels:[]}):null;return {id:item.id,title:item.title,image_url:item.image_url??null,description:item.description??null,rank_position:item.rank_position??null,tie_group_id:item.tie_group_id??null,preview_url:item.metadata?.previewUrl??null,score:item.score??null,gradeLabel:label?.name??null,gradeColor:label?.color??null};})} actions={<button type="button" className="renq-save-button" onClick={() => setShowReveal(false)}>Torna alla classifica</button>} /></div>;
+  if (showReveal) return <div className="saved-renq-page saved-renq-reveal-page"><button className="saved-renq-back" type="button" onClick={() => setShowReveal(false)}><ArrowLeft size={17}/> Torna alla classifica</button><RenqReveal title={currentTitle} mode={ranking.mode} category={String(settings.category ?? "custom")} contentType={contentType} coverImageUrl={rawCover} coverPosition={currentCoverPosition} allowTies={displayItems.some(item => Boolean(item.tie_group_id))} gradeAverage={currentGradeAverage} participantPlacements={multiplayerComparison} items={displayItems.map(item => {const position=item.rank_position??0;const label=ranking.mode==="GRADE"&&item.score!==null&&item.score!==undefined?gradeLabelFor(Number(item.score),position,(settings.gradeConfig as GradeConfig|undefined)??{criterion:"score",labels:[]}):null;return {id:item.id,title:item.title,image_url:item.image_url??null,description:item.description??null,rank_position:item.rank_position??null,tie_group_id:item.tie_group_id??null,preview_url:item.metadata?.previewUrl??null,score:item.score??null,gradeLabel:label?.name??null,gradeColor:label?.color??null};})} actions={<button type="button" className="renq-save-button" onClick={() => setShowReveal(false)}>Torna alla classifica</button>} /></div>;
 
   return (
     <main className="saved-renq-page">
