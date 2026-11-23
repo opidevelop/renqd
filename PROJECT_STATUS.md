@@ -1398,5 +1398,6 @@ The three existing Battle depths are implemented in `components/renq-experience.
 
 ### Release
 - User explicitly authorized deployment to Production from `main` on 23 November 2026.
-- The commit is being published directly to `main`; the existing GitHub-to-Vercel integration automatically deploys pushes to the production branch. Record the final commit and Vercel deployment ID/status after the push completes.
+- Commit `8f95a3c8fac1d4f317a608b04905cf46f6ac4322` (`fix(ui): restore Renqd notifications and card layouts`) was published directly to `main`.
+- Vercel Production deployment `dpl_GNPTXK2eRcRum53PLLFR99EdFteq` completed successfully with state `READY`; aliases include `https://renqd.app`, `https://renqd.vercel.app` and `https://www.renqd.app`.
 - No database migration, Supabase configuration change, role/permission change or external-service mutation is part of this batch.
