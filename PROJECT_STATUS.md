@@ -1368,3 +1368,11 @@ The three existing Battle depths are implemented in `components/renq-experience.
 - The sandbox initially contained unrelated untracked generated artifacts `deno.lock` and `supabase/.temp/`; do not include them in the release commit.
 - No GitHub push/commit, Vercel deployment, database migration, Supabase change or external-service action was performed.
 - The GitHub-to-Vercel integration automatically creates a Production deployment when changes are pushed to `main`. Do not push or deploy until the user explicitly authorizes the final release. Build readiness is established; manual E2E and the user's release authorization remain outstanding.
+
+### Production release completed — 2026-11-23
+- User explicitly authorized deployment to Production from `main`.
+- Code commit `672354d429cd7e61ab03bfb82538999e2226c568` (`Polish Renqd home profile admin and brand identity`) was pushed to `origin/main`.
+- Vercel Production deployment `dpl_2ob7i2kbCZ72H8TSwTsNRZzR585e` completed with state `READY`.
+- Production aliases assigned by Vercel include `https://renqd.app`, `https://renqd.vercel.app`, and `https://www.renqd.app`.
+- Smoke check: `https://renqd.app` returned HTTP 200; `/home` resolved to the authenticated login surface when fetched without a user session. Interactive verification must be performed by the user in their authenticated browser.
+- No Supabase/database migration or schema change was included in this release.
