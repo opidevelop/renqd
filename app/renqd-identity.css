@@ -264,7 +264,7 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
  .renqd-wheel-desktop-icon{display:block!important;color:var(--renqd-orange)!important}
  .renqd-wheel-mobile-emoji{display:none!important}
 }
-.platform-sidebar-brand img{width:104px!important;height:104px!important;object-fit:contain!important}
+.platform-sidebar-brand img{width:64px!important;height:78px!important;object-fit:contain!important}
 .home-resume-section{padding:26px 28px!important;border:1px solid var(--renqd-line)!important;border-radius:24px!important;background:linear-gradient(120deg,rgba(255,249,242,.96),rgba(255,255,255,.72))!important;box-shadow:var(--renqd-shadow)!important}
 .home-resume-section .section-heading-row{align-items:center!important;margin-bottom:17px!important}
 .home-resume-section .section-heading-row h2{margin:7px 0 0!important;font-size:clamp(25px,3vw,34px)!important;letter-spacing:-1.3px!important}
