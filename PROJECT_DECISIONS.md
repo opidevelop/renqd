@@ -449,3 +449,23 @@ La decisione non modifica le specifiche funzionali già approvate per multiplaye
 - Home, Explore and Activity follow the canonical docs/design/renqd-visual-reference.jpg direction while preserving existing data and interaction behavior.
 - The multiplayer session card uses the same Renq cover image and cover positioning as the associated ranking.
 - Battle algorithm changes are not approved yet. First provide a technical explanation of the three existing depth strategies and final ranking calculation, with examples; await a separate user decision before changing their behavior.
+
+## 2026-11-23 — UI follow-up batch and brand identity usage
+
+The user approved the following coordinated UI changes. They must preserve existing business logic, data permissions, role hierarchy and backend behavior unless a specific item below says otherwise.
+
+1. **Home / Riprendi Renq:** keep approximately 30 px of separation between the creation hero and the resume section. Replace browser-native confirmation for «Svuota tutto» with an in-app confirmation dialog offering Annulla/Conferma and an in-app result notification. The existing soft-delete behavior remains unchanged; joined multiplayer sessions must not be deleted.
+2. **Administration:** redesign the complete administration experience, including moderation, users/access, audit surfaces and account detail pages, using the canonical Renqd visual reference. Preserve all current actions, role restrictions and authorization behavior.
+3. **Profile:** replace the «Collezioni» statistic with the number of profiles followed (Following). Clicking the statistic opens the existing followed-profiles modal. Before opening, scroll the app content container to bring the modal area into view; retain the modal's background-scroll lock.
+4. **Explore / Scopri:** the «Segui la curiosità» presentation must use the official supplied serpentina and stellina assets rather than improvised marks.
+5. **Desktop and tablet shell:** the sidebar must remain fixed to the viewport while the global header stays anchored at the top. Route-transition animation must not apply transforms to an ancestor of fixed shell elements.
+6. **Multiplayer lobby cover:** only the actual cover inside the session heading is visible. The separate image used exclusively for dynamic palette extraction must remain visually hidden while still loading for sampling.
+
+### Binding brand identity rule
+- Functional interface icons remain normal functional icons (Lucide or the already-used equivalent); do not replace them with decorative brand marks.
+- Decorative motifs across the application must use only the user's four original assets in `public/brand/`: `r-logo.svg`, `renqd-logo.svg`, `stellina.svg`, and `serpentina-podio.svg`.
+- SVG path geometry and silhouettes are immutable. Color and opacity may be adjusted; rendering may be proportionally scaled and positioned for layout, without distorting or redrawing the shape.
+- Do not introduce generated SVGs, substitute decorative glyphs/emoji, CSS-drawn logo shapes, or reconstructed versions of the official symbols.
+- The rule applies across the broader application, not only the Explore hero.
+
+No database migration, Supabase configuration change, role/permission change or external-service mutation is authorized by this UI batch.

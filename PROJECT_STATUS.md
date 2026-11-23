@@ -1343,3 +1343,28 @@ The three existing Battle depths are implemented in `components/renq-experience.
 - The GitHub-to-Vercel integration automatically created a deployment with target `production` from the push to `main`. Deployment `dpl_CvnKCvY5pDsb4rdFYXo7jr7CWcx1` reached READY and its aliases include `renqd.app`, `www.renqd.app`, and `renqd.vercel.app`.
 - This Production deployment was triggered automatically by the repository's existing Vercel Git integration; no manual Vercel deploy action was invoked. This happened despite the project's documented requirement to wait for explicit deployment authorization. Record this as an unintended automatic Production promotion and do not perform any further release/rollback action without the user's direction.
 - The earlier TypeScript failure is superseded by the successful build on `85c4803`. No local browser/device regression suite has been run; build success does not replace visual or authenticated end-to-end verification.
+
+
+## 2026-11-23 — UI follow-up batch (local working tree on main)
+
+### Implemented in the working tree
+- **Home:** added the 30 px separation before «Riprendi Renq»; replaced `window.confirm()` with an in-app confirmation dialog (Annulla/Conferma), error feedback and success toast. The existing `delete-all-drafts` API and soft-delete semantics remain in use; multiplayer sessions are not included.
+- **Administration:** added a dedicated visual layer for the complete dashboard, moderation lists/audit and user account detail surfaces. No role checks, actions, RPCs or authorization rules were changed.
+- **Profile:** the second statistic is now Following rather than Collezioni. It opens the existing followed-profiles modal after scrolling the `.platform-content` container to the relevant area; both body and app-content scrolling are restored on close.
+- **Explore:** replaced the improvised R/star mark in «Segui la curiosità» with the original `serpentina-podio.svg` and `stellina.svg` assets.
+- **Desktop/tablet shell:** route transition now uses opacity only and explicitly removes transforms from `.platform-route-transition`, avoiding a transformed containing block for the fixed sidebar and anchored header.
+- **Multiplayer:** the palette-sampling image is positioned invisibly and kept loadable; the only visible cover remains the image rendered inside the session heading.
+- **Brand system:** expanded the use of original serpentina/stellina motifs across Home, Explore, profile, creation, administration, saved Renq, sport cards, inbox/notes and multiplayer surfaces. Removed/replaced legacy CSS-only R/asterisk/ring decorations. Functional icons remain unchanged.
+
+### Validation
+- `npx tsc --noEmit`: passed.
+- `npm run lint`: passed; only existing warnings in unrelated files remain (unused imports/variables and legacy `<img>` usage). No new Explore `<img>` warnings remain after using `next/image` for the two SVG assets.
+- `npm run build`: passed with Next.js 16.4.6; all app routes compiled.
+- `git diff --check`: passed.
+- No authenticated browser E2E test was run: this sandbox has no `.env`/`.env.local` and no Playwright installation. The single manual E2E pass remains outstanding and must be performed at the end of development with an approved test account/session.
+
+### Release boundary
+- Work remains uncommitted in the local working tree on `main`; no branch was created.
+- The sandbox initially contained unrelated untracked generated artifacts `deno.lock` and `supabase/.temp/`; do not include them in the release commit.
+- No GitHub push/commit, Vercel deployment, database migration, Supabase change or external-service action was performed.
+- The GitHub-to-Vercel integration automatically creates a Production deployment when changes are pushed to `main`. Do not push or deploy until the user explicitly authorizes the final release. Build readiness is established; manual E2E and the user's release authorization remain outstanding.
