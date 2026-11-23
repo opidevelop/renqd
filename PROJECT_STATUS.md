@@ -1304,3 +1304,34 @@ Tutte le modifiche restano locali nel sandbox sul branch main. Nessun commit, pu
 - La reference è stata registrata in `PROJECT_DECISIONS.md` come riferimento visivo canonico per tutte le decisioni grafiche della piattaforma.
 - Non confondere questa immagine con lo screenshot successivo della copertina multiplayer: quest'ultimo resta un riferimento specifico per la presentazione della copertina nella card di sessione.
 - Questa modifica documentale non comporta modifiche al codice applicativo, database o deployment.
+
+## 2026-11-23 — Follow-up UI and Home resume refinements
+
+### Implemented on main
+- Corrected `public/brand/r-logo.svg`: its original path geometry extends below the previous 360-unit viewBox; the viewBox now includes the full 540-unit vertical extent. This fixes the bottom crop wherever the official pictogram is used, including the sidebar and loading mark.
+- Desktop navigation: the sidebar remains fixed to the viewport; the global header is sticky at the top. The page retains natural document scrolling and the Wheel remains independently fixed.
+- Notes: the tag panel is explicitly ordered after the folder list and create-folder form.
+- Profile: Followers/Following keeps the existing modal behavior. The backdrop is centered in the viewport and background body scrolling is locked while the modal is open.
+- Wheel mobile: the orange Lucide dice icon is retained and the duplicate white emoji is hidden at the mobile breakpoint.
+- Home / Riprendi Renq: cards now include cover artwork and its saved focal position. Home now combines the user's own recoverable DRAFT rankings with multiplayer sessions where the user is a pending or accepted participant; session cards link to the lobby.
+- Riprendi Renq / Svuota tutto: added a confirmation-protected bulk action. It enumerates only the authenticated user's active DRAFT rankings and calls the existing `renqd_soft_delete_ranking` RPC for each record; no hard deletion is performed. Multiplayer sessions merely joined by the user are not deleted by this action.
+- Explore and Activity: applied a substantial editorial refresh using the canonical Lobby reference language while preserving the existing feed, search, filters, notifications and messaging behavior.
+- Profile follow modal: background scroll lock and viewport-centered presentation added.
+- Music Album builder: step 4 now reads the currently selected album entity rather than the first track in the loaded item list.
+- Grade creation: when the criterion is position, the unbounded upper limit is displayed as `*` while retaining the internal numeric sentinel `2147483647`.
+
+### Battle algorithms — technical analysis, no behavior changed
+The three existing Battle depths are implemented in `components/renq-experience.tsx` by generating the comparison-pair list from the current item order:
+- **Rapida (`quick`)**: compares only adjacent items in their current order. For N items the list is (1,2), (2,3), …, (N−1,N), therefore N−1 comparisons. It is deterministic and does not shuffle the items.
+- **Approfondita (`deep`)**: generates every unordered pair (i,j) with i < j, therefore N×(N−1)/2 comparisons.
+- **Standard (`standard`)**: starts from the complete pair list. If the list is longer than 2N, it keeps every k-th pair, where k = ceil(M/(2N)) and M = N×(N−1)/2; otherwise it keeps all pairs. This is deterministic subsampling, not random sampling, and does not guarantee exactly 2N comparisons. Example: N=6 gives M=15, k=2 and 8 retained comparisons; N=10 gives M=45, k=3 and 15 retained comparisons.
+- In solo Battle, a selected winner increments that item's win count. An explicit tie records the pair without adding a win. Finalization groups connected tie relationships (including automatic equal-win ties when enabled), sorts groups by wins descending and then original sort order, and assigns one sequential position per group. Every item in the same group receives the same position.
+- The solo API records the final choice and finalizes the ranking atomically. Undo removes the last comparison and reverses its win/tie contribution; repeat restarts a completed Battle.
+- Competitive multiplayer stores participant progress/result snapshots separately; its client-side completion path sorts by wins and carries explicit tie pairs. Do not assume this path is identical to solo finalization.
+- **No Battle algorithm was changed in this batch.** The user approved receiving this technical explanation before choosing new comparison strategies or ranking rules.
+
+### Commits and validation
+- Changes were committed directly to `main` in the following grouped commits: `77b2a007` (pictogram SVG), `b74dd177` (initial Home action integration), `9e494a35` (bulk draft action), `85ed7844` (Home action component), `f2ce363b` and `a0d04db0` and `4c4aaba3` (layout and visual styles), `ae457763` (album context), `207cfee2` (profile modal), `f2d2dac3` (decisions documentation), `5fb95a7d` (Home multiplayer resume cards), `933704d7` (Grade sentinel display), and `03657733` (guarded bulk soft-delete).
+- No database migration was added or applied. Existing soft-delete RPC is reused.
+- No Vercel Production deployment was initiated. No Preview/Staging deployment or non-main branch was created.
+- Browser-based visual regression and authenticated end-to-end tests remain outstanding. The latest Vercel check for the code commit was pending at the time of this note; deployment readiness must be confirmed against the resulting CI/build status.
