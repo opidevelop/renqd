@@ -99,3 +99,20 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
  .multiplayer-person-state{margin-left:54px}.multiplayer-session-status{margin-top:12px}
 }
 @media(prefers-reduced-motion:reduce){.platform-route-transition{animation:none!important}.platform-content *{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+.multiplayer-ready-panel{display:grid;gap:14px;padding:23px 26px;border:1px solid rgba(244,122,8,.18);border-radius:22px;background:linear-gradient(112deg,#fff3e7,#fffaf5 70%,#fff)!important;box-shadow:0 12px 34px rgba(72,48,25,.05)}
+.multiplayer-ready-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;color:var(--renqd-orange)}
+.multiplayer-ready-heading>div>span{color:#b96824;font-size:9px;font-weight:900;letter-spacing:1.5px}
+.multiplayer-ready-heading h2{margin:5px 0 0;color:#1c1916;font-size:24px;letter-spacing:-.8px}
+.multiplayer-ready-progress{display:flex;align-items:center;gap:16px}
+.multiplayer-ready-progress>div{height:12px;min-width:0;flex:1;overflow:hidden;border-radius:99px;background:#f5e7d8}
+.multiplayer-ready-progress>div>span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#f5a13d,#ed7707);transition:width .35s ease}
+.multiplayer-ready-progress>strong{color:#342b23;font-size:12px;white-space:nowrap}
+.multiplayer-ready-panel>p{margin:0;color:#807469;font-size:12px;line-height:1.65}
+.multiplayer-ready-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.multiplayer-ready-footer>small{color:#9a8b7e;font-size:10px}
+.multiplayer-ready-confirmed{display:inline-flex;align-items:center;gap:8px;color:#39764b;font-size:12px;font-weight:800}
+.multiplayer-reveal-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:54px;min-width:220px;padding:0 24px;border:0;border-radius:14px;background:linear-gradient(100deg,#f99b31,#f17606);color:#fff;font-size:18px;font-weight:900;box-shadow:0 8px 22px rgba(239,121,8,.22);cursor:pointer}
+.multiplayer-reveal-button:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 26px rgba(239,121,8,.28)}
+.multiplayer-reveal-button:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.35)}
+@media(max-width:680px){.multiplayer-ready-panel{padding:18px}.multiplayer-ready-heading h2{font-size:20px}.multiplayer-ready-progress{align-items:flex-start;flex-direction:column;gap:8px}.multiplayer-ready-progress>div{width:100%;flex:none}.multiplayer-reveal-button{width:100%;min-width:0}}
