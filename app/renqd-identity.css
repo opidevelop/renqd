@@ -181,3 +181,16 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 @media(max-width:680px){.multiplayer-ready-actions{display:grid;grid-template-columns:1fr 1fr}.multiplayer-ready-actions .multiplayer-decision{grid-column:1/-1}}
 
 .platform-topbar{position:sticky!important;top:0!important;z-index:40!important}
+
+/* Official supplied SVG identity assets. */
+.platform-sidebar:before,.platform-sidebar:after{content:none!important;display:none!important}
+.platform-sidebar{align-items:stretch!important}
+.platform-sidebar-brand{display:flex;align-items:center;justify-content:center;width:100%;height:78px;flex:0 0 78px;margin:0 0 0;text-decoration:none}
+.platform-sidebar-brand img{display:block;width:104px;height:72px;object-fit:contain}
+.platform-header-logo{display:flex!important;align-items:center;justify-content:center;width:146px;height:58px;font-size:0!important;letter-spacing:0!important}
+.platform-header-logo img{display:block;width:100%;height:100%;object-fit:contain}
+.renqd-loading-wordmark{display:block;width:clamp(142px,22vw,190px);height:auto;object-fit:contain}
+.renqd-loading-brand-art{position:relative;display:grid;place-items:center;width:min(520px,86vw);padding:8px 0}
+.renqd-loading-serpentina{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 8px 22px rgba(198,94,0,.2));animation:renqd-serpentina-float 2.8s ease-in-out infinite}
+.renqd-loading-spark{position:absolute;top:-2px;right:10%;display:block;width:30px;height:30px;object-fit:contain;filter:brightness(0) saturate(100%) invert(48%) sepia(98%) saturate(2216%) hue-rotate(359deg) brightness(101%) contrast(106%);animation:renqd-spark-pulse 1.5s ease-in-out infinite}
+@media(max-width:680px){.platform-sidebar-brand{display:none}.platform-header-logo{width:126px;height:50px}.renqd-loading-brand-art{width:min(420px,88vw)}}
