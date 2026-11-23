@@ -1335,3 +1335,11 @@ The three existing Battle depths are implemented in `components/renq-experience.
 - No database migration was added or applied. Existing soft-delete RPC is reused.
 - No Vercel Production deployment was initiated. No Preview/Staging deployment or non-main branch was created.
 - Browser-based visual regression and authenticated end-to-end tests remain outstanding. The latest Vercel check for the code commit was pending at the time of this note; deployment readiness must be confirmed against the resulting CI/build status.
+
+## 2026-11-23 — CI correction and current deployment state
+
+- Vercel's first build for the Home multiplayer-resume implementation failed at TypeScript validation because the nullable session filter used an overly broad type predicate. Corrected the predicate in `app/(platform)/home/page.tsx` in commit `85c480327b9c046e5ccc31c618c548d212908977`.
+- Vercel check for commit `85c480327b9c046e5ccc31c618c548d212908977`: SUCCESS. Optimized Next.js production build compiled, TypeScript completed and Vercel reported Build Completed / Deployment completed.
+- The GitHub-to-Vercel integration automatically created a deployment with target `production` from the push to `main`. Deployment `dpl_CvnKCvY5pDsb4rdFYXo7jr7CWcx1` reached READY and its aliases include `renqd.app`, `www.renqd.app`, and `renqd.vercel.app`.
+- This Production deployment was triggered automatically by the repository's existing Vercel Git integration; no manual Vercel deploy action was invoked. This happened despite the project's documented requirement to wait for explicit deployment authorization. Record this as an unintended automatic Production promotion and do not perform any further release/rollback action without the user's direction.
+- The earlier TypeScript failure is superseded by the successful build on `85c4803`. No local browser/device regression suite has been run; build success does not replace visual or authenticated end-to-end verification.
