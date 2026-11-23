@@ -7,7 +7,7 @@ import { highQualityImageUrl } from "@/lib/image-quality";
 
 export const dynamic = "force-dynamic";
 
-type MultiplayerDetails={session:{mode:"COLLABORATIVE"|"COMPETITIVE";status:string;deadlineAt:string|null;sharedState:Record<string,unknown>|null};participants:Array<{userId:string;progressStatus:string}>};
+type MultiplayerDetails={session:{mode:"COLLABORATIVE"|"COMPETITIVE";status:string;deadlineAt:string|null;sharedState:Record<string,unknown>|null};participants:Array<{userId:string;username:string;displayName:string;avatarUrl:string|null;progressStatus:string}>};
 
 export default async function RenqPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -32,6 +32,9 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   const {data:personalResult}=multiplayerDetails?.session.mode==="COMPETITIVE"
     ? await supabase.from("ranking_session_results").select("result_snapshot,result_status").eq("ranking_id",ranking.id).eq("user_id",user.id).maybeSingle()
     : {data:null};
+  const {data:multiplayerResults}=multiplayerDetails?.session.mode==="COMPETITIVE"
+    ? await supabase.from("ranking_session_results").select("user_id,result_snapshot,result_status").eq("ranking_id",ranking.id).eq("result_status","FINISHED")
+    : {data:[]};
   const multiplayerContext=multiplayerDetails?{
     mode:multiplayerDetails.session.mode,
     status:multiplayerDetails.session.status,
@@ -49,6 +52,13 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
   const isSaved = ranking.status === "COMPLETED" && Boolean(settings.savedAt) && Array.isArray(savedSnapshot?.items);
 
   if (isSaved) {
+    const multiplayerComparison=multiplayerDetails?multiplayerDetails.participants.filter(person=>person.progressStatus==="FINISHED").map(person=>{
+      const resultRow=(multiplayerResults??[]).find(row=>row.user_id===person.userId);
+      const resultItems=Array.isArray(resultRow?.result_snapshot?.items)?resultRow.result_snapshot.items as Array<Record<string,unknown>>:(savedSnapshot?.items??[]) as Array<Record<string,unknown>>;
+      const placements=Object.fromEntries(resultItems.map((item,index)=>[String(item.id),{rankPosition:Number(item.rank_position??index+1),score:item.score===null||item.score===undefined?null:Number(item.score)}]));
+      return {userId:person.userId,username:person.username,displayName:person.displayName,avatarUrl:person.avatarUrl,placements};
+    }):[];
+
     const [{ data: comments, count: commentCount }, { data: liked }, { count: likeCount }, { data: revisions }] = await Promise.all([
       supabase.from("ranking_comments").select("id,body,created_at,author_id", { count: "exact" }).eq("ranking_id", ranking.id).is("deleted_at", null).order("created_at", { ascending: true }),
       supabase.from("ranking_likes").select("user_id").eq("ranking_id", ranking.id).eq("user_id", user.id).maybeSingle(),
@@ -68,6 +78,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
       likeCount={likeCount ?? 0}
       revisions={revisions ?? []}
       isMultiplayer={Boolean(multiplayerDetails)}
+      multiplayerComparison={multiplayerComparison}
     />;
   }
 
