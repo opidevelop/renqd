@@ -1162,3 +1162,21 @@ Revisione della migrazione di hardening:
 - Supabase migration versions `20261123094548` and `20261123094550` are applied and their filenames in this repository match the database migration history.
 - The production build for commit `e494abb` completed successfully and the deployment reached READY. Subsequent commits only center the header wordmark and align migration filenames; their Vercel production build is queued/in progress at the time of this note.
 - Original brand SVG assets were not available in the current repository/current uploads; temporary CSS and inline-SVG marks are used pending re-upload of the source SVG/ZIP.
+
+
+## 2026-11-23 — Integrazione degli asset SVG ufficiali Renqd
+
+### Modifiche repository
+- Aggiunti gli asset originali dello ZIP in `public/brand/`: pittogramma, wordmark, stellina e serpentina podio.
+- Rifilati i viewBox per rimuovere gli ampi margini vuoti degli SVG sorgente; i tracciati originali sono mantenuti.
+- Colorata la stellina del pittogramma con l'arancione ufficiale `#FF7900`, lasciando nera la R. Il wordmark conserva il colore già presente nello SVG originale.
+- Aggiunto `app/icon.svg` come favicon vettoriale ufficiale.
+- `PlatformShell` usa ora il pittogramma SVG nella sidebar desktop e il wordmark SVG nell'header. Voci e ordine della navigazione non sono stati modificati.
+- `PageTransition` usa la serpentina SVG e la stellina ufficiale nel loading Style 1, mantenendo l'animazione ridotta per `prefers-reduced-motion`.
+- Aggiornato `app/renqd-identity.css` per eliminare il marchio provvisorio CSS e dimensionare gli asset ufficiali.
+
+### Verifiche e rilascio
+- Modifiche applicative committate su `main`; nessuna modifica a database o servizi esterni.
+- CI/build: da verificare sul commit risultante.
+- Test visivo autenticato desktop/mobile e verifica favicon in browser: da eseguire nel collaudo finale.
+- Nessun deployment Production eseguito.
