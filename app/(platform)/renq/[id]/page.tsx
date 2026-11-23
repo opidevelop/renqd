@@ -65,7 +65,8 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
         const positionKey=ranking.mode==="BATTLE_RENQ"?Number(item.wins??0):ranking.mode==="GRADE"?Number(item.score??-1):Number(item.rank_position??index+1);
         if(index===0||positionKey!==previousPositionKey)currentParticipantPosition=index+1;
         previousPositionKey=positionKey;
-        return [String(item.id),{rankPosition:currentParticipantPosition,score:item.score===null||item.score===undefined?null:Number(item.score)}];
+        const finalPosition=ranking.mode==="RENQ"||ranking.mode==="SPEED_RENQ"?Number(item.rank_position??currentParticipantPosition):currentParticipantPosition;
+        return [String(item.id),{rankPosition:finalPosition,score:item.score===null||item.score===undefined?null:Number(item.score)}];
       }));
       return {userId:person.userId,username:person.username,displayName:person.displayName,avatarUrl:person.avatarUrl,placements};
     }):[];
