@@ -170,3 +170,12 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 .platform-header-logo{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;white-space:nowrap}
 .topbar-profile-menu{position:relative;z-index:2;margin-left:auto;justify-content:flex-end}
 @media(max-width:680px){.platform-topbar>span:first-child{flex:1}.topbar-profile-menu{flex:1}}
+
+.multiplayer-active-box{display:none!important}
+.multiplayer-ready-timer{display:inline-flex;align-items:center;gap:7px;width:max-content;padding:7px 10px;border-radius:999px;background:#f7eee5;color:#806f60;font-size:11px;font-variant-numeric:tabular-nums}
+.multiplayer-ready-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.multiplayer-open-ranking,.multiplayer-mark-incomplete{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:0 13px;border:1px solid #eadfd3;border-radius:11px;background:#fff;color:#8c562c;font-size:10px;font-weight:800;cursor:pointer}
+.multiplayer-open-ranking{border-color:#f1c49b;background:#fff4e9;color:#bd5b05}
+.multiplayer-open-ranking:disabled,.multiplayer-mark-incomplete:disabled{opacity:.45;cursor:not-allowed}
+.multiplayer-ready-actions .multiplayer-decision{flex-basis:100%;margin-top:3px}
+@media(max-width:680px){.multiplayer-ready-actions{display:grid;grid-template-columns:1fr 1fr}.multiplayer-ready-actions .multiplayer-decision{grid-column:1/-1}}
