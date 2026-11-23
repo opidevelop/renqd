@@ -416,3 +416,13 @@ La decisione non modifica le specifiche funzionali già approvate per multiplaye
 - Multiplayer Reveal is a sequential, non-live presentation. Each placement compares every finished participant with display name, avatar and their individual position. Grade placements also show the fused arithmetic mean beside the placement; participant-level grades remain visible in the comparison.
 - Keep the existing route structure, session modes, invitations, ranking mechanics and navigation intact.
 - Original brand SVG files were not present in the current repository or current attachments. A CSS/inline-SVG fallback is used temporarily; replace it with the original supplied assets when they are re-uploaded.
+
+
+## 2026-11-23 — Approvazione e integrazione degli asset SVG ufficiali
+
+- L'utente ha fornito lo ZIP definitivo con `r logo black.svg`, `renqd logo.svg`, `stellina simbolo.svg` e `serpentina podio elemento.svg`.
+- Il wordmark originale conferma il colore ufficiale della stellina `#FF7900`; nel pittogramma separato la R resta nera e la stellina viene colorata `#FF7900`.
+- Gli SVG sono conservati in `public/brand/` con viewBox rifilati ai contenuti per evitare spazi vuoti: `r-logo.svg`, `renqd-logo.svg`, `stellina.svg`, `serpentina-podio.svg`.
+- `app/icon.svg` usa il pittogramma ufficiale rifilato, con R nera e stellina arancione.
+- Sidebar desktop: pittogramma ufficiale centrato sopra la navigazione, senza modificare ordine e struttura delle voci. Header: wordmark SVG ufficiale centrato. Loading Style 1: serpentina SVG ufficiale protagonista e stellina ufficiale come accento.
+- Gli asset decorativi restano disponibili per l'uso coerente nelle altre superfici della piattaforma.
