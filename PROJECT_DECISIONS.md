@@ -435,3 +435,17 @@ La decisione non modifica le specifiche funzionali già approvate per multiplaye
 - La coerenza richiesta riguarda linguaggio visivo, palette, tipografia, gerarchia, spaziature, proporzioni, superfici, bordi, ombre, trasparenze, decorazioni e composizione. Non è sufficiente applicare soltanto colori simili.
 - La serpentina ufficiale Renqd è parte integrante della brand identity e deve essere utilizzata in modo coerente nelle diverse superfici, senza sovraccaricare l'interfaccia.
 - La reference non sostituisce le specifiche funzionali e non autorizza a modificarle. Ogni comportamento deve restare quello concordato, salvo richiesta esplicita dell'utente.
+
+
+## 2026-11-23 — Follow-up UI refinements approved by user
+
+- The authenticated desktop sidebar remains fixed, the global header remains sticky at the top, and only the document content scrolls. The floating Wheel remains attached to the viewport.
+- The Notes tags area follows the complete folder area and the create-folder control.
+- The Profile Followers/Following modal remains the current modal interaction and is centered in the viewport; opening it locks background scrolling without jumping the underlying profile.
+- The Home Riprendi Renq area includes a Svuota tutto action. It requires confirmation and soft-deletes only the authenticated user's active DRAFT rankings; it does not hard-delete ranking records.
+- Mobile Wheel keeps the orange Lucide dice control and hides the additional white emoji dice.
+- The official pictogram SVG viewBox must include the full original path geometry so the lower part is never clipped in the sidebar or loading transition.
+- Step 4 of music Album creation must display the currently selected album entity, not the first track from the previously loaded item list.
+- Home, Explore and Activity follow the canonical docs/design/renqd-visual-reference.jpg direction while preserving existing data and interaction behavior.
+- The multiplayer session card uses the same Renq cover image and cover positioning as the associated ranking.
+- Battle algorithm changes are not approved yet. First provide a technical explanation of the three existing depth strategies and final ranking calculation, with examples; await a separate user decision before changing their behavior.
