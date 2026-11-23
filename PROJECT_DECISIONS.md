@@ -484,3 +484,17 @@ The user approved the following corrections for the existing Renqd experience. P
 7. Explore's followed-activity layout must remain within the viewport on tablets. Keep two columns when sufficient width exists and stack them when the available width is insufficient; mobile remains single-column.
 
 No database schema, migration, role, permission, authentication or external-service changes are authorized by this UI batch.
+
+
+## Decisioni approvate — correzioni UI del 23 novembre 2026
+
+- **Card Renq pubblicato:** ripristinare la presentazione precedentemente approvata, senza reinterpretarne struttura o gerarchia visiva. La copertina resta protagonista nella card del Renq pubblicato.
+- **Lobby Multiplayer:** mantenere il tema dinamico della copertina per la palette della pagina, ma mostrare anche la copertina dentro la card della sessione, come thumbnail contenuta e con il punto focale salvato. Non trasformare la copertina della sessione in uno sfondo full-bleed della card. Il creatore dispone del collegamento a matita per aprire il Renq pubblicato e modificarlo.
+- **Decorazioni:** usare esclusivamente gli SVG ufficiali forniti (r-logo.svg, renqd-logo.svg, stellina.svg, serpentina-podio.svg). I tracciati e le forme originali non vanno alterati; sono consentite variazioni di colore, opacità, dimensione, rotazione e posizione. Le icone funzionali restano icone funzionali e non sono soggette a questo vincolo.
+- **Home:** mantenere 30 px di separazione tra la sezione «Crea un Renq» e «Riprendi Renq».
+- **Conferme e notifiche:** le azioni di pulizia, incluso «Svuota tutto», usano conferme e feedback interni a Renqd; non usare finestre native del browser (window.confirm, window.alert o window.prompt).
+- **Amministrazione:** ridisegnare la dashboard Admin senza alterare gerarchia dei ruoli, autorizzazioni, RPC o audit.
+- **Profilo:** mostrare «Following» al posto di «Collezioni» come statistica; il click apre il modal dei profili seguiti e porta il contenuto in una posizione che renda il modal raggiungibile. Alla chiusura ripristinare lo scroll.
+- **Sidebar:** la sidebar desktop resta fissa. Le animazioni di transizione delle route non devono applicare transform al contenitore che può diventare containing block degli elementi fixed.
+- **Scopri:** la griglia di suggerimenti e attività dei seguiti deve rientrare nel viewport anche su tablet; quando lo spazio non basta le colonne si impilano.
+- **Altre correzioni approvate nello stesso gruppo:** rimuovere l'intestazione ridondante «Centro moderazione», aggiornare automaticamente il titolo Album quando cambia l'album selezionato e mostrare le foto profilo dei partecipanti sia nella pagina Renq pubblicata sia nella lobby.

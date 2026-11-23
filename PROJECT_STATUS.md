@@ -1378,32 +1378,44 @@ The three existing Battle depths are implemented in `components/renq-experience.
 - No Supabase/database migration or schema change was included in this release.
 
 
-## 2026-11-23 — UI regression restoration batch (approved)
+## 2026-11-23 — UI batch e ripristino correttivo
 
-### Implemented on `main`
-- Standardized the shared confirmation-dialog surface and all existing app toast surfaces (notification menu, Home resume and My Renq feedback) on the same Renqd notification visual language. Confirmations remain in-app and do not use browser-native alert/confirm dialogs.
-- Rebuilt the Explore «Segui la curiosità» decoration using only the official serpentina and stellina SVG assets. Removed the inline Next Image instances that were rendering as broken image placeholders.
-- Removed only the redundant «Centro moderazione» hero. Moderation tabs, lists, filters, actions and authorization behavior remain unchanged.
-- Fixed album title synchronization: selecting a different Album refreshes the generated `Artist - Album` title; manually edited titles are preserved. The automatic-title state resets when changing category or discography mode.
-- Multiplayer participant avatar storage paths are resolved to signed profile-media URLs both on the published Renq result page and in the lobby (including subsequent lobby refreshes); the client caches lobby signed URLs for 50 minutes. Existing fallback initials remain available when no avatar exists.
-- Restyled the Multiplayer session header to match the published Renq hero and added a creator-only pencil link to the existing published Renq editor.
-- Made Explore's two-column mosaic stack below the tablet-width breakpoint and set the grid children to `min-width: 0` to prevent horizontal overflow.
+### Contesto e correzione della documentazione
+I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI concordato, ma la precedente nota di stato descriveva come pienamente completato anche il ripristino delle card: non era corretto. La modifica grafica full-bleed applicata all'header Multiplayer non rispettava la richiesta di mantenere la copertina dentro la card della sessione. Questa sezione sostituisce la precedente descrizione troppo ampia.
 
-### Validation
-- `git diff --check`: passed.
-- `npx tsc --noEmit`: passed.
-- `npm run lint`: passed.
-- `npm run build`: passed.
-- No authenticated browser/device end-to-end test was run in the sandbox. The user will perform visual and functional verification on `https://renqd.app` after the Production deployment.
+### Parti del gruppo UI già presenti nei commit precedenti
+- Home: conferma in-app per «Svuota tutto» e feedback interno; la cancellazione continua a usare la soft-delete prevista.
+- Dashboard Admin: foglio di stile dedicato e restyling della dashboard; nessuna modifica a ruoli, permessi, RPC o audit.
+- Profilo: statistica «Following» al posto di «Collezioni» e apertura del modal dei seguiti; backdrop centrato, scroll del contenuto gestito e ripristinato alla chiusura.
+- Scopri: decorazione dell'intestazione tramite SVG ufficiali; il mosaico viene adattato ai viewport ridotti.
+- Moderazione: rimossa l'intestazione ridondante «Centro moderazione», mantenendo tab, liste, filtri, azioni e controlli di accesso.
+- Creazione Album: il titolo automatico segue l'album selezionato e conserva le modifiche manuali dell'utente.
+- Multiplayer e pagina Renq pubblicata: risoluzione degli avatar dei partecipanti da storage a URL firmati, con fallback alle iniziali.
+- Le risorse SVG ufficiali presenti in public/brand sono r-logo.svg, renqd-logo.svg, stellina.svg e serpentina-podio.svg; i tracciati originali non vengono modificati.
 
-### Release
-- User explicitly authorized deployment to Production from `main` on 23 November 2026.
-- Commit `8f95a3c8fac1d4f317a608b04905cf46f6ac4322` (`fix(ui): restore Renqd notifications and card layouts`) was published directly to `main`.
-- Vercel Production deployment `dpl_GNPTXK2eRcRum53PLLFR99EdFteq` completed successfully with state `READY`; aliases include `https://renqd.app`, `https://renqd.vercel.app` and `https://www.renqd.app`.
-- No database migration, Supabase configuration change, role/permission change or external-service mutation is part of this batch.
+### Correzioni incluse nel rilascio corrente
+- Ripristinato l'header Multiplayer al layout card precedente: copertina come thumbnail contenuta nel riquadro, titolo e informazioni nella card chiara, stato separato e matitina per il creatore. La copertina continua a usare il punto focale salvato; DynamicCoverTheme mantiene la funzione di campionamento della palette senza mostrare l'immagine tecnica fuori layout.
+- La card del Renq pubblicato conserva il componente/hero e la copertina già approvati; non viene introdotto un restyling alternativo.
+- La sezione Home «Riprendi Renq» ha 30 px di spazio superiore rispetto alla sezione precedente.
+- Le transizioni di route usano solo opacità, senza transform, per non interferire con gli elementi fixed della shell.
+- La griglia Scopri passa a una sola colonna fino a 1100 px e impedisce ai pannelli di imporre larghezze minime che causino overflow su tablet.
+- Rimossi gli stili residui dell'ornamento CSS-only R/stella non più utilizzato; la decorazione di intestazione usa l'SVG ufficiale.
 
+### Verifiche
+- git diff --check: superato.
+- npm run lint: superato; restano warning preesistenti (import/variabili non utilizzati e uso legacy di img in file non modificati da questa correzione).
+- npx tsc --noEmit: superato.
+- npm run build: superato con Next.js 16.4.6; tutte le route compilate.
+- Verificato che non esistano chiamate a window.confirm, window.alert, window.prompt o globalThis equivalenti nei sorgenti app, components e lib.
+- Verificata la presenza dei quattro SVG ufficiali in public/brand.
+- Non è stato eseguito un test visuale browser autenticato né un test E2E su dispositivo: la build non viene presentata come prova di tali verifiche.
 
-### Published Renq participant-avatar follow-up — 2026-11-23
-- Added profile-media URL resolution to the published `/renq/[id]` page as well as the Multiplayer lobby, so the participant standings in the screenshot path receive signed avatar URLs before the Reveal is rendered.
-- Commit `cc21cb825e1bf26cbe787240cf70f5ae6d3f937e` was pushed directly to `main`.
-- Vercel Production deployment `dpl_HZN5Wmxg4wCdWnYnQr1f33Br2Ezy` completed with state `READY`; Production aliases include `https://renqd.app`, `https://renqd.vercel.app` and `https://www.renqd.app`.
+### Confini del rilascio
+- Nessuna migrazione Supabase, modifica dello schema, modifica di ruoli/permessi o mutazione di servizi esterni.
+- Il rilascio è limitato a UI/CSS e documentazione.
+- Il push su main attiva il deployment Production tramite l'integrazione Git esistente; il suo stato viene verificato separatamente.
+
+### Storico dei rilasci UI precedenti
+- 8f95a3c8fac1d4f317a608b04905cf46f6ac4322 — fix(ui): restore Renqd notifications and card layouts; Vercel dpl_GNPTXK2eRcRum53PLLFR99EdFteq READY.
+- cc21cb825e1bf26cbe787240cf70f5ae6d3f937e — fix(multiplayer): resolve participant avatars on published Renq; Vercel dpl_HZN5Wmxg4wCdWnYnQr1f33Br2Ezy READY.
+- f2929c147bbaf6ba8ec0fa5595c30ae118dd1fdb — aggiornamento documentale successivo; Vercel dpl_8KabN2RhRiHFH6XM2TSxeAy5yBT9 READY.
