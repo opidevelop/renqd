@@ -21,7 +21,7 @@ export default async function PlatformHomePage(){
   const {data,error}=await supabase.rpc("renqd_get_multiplayer_session",{p_ranking_id:rankingId});
   if(error||!data||!["LOBBY","ACTIVE","AWAITING_DECISION"].includes(String(data.session?.status)))return null;
   return {id:String(data.ranking.id),title:typeof data.ranking.title==="string"?data.ranking.title:null,mode:String(data.ranking.mode??"RENQ"),kind:"session" as const,status:String(data.session.status),settings:(data.ranking.settings??{}) as Record<string,unknown>};
- }))).filter((entry):entry is ResumeEntry=>Boolean(entry));
+ }))).filter((entry):entry is NonNullable<typeof entry>=>entry!==null);
  const known=new Set(draftEntries.map(entry=>entry.id));
  const resumable=[...draftEntries,...sessionEntries.filter(entry=>!known.has(entry.id))];
  const resumableWithCovers=await Promise.all(resumable.map(async entry=>{
