@@ -55,7 +55,18 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
     const multiplayerComparison=multiplayerDetails?multiplayerDetails.participants.filter(person=>person.progressStatus==="FINISHED").map(person=>{
       const resultRow=(multiplayerResults??[]).find(row=>row.user_id===person.userId);
       const resultItems=Array.isArray(resultRow?.result_snapshot?.items)?resultRow.result_snapshot.items as Array<Record<string,unknown>>:(savedSnapshot?.items??[]) as Array<Record<string,unknown>>;
-      const placements=Object.fromEntries(resultItems.map((item,index)=>[String(item.id),{rankPosition:Number(item.rank_position??index+1),score:item.score===null||item.score===undefined?null:Number(item.score)}]));
+      const sortedResultItems=[...resultItems].sort((a,b)=>{
+        if(ranking.mode==="BATTLE_RENQ")return Number(b.wins??0)-Number(a.wins??0);
+        if(ranking.mode==="GRADE")return Number(b.score??-1)-Number(a.score??-1);
+        return Number(a.rank_position??999999)-Number(b.rank_position??999999)||Number(a.tie_order??0)-Number(b.tie_order??0);
+      });
+      let previousPositionKey: number|null=null;let currentParticipantPosition=0;
+      const placements=Object.fromEntries(sortedResultItems.map((item,index)=>{
+        const positionKey=ranking.mode==="BATTLE_RENQ"?Number(item.wins??0):ranking.mode==="GRADE"?Number(item.score??-1):Number(item.rank_position??index+1);
+        if(index===0||positionKey!==previousPositionKey)currentParticipantPosition=index+1;
+        previousPositionKey=positionKey;
+        return [String(item.id),{rankPosition:currentParticipantPosition,score:item.score===null||item.score===undefined?null:Number(item.score)}];
+      }));
       return {userId:person.userId,username:person.username,displayName:person.displayName,avatarUrl:person.avatarUrl,placements};
     }):[];
 
