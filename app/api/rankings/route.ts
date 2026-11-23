@@ -10,6 +10,11 @@ function validHttpsUrl(value:unknown):value is string{if(typeof value!=="string"
 export async function POST(request:Request){
  const supabase=await createClient();const {user,status}=await getAccountAccess(supabase);if(!user)return jsonError("Sessione scaduta. Accedi di nuovo.",401);if(status!=="APPROVED")return jsonError("Account non ancora abilitato.",403);
  const body=await request.json().catch(()=>null);if(!body)return jsonError("Richiesta non valida.");
+ if(body.action==="delete-all-drafts"){
+  const {data,error}=await supabase.from("rankings").update({deleted_at:new Date().toISOString()}).eq("user_id",user.id).eq("status","DRAFT").is("deleted_at",null).select("id");
+  if(error)return jsonError(error.message,500);
+  return NextResponse.json({ok:true,deletedCount:data?.length??0});
+ }
  if(body.action==="update-title"){
   const {rankingId,title}=body as {rankingId:string;title:string};
   const clean=typeof title==="string"?title.trim():"";
