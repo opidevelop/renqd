@@ -1401,3 +1401,9 @@ The three existing Battle depths are implemented in `components/renq-experience.
 - Commit `8f95a3c8fac1d4f317a608b04905cf46f6ac4322` (`fix(ui): restore Renqd notifications and card layouts`) was published directly to `main`.
 - Vercel Production deployment `dpl_GNPTXK2eRcRum53PLLFR99EdFteq` completed successfully with state `READY`; aliases include `https://renqd.app`, `https://renqd.vercel.app` and `https://www.renqd.app`.
 - No database migration, Supabase configuration change, role/permission change or external-service mutation is part of this batch.
+
+
+### Published Renq participant-avatar follow-up — 2026-11-23
+- Added profile-media URL resolution to the published `/renq/[id]` page as well as the Multiplayer lobby, so the participant standings in the screenshot path receive signed avatar URLs before the Reveal is rendered.
+- Commit `cc21cb825e1bf26cbe787240cf70f5ae6d3f937e` was pushed directly to `main`.
+- Vercel Production deployment `dpl_HZN5Wmxg4wCdWnYnQr1f33Br2Ezy` completed with state `READY`; Production aliases include `https://renqd.app`, `https://renqd.vercel.app` and `https://www.renqd.app`.
