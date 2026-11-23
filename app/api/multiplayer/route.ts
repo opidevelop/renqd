@@ -107,6 +107,11 @@ export async function POST(request:Request){
   const {data,error}=await supabase.rpc("renqd_multiplayer_speed_start",{p_ranking_id:rankingId});
   if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
  }
+ if(body.action==="request-reveal"){
+  if(!rankingId)return jsonError("Renq non valido.");
+  const {data,error}=await supabase.rpc("renqd_request_multiplayer_reveal",{p_ranking_id:rankingId});
+  if(error)return jsonError(error.message,400);return NextResponse.json(data??{});
+ }
  if(body.action==="decide"){
   if(!rankingId||!["REVEAL","EXTEND","CLOSE_EARLY"].includes(body.decision))return jsonError("Decisione non valida.");
   const extendMinutes=body.decision==="EXTEND"?Number(body.extendMinutes):null;
