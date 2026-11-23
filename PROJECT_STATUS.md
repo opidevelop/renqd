@@ -1149,3 +1149,16 @@ Revisione della migrazione di hardening:
 - Migrazione applicata al progetto Supabase live e registrata nel repository: `20261119160000_renqd_notes_create_rpc_rls_fix.sql`.
 - Verifica database: entrambe le funzioni esistono come SECURITY DEFINER; `authenticated` può eseguirle e `anon` no. Test UI autenticato di creazione cartella/documento ancora da eseguire.
 - Commit applicativi/documentali di questo gruppo: da consolidare; CI e deploy Production da verificare dopo gli aggiornamenti documentali.
+
+
+## 2026-11-23 — Visual refresh and multiplayer Reveal implementation
+
+- Added `app/renqd-identity.css`, imported globally and in the platform layout, to carry the warm ivory/orange visual language across the app.
+- Updated `PlatformShell`: exact existing nav order, 244px fixed desktop sidebar, centered Renqd wordmark, activity bell and existing profile menu. Mobile bottom navigation is retained.
+- Added serpentina-led loading transition for initial load and route changes, with reduced-motion support. Subtle brand watermark treatment is applied to hero/section surfaces.
+- Refined Multiplayer lobby: cinematic cover hero, category/mode chips, lobby heading, two-column participants/readiness layout, completion progress and Reveal CTA.
+- Multiplayer participants now return to the lobby after finishing. Database changes are applied: per-participant `reveal_ready_at`, session `reveal_sync_at`, unanimous Reveal RPC and guardrails preventing automatic or creator-only early reveal. The last completed participant confirmation schedules a shared reveal start 4 seconds later.
+- Multiplayer Reveal auto-opens after the synchronized handoff and displays each participant's avatar, name and placement for every item. Grade placements display the merged arithmetic mean beside the placement and each participant's individual score.
+- Supabase migration versions `20261123094548` and `20261123094550` are applied and their filenames in this repository match the database migration history.
+- The production build for commit `e494abb` completed successfully and the deployment reached READY. Subsequent commits only center the header wordmark and align migration filenames; their Vercel production build is queued/in progress at the time of this note.
+- Original brand SVG assets were not available in the current repository/current uploads; temporary CSS and inline-SVG marks are used pending re-upload of the source SVG/ZIP.
