@@ -1419,3 +1419,13 @@ I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI conco
 - 8f95a3c8fac1d4f317a608b04905cf46f6ac4322 — fix(ui): restore Renqd notifications and card layouts; Vercel dpl_GNPTXK2eRcRum53PLLFR99EdFteq READY.
 - cc21cb825e1bf26cbe787240cf70f5ae6d3f937e — fix(multiplayer): resolve participant avatars on published Renq; Vercel dpl_HZN5Wmxg4wCdWnYnQr1f33Br2Ezy READY.
 - f2929c147bbaf6ba8ec0fa5595c30ae118dd1fdb — aggiornamento documentale successivo; Vercel dpl_8KabN2RhRiHFH6XM2TSxeAy5yBT9 READY.
+
+
+## 2026-11-23 — Correzioni UI successive alla verifica dell'utente
+
+- **Intestazione rank classici:** corretta la gerarchia dei livelli della copertina sfumata e del contenuto, ripristinando la copertina nitida e una disposizione responsive del blocco copertina/titolo.
+- **Lobby Multiplayer:** rimossi blur, opacità e trasformazioni dalla copertina visibile. L'immagine di campionamento della palette resta invisibile e non filtra la thumbnail.
+- **Riprendi Renq:** quando una bozza ha anche una sessione multiplayer attiva, la card della sessione ha precedenza sulla card bozza, così il collegamento porta alla lobby e non all'editor di creazione.
+- **Modal:** Following, conferme globali e conferma «Svuota tutto» vengono renderizzati direttamente in document.body tramite portal, così non restano intrappolati negli stacking context e negli overflow della pagina.
+- Verifiche locali: git diff --check, npm run lint, npx tsc --noEmit e npm run build superati. ESLint segnala warning non bloccanti preesistenti.
+- Nessuna modifica a schema Supabase, migrazioni, ruoli, permessi o dati. Test visuale autenticato non eseguito in questa sessione.

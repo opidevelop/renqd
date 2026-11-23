@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle2, Trash2, X } from 'lucide-react';
 
@@ -61,7 +62,7 @@ export function HomeResumeActions() {
         </div>
       )}
 
-      {confirmOpen && (
+      {confirmOpen && typeof document !== 'undefined' && createPortal(
         <div
           className='home-resume-confirm-backdrop'
           onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) setConfirmOpen(false); }}
@@ -84,7 +85,8 @@ export function HomeResumeActions() {
               </button>
             </footer>
           </section>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

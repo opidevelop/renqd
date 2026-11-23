@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, type MouseEvent } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { Users, X, UserRound, ArrowUpRight } from 'lucide-react';
 
@@ -77,7 +78,7 @@ export function ProfileFollowLists({
         </div>
       )}
 
-      {open && (
+      {open && typeof document !== 'undefined' && createPortal(
         <div className='profile-follow-modal-backdrop' onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(null); }}>
           <section className='profile-follow-modal' role='dialog' aria-modal='true' aria-labelledby='profile-follow-modal-title'>
             <header>
@@ -100,7 +101,8 @@ export function ProfileFollowLists({
               )) : <div className='profile-follow-modal-empty'>Ancora nessun profilo in questa lista.</div>}
             </div>
           </section>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

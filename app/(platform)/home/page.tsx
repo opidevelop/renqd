@@ -22,8 +22,8 @@ export default async function PlatformHomePage(){
   if(error||!data||!["LOBBY","ACTIVE","AWAITING_DECISION"].includes(String(data.session?.status)))return null;
   return {id:String(data.ranking.id),title:typeof data.ranking.title==="string"?data.ranking.title:null,mode:String(data.ranking.mode??"RENQ"),kind:"session" as const,status:String(data.session.status),settings:(data.ranking.settings??{}) as Record<string,unknown>};
  }))).filter((entry):entry is NonNullable<typeof entry>=>entry!==null);
- const known=new Set(draftEntries.map(entry=>entry.id));
- const resumable=[...draftEntries,...sessionEntries.filter(entry=>!known.has(entry.id))];
+ const sessionRankingIds=new Set(sessionEntries.map(entry=>entry.id));
+ const resumable=[...draftEntries.filter(entry=>!sessionRankingIds.has(entry.id)),...sessionEntries];
  const resumableWithCovers=await Promise.all(resumable.map(async entry=>{
   const coverPath=typeof entry.settings.coverImagePath==="string"?entry.settings.coverImagePath:null;
   const {data:signed}=coverPath?await supabase.storage.from("renq-covers").createSignedUrl(coverPath,60*60*24*7):{data:null};
