@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useState} from "react";
+import {useEffect,useRef,useState} from "react";
 import Link from "next/link";
 import {Bell,Check,CheckCheck,FileText,Users,X,MessageCircle} from "lucide-react";
 import {createClient} from "@/lib/supabase/client";
@@ -7,21 +7,21 @@ type Notice={id:string;actor_id:string|null;notification_type:string;payload:Rec
 export function ActivityInbox({notifications}:{notifications:Notice[]}){
  const[items,setItems]=useState(notifications);const[busy,setBusy]=useState<string|null>(null);const[error,setError]=useState("");
  useEffect(()=>{
-  const supabase=createClient();let active=true;let channel:ReturnType<typeof supabase.channel>|null=null;let currentUserId:string|null=null;
+  const supabase=createClient();let active=true;let channel:ReturnType<typeof supabase.channel>|null=null;let currentUserId:string|null=null;const realtimeChanges=useRef<Map<string,Notice|null>>(new Map());
   const refresh=async(userId:string)=>{
    const {data,error:loadError}=await supabase.from("user_notifications").select("id,actor_id,notification_type,payload,read_at,created_at").eq("recipient_id",userId).order("created_at",{ascending:false}).limit(100);
    if(!active||loadError||!data)return;
-   setItems(current=>{
-    const merged=new Map<string,Notice>((data as Notice[]).map(item=>[item.id,item]));
-    current.forEach(item=>{if(!merged.has(item.id))merged.set(item.id,item);});
-    return Array.from(merged.values()).sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,100);
-   });
+   const changes=new Map(realtimeChanges.current);realtimeChanges.current.clear();
+   const merged=new Map<string,Notice>((data as Notice[]).map(item=>[item.id,item]));
+   changes.forEach((value,id)=>{if(value)merged.set(id,value);else merged.delete(id);});
+   setItems(Array.from(merged.values()).sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,100));
   };
   void supabase.auth.getUser().then(({data:{user}})=>{
    if(!active||!user)return;
    currentUserId=user.id;
    channel=supabase.channel("renqd-inbox-"+user.id).on("postgres_changes",{event:"*",schema:"public",table:"user_notifications",filter:"recipient_id=eq."+user.id},payload=>{
     const row=(payload.new??payload.old) as Notice;
+    realtimeChanges.current.set(row.id,payload.eventType==="DELETE"?null:row);
     if(payload.eventType==="INSERT")setItems(current=>current.some(item=>item.id===row.id)?current:[row,...current].sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,100));
     else if(payload.eventType==="UPDATE")setItems(current=>current.map(item=>item.id===row.id?row:item));
     else if(payload.eventType==="DELETE")setItems(current=>current.filter(item=>item.id!==row.id));
