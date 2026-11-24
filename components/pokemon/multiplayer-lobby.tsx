@@ -13,7 +13,7 @@ import {
 export type NameEmAllParticipant = {
   userId:string; username:string; displayName:string; avatarUrl:string|null;
   isReady:boolean; isActive:boolean; isConnected:boolean; completed:boolean;
-  foundCount:number; rankPosition:number|null; publicSlug:string|null;
+  foundCount:number; rankPosition:number|null; publicSlug:string|null;lastDiscoveryAt:string|null;
 };
 
 type LobbyConfig = {
@@ -140,7 +140,7 @@ export function NameEmAllMultiplayerLobby({
       const result=await leaveNameEmAllAction(session.id);
       setBusy(false);
       if(!result.ok){setError(result.error??"Non è stato possibile uscire dalla lobby.");return;}
-      router.refresh();
+      router.push("/pokemon");
     });
   };
 
@@ -179,8 +179,8 @@ export function NameEmAllMultiplayerLobby({
           </div>
           <div className="pokemon-nae-subheading"><strong>Aiuti e visualizzazione</strong></div>
           <div className="pokemon-nae-toggle-list">
-            <label><span><strong>Numero Pokédex</strong></span><input type="checkbox" checked={editConfig.showDexNumber} onChange={event=>setEditConfig(value=>({...value,showDexNumber:event.target.checked}))}/></label>
-            <label><span><strong>Tipo Pokémon</strong></span><input type="checkbox" checked={editConfig.showType} onChange={event=>setEditConfig(value=>({...value,showType:event.target.checked}))}/></label>
+            <label><span><strong>Numero Pokédex nella scheda</strong></span><input type="checkbox" checked={editConfig.showDexNumber} onChange={event=>setEditConfig(value=>({...value,showDexNumber:event.target.checked}))}/></label>
+            <label><span><strong>Tipo nella scheda</strong></span><input type="checkbox" checked={editConfig.showType} onChange={event=>setEditConfig(value=>({...value,showType:event.target.checked}))}/></label>
             <label><span><strong>Aiuto ortografico</strong></span><input type="checkbox" checked={editConfig.spellingHelp} onChange={event=>setEditConfig(value=>({...value,spellingHelp:event.target.checked}))}/></label>
           </div>
           <div className="pokemon-nae-subheading"><strong>Shadows</strong></div>

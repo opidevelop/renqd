@@ -26,6 +26,7 @@ export default async function NameEmAllPage() {
   } : null;
 
   let discoveries: {species_id:number}[]=[];
+  const initialDiscoverers:Record<string,string>={};
   let initialParticipants: NameEmAllParticipant[]=[];
   if(user&&activeSession){
     let discoveryQuery=supabase.from("pokemon_name_em_all_discoveries").select("species_id,user_id,discovered_by").eq("session_id",activeSession.id);
@@ -44,11 +45,15 @@ export default async function NameEmAllPage() {
     const profileMap=new Map((profiles??[]).map(profile=>[profile.user_id,profile]));
     const slugMap=new Map((rankingRows??[]).map(row=>[row.id,row.public_slug]));
     const {data:allDiscoveries}=await supabase.from("pokemon_name_em_all_discoveries")
-      .select("species_id,user_id,discovered_by").eq("session_id",activeSession.id);
+      .select("species_id,user_id,discovered_by,discovered_at").eq("session_id",activeSession.id);
     const counts=new Map<string,number>();
+    const lastDiscoveryAt=new Map<string,string>();
     for(const row of allDiscoveries??[]){
       const key=activeSession.game_mode==="COLLABORATIVE"?String(row.discovered_by):String(row.user_id);
       counts.set(key,(counts.get(key)??0)+1);
+      const timestamp=String(row.discovered_at??"");
+      if(timestamp&&(!lastDiscoveryAt.has(key)||timestamp>lastDiscoveryAt.get(key)!))lastDiscoveryAt.set(key,timestamp);
+      if(activeSession.game_mode==="COLLABORATIVE"&&row.user_id===null&&row.discovered_by)initialDiscoverers[String(row.species_id)]=String(row.discovered_by);
     }
     initialParticipants=await Promise.all((participantRows??[]).map(async row=>{
       const profile=profileMap.get(row.user_id);
@@ -57,7 +62,7 @@ export default async function NameEmAllPage() {
         avatarUrl:await getProfileMediaUrl(supabase,profile?.avatar_url??null),
         isReady:Boolean(row.is_ready),isActive:Boolean(row.is_active),isConnected:Boolean(row.is_connected),
         completed:Boolean(row.completed_at),foundCount:counts.get(row.user_id)??0,rankPosition:null,
-        publicSlug:slugMap.get(row.ranking_id)??null,
+        publicSlug:slugMap.get(row.ranking_id)??null,lastDiscoveryAt:lastDiscoveryAt.get(row.user_id)??null,
       };
     }));
   }
@@ -74,6 +79,7 @@ export default async function NameEmAllPage() {
         initialDiscoveries={discoveries.map(row=>row.species_id)}
         latestResult={(latestResult?.result_snapshot as Record<string,unknown> | undefined) ?? null}
         initialParticipants={initialParticipants}
+        initialDiscoverers={initialDiscoverers}
         currentUserId={user?.id??""}
         currentUserRole={String(profile?.role??"")}
       />

@@ -1576,3 +1576,16 @@ I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI conco
 3. Confrontare i risultati, le card, la privacy e la cancellazione con tutte le decisioni 1–134, senza riaprire le decisioni.
 4. Eseguire test visuali desktop/mobile per tutte e quattro le modalità.
 5. Solo dopo questi controlli, considerare la macro-categoria pronta al rilascio.
+
+
+### Aggiornamento implementativo multiplayer — 24 novembre 2026
+- L'uscita volontaria durante una partita salva immediatamente il risultato parziale, rimuove il partecipante dalla classifica attiva e conserva il suo contributo nel risultato finale.
+- Il rientro nella stessa sessione riattiva il partecipante, nasconde il risultato parziale provvisorio e conserva progressi, ranking e cronologia.
+- L'uscita dalla lobby prima dell'avvio rimuove il partecipante e il relativo ranking; se esce il creatore, la lobby viene chiusa.
+- L'host dispone ora di due azioni distinte e confermate: abbandonare salvando il proprio parziale oppure terminare la partita per tutti.
+- In modalità condivisa, ogni Pokémon scoperto mostra l'indicatore dell'Allenatore che lo ha trovato; la classifica usa il numero di scoperte e, a parità, il timestamp con cui è stato raggiunto il punteggio.
+- Durante la partita restano modificabili le impostazioni visive ammesse: Shadows e ordinamento della griglia. Numero Pokédex e tipo non compaiono nelle celle; se attivati in configurazione sono mostrati solo nella scheda dettaglio.
+- Il risultato personale multiplayer distingue il contributo individuale dal totale di squadra; l'esportazione completa aggiunge la classifica.
+- Nuove migrazioni applicate e salvate localmente: uscita con risultato parziale e rientro, classifica attiva per il tie-break, alias del conteggio errori per la card.
+- Verifica dopo questi aggiornamenti: TypeScript superato, ESLint senza errori (warning non bloccanti), catalogo locale verificato, build di produzione superata.
+- Il collaudo con più account reali e la sincronizzazione remota del catalogo restano da eseguire. Il commit locale e lo snapshot Vercel sono conservati; il push GitHub non è ancora confermato.

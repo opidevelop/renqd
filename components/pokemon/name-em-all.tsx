@@ -108,8 +108,8 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
         <span className="pokemon-page-eyebrow">03 · DIFFICOLTÀ</span><h2>Imposta il livello di aiuto.</h2>
         <p className="pokemon-nae-help">Le impostazioni suggerite nascondono numero Pokédex e tipo, mantenendo attivo l&apos;aiuto ortografico.</p>
         <div className="pokemon-nae-toggle-list">
-          <label><span><strong>Numero Pokédex</strong><small>Mostra il numero nazionale nella griglia</small></span><input type="checkbox" checked={config.showDexNumber} onChange={e=>update({showDexNumber:e.target.checked})}/></label>
-          <label><span><strong>Tipo Pokémon</strong><small>Mostra i tipi durante la partita</small></span><input type="checkbox" checked={config.showType} onChange={e=>update({showType:e.target.checked})}/></label>
+          <label><span><strong>Numero Pokédex</strong><small>Mostra il numero nazionale nella scheda dettaglio</small></span><input type="checkbox" checked={config.showDexNumber} onChange={e=>update({showDexNumber:e.target.checked})}/></label>
+          <label><span><strong>Tipo Pokémon</strong><small>Mostra i tipi nella scheda dettaglio</small></span><input type="checkbox" checked={config.showType} onChange={e=>update({showType:e.target.checked})}/></label>
           <label><span><strong>Aiuto ortografico</strong><small>Rivela progressivamente le lettere corrette, senza mostrare il nome completo</small></span><input type="checkbox" checked={config.spellingHelp} onChange={e=>update({spellingHelp:e.target.checked})}/></label>
         </div>
         <div className="pokemon-nae-subheading"><strong>Shadows</strong><span>Seleziona una preferenza</span></div>
@@ -150,7 +150,7 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
           <div><span>Generazioni</span><strong>{config.generations.map(g=>GENERATION_LABELS[g-1]).join(", ")}</strong></div>
           <div><span>Tipi</span><strong>{config.types.length?config.types.map(t=>POKEMON_TYPE_LABELS[t]).join(", "):"Tutti"}</strong></div>
           <div><span>Sezioni speciali</span><strong>{(Object.keys(specialLabels) as (keyof SpecialSections)[]).filter(k=>config.specialSections[k]).map(k=>specialLabels[k]).join(", ")||"Nessuna"}</strong></div>
-          <div><span>Difficoltà</span><strong>{config.showDexNumber?"Numero Pokédex visibile":"Numero nascosto"} · {config.showType?"Tipo visibile":"Tipo nascosto"}</strong></div>
+          <div><span>Difficoltà</span><strong>{config.showDexNumber?"Numero Pokédex nella scheda":"Numero nascosto"} · {config.showType?"Tipo nella scheda":"Tipo nascosto"}</strong></div>
           <div><span>Aiuto ortografico</span><strong>{config.spellingHelp?"Attivo":"Disattivo"}</strong></div>
           <div><span>Shadows</span><strong>{config.shadows?"Silhouette":"Poké Ball"}</strong></div>
           <div><span>Ordinamento</span><strong>{config.sortOrder==="RANDOM"?"Casuale":config.sortOrder==="POKEDEX"?"Numero Pokédex":"Per tipo"}</strong></div>
@@ -205,7 +205,7 @@ function Game({
   const inputRef=useRef<HTMLInputElement>(null);
   const config=session.config as WizardConfig;
   const [settingsOpen,setSettingsOpen]=useState(false);
-  const [visual,setVisual]=useState({showDexNumber:config.showDexNumber,showType:config.showType,shadows:config.shadows===true});
+  const [visual,setVisual]=useState({shadows:config.shadows===true});
   const [sortOrder,setSortOrder]=useState(config.sortOrder);
   const [randomOrder,setRandomOrder]=useState<number[]|null>(null);
   const baseSpecies=session.catalog_species_ids.map(id=>catalog.species.find(item=>item.id===id)).filter((item):item is PokemonSpecies=>Boolean(item));
@@ -307,8 +307,6 @@ function Game({
       </header>
       {settingsOpen&&<section className="pokemon-nae-live-settings" aria-label="Impostazioni visive">
         <div className="pokemon-nae-toggle-list">
-          <label><span><strong>Numero Pokédex</strong></span><input type="checkbox" checked={visual.showDexNumber} onChange={event=>setVisual(value=>({...value,showDexNumber:event.target.checked}))}/></label>
-          <label><span><strong>Tipo Pokémon</strong></span><input type="checkbox" checked={visual.showType} onChange={event=>setVisual(value=>({...value,showType:event.target.checked}))}/></label>
           <label><span><strong>Shadows · Silhouette</strong></span><input type="checkbox" checked={visual.shadows} onChange={event=>setVisual(value=>({...value,shadows:event.target.checked}))}/></label>
         </div>
         <div className="pokemon-nae-choice-row">{([["RANDOM","Casuale"],["POKEDEX","Pokédex"],["TYPE","Per tipo"]] as const).map(([value,label])=><button type="button" key={value} className={sortOrder===value?"is-selected":""} onClick={()=>changeSort(value)}>{label}</button>)}</div>
@@ -347,8 +345,6 @@ function Game({
               return <button type="button" key={item.id+"-"+(form?.id??"base")} onClick={()=>{setSelected(item);setHint(null);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")}>
                 <span className="pokemon-nae-cell-art">{isFound||visual.shadows?<img src={artwork} alt="" loading="lazy" style={{filter:isFound?"none":"brightness(0) saturate(0) opacity(.55)"}}/>:<b className="pokemon-nae-pokeball">◉</b>}</span>
                 {isFound?<strong>{displayName}</strong>:<strong className="is-hidden">{visual.shadows?"???":"Pokémon"}</strong>}
-                {visual.showDexNumber&&<small>#{item.id.toString().padStart(4,"0")}</small>}
-                {visual.showType&&<small>{item.types.map(t=>POKEMON_TYPE_LABELS[t]??t).join(" · ")}</small>}
                 {(item.forms.length>0||item.isLegendary||item.isMythical||item.isUltraBeast||item.isParadox)&&<span className="pokemon-nae-cell-indicators">{item.forms.length>0?"◇":""}{item.isLegendary?"★":""}{item.isMythical?"✦":""}{item.isUltraBeast?"◈":""}{item.isParadox?"⌁":""}</span>}
               </button>;
             })}
@@ -359,7 +355,7 @@ function Game({
       {selected&&<div className="pokemon-nae-detail-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setSelected(null);}}>
         <aside className="pokemon-nae-detail" role="dialog" aria-modal="true" aria-label={"Dettaglio "+selected.name}>
           <header><span className="pokemon-page-eyebrow">SCHEDA POKÉMON</span><button type="button" onClick={()=>setSelected(null)} aria-label="Chiudi"><X size={18}/></button></header>
-          <div className="pokemon-nae-detail-hero"><img src={selected.artworkUrl} alt={selected.name}/><div><h2>{selected.name}</h2><small>#{selected.id.toString().padStart(4,"0")} · Generazione {GENERATION_LABELS[selected.generation-1]}</small><p>{selected.types.map(t=>POKEMON_TYPE_LABELS[t]??t).join(" · ")}</p></div></div>
+          <div className="pokemon-nae-detail-hero"><img src={selected.artworkUrl} alt={selected.name}/><div><h2>{selected.name}</h2>{config.showDexNumber&&<small>#{selected.id.toString().padStart(4,"0")}</small>}<small>Generazione {GENERATION_LABELS[selected.generation-1]}</small>{config.showType&&<p>{selected.types.map(t=>POKEMON_TYPE_LABELS[t]??t).join(" · ")}</p>}</div></div>
           <div className="pokemon-nae-detail-stats"><span>{discoveredName(selected.id)?"Scoperto":"Da scoprire"}</span><span>{selectedForms.length} forme associate</span></div>
           {selectedForms.length>0&&<div className="pokemon-nae-forms"><strong>Forme associate</strong><div>{selectedForms.map(form=><div key={form.id}><img src={form.spriteUrl} alt=""/><span>{form.label||form.slug}</span></div>)}</div></div>}
           {config.spellingHelp&&!discoveredName(selected.id)&&<div className="pokemon-nae-hint-box"><strong>Aiuto ortografico</strong><p>Nome di {selected.name.length} caratteri. Rivela progressivamente le lettere senza mostrare il nome completo.</p>{hint&&<div className="pokemon-nae-hint-reveal"><span>{hint.revealedPrefix}</span><span>{Array.from({length:Math.max(0,hint.nameLength-hint.revealedPrefix.length)},()=> "•").join(" ")}</span></div>}<button type="button" onClick={()=>void revealHint()}><HelpCircle size={14}/> Rivela una lettera</button></div>}
@@ -401,7 +397,12 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
   const discoveredIds=Array.isArray(result.discoveredSpeciesIds)?(result.discoveredSpeciesIds as unknown[]).map(Number).filter(Number.isFinite):[];
   const discovered=useMemo(()=>discoveredIds.map(id=>catalog?.species.find(item=>item.id===id)).filter((item):item is PokemonSpecies=>Boolean(item)),[catalog,result.discoveredSpeciesIds]);
   const leaderboard=Array.isArray(result.leaderboard)?result.leaderboard as Array<Record<string,unknown>>:[];
-  const finishLabels:Record<string,string>={TIMER_EXPIRED:"Timer scaduto",CATALOG_COMPLETE:"Pokédex completato",USER_EXIT:"Terminata dal giocatore",HOST_TERMINATED:"Terminata dall’host",ALL_COMPLETED:"Tutti i partecipanti hanno completato"};
+  const isShared=result.gameMode==="COLLABORATIVE";
+  const ownRow=leaderboard.find(entry=>String(entry.userId??"")===String(result.userId??""));
+  const personalScore=Number(result.personalFoundCount??ownRow?.foundCount??result.score??result.foundCount??0);
+  const teamScore=Number(result.teamFoundCount??result.foundCount??result.score??0);
+  const exportScore=exportMode==="FULL"&&isShared?teamScore:personalScore;
+  const finishLabels:Record<string,string>={TIMER_EXPIRED:"Timer scaduto",CATALOG_COMPLETE:"Pokédex completato",USER_EXIT:"Terminata dal giocatore",HOST_TERMINATED:"Terminata dall’host",ALL_COMPLETED:"Tutti i partecipanti hanno completato",PLAYER_LEFT:"Risultato parziale · uscita volontaria"};
   const exportWidth=1080;
   const exportHeight=exportSize==="VERTICAL"?1350:1080;
   const handleExport=async()=>{
@@ -419,13 +420,14 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
   };
   return <section className="pokemon-nae-result">
     <span className="pokemon-page-eyebrow">RENQD × POKÉMON · RISULTATO</span><h1>La tua partita.</h1>
+    {result.partial===true&&<p className="pokemon-nae-partial-tag">Risultato parziale salvato · potrai rientrare nella sessione finché resta attiva.</p>}
     <div className={"pokemon-nae-result-card medal-"+medal} style={{background:"linear-gradient(145deg,"+(colors[medal]??colors.eevee)+"30,#fffdfa 72%)"}}>
       <div className="pokemon-nae-result-artwork"><img src={medalArt} alt="" crossOrigin="anonymous"/></div>
       <div className="pokemon-nae-result-medal" style={{borderColor:colors[medal]??colors.eevee,background:"linear-gradient(145deg,#fffdf8,"+(colors[medal]??colors.eevee)+"22)"}}>
         <img src={medalArt} alt="" crossOrigin="anonymous"/>
       </div>
       <span className="pokemon-page-eyebrow">LIVELLO OTTENUTO</span><h2>{level}</h2>
-      <strong className="pokemon-nae-result-score">{String(result.score??result.foundCount??0)} <small>Pokémon</small></strong>
+      <strong className="pokemon-nae-result-score">{String(isShared?personalScore:result.score??result.foundCount??0)} <small>{isShared?"contributo personale":"Pokémon"}</small></strong>
       <div className="pokemon-nae-result-stats">
         <div><strong>{String(result.completion??0)}%</strong><small>Completamento</small></div>
         <div><strong>{String(result.accuracy??0)}%</strong><small>Precisione</small></div>
@@ -443,7 +445,8 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
     <div className="pokemon-nae-result-tab-content">
       {activeTab==="overview"&&<div className="pokemon-nae-result-overview">
         <p>La partita è stata registrata nel tuo profilo Renqd. Il livello mostrato è quello ottenuto in questa specifica sessione.</p>
-        <div><span>Pokémon trovati</span><strong>{String(result.foundCount??result.score??0)} / {String(result.catalogCount??0)}</strong></div>
+        <div><span>Pokémon trovati</span><strong>{String(teamScore)} / {String(result.catalogCount??0)}</strong></div>
+        {isShared&&<div><span>Contributo personale</span><strong>{String(personalScore)} Pokémon</strong></div>}
         <div><span>Generazioni completate</span><strong>{String(result.generationsCompleted??0)}</strong></div>
         <div><span>Conclusione</span><strong>{finishLabels[String(result.finishReason??"")]??"Risultato salvato"}</strong></div>
       </div>}
@@ -471,7 +474,7 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
         <div className="pokemon-nae-export-top"><img src="/brand/renqd-logo.svg" alt="Renqd" crossOrigin="anonymous"/><span>NAME ’EM ALL</span></div>
         <div className="pokemon-nae-export-main">
           <div className="pokemon-nae-export-medal" style={{background:colors[medal]??colors.eevee}}><img src={medalArt} alt="" crossOrigin="anonymous"/></div>
-          <span>IL TUO LIVELLO</span><h2>{level}</h2><strong>{String(result.score??result.foundCount??0)} Pokémon</strong>
+          <span>{exportMode==="FULL"&&isShared?"RISULTATO DI SQUADRA":"IL TUO LIVELLO"}</span><h2>{level}</h2><strong>{String(exportScore)} Pokémon</strong>
           <div className="pokemon-nae-export-stats"><span><b>{String(result.completion??0)}%</b>Completamento</span><span><b>{String(result.accuracy??0)}%</b>Precisione</span><span><b>{formatTime(Number(result.elapsedSeconds??0))}</b>Tempo effettivo</span></div>
           {result.perfect===true&&<em>MAESTRO POKÉMON · PARTITA PERFETTA</em>}
         </div>
@@ -483,9 +486,9 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
   </section>;
 }
 
-export function NameEmAllExperience({activeSession,initialDiscoveries=[],latestResult=null,initialParticipants=[],currentUserId="",currentUserRole=""}:{
+export function NameEmAllExperience({activeSession,initialDiscoveries=[],latestResult=null,initialParticipants=[],initialDiscoverers={},currentUserId="",currentUserRole=""}:{
   activeSession:ActiveSession|null;initialDiscoveries?:number[];latestResult?:ResultSnapshot|null;
-  initialParticipants?:NameEmAllParticipant[];currentUserId?:string;currentUserRole?:string;
+  initialParticipants?:NameEmAllParticipant[];initialDiscoverers?:Record<string,string>;currentUserId?:string;currentUserRole?:string;
 }) {
   const router=useRouter();
   const [catalog,setCatalog]=useState<PokemonCatalog|null>(null);
@@ -528,7 +531,7 @@ export function NameEmAllExperience({activeSession,initialDiscoveries=[],latestR
   };
   if(!catalog)return <div className="pokemon-favourite-loading"><LoaderCircle size={18}/> Caricamento Pokédex… {error}</div>;
   if(activeSession?.status==="LOBBY")return <NameEmAllMultiplayerLobby session={activeSession} participants={initialParticipants} currentUserId={currentUserId}/>;
-  if(activeSession&&activeSession.game_mode!=="SOLO")return <PokemonNameEmAllMultiplayerGame catalog={catalog} session={activeSession} initialDiscoveries={initialDiscoveries} initialParticipants={initialParticipants} currentUserId={currentUserId} currentUserRole={currentUserRole}/>;
+  if(activeSession&&activeSession.game_mode!=="SOLO")return <PokemonNameEmAllMultiplayerGame catalog={catalog} session={activeSession} initialDiscoveries={initialDiscoveries} initialParticipants={initialParticipants} initialDiscoverers={initialDiscoverers} currentUserId={currentUserId} currentUserRole={currentUserRole}/>;
   if(activeSession)return <Game catalog={catalog} session={activeSession} initialDiscoveries={initialDiscoveries}/>;
   if(latestResult&&!showWizard)return <ResultView result={latestResult} catalog={catalog} onNewGame={()=>setShowWizard(true)}/>;
   return <><p className={catalogReady?"pokemon-catalog-sync is-ready":"pokemon-catalog-sync"}>{catalogReady?<CheckCircle2 size={14}/>:<LoaderCircle size={14}/>} {catalogReady?"Catalogo server verificato · "+catalog.speciesCount+" specie":syncError||"Verifica del catalogo server in corso…"}</p><Wizard catalog={catalog} onStart={start} catalogReady={catalogReady}/></>;

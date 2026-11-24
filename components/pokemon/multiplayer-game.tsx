@@ -17,15 +17,16 @@ type MultiplayerSession={
 function formatClock(seconds:number){const value=Math.max(0,seconds);return Math.floor(value/60).toString().padStart(2,"0")+":"+Math.floor(value%60).toString().padStart(2,"0");}
 
 export function PokemonNameEmAllMultiplayerGame({
-  catalog,session:initialSession,initialDiscoveries,initialParticipants,currentUserId,currentUserRole,
+  catalog,session:initialSession,initialDiscoveries,initialParticipants,initialDiscoverers,currentUserId,currentUserRole,
 }:{
   catalog:PokemonCatalog;session:MultiplayerSession;initialDiscoveries:number[];
-  initialParticipants:NameEmAllParticipant[];currentUserId:string;currentUserRole:string;
+  initialParticipants:NameEmAllParticipant[];initialDiscoverers:Record<string,string>;currentUserId:string;currentUserRole:string;
 }) {
   const router=useRouter();
   const [session,setSession]=useState(initialSession);
   const [participants,setParticipants]=useState(initialParticipants);
   const [found,setFound]=useState<Set<number>>(new Set(initialDiscoveries));
+  const [discoveryById,setDiscoveryById]=useState<Record<string,string>>(initialDiscoverers);
   const [query,setQuery]=useState("");
   const [selected,setSelected]=useState<PokemonSpecies|null>(null);
   const [hint,setHint]=useState<{nameLength:number;revealedPrefix:string;hintCount:number}|null>(null);
@@ -38,6 +39,7 @@ export function PokemonNameEmAllMultiplayerGame({
   const [message,setMessage]=useState("");
   const [error,setError]=useState("");
   const [confirmExit,setConfirmExit]=useState(false);
+  const [confirmTerminate,setConfirmTerminate]=useState(false);
   const [inviteNames,setInviteNames]=useState("");
   const [inviteLink,setInviteLink]=useState("");
   const [inviteFeedback,setInviteFeedback]=useState("");
@@ -50,7 +52,7 @@ export function PokemonNameEmAllMultiplayerGame({
   const isPlatformOwner=currentUserRole==="OWNER";
   const config=session.config as Record<string,unknown>;
   const [settingsOpen,setSettingsOpen]=useState(false);
-  const [visual,setVisual]=useState({showDexNumber:config.showDexNumber===true,showType:config.showType===true,shadows:config.shadows===true});
+  const [visual,setVisual]=useState({shadows:config.shadows===true});
   const [sortOrder,setSortOrder]=useState(config.sortOrder==="POKEDEX"||config.sortOrder==="TYPE"?config.sortOrder:"RANDOM");
   const [randomOrder,setRandomOrder]=useState<number[]|null>(null);
   const spellingHelp=config.spellingHelp!==false;
@@ -94,15 +96,22 @@ export function PokemonNameEmAllMultiplayerGame({
 
   const refreshLive=useCallback(async(client:ReturnType<typeof createClient>)=>{
     const [discoveriesResult,participantsResult,sessionResult]=await Promise.all([
-      client.from("pokemon_name_em_all_discoveries").select("species_id,user_id,discovered_by").eq("session_id",session.id),
+      client.from("pokemon_name_em_all_discoveries").select("species_id,user_id,discovered_by,discovered_at").eq("session_id",session.id),
       client.from("pokemon_name_em_all_participants").select("user_id,is_ready,is_active,is_connected,completed_at,joined_at").eq("session_id",session.id).is("expelled_at",null).order("joined_at",{ascending:true}),
       client.from("pokemon_name_em_all_sessions").select("status,host_id,started_at,deadline_at,remaining_seconds").eq("id",session.id).maybeSingle(),
     ]);
     const rows=discoveriesResult.data??[];
     const myRows=rows.filter(row=>shared?row.user_id===null:row.user_id===currentUserId);
     setFound(new Set(myRows.map(row=>Number(row.species_id))));
+    if(shared)setDiscoveryById(Object.fromEntries(rows.filter(row=>row.user_id===null&&row.discovered_by).map(row=>[String(row.species_id),String(row.discovered_by)])));
     const counts=new Map<string,number>();
-    for(const row of rows){const id=shared?String(row.discovered_by):String(row.user_id);counts.set(id,(counts.get(id)??0)+1);}
+    const lastDiscoveryAt=new Map<string,string>();
+    for(const row of rows){
+      const id=shared?String(row.discovered_by):String(row.user_id);
+      counts.set(id,(counts.get(id)??0)+1);
+      const timestamp=String(row.discovered_at??"");
+      if(timestamp&&(!lastDiscoveryAt.has(id)||timestamp>lastDiscoveryAt.get(id)!))lastDiscoveryAt.set(id,timestamp);
+    }
     const participantRows=participantsResult.data??[];
     const ids=participantRows.map(row=>row.user_id);
     const {data:profiles}=ids.length?await client.from("public_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids):{data:[]};
@@ -112,7 +121,8 @@ export function PokemonNameEmAllMultiplayerGame({
       const old=initialParticipants.find(item=>item.userId===row.user_id);
       return {userId:row.user_id,username:profile?.username??old?.username??"",displayName:profile?.display_name??old?.displayName??"Allenatore",
         avatarUrl:old?.avatarUrl??null,isReady:Boolean(row.is_ready),isActive:Boolean(row.is_active),isConnected:Boolean(row.is_connected),
-        completed:Boolean(row.completed_at),foundCount:counts.get(row.user_id)??0,rankPosition:old?.rankPosition??null,publicSlug:old?.publicSlug??null};
+        completed:Boolean(row.completed_at),foundCount:counts.get(row.user_id)??0,rankPosition:old?.rankPosition??null,publicSlug:old?.publicSlug??null,
+        lastDiscoveryAt:lastDiscoveryAt.get(row.user_id)??old?.lastDiscoveryAt??null};
     }));
     if(sessionResult.data){
       const live=sessionResult.data;
@@ -195,10 +205,14 @@ export function PokemonNameEmAllMultiplayerGame({
 
   const exit=async()=>{
     setConfirmExit(false);
-    if(isHost){await finish("HOST_TERMINATED");return;}
     const result=await leaveNameEmAllAction(session.id);
     if(!result.ok){setError(result.error??"Non è stato possibile uscire.");return;}
-    router.refresh();
+    if(result.data?.partialSaved)router.push("/profile/pokemon");
+    else router.push("/pokemon");
+  };
+  const terminateForAll=async()=>{
+    setConfirmTerminate(false);
+    await finish("HOST_TERMINATED");
   };
 
   const inviteUsers=async()=>{
@@ -225,21 +239,24 @@ export function PokemonNameEmAllMultiplayerGame({
     if(!result.ok){setInviteError(result.error??"Espulsione non riuscita.");return;}
     setInviteFeedback(displayName+" è stato espulso dalla partita.");
   };
-  const sortedParticipants=[...participants].sort((a,b)=>b.foundCount-a.foundCount||a.displayName.localeCompare(b.displayName,"it"));
+  const sortedParticipants=[...participants].sort((a,b)=>b.foundCount-a.foundCount||
+    (a.lastDiscoveryAt&&b.lastDiscoveryAt?new Date(a.lastDiscoveryAt).getTime()-new Date(b.lastDiscoveryAt).getTime():a.lastDiscoveryAt?-1:b.lastDiscoveryAt?1:0)||
+    a.displayName.localeCompare(b.displayName,"it"));
   return <section className="pokemon-nae-game pokemon-nae-multiplayer">
     <header className="pokemon-nae-game-header">
       <div><span className="pokemon-page-eyebrow">RENQD × POKÉMON · MULTIPLAYER</span><h1>Name ’Em All</h1><p>{shared?"Un unico catalogo per tutta la squadra.":"Stesso catalogo, progressi personali."} {isHost?"Sei l’host della partita.": "Segui la classifica in tempo reale."}</p></div>
       <div className="pokemon-nae-multiplayer-header-actions">
         {isHost&&<span className="pokemon-nae-host-tag"><Crown size={13}/> Host</span>}
-        <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmExit(true)}><LogOut size={15}/>{isHost?"Termina partita":"Abbandona"}</button>
+        <div className="pokemon-nae-game-header-actions">
+          <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmExit(true)}><LogOut size={15}/> Abbandona</button>
+          {isHost&&<button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmTerminate(true)}><X size={15}/> Termina per tutti</button>}
+        </div>
       </div>
     </header>
 
     <div className="pokemon-nae-live-settings-toggle"><button type="button" className="pokemon-favourite-secondary" onClick={()=>setSettingsOpen(value=>!value)}><Settings size={15}/> Visualizzazione</button></div>
     {settingsOpen&&<section className="pokemon-nae-live-settings" aria-label="Impostazioni visive">
       <div className="pokemon-nae-toggle-list">
-        <label><span><strong>Numero Pokédex</strong></span><input type="checkbox" checked={visual.showDexNumber} onChange={event=>setVisual(value=>({...value,showDexNumber:event.target.checked}))}/></label>
-        <label><span><strong>Tipo Pokémon</strong></span><input type="checkbox" checked={visual.showType} onChange={event=>setVisual(value=>({...value,showType:event.target.checked}))}/></label>
         <label><span><strong>Shadows · Silhouette</strong></span><input type="checkbox" checked={visual.shadows} onChange={event=>setVisual(value=>({...value,shadows:event.target.checked}))}/></label>
       </div>
       <div className="pokemon-nae-choice-row">{([["RANDOM","Casuale"],["POKEDEX","Pokédex"],["TYPE","Per tipo"]] as const).map(([value,label])=><button type="button" key={value} className={sortOrder===value?"is-selected":""} onClick={()=>changeSort(value)}>{label}</button>)}</div>
@@ -283,11 +300,12 @@ export function PokemonNameEmAllMultiplayerGame({
     <div className="pokemon-nae-multiplayer-catalog">
       {species.map(item=>{
         const isFound=found.has(item.id);
+        const discovererId=shared?discoveryById[String(item.id)]:null;
+        const discoverer=discovererId?participants.find(player=>player.userId===discovererId):null;
         return <button key={item.id} type="button" disabled={isFound||playerCompleted||session.status!=="ACTIVE"} onClick={()=>{setSelected(item);setHint(null);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")}>
           <span className="pokemon-nae-cell-art">{isFound?<img src={item.spriteUrl} alt="" loading="lazy"/>:visual.shadows?<img src={item.spriteUrl} alt="" loading="lazy" style={{filter:"brightness(0) saturate(0) opacity(.55)"}}/>:<span className="pokemon-nae-pokeball-placeholder">◉</span>}</span>
           <strong className={isFound?"":"is-hidden"}>{isFound?item.name:visual.shadows?"???":"Pokémon"}</strong>
-          {visual.showDexNumber&&<small>#{String(item.id).padStart(4,"0")}</small>}
-          {visual.showType&&<small>{item.types.join(" · ")}</small>}
+          {shared&&isFound&&discoverer&&<span className="pokemon-nae-cell-discoverer" title={"Scoperto da "+discoverer.displayName}>{discoverer.avatarUrl?<img src={discoverer.avatarUrl} alt=""/>:discoverer.displayName.slice(0,1).toUpperCase()}</span>}
         </button>;
       })}
     </div>
@@ -295,7 +313,7 @@ export function PokemonNameEmAllMultiplayerGame({
     {selected&&!found.has(selected.id)&&<div className="pokemon-nae-detail-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setSelected(null);}}>
       <aside className="pokemon-nae-detail" role="dialog" aria-modal="true" aria-label={"Suggerimento per "+selected.name}>
         <header><span className="pokemon-page-eyebrow">AIUTO ORTOGRAFICO</span><button type="button" onClick={()=>setSelected(null)} aria-label="Chiudi"><X size={18}/></button></header>
-        <div className="pokemon-nae-detail-hero"><span className="pokemon-nae-detail-question">?</span><div><h2>#{String(selected.id).padStart(4,"0")}</h2><small>Generazione {selected.generation}</small><p>{selected.types.join(" · ")}</p></div></div>
+        <div className="pokemon-nae-detail-hero"><span className="pokemon-nae-detail-question">?</span><div>{config.showDexNumber===true&&<h2>#{String(selected.id).padStart(4,"0")}</h2>}<small>Generazione {selected.generation}</small>{config.showType===true&&<p>{selected.types.join(" · ")}</p>}</div></div>
         {hint&&<p className="pokemon-nae-hint-reveal">{hint.revealedPrefix}{hint.revealedPrefix.length<hint.nameLength?" _".repeat(Math.min(12,hint.nameLength-hint.revealedPrefix.length)):""} <small>{hint.nameLength} lettere</small></p>}
         <button type="button" className="pokemon-favourite-primary" onClick={()=>void requestHint()} disabled={!spellingHelp||pending}> <HelpCircle size={15}/> Rivela lettere</button>
         <button type="button" className="pokemon-favourite-secondary" onClick={()=>setSelected(null)}>Chiudi</button>
@@ -303,11 +321,18 @@ export function PokemonNameEmAllMultiplayerGame({
     </div>}
 
     {confirmExit&&<div className="pokemon-nae-pause-backdrop" role="presentation"><section className="pokemon-nae-pause-card" role="alertdialog" aria-modal="true" aria-labelledby="pokemon-nae-multi-exit">
-      <span className="pokemon-page-eyebrow">{isHost?"HOST":"PARTECIPANTE"}</span>
-      <h2 id="pokemon-nae-multi-exit">{isHost?"Terminare la partita per tutti?":"Abbandonare la partita?"}</h2>
-      <p>{isHost?"Tutti i partecipanti riceveranno il risultato della partita.":"Il tuo contributo sarà conservato e riceverai il risultato quando la partita terminerà."}</p>
-      <button type="button" className="pokemon-favourite-primary" onClick={()=>void exit()} disabled={isFinishing}>{isHost?"Termina per tutti":"Abbandona partita"}</button>
+      <span className="pokemon-page-eyebrow">CONFERMA USCITA</span>
+      <h2 id="pokemon-nae-multi-exit">Abbandonare la partita?</h2>
+      <p>Il tuo risultato parziale verrà salvato nel profilo, uscirai dalla classifica attiva e il tuo contributo resterà nei risultati finali. Potrai rientrare nella stessa sessione finché sarà in corso.</p>
+      <button type="button" className="pokemon-favourite-primary" onClick={()=>void exit()} disabled={isFinishing}>Abbandona e salva</button>
       <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmExit(false)}>Continua a giocare</button>
+    </section></div>}
+    {confirmTerminate&&<div className="pokemon-nae-pause-backdrop" role="presentation"><section className="pokemon-nae-pause-card" role="alertdialog" aria-modal="true" aria-labelledby="pokemon-nae-multi-terminate">
+      <span className="pokemon-page-eyebrow">AZIONE HOST</span>
+      <h2 id="pokemon-nae-multi-terminate">Terminare la partita per tutti?</h2>
+      <p>La sessione verrà chiusa per tutti i partecipanti e ciascuno riceverà il proprio risultato, compresi i progressi parziali.</p>
+      <button type="button" className="pokemon-favourite-primary" onClick={()=>void terminateForAll()} disabled={isFinishing}>Termina per tutti</button>
+      <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmTerminate(false)}>Annulla</button>
     </section></div>}
   </section>;
 }
