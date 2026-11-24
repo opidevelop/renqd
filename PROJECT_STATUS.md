@@ -4,7 +4,7 @@
 >
 > Per le decisioni vincolanti consultare prima `PROJECT_DECISIONS.md`. Se questo documento descrive uno stato tecnico che contraddice una decisione, prevale `PROJECT_DECISIONS.md`.
 >
-> **Aggiornato:** 23 novembre 2026
+> **Aggiornato:** 24 novembre 2026
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
 > **Ultimo commit applicativo analizzato su main:** `162f3749f65ebc55f2ac32c13db083f9af0c1be6`
@@ -1262,7 +1262,6 @@ Revisione della migrazione di hardening:
 
 - Ulteriore avviso Supabase Security Advisor: auth_leaked_password_protection è disabilitato. È una configurazione di Supabase Auth (disponibile sui piani Pro e superiori) e non è modificabile tramite le azioni del connettore disponibili; resta da abilitare e verificare nel pannello Auth Settings.
 - La Production Vercel resta sul deployment READY dpl_2ttceyTg9gj1iV5zwR2q2jFtLbsR, commit 162f3749f65ebc55f2ac32c13db083f9af0c1be6. La Edge Function admin-delete-user è ancora alla versione Production 3; la hardening locale non è stata distribuita.
-- La nota di recupero allegata menziona un branch develop, ma le decisioni più recenti del progetto impongono il flusso main-only senza Preview/Staging: nessun branch develop è stato creato.
 
 
 ## Aggiornamento attività aperte — 23 novembre 2026
@@ -1429,3 +1428,33 @@ I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI conco
 - **Modal:** Following, conferme globali e conferma «Svuota tutto» vengono renderizzati direttamente in document.body tramite portal, così non restano intrappolati negli stacking context e negli overflow della pagina.
 - Verifiche locali: git diff --check, npm run lint, npx tsc --noEmit e npm run build superati. ESLint segnala warning non bloccanti preesistenti.
 - Nessuna modifica a schema Supabase, migrazioni, ruoli, permessi o dati. Test visuale autenticato non eseguito in questa sessione.
+
+
+## 2026-11-24 — Nuove richieste UI e aggiornamento delle regole operative
+
+### Decisioni e preferenze confermate dall'utente
+- **Card Renq pubblicato:** individuare il riferimento corretto tramite la cronologia Git, senza chiedere all'utente di scegliere un commit che non conosce; ripristinare fedelmente la grafica di riferimento.
+- **Card Lobby Multiplayer:** uniformare la presentazione alla card dei Renq pubblicati, mantenendo le funzionalità multiplayer già approvate e la copertina contenuta nel riquadro.
+- **Elenchi Appunti:** comportamento standard richiesto e approvato: elenchi puntati/numerati dai pulsanti, continuazione automatica con Invio, doppio Invio per uscire, Tab/Shift+Tab per gestire i livelli.
+- **Attività:** notifiche sempre aggiornate senza refresh manuale. Su mobile l'utente preferisce una soluzione mobile-friendly; le schede affiancate sono accettabili solo se ben organizzate e leggibili.
+- **Appunti condivisi:** sincronizzazione degli aggiornamenti dopo l'autosalvataggio, con propagazione entro meno di 10 secondi e senza perdere o sovrascrivere modifiche concorrenti.
+
+### Analisi tecnica già svolta — implementazione ancora da completare
+- **Card pubblicata:** lo snapshot Git 7ffa974dc88d3af65a96e000843157751af142da (19 novembre 2026) è stato individuato come riferimento storico della card. Le regole globali introdotte in app/renqd-identity.css includono .saved-renq-hero nei selettori decorativi e ne sovrascrivono lo pseudo-elemento :after, interferendo con il gradiente originale. Il ripristino dovrà escludere .saved-renq-hero da entrambi i selettori globali in conflitto, conservando markup, dimensioni, spaziature, tipografia, pulsanti e responsive originali.
+- **Lobby:** il componente interessato è components/multiplayer-session-panel.tsx, con stili in app/renqd-identity.css. La precedente decisione di progetto richiede una thumbnail contenuta nella card chiara, titolo/informazioni nella card, stato separato e controllo di modifica per il creatore. Non reintrodurre il layout full-bleed. Preservare tema dinamico e azioni già approvate.
+- **Elenchi Appunti:** components/notes-workspace.tsx dispone già dei comandi insertUnorderedList e insertOrderedList; le API e le migrazioni di sanitizzazione ammettono ul, ol e li. La causa più probabile dei marcatori invisibili è il reset Preflight di Tailwind: servono stili espliciti per marcatori, margini, padding e liste annidate. Verificare anche l'idratazione del contenuto dell'editor contentEditable quando si apre un documento e il supporto Tab/Shift+Tab.
+- **Autosave e Realtime Appunti:** il debounce esistente è di 850 ms e la subscription Realtime è già presente. Va verificata la gestione delle richieste di salvataggio concorrenti: una modifica durante una richiesta può usare un updated_at non aggiornato e produrre un conflitto 409. La soluzione deve serializzare i salvataggi, preservare le modifiche locali e non introdurre retry infiniti né sovrascritture.
+- **Attività/Notifiche:** components/activity-inbox.tsx mantiene una subscription Realtime quando è montato, ma al ritorno sulla scheda Attività il componente può riutilizzare dati iniziali non aggiornati perché è stato smontato durante la visualizzazione di Messaggi. Al mount va previsto un riallineamento con Supabase, mantenendo Realtime. Rivedere inoltre il CSS mobile delle schede in app/(platform)/inbox.css e app/renqd-identity.css per eliminare ogni rischio di sovrapposizione/overflow.
+
+### Stato del lavoro al 24 novembre
+- Le quattro aree sono APERTE — ANALISI TECNICA EFFETTUATA, IMPLEMENTAZIONE NON ANCORA ESEGUITA.
+- In questa sessione non sono stati modificati componenti applicativi, CSS, API, migrazioni o dati Supabase.
+- Nessuna build, prova browser autenticata o test E2E è stata eseguita per queste quattro richieste.
+- Il riferimento di partenza verificato su main è il commit 434ac88f25b1d1c8545daafc00bc69ecb2f9c048 (fix(ui): correct rank headers, lobby cover and modal layers, 23 novembre 2026).
+- L'utente ha autorizzato il 24 novembre i push necessari su main senza ulteriore conferma a ogni push. Poiché il push può attivare automaticamente Vercel Production, le modifiche correlate dovranno essere raggruppate e verificate prima del push. L'autorizzazione non include migrazioni o modifiche a Supabase/servizi esterni.
+
+### Riferimenti tecnici
+- Card pubblicata: components/saved-renq-detail.tsx, app/(platform)/platform.css, app/renqd-identity.css.
+- Lobby: components/multiplayer-session-panel.tsx, app/renqd-identity.css.
+- Appunti: components/notes-workspace.tsx, app/api/notes/route.ts, app/globals.css e migrazioni di sanitizzazione note.
+- Attività: components/inbox-workspace.tsx, components/activity-inbox.tsx, app/(platform)/inbox.css.

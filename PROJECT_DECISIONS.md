@@ -4,7 +4,7 @@
 >
 > Questo file raccoglie le decisioni esplicite dell'utente emerse nelle conversazioni di progetto. Non è una lista di suggerimenti: le regole qui riportate sono vincoli per analisi, codice, database, interfaccia e deployment.
 >
-> **Ultimo aggiornamento:** 18 novembre 2026  
+> **Ultimo aggiornamento:** 24 novembre 2026  
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main` esclusivamente
 
@@ -191,7 +191,6 @@
 
 - Questo documento è la fonte di riferimento per le decisioni stabili.
 - `PROJECT_STATUS.md` descrive lo stato tecnico corrente e può cambiare frequentemente; non sostituisce le decisioni qui contenute.
-- Il file storico `Recuperare chat Renqd.txt` contiene anche istruzioni di sessioni precedenti poi superate (ad esempio l'uso di `develop`). In caso di conflitto prevalgono le decisioni più recenti e questo documento: si lavora solo su `main`.
 - Aggiornare questo file quando l'utente approva una nuova decisione o modifica esplicitamente una decisione esistente.
 
 14. La console MODERATOR deve mostrare **tutti i Renq pubblicati**, non soltanto quelli segnalati. Deve inoltre offrire un filtro dedicato alle segnalazioni ricevute, così da distinguere la coda delle segnalazioni dalla consultazione generale dei contenuti.
@@ -498,3 +497,16 @@ No database schema, migration, role, permission, authentication or external-serv
 - **Sidebar:** la sidebar desktop resta fissa. Le animazioni di transizione delle route non devono applicare transform al contenitore che può diventare containing block degli elementi fixed.
 - **Scopri:** la griglia di suggerimenti e attività dei seguiti deve rientrare nel viewport anche su tablet; quando lo spazio non basta le colonne si impilano.
 - **Altre correzioni approvate nello stesso gruppo:** rimuovere l'intestazione ridondante «Centro moderazione», aggiornare automaticamente il titolo Album quando cambia l'album selezionato e mostrare le foto profilo dei partecipanti sia nella pagina Renq pubblicata sia nella lobby.
+
+
+### Decisioni approvate il 24 novembre 2026 — card, Attività e Appunti
+
+1. **Card dei Renq pubblicati e Lobby Multiplayer:** ricostruire dalla cronologia Git la versione grafica di riferimento della card pubblicata, perché l'utente non è in grado di indicare uno specifico commit. Il recupero deve essere fedele alla versione effettivamente approvata, senza reinterpretazioni grafiche arbitrarie. La card della Lobby Multiplayer deve poi essere uniformata al linguaggio visivo della card pubblicata, preservando le funzionalità multiplayer già approvate e le decisioni pregresse sulla copertina contenuta nella card.
+2. **Elenchi in Appunti:** gli elenchi puntati e numerati devono comportarsi come negli editor di testo standard: comandi dedicati nella barra strumenti, prosecuzione automatica dell'elenco con Invio, doppio Invio per uscire dall'elenco e Tab/Shift+Tab per creare o ridurre un sottoelenco.
+3. **Attività e notifiche:** le notifiche devono restare aggiornate senza richiedere un refresh manuale. Su mobile la pagina deve adottare una disposizione realmente mobile-friendly, evitando sovrapposizioni; le schede possono essere affiancate soltanto se la leggibilità e l'organizzazione restano adeguate.
+4. **Appunti condivisi:** le funzionalità della sezione Appunti devono essere operative. Le modifiche condivise devono propagarsi agli altri collaboratori dopo l'autosalvataggio, con sincronizzazione entro meno di 10 secondi. Va mantenuta la protezione contro la sovrascrittura delle modifiche concorrenti.
+5. Per le richieste sopra elencate, le risposte dell'utente alle domande di chiarimento costituiscono approvazione dei comportamenti descritti. Prima di modificare una singola funzionalità non ancora chiarita, chiedere una domanda specifica e attendere risposta.
+
+### Autorizzazione operativa aggiornata il 24 novembre 2026 — push e rilascio
+
+L'utente autorizza a effettuare direttamente i push necessari sul solo branch main, senza chiedere una nuova conferma per ogni push. L'autorizzazione comprende la consapevolezza che l'integrazione GitHub–Vercel può avviare automaticamente un deployment Production a ogni push su main. Continuano a valere le regole di rilascio cumulativo, verifica preventiva e distinzione tra build, deployment e collaudo funzionale. Questa autorizzazione non equivale ad autorizzazione a modificare Supabase, applicare migrazioni, alterare dati o cambiare servizi esterni: per tali operazioni restano necessari verifica e consenso specifici quando richiesti.
