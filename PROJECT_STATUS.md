@@ -5,8 +5,8 @@
 > Per le decisioni vincolanti consultare prima `PROJECT_DECISIONS.md`. Se questo documento descrive uno stato tecnico che contraddice una decisione, prevale `PROJECT_DECISIONS.md`.
 >
 > **Aggiornato:** 24 novembre 2026
-> **Repository:** https://github.com/opidevelop/renqd  
-> **Branch operativo:** `main`  
+> **Repository:** https://github.com/opidevelop/renqd
+> **Branch operativo:** `main`
 > **Ultimo commit applicativo analizzato su main:** `3ea2351030371b570354c6352c56079078ded152`
 
 ## 1. Sintesi esecutiva
@@ -1543,51 +1543,101 @@ I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI conco
 
 ## Macro-categoria Pokémon — stato lavori (24 novembre 2026)
 
-### Fonti vincolanti
-- Registro: Renqd_Documento_passaggio_progettazione_Pokemon_aggiornato_24-11-2026_decisioni_1-134_NameEmAll_chiusa_Doku.md nella Project Library.
-- Specifica di implementazione: Renqd_Specifica_MacroCategoria_Pokemon_Handoff.docx nella Project Library.
-- Name ’Em All decisioni 1–134: CHIUSE. Non riaprire né riproporre decisioni consolidate.
+### Fonti vincolanti e decisioni
+- Registro canonico: Renqd_Documento_passaggio_progettazione_Pokemon_aggiornato_24-11-2026_decisioni_1-134_NameEmAll_chiusa_Doku.md nella Project Library.
+- Handoff funzionale: Renqd_Specifica_MacroCategoria_Pokemon_Handoff.docx nella Project Library.
+- Name ’Em All: decisioni 1–134 CHIUSE. Non riaprire, reinterpretare o riproporre decisioni consolidate.
+- L'utente ha autorizzato l'implementazione, le migrazioni necessarie e i deploy necessari, con verifica prima del rilascio.
+- Branch operativo: solo main. Nessun branch alternativo.
 
-### Implementato nel codice
-- Hub Pokémon con quattro modalità e relative route.
-- Ultimate Favourite: UI, catalogo, salvataggio e collegamento al profilo.
-- Name ’Em All: wizard, catalogo, partita solo, multiplayer individuale e collaborativo, lobby, inviti per username e link, modifica configurazione prima dell'avvio, rimozione partecipante in lobby con conferma, countdown di 3 secondi, timer e presenza, trasferimento host, pausa automatica quando tutti sono disconnessi, rientro automatico anche dopo la finestra di 10 minuti, espulsione riservata al ruolo OWNER, impostazioni visive modificabili durante la partita, risultati e card PNG personale/completa, socialità del risultato.
-- Doku e Connections: route con iframe dei giochi originali (https://pokedoku.com/ e https://pokennection.com/), stato giornaliero Da fare/Fatto basato sulla data Europe/Rome.
-- Migrazioni Name ’Em All ricostruite anche come file locali e allineate alle migrazioni già applicate al progetto Supabase.
+### Implementato
+- Hub Pokémon, banner Home, navigazione desktop/mobile e area profilo integrata con gli account Renqd esistenti.
+- Ultimate Favourite: matrice 22 colonne × 10 righe, controlli di compatibilità, generazioni, tipi, Mega, Mythical, Legendary, preferito assoluto, selezione forme, salvataggio e pagina pubblica.
+- Name ’Em All: wizard a 7 step, catalogo, Solo, multiplayer individuale e collaborativo, lobby, inviti username/link, ready state, configurazione prima dell'avvio, massimo 8 partecipanti, countdown, timer, presenza, host transfer, pausa automatica, rientro anche dopo la finestra di 10 minuti, uscita con risultato parziale, espulsione OWNER, impostazioni visive, risultati con link pubblico e card PNG personale/completa. Il risultato distingue contributo personale e progresso squadra; l'IP usa i valori non arrotondati e Maestro è assegnabile anche nel condiviso se il singolo partecipante soddisfa tutti i requisiti.
+- Name ’Em All social: Mi piace e lista utenti, commenti e risposte a un livello, ordinamento per apprezzamento/recenza, modifica/eliminazione, segnalazione, moderazione Owner, notifiche con preferenze separate.
+- Name ’Em All privacy: visibilità predefinita e per singolo risultato, risultati privati accessibili al proprietario e ai partecipanti, blocco reciproco, gestione utenti bloccati anche con profili privati, identità dei partecipanti bloccati oscurate nelle classifiche. RLS aggiornata per profili, classifiche, commenti, risposte e like; le partite condivise restano consultabili dai partecipanti.
+- Archivio Pokémon profilo: cards recenti verticali e storico orizzontale con artwork; filtri combinabili attività, Solo/Multiplayer, intervallo date Europe/Rome, livello, generazione, sezioni speciali e catalogo completo/personalizzato; ordinamento per data/punteggio; eliminazione singola e totale dei risultati Name ’Em All con doppia conferma. Il miglior livello e la medaglia Maestro sono persistenti anche dopo la cancellazione dello storico.
+- Doku e Connections: iframe dei giochi originali (https://pokedoku.com/ e https://pokennection.com/), stato giornaliero Europe/Rome Da fare/Fatto, replay senza duplicare la registrazione e fallback dopo timeout di caricamento. Nessun completamento automatico senza segnale tecnico attendibile.
+- Nessun clone dei giochi originali. Nessun completamento Doku/Connections inventato o derivato dal solo caricamento dell'iframe.
 
-### Dati e servizi
+### Dati, servizi e migrazioni
 - Supabase project: dgbogctuqtxzckigccbf.
 - Edge Function pokemon-catalog-sync: ACTIVE, verify_jwt=true.
-- Il catalogo locale è verificato: 1.025 specie, 326 forme, 97 Mega, 9 generazioni.
-- Il catalogo remoto Supabase risulta ancora vuoto al controllo del 24 novembre 2026; la sincronizzazione è predisposta per partire da un account autenticato e approvato al primo accesso alla modalità. Non considerare la sincronizzazione remota verificata finché il conteggio non raggiunge almeno 1.000 specie.
-- Le tabelle di sessioni e risultati Name ’Em All erano vuote al controllo; nessun dato di gioco preesistente è stato alterato.
+- Catalogo locale verificato: 1.025 specie, 326 forme, 97 Mega, 9 generazioni.
+- Catalogo remoto Supabase: ancora vuoto all'ultimo controllo. È stato aggiunto il record iniziale obbligatorio in pokemon_catalog_sync_state (id=1), necessario affinché claim_pokemon_catalog_sync possa acquisire il lock; la sincronizzazione parte da una sessione autenticata e approvata. Non dichiarare il sync remoto completato finché non risulta almeno 1.000 specie.
+- Tabelle di sessioni/risultati Name ’Em All e completamenti giornalieri erano vuote all'ultimo controllo; nessun record di gioco è stato creato o alterato durante i test.
+- Migrazioni Name ’Em All, privacy, social, blocchi, notifiche, cancellazione risultati, progressi parziali, badge permanente, catalog sync seed e policy di blocco reciproco applicate al progetto Supabase e salvate in supabase/migrations. L'allineamento versioni locale/remoto è stato verificato dopo il riallineamento dei sei timestamp storici.
 
-### Verifiche
+### Verifiche eseguite
+- git diff --check: superato.
 - npx tsc --noEmit: superato.
-- npm run lint: completato senza errori; restano warning già presenti nel progetto e warning di immagini non ottimizzate.
-- npm run build: superato dopo le modifiche UI multiplayer; tutte le route Pokémon sono state generate correttamente.
 - npm run pokemon:catalog:verify: superato (valid=true, 1.025 specie, 326 forme, 97 Mega, 9 generazioni).
-- Non è ancora stato eseguito un collaudo end-to-end con due o più account approvati; non dichiarare il multiplayer collaudato in produzione.
-- Per Doku e Connections non è emersa una specifica pubblica e verificabile di postMessage per il completamento. Non dedurre il completamento dal semplice caricamento o dalla permanenza nell'iframe e non registrare Fatto senza un segnale attendibile.
+- npm run lint: exit 0, 0 errori; restano 92 warning non bloccanti.
+- npm run build: superato; generate tutte le route Pokémon e API social/archivio/blocchi.
+- Doku e Connections: entrambi i siti originali hanno risposto HTTP 200 all'ultimo controllo HEAD; nessun header X-Frame-Options o Content-Security-Policy è apparso in quella risposta. Non equivale a un test browser completo dell'iframe.
+- Nessun test end-to-end con più account Renqd approvati; inviti, risposte simultanee, presenza, rientro, espulsione, privacy e notifiche restano da collaudare in ambiente preview.
+- Nessun test visuale autenticato desktop/mobile eseguito in browser.
+- Nessun test automatizzato dedicato è presente negli script package; package.json espone lint, build e verifica catalogo.
 
-### Prossimi controlli obbligatori
-1. Verificare la sincronizzazione remota del catalogo con un account approvato.
-2. Eseguire il flusso multiplayer con più account: invito, accettazione, modifica lobby, avvio, countdown, risposte simultanee, disconnessione, rientro, completamento, espulsione OWNER e risultati.
-3. Confrontare i risultati, le card, la privacy e la cancellazione con tutte le decisioni 1–134, senza riaprire le decisioni.
-4. Eseguire test visuali desktop/mobile per tutte e quattro le modalità.
-5. Solo dopo questi controlli, considerare la macro-categoria pronta al rilascio.
+### Blocchi prima del rilascio pubblico
+1. Eseguire preview/staging e smoke test autenticato desktop/mobile, incluse quattro modalità.
+2. Eseguire il collaudo multiplayer con almeno due account approvati e verificare le policy RLS/permessi con casi owner, partecipante, non partecipante e utenti bloccati.
+3. Verificare la sincronizzazione del catalogo remoto da un account approvato.
+4. Verificare la compatibilità reale degli iframe in browser; il completamento resta Da fare se non esiste un segnale tecnico attendibile.
+5. Revisione IP Pokémon obbligatoria prima del rilascio pubblico: Pokémon Support (30 gennaio 2026) chiede di non utilizzare IP Pokémon in progetti; il repository PokeAPI Sprites dichiara che le immagini restano copyright The Pokémon Company nonostante la dedica CC0 del repository. La nota e le fonti sono in docs/POKEMON_DATA_SOURCES.md. Il progetto non deve interpretare PokeAPI/CC0 o un disclaimer fan-made come licenza.
+6. Solo dopo questi controlli aggiornare questo stato con preview, commit, deploy e versione live verificati.
 
+### Prossimi passi operativi
+- Allineare i file migrazione locali con le versioni effettivamente applicate in Supabase.
+- Eseguire smoke test preview e correggere gli eventuali errori.
+- Non dichiarare il progetto pronto per produzione finché i blocchi sopra non sono risolti.
 
-### Aggiornamento implementativo multiplayer — 24 novembre 2026
-- L'uscita volontaria durante una partita salva immediatamente il risultato parziale, rimuove il partecipante dalla classifica attiva e conserva il suo contributo nel risultato finale.
-- Il rientro nella stessa sessione riattiva il partecipante, nasconde il risultato parziale provvisorio e conserva progressi, ranking e cronologia.
-- L'uscita dalla lobby prima dell'avvio rimuove il partecipante e il relativo ranking; se esce il creatore, la lobby viene chiusa.
-- L'host dispone ora di due azioni distinte e confermate: abbandonare salvando il proprio parziale oppure terminare la partita per tutti.
-- In modalità condivisa, ogni Pokémon scoperto mostra l'indicatore dell'Allenatore che lo ha trovato; la classifica usa il numero di scoperte e, a parità, il timestamp con cui è stato raggiunto il punteggio.
-- Durante la partita restano modificabili le impostazioni visive ammesse: Shadows e ordinamento della griglia. Numero Pokédex e tipo non compaiono nelle celle; se attivati in configurazione sono mostrati solo nella scheda dettaglio.
-- Il risultato personale multiplayer distingue il contributo individuale dal totale di squadra; l'esportazione completa aggiunge la classifica.
-- Nuove migrazioni applicate e salvate localmente: uscita con risultato parziale e rientro, classifica attiva per il tie-break, alias del conteggio errori per la card.
-- Verifica dopo questi aggiornamenti: TypeScript superato, ESLint senza errori (warning non bloccanti), catalogo locale verificato, build di produzione superata.
-- Il collaudo con più account reali e la sincronizzazione remota del catalogo restano da eseguire. Il commit locale e lo snapshot Vercel sono conservati; il push GitHub non è ancora confermato.
+## Altri filoni Renqd da preservare (non modificati in questa sessione)
 
-- Il rientro automatico aggiorna ranking e revisioni solo quando cambia realmente lo stato del partecipante (uscito/disconnesso → attivo); il semplice caricamento della pagina non genera revisioni aggiuntive.
+### Resend DNS e Turnstile — recupero chat allegato
+- Record DNS CNAME `rsend`: target da confrontare esattamente con quello mostrato da Resend; se corretto, attendere propagazione e usare `Restart verification`. Record `send` già verificato: non modificarlo.
+- Turnstile: Site Key pubblica nel frontend; Secret Key esclusivamente nella configurazione Supabase, mai nel repository o nel frontend.
+- Integrare il captcha nei moduli login, registrazione e recupero password e passare il token alle rispettive chiamate Supabase Auth.
+- La nota di recupero indica per questo specifico filone il branch `develop`, senza toccare `main`. Non è stato modificato durante il lavoro Pokémon.
+- Prima di chiudere il filone: confrontare il target DNS `rsend`, completare la configurazione CAPTCHA Supabase, impostare la Site Key nell'ambiente Preview e verificare una build/deploy Preview.
+
+---
+
+## Stato implementazione Pokémon — 24 novembre 2026 (aggiornamento)
+
+**Stato codice: pronto per revisione e commit. Non ancora pubblicato su Production.**
+
+### Implementazioni completate
+
+- Hub Pokémon, Ultimate Favourite, Name 'Em All Solo e Multiplayer, archivio risultati e condivisione.
+- UX Name 'Em All completata anche per audio configurabile, intro Pokédex, feedback animati, completamento generazioni, navigazione sezioni, ricerca mobile e parità Multiplayer per sezioni speciali/Forme Mega/dettaglio.
+- Social risultati: like, commenti, risposte, notifiche, preferenze, privacy e blocchi; controlli RLS rafforzati per impedire visibilità residua di commenti/reazioni tra utenti bloccati.
+- Doku e Connections continuano a usare gli iframe originali; il caricamento è verificato via HEAD, ma non esiste un segnale pubblico affidabile per registrare automaticamente il completamento. Non impostare "Fatto" su semplice caricamento.
+- Catalogo locale verificato: 1.025 specie, 326 forme, 97 Mega, 9 generazioni. La sincronizzazione remota viene avviata dalla pagina Name 'Em All per utente autenticato e approvato; al controllo live il catalogo remoto era ancora vuoto.
+
+### Database e sicurezza
+
+- 151 migrazioni locali e 151 remote, versioni allineate.
+- Nuove migrazioni: `20261124205653_pokemon_name_em_all_rls_visibility_guard`, `20261124205731_pokemon_comment_likes_block_visibility_guard`, `20261124211157_pokemon_missing_foreign_key_indexes`.
+- Edge Function `pokemon-catalog-sync` ACTIVE (`verify_jwt=true`).
+- Gli advisor Supabase mantengono warning globali preesistenti (funzioni SECURITY DEFINER, policy multiple, FK non indicizzate fuori dall'ultimo intervento e impostazione di protezione password leaked). Le policy Pokémon critiche sono state verificate individualmente; non dichiarare l'intero progetto senza warning.
+
+### Verifiche eseguite
+
+- `git diff --check` — OK
+- `npx tsc --noEmit` — OK
+- `npm run pokemon:catalog:verify` — OK
+- `npm run pokemon:implementation:verify` — OK
+- `npx eslint --quiet .` — OK
+- `npm run lint` — exit 0, warning non bloccanti
+- `npm run build` — OK
+
+### Stato Git/Deploy
+
+- `main` locale: 7 commit avanti rispetto a `origin/main` (`447a889`); HEAD documentale successivo al commit applicativo `8fc69e4`.
+- Working tree pulito: aggiornamenti applicativi e documentali committati localmente.
+- Nessun push eseguito e nessun nuovo deploy Vercel; Production resta sul commit documentale `447a889`. Il push su `main` attiverà il deploy automatico.
+
+### Prima del rilascio Production
+
+Restano test autenticati multi-account, controllo visuale mobile/iframe con account reali e revisione IP/licenze delle risorse Pokémon. Questi sono gate di collaudo/rilascio, non indicano che si debba riscrivere l'implementazione.

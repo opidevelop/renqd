@@ -23,3 +23,19 @@ Snapshot informativo del 24 novembre 2026.
 - Sessioni effimere; fare affidamento su Git e su snapshot, non su un ID sessione storico.
 
 Per ogni rilascio annotare commit SHA, target, deployment ID, URL, stato, smoke test e rollback.
+
+## Stato aggiornato — 24 novembre 2026
+
+- Production Vercel è ancora `READY` sul commit `447a889f0f1109fb86a2b751b2d00283abd2f7a0` (`docs: add Renqd project memory system`).
+- `renqd.app` resta online sulla versione precedente.
+- Nessun codice Pokémon del workspace è stato pushato o distribuito in questo ciclo.
+- Il branch locale `main` è avanti di 5 commit rispetto a `origin/main` e contiene inoltre modifiche non committate.
+- Il push su `main` attiva il deploy Production automatico: prima del push verificare il diff e avvisare l'utente.
+
+
+## Aggiornamento 24 novembre 2026 — commit locale
+
+- Implementazione Pokémon committata localmente: `8fc69e4` (`feat(pokemon): complete gameplay and social safeguards`).
+- Branch `main`: 7 commit avanti rispetto a `origin/main` (`447a889`).
+- Nessun push eseguito. Nessun deploy Vercel avviato; Production resta sul commit `447a889`.
+- Il push su `main` attiverà il deploy automatico: richiede verifica e decisione esplicita prima di procedere.

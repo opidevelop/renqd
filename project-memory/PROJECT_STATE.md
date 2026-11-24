@@ -29,3 +29,13 @@ Queste verifiche sono state eseguite sul working tree attuale, che contiene anch
 - Test end-to-end multiplayer con account distinti.
 - Responsive e segnali di completamento iframe Doku/Connections.
 - Stato Vercel live e deployment correnti.
+
+## Verifica aggiornata — 24 novembre 2026
+
+La macro-categoria Pokémon è implementata nel workspace e pronta per la revisione/creazione dei commit. La progettazione Name 'Em All (decisioni 1–134) resta chiusa e non va riaperta.
+
+Il completamento recente ha portato alla parità Solo/Multiplayer per navigazione per generazioni e sezioni speciali, forme Mega, dettaglio Pokémon, ricerca mobile, feedback di risposta/scoperta, audio configurabile e classifica espandibile. Sono state aggiunte verifiche statiche automatiche delle invarianti principali.
+
+La build e i controlli statici passano. Non è stato eseguito un collaudo E2E con più account reali. Doku/Connections restano incorporati tramite iframe originale; non segnare automaticamente il completamento senza un segnale pubblico verificabile.
+
+Il codice non è ancora committato/pushato e Production non contiene queste modifiche. Vedere `ACTIVE_TASK.md`, `DATABASE_STATE.md` e `DEPLOYMENT_STATE.md` per lo stato verificato.
