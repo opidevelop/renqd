@@ -7,7 +7,7 @@
 > **Aggiornato:** 24 novembre 2026
 > **Repository:** https://github.com/opidevelop/renqd  
 > **Branch operativo:** `main`  
-> **Ultimo commit applicativo analizzato su main:** `162f3749f65ebc55f2ac32c13db083f9af0c1be6`
+> **Ultimo commit applicativo analizzato su main:** `3ea2351030371b570354c6352c56079078ded152`
 
 ## 1. Sintesi esecutiva
 
@@ -1458,3 +1458,36 @@ I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI conco
 - Lobby: components/multiplayer-session-panel.tsx, app/renqd-identity.css.
 - Appunti: components/notes-workspace.tsx, app/api/notes/route.ts, app/globals.css e migrazioni di sanitizzazione note.
 - Attività: components/inbox-workspace.tsx, components/activity-inbox.tsx, app/(platform)/inbox.css.
+
+
+## 2026-11-24 — Implementazione card Renq, Lobby, Appunti e Attività
+
+### Modifiche applicative rilasciate
+- **Card dei Renq pubblicati:** ripristinato il comportamento grafico originario della card di riferimento Git del 19 novembre 2026 (`7ffa974dc88d3af65a96e000843157751af142da`). La causa era l'inclusione di `.saved-renq-hero` nei selettori globali che sostituivano il suo pseudo-elemento `:after` e forzavano il posizionamento dei figli. La card torna a usare il proprio gradiente di raccordo copertina/contenuto, senza reinterpretare markup o gerarchia.
+- **Lobby Multiplayer:** rimosso il trattamento full-bleed della copertina e ripristinata una thumbnail contenuta nella card chiara, con titolo, informazioni, tag, stato e matitina. La copertina conserva il punto focale salvato e il tema dinamico della pagina. Aggiunto un layout dedicato per schermi piccoli.
+- **Elenchi in Appunti:** ripristinati esplicitamente marcatori, margini, rientri e livelli annidati per elenchi puntati e numerati, neutralizzando il reset Preflight di Tailwind. Aggiunto Tab/Shift+Tab per indentare/de-indentare gli elementi `li`; Invio e doppio Invio restano gestiti dal comportamento nativo dell'editor contentEditable.
+- **Idratazione Appunti:** quando si apre un documento o si cambia scheda, il contenuto HTML salvato viene sincronizzato con il nodo contentEditable senza sovrascrivere modifiche locali non salvate.
+- **Autosave Appunti:** i salvataggi sono sequenziali: non parte una seconda richiesta mentre la prima è in corso; il salvataggio usa l'ultimo `updated_at` restituito dal server e, se l'utente continua a scrivere durante la richiesta, la versione successiva viene salvata dopo la conclusione della precedente. Il debounce resta di 850 ms. Un conflitto di concorrenza mantiene intatte le modifiche locali e sospende i tentativi automatici per evitare sovrascritture o retry infiniti. Gli echo Realtime delle modifiche dello stesso utente non vengono scambiati per modifiche di un collaboratore.
+- **Attività/Notifiche:** al mount della scheda Attività, al ritorno in primo piano e al ripristino della visibilità viene eseguito un riallineamento con `user_notifications`; la subscription Supabase Realtime resta attiva. Gli eventi ricevuti durante il fetch vengono riconciliati con lo snapshot per non perdere inserimenti, aggiornamenti o cancellazioni concorrenti.
+- **Inbox mobile:** le schede Messaggi/Attività usano una griglia a due colonne con larghezze minime controllate, testo contenuto e azioni flessibili, per evitare sovrapposizioni e overflow.
+
+### File modificati
+- `app/renqd-identity.css`
+- `app/(platform)/platform.css`
+- `app/(platform)/inbox.css`
+- `components/notes-workspace.tsx`
+- `components/activity-inbox.tsx`
+
+### Verifiche e rilascio
+- GitHub Actions — workflow Code quality sul commit finale `3ea2351030371b570354c6352c56079078ded152`: **SUCCESS**.
+- TypeScript check: superato.
+- ESLint: superato; restano warning non bloccanti già presenti nel repository.
+- Production build GitHub Actions: superata.
+- Vercel Production — deployment `dpl_4CFXRRUGqHGgw8eYoWH4WXX4Zq2Y`: **READY**, commit `3ea2351030371b570354c6352c56079078ded152`; alias Production tra cui `renqd.app` e `renqd.vercel.app`.
+- Nessuna modifica a Supabase, schema, migrazioni, RLS, RPC, ruoli, permessi o dati.
+- Non è stato eseguito un collaudo visuale autenticato né un test E2E interattivo su dispositivo. La build e lo stato Vercel READY non vengono presentati come sostitutivi di tali prove; resta da raccogliere la verifica visuale dell'utente sulle quattro aree.
+
+### Sequenza dei commit applicativi
+- `978e48e3f4c33f51bbc614a4560d85cb71d0171b` — ripristino card, stili Lobby, liste Appunti, autosave e refresh Attività.
+- `98bfd843cd1c4798d5fb2556cb34bd8bfc18e2f8` — riconciliazione degli snapshot Attività con gli eventi Realtime.
+- `3ea2351030371b570354c6352c56079078ded152` — correzione della collocazione dell'hook React per il tracciamento Realtime; commit finale verificato e distribuito.
