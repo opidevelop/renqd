@@ -14,7 +14,7 @@ export default function PageTransition({children}:{children:ReactNode}){
   <div key={pathname} className="platform-route-transition">{children}</div>
   {loading&&<div className="renqd-loading-overlay" role="status" aria-live="polite" aria-label="Caricamento Renqd">
    <div className="renqd-loading-content">
-    <div className="renqd-loading-mark" aria-label="Renqd"><img className="renqd-loading-r" src="/brand/r-logo.svg" alt="" /><img className="renqd-loading-spark" src="/brand/stellina.svg" alt="" /></div>
+    <div className="renqd-loading-mark" aria-hidden="true"><img className="renqd-loading-spark" src="/brand/stellina.svg" alt="" /></div>
     <img className="renqd-loading-serpentina" src="/brand/serpentina-podio.svg" alt="" />
     <p>Le tue scelte, in ordine.</p>
    </div>

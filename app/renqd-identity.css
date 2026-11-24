@@ -506,3 +506,61 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 .platform-content .rank-detail .rank-cover-wrap{width:100%;max-width:260px;min-width:0}
 .platform-content .rank-detail .rank-cover-wrap img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;filter:none!important;opacity:1!important;transform:none!important}
 @media(max-width:680px){.platform-content .rank-detail .rank-hero{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center;padding:25px 16px 28px}.platform-content .rank-detail .rank-cover-wrap{width:min(58vw,220px)}.platform-content .rank-detail .rank-hero-copy{width:100%;min-width:0}.platform-content .rank-detail .rank-meta{justify-content:center}}
+
+
+/* 24 Nov — public entry, category cards and single-image Reveal backgrounds. */
+.auth-brand{display:inline-flex;align-items:center;width:154px;height:54px}
+.auth-brand img{display:block;width:100%;height:100%;object-fit:contain;object-position:left center}
+.renqd-loading-mark{width:104px;height:104px}
+.renqd-loading-r{display:none!important}
+.renqd-loading-mark .renqd-loading-spark{top:0;right:0;width:29px;height:29px}
+.renq-reveal-slide{background-repeat:no-repeat!important;background-size:cover!important;background-position:center!important}
+.home-category-card,.builder-category-grid .home-category-card,.builder-category-card{
+ position:relative;isolation:isolate;overflow:hidden;min-height:150px!important;padding:18px!important;
+ border:1px solid rgba(224,211,197,.9)!important;border-radius:20px!important;
+ background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(250,243,235,.92))!important;
+ color:#332b24!important;box-shadow:0 9px 26px rgba(55,38,23,.055)!important;
+ transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease!important
+}
+.home-category-card:before,.builder-category-card:before,.builder-category-grid .home-category-card:before{
+ content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,#ff7900,rgba(255,121,0,.12));opacity:.85
+}
+.home-category-card:after{right:12px!important;bottom:12px!important;width:44px!important;height:44px!important;opacity:.11!important}
+.home-category-card:hover,.builder-category-card:hover,.builder-category-grid .home-category-card:hover{
+ transform:translateY(-4px)!important;border-color:#efbd91!important;box-shadow:0 17px 34px rgba(55,38,23,.10)!important
+}
+.home-category-icon{width:40px!important;height:40px!important;border:1px solid #f1e4d8;border-radius:13px!important;background:#fff!important;color:#bd641f!important}
+.home-category-card>strong,.builder-category-card strong{margin-top:16px!important;font-size:14px!important;font-weight:850!important;letter-spacing:-.25px}
+.home-category-card>small,.builder-category-card small{max-width:85%;color:#887c70!important;font-size:10px!important;line-height:1.5!important;opacity:1!important}
+.builder-category-card>svg{color:#bd641f}
+.builder-category-card.is-selected,.builder-category-grid .home-category-card.is-selected{outline:2px solid #ff7900!important;outline-offset:2px!important;background:linear-gradient(145deg,#fff8f0,#fff)!important;box-shadow:0 10px 26px rgba(255,121,0,.12)!important}
+.tone-music,.tone-games,.tone-film,.tone-books,.tone-sport,.tone-custom{background:linear-gradient(145deg,#fff,#faf4ed)!important;color:#332b24!important}
+@media(max-width:680px){.home-category-card,.builder-category-grid .home-category-card,.builder-category-card{min-height:126px!important;padding:14px!important}.home-category-icon{width:34px!important;height:34px!important}.home-category-card>strong,.builder-category-card strong{font-size:12px!important}}
+/* Public landing — editorial Renqd identity, retaining all existing entry links. */
+.public-home{position:relative;isolation:isolate;min-height:100svh;padding:0 clamp(20px,6vw,88px)!important;overflow:hidden;background:radial-gradient(ellipse at 78% 22%,rgba(255,121,0,.11),transparent 34%),radial-gradient(ellipse at 12% 78%,rgba(222,207,190,.24),transparent 32%),#fbf8f3!important}
+.public-home:before{content:"";position:absolute;z-index:-1;right:-8vw;top:12vh;width:min(54vw,720px);height:min(70vw,720px);background:url('/brand/serpentina-podio.svg') center/contain no-repeat;opacity:.055;pointer-events:none}
+.public-home-header{height:88px!important;border-color:#e9dfd4!important}
+.public-home-logo{display:inline-flex;align-items:center;width:150px;height:52px;font-size:0!important;letter-spacing:0!important}
+.public-home-logo img{display:block;width:100%;height:100%;object-fit:contain;object-position:left center}
+.public-home-header nav{gap:27px!important;font-size:12px!important}
+.public-home-register{border-radius:999px!important;padding:13px 19px!important;background:#ff7900!important;box-shadow:0 9px 24px rgba(255,121,0,.2)!important}
+.public-home-hero{position:relative;min-height:620px!important;grid-template-columns:minmax(0,.92fr) minmax(440px,1.08fr)!important;gap:clamp(30px,5vw,82px)!important;padding:74px 0 82px!important}
+.public-home-copy h1{max-width:660px;font-size:clamp(58px,7.1vw,96px)!important;line-height:.92!important;letter-spacing:-6.8px!important;font-weight:820!important}
+.public-home-copy h1 em{color:#ff7900!important}
+.public-home-copy>p{max-width:460px!important;margin-top:26px!important;color:#776d63!important;font-size:15px!important;line-height:1.85!important}
+.public-home-kicker{padding:9px 13px;border:1px solid #eadfd3;border-radius:999px;background:rgba(255,255,255,.72);letter-spacing:1.6px!important}
+.public-home-primary{border-radius:999px!important;padding:16px 22px!important;background:#211e1b!important;box-shadow:0 12px 28px rgba(33,30,27,.16)!important}
+.public-home-secondary{padding:12px 4px}
+.public-home-proof{gap:19px!important;color:#82776c!important}
+.public-home-visual{min-height:480px!important}
+.visual-rank-card{width:min(470px,94%)!important;padding:29px!important;border:1px solid rgba(226,214,201,.95)!important;border-radius:26px!important;background:rgba(255,253,250,.94)!important;box-shadow:0 30px 90px rgba(57,42,28,.13),0 4px 14px rgba(57,42,28,.04)!important;transform:rotate(-2deg)}
+.visual-rank-top{color:#9a6b45!important}
+.visual-rank-card h2{font-size:27px!important;letter-spacing:-1.1px!important}
+.visual-rank-row{min-height:65px!important;border-color:#eee6de!important}
+.visual-rank-row>div strong{font-size:12px!important}
+.visual-floating{border:1px solid #eadfd3!important;border-radius:15px!important;background:rgba(255,253,250,.96)!important;box-shadow:0 12px 35px rgba(57,42,28,.11)!important}
+.visual-orbit{border-color:rgba(255,121,0,.15)!important}
+.public-home-footer{min-height:88px!important;border-color:#e9dfd4!important}
+.public-home-footer .public-home-logo{width:112px;height:40px}
+@media(max-width:800px){.public-home-hero{grid-template-columns:1fr!important;min-height:0!important;padding:55px 0 48px!important}.public-home-copy h1{font-size:clamp(52px,11vw,76px)!important;letter-spacing:-4px!important}.public-home-visual{min-height:370px!important}.public-home-logo{width:128px;height:46px}}
+@media(max-width:440px){.public-home-header nav{gap:12px!important}.public-home-register{padding:10px 13px!important}.public-home-visual{min-height:320px!important}.visual-rank-card{transform:none;padding:18px!important}}

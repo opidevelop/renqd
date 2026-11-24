@@ -39,7 +39,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   }
 
   return <main className="auth-page"><section className="auth-card">
-    <Link className="auth-brand" href="/">renqd<span>.</span></Link>
+    <Link className="auth-brand" href="/" aria-label="Renqd"><img src="/brand/renqd-logo.svg" alt="Renqd" /></Link>
     <div className="auth-eyebrow">{accountStatus ? "STATO DEL TUO ACCOUNT" : "BENTORNATO"}</div>
     <h1>{accountStatus === "PENDING" ? "Il tuo account è in verifica." : accountStatus === "REJECTED" || accountStatus === "SUSPENDED" ? "Accesso non disponibile." : "Accedi a Renqd."}</h1>
     <p className="auth-copy">{accountStatus ? "La verifica dell'account è necessaria per accedere alla piattaforma." : "Ritrova le tue classifiche, le tue idee e la community."}</p>
