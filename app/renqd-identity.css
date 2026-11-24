@@ -104,12 +104,12 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 .multiplayer-reveal-button:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.35)}
 @media(max-width:680px){.multiplayer-ready-panel{padding:18px}.multiplayer-ready-heading h2{font-size:20px}.multiplayer-ready-progress{align-items:flex-start;flex-direction:column;gap:8px}.multiplayer-ready-progress>div{width:100%;flex:none}.multiplayer-reveal-button{width:100%;min-width:0}}
 
-/* Premium loading: one breathing, gently morphing Renqd star. */
-.renqd-loading-overlay{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 42%,#fff 0,#fffaf5 44%,#f8f0e8 100%);animation:renqd-loading-in .28s ease both}
-.renqd-loading-star{display:block;width:clamp(64px,12vw,88px);height:auto;overflow:visible;transform-box:fill-box;transform-origin:center;filter:drop-shadow(0 5px 13px rgba(244,122,8,.22));animation:renqd-star-breathe 3.2s cubic-bezier(.4,0,.2,1) infinite}
+/* Premium loading: original crisp star, brief breath followed by a restrained rotation. */
+.renqd-loading-overlay{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#fbf8f3;animation:renqd-loading-in .28s ease both}
+.renqd-loading-star{display:block;width:32px;height:auto;overflow:visible;transform-origin:50% 50%;filter:none;animation:renqd-star-breathe-rotate 3.2s cubic-bezier(.4,0,.2,1) infinite}
 @keyframes renqd-loading-in{from{opacity:0}to{opacity:1}}
-@keyframes renqd-star-breathe{0%,100%{transform:translateY(0) rotate(-3deg) scale(.94);filter:drop-shadow(0 4px 10px rgba(244,122,8,.16))}50%{transform:translateY(-3px) rotate(3deg) scale(1.045);filter:drop-shadow(0 8px 19px rgba(244,122,8,.3))}}
-@media(prefers-reduced-motion:reduce){.renqd-loading-overlay,.renqd-loading-star{animation:none!important}.renqd-loading-star{transform:none;filter:drop-shadow(0 5px 13px rgba(244,122,8,.2))}}
+@keyframes renqd-star-breathe-rotate{0%,100%{transform:scale(1) rotate(0)}9%{transform:scale(1.12) rotate(0)}19%{transform:scale(1) rotate(0)}53%{transform:scale(1) rotate(0)}76%{transform:scale(1) rotate(360deg)}90%{transform:scale(1) rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.renqd-loading-overlay,.renqd-loading-star{animation:none!important}.renqd-loading-star{transform:none!important}}
 .platform-content :is(.home-hero,.explore-intro,.profile-cover,.saved-renq-hero,.multiplayer-session-heading){isolation:isolate}
 .platform-content :is(.home-hero,.explore-intro,.profile-cover):after{content:"";position:absolute;z-index:0;right:3%;bottom:-30%;width:230px;height:230px;background:url('/brand/serpentina-podio.svg') center/contain no-repeat;opacity:.14;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.renqd-loading-overlay,.renqd-loading-serpentina,.renqd-loading-serpentina-line,.renqd-loading-spark{animation:none!important}.renqd-loading-serpentina-line{stroke-dashoffset:0}}
