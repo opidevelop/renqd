@@ -397,3 +397,13 @@ button.pokemon-favourite-cell:hover{background:#fff1e3}
 .pokemon-result-comment-compose small{font-size:10px;color:#998a7c}
 .pokemon-result-comment-compose button{display:flex;align-items:center;gap:7px;padding:9px 14px;border:0;border-radius:999px;background:#a96331;color:white;font-size:12px;font-weight:700}
 .pokemon-result-comment-compose button:disabled{opacity:.5;cursor:not-allowed}
+.pokemon-profile-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:24px 0}
+.pokemon-profile-stats article{display:grid;gap:8px;padding:17px;border:1px solid #eadfd3;border-radius:16px;background:#fffdfa}
+.pokemon-profile-stats article span{font-size:9px;letter-spacing:1.5px;font-weight:800;color:#9a785c}
+.pokemon-profile-stats article strong{font-size:22px;color:#30251e;overflow-wrap:anywhere}
+.pokemon-profile-stats article small{font-size:11px;color:#8b7c6f}
+.pokemon-profile-filter-row{display:grid;gap:9px;margin:18px 0}
+.pokemon-profile-filter-group{display:flex;flex-wrap:wrap;gap:7px}
+.pokemon-profile-filter-group button{padding:8px 12px;border:1px solid #e8dbce;border-radius:999px;background:#fffdfa;color:#766454;font-size:11px}
+.pokemon-profile-filter-group button.is-active{border-color:#b56c35;background:#f8eee4;color:#8a4f25;font-weight:800}
+@media(max-width:760px){.pokemon-profile-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
