@@ -1530,3 +1530,12 @@ I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI conco
 ### Verifiche e rilascio
 - Verifiche di build/CI e deployment Production da completare dopo il commit su `main`; non dichiarare il rilascio completato prima dello stato Vercel **READY**.
 - Il test visuale autenticato della schermata di caricamento resta da eseguire nel browser dell'utente.
+
+
+## 2026-11-24 — Revisione animazione stellina loading
+- Su feedback dell'utente, sostituita la versione grande, sfocata e morphing con la stellina SVG originale `/brand/stellina.svg`, nitida e senza filtri.
+- Dimensione fissa 32 px, centrata su fondo avorio.
+- Movimento: breve respirazione e successiva rotazione fluida, con pausa nel ciclo; nessun rimbalzo, morphing o spostamento.
+- Mantenuto il fallback `prefers-reduced-motion` e invariata la durata della transizione di pagina.
+- Modifica limitata a componente loading, CSS e documentazione. Nessuna modifica a Supabase, migrazioni, database o servizi esterni.
+- Verifiche CI e deployment Production da completare per il commit di questa revisione; nessun test visuale autenticato eseguito in questa sessione.
