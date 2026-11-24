@@ -529,3 +529,12 @@ L'utente autorizza a effettuare direttamente i push necessari sul solo branch ma
 - Movimento approvato: combinazione **Breathing Star + Morphing Star**. La stellina respira con una variazione lenta e contenuta di scala, una lieve rotazione e un alone morbido; contemporaneamente la sagoma si trasforma in modo fluido tra una stella più appuntita e una più morbida, mantenendo riconoscibile il simbolo originale.
 - Il movimento deve essere elegante, discreto e premium, non un rimbalzo. Rispettare `prefers-reduced-motion` mostrando la stellina statica.
 - Conservare il fondo chiaro/avorio della schermata e non modificare il comportamento o la durata della transizione di pagina.
+
+
+### Decisione approvata il 24 novembre 2026 — animazione della stellina di caricamento (revisione)
+La precedente combinazione «Breathing Star + Morphing Star» è superata dalla correzione approvata dall'utente:
+- usare esclusivamente l'SVG originale `/brand/stellina.svg`, senza ridisegni, morphing, filtri, ombre o sfocature;
+- dimensione fissa di circa 32 px, centrata su fondo avorio;
+- animazione premium composta da una breve respirazione (leggera espansione e ritorno) seguita da una rotazione fluida e contenuta, con pausa tra i cicli;
+- nessun rimbalzo, traslazione o deformazione; rispettare `prefers-reduced-motion`;
+- restano invariati contenuto esclusivo della stellina e tempi/logica della transizione di pagina.
