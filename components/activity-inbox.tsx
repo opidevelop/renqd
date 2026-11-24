@@ -5,9 +5,9 @@ import {Bell,Check,CheckCheck,FileText,Users,X,MessageCircle} from "lucide-react
 import {createClient} from "@/lib/supabase/client";
 type Notice={id:string;actor_id:string|null;notification_type:string;payload:Record<string,unknown>;read_at:string|null;created_at:string};
 export function ActivityInbox({notifications}:{notifications:Notice[]}){
- const[items,setItems]=useState(notifications);const[busy,setBusy]=useState<string|null>(null);const[error,setError]=useState("");
+ const[items,setItems]=useState(notifications);const[busy,setBusy]=useState<string|null>(null);const[error,setError]=useState("");const realtimeChanges=useRef<Map<string,Notice|null>>(new Map());
  useEffect(()=>{
-  const supabase=createClient();let active=true;let channel:ReturnType<typeof supabase.channel>|null=null;let currentUserId:string|null=null;const realtimeChanges=useRef<Map<string,Notice|null>>(new Map());
+  const supabase=createClient();let active=true;let channel:ReturnType<typeof supabase.channel>|null=null;let currentUserId:string|null=null;
   const refresh=async(userId:string)=>{
    const {data,error:loadError}=await supabase.from("user_notifications").select("id,actor_id,notification_type,payload,read_at,created_at").eq("recipient_id",userId).order("created_at",{ascending:false}).limit(100);
    if(!active||loadError||!data)return;
