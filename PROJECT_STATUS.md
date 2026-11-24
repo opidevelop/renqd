@@ -1589,3 +1589,5 @@ I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI conco
 - Nuove migrazioni applicate e salvate localmente: uscita con risultato parziale e rientro, classifica attiva per il tie-break, alias del conteggio errori per la card.
 - Verifica dopo questi aggiornamenti: TypeScript superato, ESLint senza errori (warning non bloccanti), catalogo locale verificato, build di produzione superata.
 - Il collaudo con più account reali e la sincronizzazione remota del catalogo restano da eseguire. Il commit locale e lo snapshot Vercel sono conservati; il push GitHub non è ancora confermato.
+
+- Il rientro automatico aggiorna ranking e revisioni solo quando cambia realmente lo stato del partecipante (uscito/disconnesso → attivo); il semplice caricamento della pagina non genera revisioni aggiuntive.

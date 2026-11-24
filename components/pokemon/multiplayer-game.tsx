@@ -323,7 +323,7 @@ export function PokemonNameEmAllMultiplayerGame({
     {confirmExit&&<div className="pokemon-nae-pause-backdrop" role="presentation"><section className="pokemon-nae-pause-card" role="alertdialog" aria-modal="true" aria-labelledby="pokemon-nae-multi-exit">
       <span className="pokemon-page-eyebrow">CONFERMA USCITA</span>
       <h2 id="pokemon-nae-multi-exit">Abbandonare la partita?</h2>
-      <p>Il tuo risultato parziale verrà salvato nel profilo, uscirai dalla classifica attiva e il tuo contributo resterà nei risultati finali. Potrai rientrare nella stessa sessione finché sarà in corso.</p>
+      <p>Il tuo risultato attuale verrà salvato nel profilo, uscirai dalla classifica attiva e il tuo contributo resterà nei risultati finali. Potrai rientrare nella stessa sessione finché sarà in corso.</p>
       <button type="button" className="pokemon-favourite-primary" onClick={()=>void exit()} disabled={isFinishing}>Abbandona e salva</button>
       <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmExit(false)}>Continua a giocare</button>
     </section></div>}

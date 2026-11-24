@@ -16,7 +16,7 @@ export default async function NameEmAllPage() {
   const { data: sessionRow } = user && participant ? await supabase.from("pokemon_name_em_all_sessions")
     .select("id,owner_id,host_id,ranking_id,game_mode,status,config,catalog_species_ids,special_species_ids,duration_seconds,started_at,deadline_at,paused_at,remaining_seconds,paused_total_seconds")
     .eq("id",participant.session_id).in("status",["LOBBY","ACTIVE","PAUSED"]).maybeSingle() : { data: null };
-  if (user && participant && sessionRow) {
+  if (user && participant && sessionRow && (!participant.is_active || !participant.is_connected)) {
     const {error:rejoinError}=await supabase.rpc("renqd_pokemon_name_em_all_rejoin_session",{p_session_id:sessionRow.id});
     if(rejoinError) console.error("Name ’Em All rejoin:",rejoinError.message);
   }
