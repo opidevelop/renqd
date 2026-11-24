@@ -7,17 +7,31 @@ type Notice={id:string;actor_id:string|null;notification_type:string;payload:Rec
 export function ActivityInbox({notifications}:{notifications:Notice[]}){
  const[items,setItems]=useState(notifications);const[busy,setBusy]=useState<string|null>(null);const[error,setError]=useState("");
  useEffect(()=>{
-  const supabase=createClient();let active=true;let channel:ReturnType<typeof supabase.channel>|null=null;
+  const supabase=createClient();let active=true;let channel:ReturnType<typeof supabase.channel>|null=null;let currentUserId:string|null=null;
+  const refresh=async(userId:string)=>{
+   const {data,error:loadError}=await supabase.from("user_notifications").select("id,actor_id,notification_type,payload,read_at,created_at").eq("recipient_id",userId).order("created_at",{ascending:false}).limit(100);
+   if(!active||loadError||!data)return;
+   setItems(current=>{
+    const merged=new Map<string,Notice>((data as Notice[]).map(item=>[item.id,item]));
+    current.forEach(item=>{if(!merged.has(item.id))merged.set(item.id,item);});
+    return Array.from(merged.values()).sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,100);
+   });
+  };
   void supabase.auth.getUser().then(({data:{user}})=>{
    if(!active||!user)return;
+   currentUserId=user.id;
    channel=supabase.channel("renqd-inbox-"+user.id).on("postgres_changes",{event:"*",schema:"public",table:"user_notifications",filter:"recipient_id=eq."+user.id},payload=>{
     const row=(payload.new??payload.old) as Notice;
     if(payload.eventType==="INSERT")setItems(current=>current.some(item=>item.id===row.id)?current:[row,...current].sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,100));
     else if(payload.eventType==="UPDATE")setItems(current=>current.map(item=>item.id===row.id?row:item));
     else if(payload.eventType==="DELETE")setItems(current=>current.filter(item=>item.id!==row.id));
    }).subscribe();
+   void refresh(user.id);
   });
-  return()=>{active=false;if(channel)void supabase.removeChannel(channel);};
+  const onVisible=()=>{if(document.visibilityState==="visible"&&currentUserId)void refresh(currentUserId);};
+  window.addEventListener("focus",onVisible);
+  document.addEventListener("visibilitychange",onVisible);
+  return()=>{active=false;window.removeEventListener("focus",onVisible);document.removeEventListener("visibilitychange",onVisible);if(channel)void supabase.removeChannel(channel);};
  },[]);
  async function respondInvite(inviteId:string,accept:boolean,notificationId:string){
   setBusy(inviteId);setError("");

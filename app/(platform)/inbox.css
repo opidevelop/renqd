@@ -29,3 +29,19 @@
 @media(max-width:760px){.dm-workspace{grid-template-columns:minmax(0,1fr);min-height:560px}.dm-conversation-list{border-right:0}.dm-chat-panel{display:none;min-height:560px}.dm-workspace.is-chat-open .dm-conversation-list{display:none}.dm-workspace.is-chat-open .dm-chat-panel{display:grid}.dm-mobile-back{display:grid;width:32px;height:32px;place-items:center;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--ink)}.dm-message{max-width:92%}.dm-message-list{padding:13px}.public-profile-action{display:flex;gap:7px;flex-wrap:wrap}}
 
 .activity-notification-actions a{display:inline-flex;align-items:center;justify-content:center;padding:9px 13px;border-radius:10px;background:#f1e8dc;color:#795a3c;font-size:10px;font-weight:850;text-decoration:none}
+
+
+/* Inbox tabs: predictable two-column layout on narrow screens. */
+.inbox-workspace{min-width:0;width:100%}
+.inbox-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;min-width:0;gap:6px}
+.inbox-tabs button{min-width:0;width:100%;padding:0 10px;white-space:nowrap;overflow:hidden}
+.inbox-tabs button svg{flex:none}
+@media(max-width:680px){
+ .inbox-tabs{position:sticky;top:calc(64px + env(safe-area-inset-top));z-index:15;gap:5px;padding:5px}
+ .inbox-tabs button{min-height:42px;gap:6px;padding:0 7px;font-size:10px}
+ .inbox-tabs button i{flex:none}
+ .inbox-page,.activity-notifications,.activity-notification{min-width:0;max-width:100%}
+ .activity-notification{gap:10px}
+ .activity-notification-copy{overflow-wrap:anywhere}
+ .activity-notification-actions{flex-wrap:wrap}
+}

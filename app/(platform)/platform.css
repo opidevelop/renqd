@@ -1257,3 +1257,13 @@
 .renq-reveal-participant-details summary{width:max-content;cursor:pointer;color:#b36a2c;font-weight:750}
 .renq-reveal-participant-details>span{display:block;margin-top:5px}
 @media(max-width:600px){.renq-reveal-participant-row{gap:7px}.renq-reveal-participant-average{font-size:10px}.renq-reveal-participant-details{padding-left:30px}}
+
+
+/* Appunti: restore native list markers removed by Tailwind Preflight. */
+.notes-editor ul{list-style:disc!important;margin:.65em 0!important;padding-inline-start:1.8rem!important}
+.notes-editor ol{list-style:decimal!important;margin:.65em 0!important;padding-inline-start:1.8rem!important}
+.notes-editor li{display:list-item!important;margin:.22em 0!important;padding-inline-start:.12em!important}
+.notes-editor ul ul{list-style:circle!important}
+.notes-editor ul ul ul{list-style:square!important}
+.notes-editor ol ol{list-style:lower-alpha!important}
+.notes-editor ol ol ol{list-style:lower-roman!important}

@@ -119,7 +119,7 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 @keyframes renqd-serpentina-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @keyframes renqd-spark-pulse{0%,100%{opacity:.72;transform:scale(.9)}50%{opacity:1;transform:scale(1.08)}}
 .platform-content :is(.home-hero,.explore-intro,.profile-cover,.saved-renq-hero,.multiplayer-session-heading){isolation:isolate}
-.platform-content :is(.home-hero,.explore-intro,.profile-cover,.saved-renq-hero):after{content:"";position:absolute;z-index:0;right:3%;bottom:-30%;width:230px;height:230px;background:url('/brand/serpentina-podio.svg') center/contain no-repeat;opacity:.14;pointer-events:none}
+.platform-content :is(.home-hero,.explore-intro,.profile-cover):after{content:"";position:absolute;z-index:0;right:3%;bottom:-30%;width:230px;height:230px;background:url('/brand/serpentina-podio.svg') center/contain no-repeat;opacity:.14;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.renqd-loading-overlay,.renqd-loading-serpentina,.renqd-loading-serpentina-line,.renqd-loading-spark{animation:none!important}.renqd-loading-serpentina-line{stroke-dashoffset:0}}
 
 @media(min-width:681px){
@@ -421,8 +421,8 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 .sport-discipline-card::after{border-radius:0!important;background:url('/brand/serpentina-podio.svg') center/contain no-repeat!important;opacity:.16!important;transform:none!important}
 .sport-discipline-card>*{position:relative;z-index:2}
 .saved-grade-label::before{content:""!important;display:inline-block;width:11px;height:11px;background:url('/brand/stellina.svg') center/contain no-repeat}
-.platform-content :is(.home-hero,.explore-intro,.profile-cover,.saved-renq-hero):after{z-index:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:url('/brand/serpentina-podio.svg') center/contain no-repeat!important;transform:none!important;opacity:.14!important}
-.platform-content :is(.home-hero,.explore-intro,.profile-cover,.saved-renq-hero)>*{position:relative;z-index:1}
+.platform-content :is(.home-hero,.explore-intro,.profile-cover):after{z-index:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:url('/brand/serpentina-podio.svg') center/contain no-repeat!important;transform:none!important;opacity:.14!important}
+.platform-content :is(.home-hero,.explore-intro,.profile-cover)>*{position:relative;z-index:1}
 
 .platform-page-heading,.builder-step-heading,.profile-overview{position:relative;isolation:isolate;overflow:hidden}
 .platform-page-heading:after,.builder-step-heading:after,.profile-overview:after{content:"";position:absolute;z-index:0;right:14px;top:50%;width:clamp(76px,11vw,140px);height:clamp(76px,11vw,140px);transform:translateY(-50%);background:url('/brand/serpentina-podio.svg') center/contain no-repeat;opacity:.12;pointer-events:none}
@@ -462,19 +462,32 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 @media(max-width:1100px){.explore-mosaic{grid-template-columns:minmax(0,1fr)}.explore-mosaic-discover,.explore-mosaic-feed{min-width:0;width:100%}}
 .explore-mosaic-discover,.explore-mosaic-feed{min-width:0}
 
-.multiplayer-session-heading{position:relative;isolation:isolate;display:flex;min-height:390px;align-items:flex-end;overflow:hidden;margin:16px 0 0;border:1px solid rgba(255,255,255,.08);border-radius:24px;background:linear-gradient(135deg,#32251d,#171411);color:#fff}
-.multiplayer-session-cover{position:absolute!important;z-index:-2!important;inset:0;width:100%;height:100%;min-height:0;border-radius:0}
-.multiplayer-session-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.82);transform:scale(1.04)}
-.multiplayer-session-cover-shade{position:absolute;z-index:-1;inset:0;background:linear-gradient(180deg,rgba(15,12,10,.05) 0%,rgba(15,12,10,.24) 35%,rgba(15,12,10,.9) 100%)}
-.multiplayer-session-heading-copy{position:relative;z-index:1;width:100%;padding:42px 76px 34px 38px}
-.multiplayer-session-heading-copy>span:first-child{color:#f6c49c;font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
-.multiplayer-session-heading-copy h1{max-width:720px;margin:12px 0 8px;color:#fff;font-size:clamp(34px,5vw,54px);line-height:1;letter-spacing:-2.3px}
-.multiplayer-session-heading-copy p{margin:0;color:#e0d6ce;font-size:11px}
-.multiplayer-session-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}
-.multiplayer-session-edit{position:absolute;z-index:4;right:22px;bottom:22px;display:grid;width:38px;height:38px;place-items:center;border:1px solid rgba(255,255,255,.32);border-radius:50%;background:rgba(255,255,255,.88);color:#302720;box-shadow:0 5px 18px rgba(0,0,0,.18);transition:transform .18s ease,background .18s ease}
-.multiplayer-session-edit:hover{transform:translateY(-2px);background:#fff}
-.multiplayer-session-status{z-index:3}
-@media(max-width:680px){.multiplayer-session-heading{min-height:320px;margin-top:10px;border-radius:19px}.multiplayer-session-heading-copy{padding:27px 62px 24px 22px}.multiplayer-session-heading-copy h1{font-size:36px;letter-spacing:-1.6px}.multiplayer-session-edit{right:14px;bottom:14px;width:36px;height:36px}}
+/* Multiplayer lobby: match the published Renq card and keep the cover contained. */
+.multiplayer-session-heading{position:relative!important;isolation:isolate!important;display:grid!important;grid-template-columns:132px minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;align-items:center!important;gap:18px!important;min-height:0!important;padding:20px!important;margin:16px 0 0!important;overflow:hidden!important;border:1px solid var(--renqd-line)!important;border-radius:24px!important;background:var(--renqd-card,#fff)!important;color:var(--renqd-ink)!important;box-shadow:var(--renqd-shadow)!important}
+.multiplayer-session-heading:after{z-index:0!important;right:3%!important;bottom:-30%!important;width:190px!important;height:190px!important;opacity:.09!important;pointer-events:none!important}
+.multiplayer-session-cover{position:relative!important;inset:auto!important;z-index:1!important;grid-column:1!important;grid-row:1 / span 2!important;flex:none!important;width:132px!important;height:132px!important;min-height:0!important;overflow:hidden!important;border-radius:15px!important;background:#f0e8df!important}
+.multiplayer-session-cover img{position:static!important;display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;filter:none!important;opacity:1!important;transform:none!important;mix-blend-mode:normal!important}
+.multiplayer-session-cover-shade{display:none!important}
+.multiplayer-session-heading-copy{position:relative!important;z-index:1!important;grid-column:2!important;grid-row:1!important;width:auto!important;min-width:0!important;max-width:none!important;padding:0!important}
+.multiplayer-session-heading-copy>span:first-child{color:#b8794e!important;font-size:9px!important;font-weight:850!important;letter-spacing:1.5px!important;text-transform:uppercase}
+.multiplayer-session-heading-copy h1{max-width:720px!important;margin:9px 0 7px!important;color:#352d26!important;font-size:clamp(25px,4vw,36px)!important;line-height:1.08!important;letter-spacing:-1.2px!important;overflow-wrap:anywhere}
+.multiplayer-session-heading-copy p{margin:0!important;color:#8a7d70!important;font-size:11px!important;line-height:1.55!important}
+.multiplayer-session-tags{display:flex!important;flex-wrap:wrap!important;gap:7px!important;margin-top:12px!important}
+.multiplayer-session-tags span{display:inline-flex!important;align-items:center!important;padding:6px 10px!important;border:1px solid #eadfd3!important;border-radius:999px!important;background:#fffaf5!important;color:#8a674a!important;font-size:9px!important;font-weight:750!important;backdrop-filter:none!important}
+.multiplayer-session-edit{position:relative!important;z-index:2!important;grid-column:3!important;grid-row:1!important;align-self:start!important;right:auto!important;bottom:auto!important;display:grid!important;width:36px!important;height:36px!important;place-items:center!important;border:1px solid #eadfd3!important;border-radius:11px!important;background:#fff!important;color:#a46b3f!important;box-shadow:none!important}
+.multiplayer-session-edit:hover{transform:translateY(-1px)!important;background:#fff5eb!important}
+.multiplayer-session-status{position:relative!important;z-index:1!important;grid-column:2!important;grid-row:2!important;justify-self:start!important;align-self:start!important;margin:0!important;padding:6px 10px!important;border:1px solid #eadfd3!important;border-radius:999px!important;background:#fff8f0!important;color:#93643e!important;font-size:9px!important;font-weight:800!important}
+@media(max-width:680px){
+ .multiplayer-session-heading{grid-template-columns:84px minmax(0,1fr)!important;grid-template-rows:auto auto!important;gap:10px 13px!important;min-height:0!important;margin-top:10px!important;padding:14px!important;border-radius:19px!important}
+ .multiplayer-session-cover{grid-column:1!important;grid-row:1 / span 2!important;width:84px!important;height:84px!important;border-radius:12px!important}
+ .multiplayer-session-heading-copy{grid-column:2!important;grid-row:1!important;padding-right:34px!important}
+ .multiplayer-session-heading-copy h1{font-size:clamp(20px,5.5vw,25px)!important;letter-spacing:-.8px!important}
+ .multiplayer-session-heading-copy p{font-size:10px!important}
+ .multiplayer-session-tags{gap:5px!important;margin-top:8px!important}
+ .multiplayer-session-tags span{padding:5px 7px!important;font-size:8px!important}
+ .multiplayer-session-edit{position:absolute!important;top:12px!important;right:12px!important;grid-column:auto!important;grid-row:auto!important;width:31px!important;height:31px!important}
+ .multiplayer-session-status{grid-column:2!important;grid-row:2!important;justify-self:start!important}
+}
 
 /* One shared notification treatment for application toasts across all surfaces. */
 .renqd-notification-toast,.home-resume-toast,.my-renqs-feedback{position:fixed;z-index:10000;right:22px;bottom:22px;display:flex;align-items:center;gap:10px;width:auto;max-width:min(390px,calc(100vw - 32px));padding:13px 15px;border:1px solid #f1d9c4;border-radius:14px;background:#fffaf5;color:var(--renqd-ink);box-shadow:0 12px 38px rgba(44,29,16,.16);font-size:12px;line-height:1.5;animation:renqd-toast-in .22s ease-out both}
