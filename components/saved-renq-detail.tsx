@@ -22,7 +22,7 @@ type SavedItem = {
   tie_order?: number | null;
   metadata?: { previewUrl?: string | null };
 };
-type CommentItem = { id: string; body: string; created_at: string; author_id: string };
+type CommentItem = { id: string; body: string; created_at: string; author_id: string; author_name?: string; author_avatar_url?: string | null };
 type RevisionItem = { id: string; version: number; change_summary: string | null; created_at: string };
 type MultiplayerComparisonParticipant={userId:string;username:string;displayName:string;avatarUrl:string|null;placements:Record<string,{rankPosition:number|null;score:number|null}>};
 type Props = {
@@ -33,6 +33,8 @@ type Props = {
   defaultCoverImageUrl: string | null;
   coverPosition: { x: number; y: number };
   comments: CommentItem[];
+  currentAuthorName: string;
+  currentAuthorAvatarUrl: string | null;
   commentCount: number;
   initialLiked: boolean;
   likeCount: number;
@@ -45,7 +47,7 @@ const modeLabels: Record<string, string> = { RENQ: "Renq", BATTLE_RENQ: "Battle 
 type GradeConfig={criterion:"score"|"position";labels:{name:string;min:number;max:number;color:string}[]};
 function gradeLabelFor(score:number| null|undefined,position:number,config:GradeConfig){if(score===null||score===undefined)return null;const value=config.criterion==="score"?score:position;return config.labels.find(label=>label.name.trim()&&value>=label.min&&value<=label.max)??null;}
 
-export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, coverPosition: initialCoverPosition, comments: initialComments, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount, revisions, isMultiplayer=false, multiplayerComparison=[] }: Props) {
+export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath, defaultCoverImageUrl, coverPosition: initialCoverPosition, comments: initialComments, currentAuthorName, currentAuthorAvatarUrl, commentCount: initialCommentCount, initialLiked, likeCount: initialLikeCount, revisions, isMultiplayer=false, multiplayerComparison=[] }: Props) {
   const router = useRouter();
   const { confirm, dialog } = useConfirmDialog();
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -102,7 +104,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
     setBusy(true); setError("");
     try {
       const result = await post({ action: "add-comment", rankingId: ranking.id, body });
-      setComments(current => [...current, result.comment]);
+      setComments(current => [...current, {...result.comment,author_name:currentAuthorName,author_avatar_url:currentAuthorAvatarUrl}]);
       setCommentCount(current => current + 1);
       setComment("");
     } catch (e) {
@@ -351,7 +353,7 @@ export function SavedRenqDetail({ ranking, items, coverImageUrl, coverImagePath,
           <textarea value={comment} onChange={event => setComment(event.target.value)} maxLength={4000} rows={2} placeholder="Aggiungi un commento…" />
           <button type="submit" disabled={!comment.trim() || busy} aria-label="Pubblica commento"><Send size={17} /></button>
         </form>
-        {comments.length ? <div className="saved-renq-comment-list">{comments.map(item => <article key={item.id}><div className="saved-renq-comment-avatar">R</div><div><p>{item.body}</p><small>{new Date(item.created_at).toLocaleString("it-IT", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</small></div></article>)}</div> : <p className="saved-renq-no-comments">Ancora nessun commento. Apri tu la conversazione.</p>}
+        {comments.length ? <div className="saved-renq-comment-list">{comments.map(item => <article key={item.id}><div className="saved-renq-comment-avatar">{item.author_avatar_url?<img src={item.author_avatar_url} alt="" />:<span>{(item.author_name||"U").slice(0,1).toUpperCase()}</span>}</div><div><strong className="saved-renq-comment-author">{item.author_name||"Utente Renqd"}</strong><p>{item.body}</p><small>{new Date(item.created_at).toLocaleString("it-IT", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</small></div></article>)}</div> : <p className="saved-renq-no-comments">Ancora nessun commento. Apri tu la conversazione.</p>}
       </section>
       {(error || message) && <p className={"saved-renq-feedback" + (error ? " is-error" : " is-success")} role="status">{error || message}</p>}
       <div className="saved-renq-footer-mark">renqd<span>.</span></div>

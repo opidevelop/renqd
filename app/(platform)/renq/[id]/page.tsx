@@ -82,6 +82,14 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
       supabase.from("ranking_likes").select("user_id", { count: "exact", head: true }).eq("ranking_id", ranking.id),
       supabase.from("ranking_revisions").select("id,version,change_summary,created_at").eq("ranking_id", ranking.id).order("version", { ascending: false }).limit(20)
     ]);
+    const commentAuthorIds=[...new Set([user.id,...(comments??[]).map(comment=>comment.author_id)])];
+    const {data:commentProfiles}=await supabase.from("public_profiles").select("user_id,username,display_name,avatar_url").in("user_id",commentAuthorIds);
+    const commentProfileMap=new Map((commentProfiles??[]).map(profile=>[profile.user_id,profile]));
+    const commentsWithAuthors=await Promise.all((comments??[]).map(async comment=>{
+      const author=commentProfileMap.get(comment.author_id);
+      return {...comment,author_name:author?.display_name||author?.username||"Utente Renqd",author_avatar_url:await getProfileMediaUrl(supabase,author?.avatar_url??null)};
+    }));
+    const currentCommentAuthor=commentProfileMap.get(user.id);
     return <SavedRenqDetail
       ranking={{ id: ranking.id, public_slug: ranking.public_slug, title: ranking.title, mode: ranking.mode, settings, created_at: ranking.created_at, visibility: ranking.visibility, allow_ties: ranking.allow_ties, started_at: ranking.started_at, completed_at: ranking.completed_at }}
       items={savedSnapshot?.items ?? []}
@@ -89,7 +97,7 @@ export default async function RenqPage({ params }: { params: Promise<{ id: strin
       coverImagePath={coverImagePath}
       defaultCoverImageUrl={typeof settings.defaultCoverImageUrl === "string" ? settings.defaultCoverImageUrl : null}
       coverPosition={settings.coverPosition && typeof settings.coverPosition === "object" ? settings.coverPosition as {x:number;y:number} : {x:50,y:50}}
-      comments={comments ?? []}
+      comments={commentsWithAuthors} currentAuthorName={currentCommentAuthor?.display_name||currentCommentAuthor?.username||"Utente Renqd"} currentAuthorAvatarUrl={await getProfileMediaUrl(supabase,currentCommentAuthor?.avatar_url??null)}
       commentCount={commentCount ?? 0}
       initialLiked={Boolean(liked)}
       likeCount={likeCount ?? 0}
