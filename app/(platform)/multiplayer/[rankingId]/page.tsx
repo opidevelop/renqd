@@ -18,6 +18,6 @@ export default async function MultiplayerPage({params}:{params:Promise<{rankingI
  const coverPosition=settings.coverPosition&&typeof settings.coverPosition==="object"?settings.coverPosition as {x:number;y:number}:{x:50,y:50};
  const participants=await Promise.all(((data.participants??[]) as Array<Record<string,unknown>>).map(async participant=>({...participant,avatarUrl:await getProfileMediaUrl(supabase,typeof participant.avatarUrl==="string"?participant.avatarUrl:null)})));
  const sessionData={...data,participants};
- const page=<main className="multiplayer-page"><MultiplayerSessionPanel initial={sessionData} coverImageUrl={coverImageUrl} coverPosition={coverPosition}/></main>;
+ const page=<main className="multiplayer-page"><MultiplayerSessionPanel initial={sessionData} coverImageUrl={coverImageUrl} coverImagePath={coverPath} coverPosition={coverPosition}/></main>;
  return coverImageUrl?<DynamicCoverTheme imageSrc={coverImageUrl}>{page}</DynamicCoverTheme>:page;
 }

@@ -569,3 +569,17 @@ body{background-image:radial-gradient(ellipse at 8% 5%,rgba(255,255,255,.9),tran
 .saved-renq-comment-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
 .saved-renq-comment-author{display:block;margin:0 0 4px;color:var(--renqd-ink);font-size:11px;font-weight:850}
 .public-home-footer>span{color:#9a8e81;font-size:10px;letter-spacing:.03em}
+
+.multiplayer-edit-backdrop{position:fixed;z-index:12000;inset:0;display:grid;place-items:center;padding:18px;background:rgba(27,22,18,.48);backdrop-filter:blur(9px)}
+.multiplayer-edit-dialog{width:min(560px,100%);max-height:min(88svh,760px);overflow:auto;padding:22px;border:1px solid var(--renqd-line);border-radius:23px;background:#fffdfa;color:var(--renqd-ink);box-shadow:0 26px 90px rgba(24,18,13,.25)}
+.multiplayer-edit-dialog>header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px}
+.multiplayer-edit-dialog>header span,.multiplayer-edit-cover>span{color:var(--renqd-orange-dark);font-size:8px;font-weight:900;letter-spacing:1.4px}
+.multiplayer-edit-dialog>header h2{margin:6px 0 0;font-size:24px;letter-spacing:-.9px}
+.multiplayer-edit-dialog>header button{display:grid;width:34px;height:34px;place-items:center;border:1px solid var(--renqd-line);border-radius:50%;background:#fff;color:var(--renqd-muted)}
+.multiplayer-edit-title-field{display:grid;gap:8px;margin-bottom:20px;color:var(--renqd-muted);font-size:10px;font-weight:800}
+.multiplayer-edit-title-field input{height:46px;padding:0 13px;border:1px solid var(--renqd-line);border-radius:12px;background:#fff;color:var(--renqd-ink);font:inherit;font-size:14px}
+.multiplayer-edit-cover{display:grid;gap:10px;padding:15px;border:1px solid var(--renqd-line);border-radius:15px;background:#fffaf5}
+.multiplayer-edit-dialog>footer{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}
+.multiplayer-edit-dialog>footer>button{min-height:42px;padding:0 16px;border:1px solid var(--renqd-line);border-radius:999px;background:#fff;color:var(--renqd-muted);font-size:10px;font-weight:800}
+.multiplayer-edit-dialog>footer>.multiplayer-primary{border-color:var(--renqd-orange);background:var(--renqd-orange);color:#fff}
+@media(max-width:680px){.multiplayer-edit-dialog{padding:17px;border-radius:19px}.multiplayer-edit-dialog>footer{flex-direction:column-reverse}.multiplayer-edit-dialog>footer>button{width:100%}}
