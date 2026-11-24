@@ -11,7 +11,7 @@ import { ArrowUpRight, BadgeCheck, Camera, FolderPlus, Globe2, Heart, ImagePlus,
 type MediaCrop = { x:number; y:number; zoom:number };
 type ProfileMediaSettings = { avatar:MediaCrop; banner:MediaCrop };
 const defaultCrop:MediaCrop={x:50,y:50,zoom:100};
-const profileModeLabels:Record<string,string>={RENQ:"Renq",BATTLE_RENQ:"Battle Renq",SPEED_RENQ:"Speed Renq",GRADE:"Grade"};
+const profileModeLabels:Record<string,string>={RENQ:"Renq",BATTLE_RENQ:"Battle Renq",SPEED_RENQ:"Speed Renq",GRADE:"Grade",POKEMON_ULTIMATE_FAVOURITE:"Ultimate Favourite",POKEMON_NAME_EM_ALL:"Name ’Em All"};
 function normalizeMediaSettings(value:unknown):ProfileMediaSettings{
   const raw=value&&typeof value==="object"?value as Record<string,unknown>:{};
   const normalize=(candidate:unknown):MediaCrop=>{
@@ -291,7 +291,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
         {profile.avatar_display_url ? <img src={profile.avatar_display_url} alt="Avatar profilo" style={{objectPosition:mediaSettings.avatar.x+"% "+mediaSettings.avatar.y+"%",transform:"scale("+mediaSettings.avatar.zoom/100+")"}}/> : <span>{(profile.display_name || profile.username).slice(0, 1).toUpperCase()}</span>}
       </div>
       <div className="profile-overview-copy"><h2>{profile.display_name || profile.username}</h2><p>@{profile.username}</p>{profile.bio && <div className="profile-bio">{profile.bio}</div>}</div>
-      <div className="profile-overview-actions"><div className="profile-privacy-pill">{profile.is_private ? <><LockKeyhole size={14}/> Privato</> : <><Globe2 size={14}/> Pubblico</>}</div><button type="button" className="profile-edit-trigger" onClick={() => setProfileEditorOpen(value => !value)} aria-expanded={profileEditorOpen}><Pencil size={14}/> Modifica profilo</button></div>
+      <div className="profile-overview-actions"><div className="profile-privacy-pill">{profile.is_private ? <><LockKeyhole size={14}/> Privato</> : <><Globe2 size={14}/> Pubblico</>}</div><Link href="/profile/pokemon" className="profile-pokemon-trigger">Pokémon <span>↗</span></Link><button type="button" className="profile-edit-trigger" onClick={() => setProfileEditorOpen(value => !value)} aria-expanded={profileEditorOpen}><Pencil size={14}/> Modifica profilo</button></div>
     </section>
 
     <section className="profile-stats-badges">
@@ -358,7 +358,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       {rankings.length ? <div className="profile-renq-grid">{rankings.map(ranking => {
         const settings = ranking.settings ?? {};
         const cover = typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null;
-        return <Link key={ranking.id} href={"/renq/" + (ranking.public_slug || ranking.id)} className="profile-renq-card"><div style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.75),rgba(15,12,10,.05)),url(" + cover + ")" } : undefined}><span>{profileModeLabels[String(ranking.mode)]??"Renq"}</span><ArrowUpRight size={17}/></div><strong>{ranking.title}</strong></Link>;
+        return <Link key={ranking.id} href={(ranking.mode === "POKEMON_ULTIMATE_FAVOURITE" || ranking.mode === "POKEMON_NAME_EM_ALL") ? "/r/" + (ranking.public_slug || ranking.id) : "/renq/" + (ranking.public_slug || ranking.id)} className="profile-renq-card"><div style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.75),rgba(15,12,10,.05)),url(" + cover + ")" } : undefined}><span>{profileModeLabels[String(ranking.mode)]??"Renq"}</span><ArrowUpRight size={17}/></div><strong>{ranking.title}</strong></Link>;
       })}</div> : <div className="profile-empty-state"><Trophy size={24}/><strong>Il tuo primo Renq ti aspetta</strong><p>Quando completi una classifica, la ritroverai qui.</p><Link href="/create">Crea un Renq <ArrowUpRight size={15}/></Link></div>}
     </section>
     <div className="profile-social-meta"><ProfileFollowLists showFollowing={false} followerCount={followerCount} followingCount={followingCount} followers={followerProfiles} following={followingProfiles}/><span><Heart size={14}/> {likeCount} apprezzamenti ricevuti</span><Link href={"/u/" + profile.username}>Apri il profilo pubblico <ArrowUpRight size={14}/></Link></div>

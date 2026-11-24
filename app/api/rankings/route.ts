@@ -128,6 +128,30 @@ export async function POST(request:Request){
   if(error)return jsonError(error.message,500);
   return NextResponse.json({ok:true});
  }
+ if(body.action==="public-toggle-like"||body.action==="public-add-comment"){
+  const {rankingId}=body as {rankingId:string};
+  if(typeof rankingId!=="string"||! /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rankingId))return jsonError("Risultato non valido.");
+  const {data:ranking}=await supabase.from("rankings").select("id,user_id,mode,status,visibility,hidden_at,deleted_at,settings")
+    .eq("id",rankingId).maybeSingle();
+  const settings=(ranking?.settings??{}) as Record<string,unknown>;
+  if(!ranking||ranking.mode!=="POKEMON_NAME_EM_ALL"||ranking.status!=="COMPLETED"||ranking.visibility!=="LIVE"
+    ||ranking.hidden_at||ranking.deleted_at||settings.access==="private")return jsonError("Risultato non disponibile.",404);
+  if(body.action==="public-toggle-like"){
+    if(ranking.user_id===user.id)return jsonError("Non puoi mettere Mi piace al tuo risultato.",403);
+    const {data:existing}=await supabase.from("ranking_likes").select("user_id").eq("ranking_id",rankingId).eq("user_id",user.id).maybeSingle();
+    if(existing){const {error}=await supabase.from("ranking_likes").delete().eq("ranking_id",rankingId).eq("user_id",user.id);if(error)return jsonError(error.message,500);}
+    else{const {error}=await supabase.from("ranking_likes").insert({ranking_id:rankingId,user_id:user.id});if(error)return jsonError(error.message,500);}
+    const {count,error}=await supabase.from("ranking_likes").select("user_id",{count:"exact",head:true}).eq("ranking_id",rankingId);
+    if(error)return jsonError(error.message,500);
+    return NextResponse.json({liked:!existing,likeCount:count??0});
+  }
+  const clean=typeof body.body==="string"?body.body.trim():"";
+  if(!clean||clean.length>4000)return jsonError("Il commento deve contenere da 1 a 4000 caratteri.");
+  const {data:comment,error}=await supabase.from("ranking_comments").insert({ranking_id:rankingId,author_id:user.id,body:clean})
+    .select("id,body,created_at,author_id").single();
+  if(error||!comment)return jsonError(error?.message??"Impossibile pubblicare il commento.",500);
+  return NextResponse.json({comment});
+ }
  if(body.action==="toggle-like"){
   const {rankingId}=body as {rankingId:string};
   const {data:ranking}=await supabase.from("rankings").select("id").eq("id",rankingId).eq("user_id",user.id).single();

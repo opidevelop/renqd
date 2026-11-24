@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import { ArrowLeft, Trophy } from "lucide-react";
 import ReportRenqMenu from "@/components/report-renq-menu";
+import { PokemonFavouritePublicView } from "@/components/pokemon/ultimate-favourite";
+import { PokemonNameEmAllPublicResultView } from "@/components/pokemon/name-em-all";
+import { FavouriteMatrix } from "@/lib/pokemon/catalog";
 import "./report-renq.css";
 
 export const dynamic = "force-dynamic";
@@ -20,11 +24,45 @@ export default async function PublicRenqPage({ params }: { params: Promise<{ slu
     ranking = result.data;
   }
   if (!ranking || ranking.status !== "COMPLETED") notFound();
-  if (!isStaff && (ranking.hidden_at || ranking.deleted_at || ranking.visibility !== "LIVE" || (ranking.settings as Record<string,unknown>)?.access === "private")) notFound();
+  const isOwner = ranking.user_id === user.id;
+  if (!isStaff && !isOwner && (ranking.hidden_at || ranking.deleted_at || ranking.visibility !== "LIVE" || (ranking.settings as Record<string,unknown>)?.access === "private")) notFound();
   const settings = (ranking.settings ?? {}) as Record<string,unknown>;
   const snapshot = (settings.savedSnapshot ?? {}) as { items?: { id?:string; title:string; image_url?:string|null; description?:string|null; rank_position?:number|null }[] };
   const items = (snapshot.items ?? []).slice().sort((a,b)=>(a.rank_position??999)-(b.rank_position??999));
   const { data: profile } = await supabase.from("public_profiles").select("username,display_name").eq("user_id", ranking.user_id).maybeSingle();
+  if (ranking.mode === "POKEMON_ULTIMATE_FAVOURITE") {
+    const matrix = (settings.matrix ?? {}) as FavouriteMatrix;
+    const ownerName = profile?.display_name || profile?.username || "Utente Renqd";
+    return <PokemonFavouritePublicView matrix={matrix} ownerName={ownerName} />;
+  }
+  if (ranking.mode === "POKEMON_NAME_EM_ALL") {
+    const result = (settings.resultSnapshot ?? {}) as Record<string, unknown>;
+    const ownerName = profile?.display_name || profile?.username || "Utente Renqd";
+    const isPublic = !ranking.hidden_at && !ranking.deleted_at && ranking.visibility === "LIVE" && settings.access !== "private";
+    const canReport = isPublic && actor?.status === "APPROVED" && !isOwner;
+    const [{ data: comments }, { data: liked }, { count: likeCount }] = isPublic ? await Promise.all([
+      supabase.from("ranking_comments").select("id,body,created_at,author_id").eq("ranking_id",ranking.id).is("deleted_at",null).order("created_at",{ascending:true}).limit(100),
+      supabase.from("ranking_likes").select("user_id").eq("ranking_id",ranking.id).eq("user_id",user.id).maybeSingle(),
+      supabase.from("ranking_likes").select("user_id",{count:"exact",head:true}).eq("ranking_id",ranking.id),
+    ]) : [{data:[]},{data:null},{count:0}];
+    const authorIds=[...new Set((comments??[]).map(comment=>comment.author_id))];
+    const {data:commentProfiles}=authorIds.length?await supabase.from("public_profiles").select("user_id,username,display_name,avatar_url").in("user_id",authorIds):{data:[]};
+    const profileById=new Map((commentProfiles??[]).map(item=>[item.user_id,item]));
+    const initialComments=await Promise.all((comments??[]).map(async comment=>{
+      const author=profileById.get(comment.author_id);
+      return {id:comment.id,body:comment.body,createdAt:comment.created_at,authorId:comment.author_id,
+        authorName:author?.display_name||author?.username||"Allenatore",username:author?.username||"",
+        avatarUrl:await getProfileMediaUrl(supabase,author?.avatar_url)};
+    }));
+    const reportStatus=canReport?await supabase.rpc("ranking_report_exists",{p_ranking_id:ranking.id}):{data:false};
+    return <div className="pokemon-public-result-shell">
+      <PokemonNameEmAllPublicResultView result={result} ownerName={ownerName} social={isPublic?{
+        rankingId:ranking.id,initialLiked:Boolean(liked),initialLikeCount:likeCount??0,initialComments,
+        currentUserId:user.id,canLike:!isOwner,
+      }:undefined}/>
+      {canReport&&<ReportRenqMenu rankingId={ranking.id} alreadyReported={Boolean(reportStatus.data)}/>}
+    </div>;
+  }
   const canReport = actor?.status === "APPROVED" && user.id !== ranking.user_id
     && !ranking.hidden_at && !ranking.deleted_at && ranking.visibility === "LIVE"
     && (settings as Record<string, unknown>).access !== "private";

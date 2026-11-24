@@ -22,7 +22,7 @@ export default async function ProfilePage() {
     banner_display_url: await getProfileMediaUrl(supabase, profile.banner_url),
   };
   const { data: rows } = await supabase.from("rankings").select("id,title,public_slug,mode,settings,status,completed_at").eq("user_id", user.id).eq("status", "COMPLETED").is("deleted_at",null).order("completed_at", { ascending: false });
-  const rankings = (rows ?? []).filter(item => Boolean((item.settings as Record<string, unknown> | null)?.savedAt));
+  const rankings = (rows ?? []).filter(item => Boolean((item.settings as Record<string, unknown> | null)?.savedAt) || item.mode === "POKEMON_ULTIMATE_FAVOURITE" || item.mode === "POKEMON_NAME_EM_ALL");
   const { data: collections } = await supabase.from("profile_collections").select("id,title,slug,description,banner_url,visibility,is_featured,sort_order").eq("owner_id", user.id).order("is_featured", { ascending: false }).order("sort_order").order("created_at", { ascending: false });
   const collectionIds = (collections ?? []).map(item => item.id);
   const { data: collectionItems } = collectionIds.length ? await supabase.from("profile_collection_items").select("collection_id,ranking_id,position,rankings!inner(deleted_at)").in("collection_id", collectionIds).is("rankings.deleted_at",null).order("position", { ascending: true }) : { data: [] };

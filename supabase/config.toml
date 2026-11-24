@@ -10,3 +10,6 @@ content_path = "./templates/recovery.html"
 
 [functions.admin-delete-user]
 verify_jwt = false
+
+[functions.pokemon-catalog-sync]
+verify_jwt = true

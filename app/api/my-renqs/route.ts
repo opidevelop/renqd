@@ -25,7 +25,17 @@ export async function GET(request: Request) {
   const items = await Promise.all(saved.map(async ranking => {
     const settings = (ranking.settings ?? {}) as Record<string, unknown>;
     const snapshot = (settings.savedSnapshot ?? {}) as { items?: { title: string; image_url?: string | null; rank_position?: number | null }[] };
-    const rows = snapshot.items ?? [];
+    const result = (settings.resultSnapshot ?? {}) as Record<string, unknown>;
+    const matrix = (settings.matrix ?? {}) as Record<string, unknown>;
+    const rows = snapshot.items ?? (
+      ranking.mode === "POKEMON_NAME_EM_ALL" ? [
+        { title: String(result.foundCount ?? result.score ?? 0) + " Pokémon trovati" },
+        { title: String(result.accuracy ?? 0) + "% precisione" },
+        { title: String(result.level ?? "Risultato") },
+      ] : ranking.mode === "POKEMON_ULTIMATE_FAVOURITE" ? [
+        { title: Object.keys(matrix).length + " celle compilate" },
+      ] : []
+    );
     const coverPath = typeof settings.coverImagePath === "string" ? settings.coverImagePath : null;
     const { data: signed } = coverPath ? await supabase.storage.from("renq-covers").createSignedUrl(coverPath, 60 * 60 * 24 * 7) : { data: null };
     return {
