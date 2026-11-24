@@ -37,7 +37,7 @@ export default async function PublicRenqPage({ params }: { params: Promise<{ slu
   const settings = (ranking.settings ?? {}) as Record<string,unknown>;
   const snapshot = (settings.savedSnapshot ?? {}) as { items?: { id?:string; title:string; image_url?:string|null; description?:string|null; rank_position?:number|null }[] };
   const items = (snapshot.items ?? []).slice().sort((a,b)=>(a.rank_position??999)-(b.rank_position??999));
-  const { data: profile } = await supabase.from("public_profiles").select("username,display_name").eq("user_id", ranking.user_id).maybeSingle();
+  const { data: profile } = await supabase.from("public_profiles").select("username,display_name,is_private").eq("user_id", ranking.user_id).maybeSingle();
   if (ranking.mode === "POKEMON_ULTIMATE_FAVOURITE") {
     const matrix = (settings.matrix ?? {}) as FavouriteMatrix;
     const ownerName = profile?.display_name || profile?.username || "Utente Renqd";
@@ -45,32 +45,65 @@ export default async function PublicRenqPage({ params }: { params: Promise<{ slu
   }
   if (ranking.mode === "POKEMON_NAME_EM_ALL") {
     const result = (settings.resultSnapshot ?? {}) as Record<string, unknown>;
-    const ownerName = profile?.display_name || profile?.username || "Utente Renqd";
-    const leaderboard = Array.isArray(result.leaderboard) ? await Promise.all((result.leaderboard as Array<Record<string,unknown>>).map(async item=>({
-      ...item,avatarUrl:await getProfileMediaUrl(supabase,typeof item.avatarUrl==="string"?item.avatarUrl:null),
-    }))) : [];
+    const rawLeaderboard=Array.isArray(result.leaderboard)?result.leaderboard as Array<Record<string,unknown>>:[];
+    const {data:ownerBlocked}=!isOwner?await supabase.rpc("renqd_is_user_blocked",{p_other_user_id:ranking.user_id}):{data:false};
+    const snapshotOwner=rawLeaderboard.find(item=>String(item.userId??"")===ranking.user_id);
+    const snapshotOwnerName=String(result.displayName??result.username??snapshotOwner?.displayName??snapshotOwner?.username??"");
+    const ownerName = ownerBlocked===true?"Allenatore bloccato":profile?.display_name || profile?.username || snapshotOwnerName || "Utente Renqd";
+    const leaderboard = rawLeaderboard.length ? await Promise.all(rawLeaderboard.map(async item=>{
+      const itemUserId=typeof item.userId==="string"?item.userId:"";
+      const {data:blocked}=itemUserId&&itemUserId!==user.id
+        ?await supabase.rpc("renqd_is_user_blocked",{p_other_user_id:itemUserId})
+        :{data:false};
+      return {
+        ...item,
+        userId:blocked===true?null:item.userId,
+        displayName:blocked===true?"Allenatore bloccato":item.displayName,
+        username:blocked===true?"":item.username,
+        publicSlug:blocked===true?null:item.publicSlug,
+        avatarUrl:blocked===true?null:await getProfileMediaUrl(supabase,typeof item.avatarUrl==="string"?item.avatarUrl:null),
+      };
+    })) : [];
     const resultWithAvatars={...result,leaderboard};
-    const isPublic = !ranking.hidden_at && !ranking.deleted_at && ranking.visibility === "LIVE" && settings.access !== "private";
+    const isPublic = !ranking.hidden_at && !ranking.deleted_at && ranking.visibility === "LIVE"
+      && settings.access !== "private" && profile?.is_private === false;
+    const {data:canViewResult}=await supabase.rpc("renqd_pokemon_name_em_all_can_view",{p_ranking_id:ranking.id});
+    const canViewSocial=canViewResult===true;
+    const {data:canSocialResult}=await supabase.rpc("renqd_pokemon_name_em_all_can_social",{p_ranking_id:ranking.id});
+    const canSocial=canSocialResult===true;
     const canReport = isPublic && actor?.status === "APPROVED" && !isOwner;
-    const [{ data: comments }, { data: liked }, { count: likeCount }] = isPublic ? await Promise.all([
-      supabase.from("ranking_comments").select("id,body,created_at,author_id").eq("ranking_id",ranking.id).is("deleted_at",null).order("created_at",{ascending:true}).limit(100),
+    const [{ data: comments }, { data: liked }, { count: likeCount }, {data:likes}] = canViewSocial ? await Promise.all([
+      supabase.from("ranking_comments").select("id,body,created_at,edited_at,author_id,parent_comment_id").eq("ranking_id",ranking.id).is("deleted_at",null).order("created_at",{ascending:true}).limit(100),
       supabase.from("ranking_likes").select("user_id").eq("ranking_id",ranking.id).eq("user_id",user.id).maybeSingle(),
       supabase.from("ranking_likes").select("user_id",{count:"exact",head:true}).eq("ranking_id",ranking.id),
-    ]) : [{data:[]},{data:null},{count:0}];
-    const authorIds=[...new Set((comments??[]).map(comment=>comment.author_id))];
+      supabase.from("ranking_likes").select("user_id,created_at").eq("ranking_id",ranking.id).order("created_at",{ascending:false}).limit(100),
+    ]) : [{data:[]},{data:null},{count:0},{data:[]}];
+    const commentIds=(comments??[]).map(comment=>comment.id);
+    const {data:likesForComments}=canViewSocial&&commentIds.length
+      ?await supabase.from("ranking_comment_likes").select("comment_id,user_id").in("comment_id",commentIds)
+      :{data:[]};
+    const authorIds=[...new Set([...(comments??[]).map(comment=>comment.author_id),...(likes??[]).map(item=>item.user_id)])];
     const {data:commentProfiles}=authorIds.length?await supabase.from("public_profiles").select("user_id,username,display_name,avatar_url").in("user_id",authorIds):{data:[]};
     const profileById=new Map((commentProfiles??[]).map(item=>[item.user_id,item]));
+    const likesByComment=new Map<string,{count:number;liked:boolean}>();
+    for(const like of likesForComments??[]){const current=likesByComment.get(like.comment_id)??{count:0,liked:false};current.count++;if(like.user_id===user.id)current.liked=true;likesByComment.set(like.comment_id,current);}
+    const initialLikers=await Promise.all((likes??[]).map(async like=>{
+      const liker=profileById.get(like.user_id);
+      return {userId:like.user_id,displayName:liker?.display_name||liker?.username||"Allenatore",
+        username:liker?.username||"",avatarUrl:await getProfileMediaUrl(supabase,liker?.avatar_url)};
+    }));
     const initialComments=await Promise.all((comments??[]).map(async comment=>{
-      const author=profileById.get(comment.author_id);
-      return {id:comment.id,body:comment.body,createdAt:comment.created_at,authorId:comment.author_id,
+      const author=profileById.get(comment.author_id);const likes=likesByComment.get(comment.id);
+      return {id:comment.id,body:comment.body,createdAt:comment.created_at,editedAt:comment.edited_at,
+        authorId:comment.author_id,parentCommentId:comment.parent_comment_id,
         authorName:author?.display_name||author?.username||"Allenatore",username:author?.username||"",
-        avatarUrl:await getProfileMediaUrl(supabase,author?.avatar_url)};
+        avatarUrl:await getProfileMediaUrl(supabase,author?.avatar_url),likeCount:likes?.count??0,likedByMe:likes?.liked??false};
     }));
     const reportStatus=canReport?await supabase.rpc("ranking_report_exists",{p_ranking_id:ranking.id}):{data:false};
     return <div className="pokemon-public-result-shell">
-      <PokemonNameEmAllPublicResultView result={resultWithAvatars} ownerName={ownerName} social={isPublic?{
-        rankingId:ranking.id,initialLiked:Boolean(liked),initialLikeCount:likeCount??0,initialComments,
-        currentUserId:user.id,canLike:!isOwner,
+      <PokemonNameEmAllPublicResultView result={resultWithAvatars} ownerName={ownerName} isOwner={isOwner} social={canViewSocial?{
+        rankingId:ranking.id,resultOwnerId:ranking.user_id,initialLiked:Boolean(liked),initialLikeCount:likeCount??0,initialLikers,initialComments,
+        currentUserId:user.id,canLike:canSocial&&!isOwner,canComment:canSocial,isOwner,
       }:undefined}/>
       {canReport&&<ReportRenqMenu rankingId={ranking.id} alreadyReported={Boolean(reportStatus.data)}/>}
     </div>;

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireApprovedUser } from "@/lib/supabase/authorization";
 import { ProfileFollowButton } from "@/components/profile-follow-button";
 import { MessageRequestButton } from "@/components/message-request-button";
+import { UserBlockButton } from "@/components/user-block-button";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import { ArrowLeft, ArrowUpRight, BadgeCheck, Folder, Globe2, Trophy } from "lucide-react";
 
@@ -14,6 +15,10 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const { data: profile } = await supabase.from("public_profiles").select("*").eq("username", username).maybeSingle();
   if (!profile) notFound();
   const isOwner = profile.user_id === user?.id;
+  if(!isOwner){
+    const {data:isBlocked}=await supabase.rpc("renqd_is_user_blocked",{p_other_user_id:profile.user_id});
+    if(isBlocked===true)notFound();
+  }
   const sortedPair = [user.id, profile.user_id].sort();
   const { data: existingConversation } = !isOwner ? await supabase.from("direct_conversations").select("id").eq("participant_one_id", sortedPair[0]).eq("participant_two_id", sortedPair[1]).maybeSingle() : { data: null };
   if (profile.is_private && !isOwner) {
@@ -52,7 +57,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     <section className="profile-overview public-profile-overview">
       <div className="profile-avatar-wrap">{profileAvatarUrl ? <img src={profileAvatarUrl} alt="" style={{objectPosition:avatarCrop.x+"% "+avatarCrop.y+"%",transform:"scale("+avatarCrop.zoom/100+")"}}/> : <span>{(profile.display_name || profile.username).slice(0,1).toUpperCase()}</span>}</div>
       <div className="profile-overview-copy"><h2>{profile.display_name || profile.username}</h2><p>@{profile.username}{profile.location ? " · " + profile.location : ""}</p>{profile.is_private && <span className="public-profile-private-note">Profilo privato · visibile ai follower</span>}{profile.bio && <div className="profile-bio">{profile.bio}</div>}{profile.website_url && <a href={profile.website_url} target="_blank" rel="noreferrer">{profile.website_url}</a>}</div>
-      <div className="public-profile-action">{isOwner ? <Link href="/profile">Modifica profilo <ArrowUpRight size={15}/></Link> : <><ProfileFollowButton targetUserId={profile.user_id}/><MessageRequestButton targetUserId={profile.user_id} conversationId={existingConversation?.id??null}/></>}</div>
+      <div className="public-profile-action">{isOwner ? <Link href="/profile">Modifica profilo <ArrowUpRight size={15}/></Link> : <><ProfileFollowButton targetUserId={profile.user_id}/><MessageRequestButton targetUserId={profile.user_id} conversationId={existingConversation?.id??null}/><UserBlockButton userId={profile.user_id} displayName={profile.display_name||profile.username}/></>}</div>
     </section>
     <div className="public-profile-stats"><span><strong>{rankings.length}</strong> Renq</span><span><strong>{visibleCollections.length}</strong> Collezioni</span>{followerCount !== null && <span><strong>{followerCount ?? 0}</strong> Follower</span>}</div>
     <section className="profile-collections-section"><div className="profile-section-heading"><div><span>RACCOLTE PERSONALI</span><h2>Collezioni</h2></div><Folder size={20}/></div>

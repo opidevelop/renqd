@@ -4,17 +4,13 @@ import { revalidatePath } from "next/cache";
 import { createHash, randomBytes } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 
-type RpcClient = {
-  rpc: (name: string, args: Record<string, unknown>) => Promise<{
-    data: unknown; error: { message: string } | null;
-  }>;
-};
+type RpcClient = Awaited<ReturnType<typeof createClient>>;
 
 async function getRpcClient() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { user: null, client: null as RpcClient | null };
-  return { user, client: supabase as unknown as RpcClient };
+  return { user, client: supabase };
 }
 
 export async function createNameEmAllSoloAction(config: Record<string, unknown>) {
@@ -83,6 +79,17 @@ export async function setNameEmAllDefaultVisibilityAction(visibility: "PUBLIC" |
   return { ok: true };
 }
 
+export async function setNameEmAllSocialNotificationsAction(notifyLikes: boolean, notifyComments: boolean) {
+  const { user, client } = await getRpcClient();
+  if (!user || !client) return { ok: false, error: "Devi accedere a Renqd." };
+  const { error } = await client.rpc("renqd_pokemon_name_em_all_set_social_notifications", {
+    p_notify_likes: notifyLikes, p_notify_comments: notifyComments,
+  });
+  if (error) return { ok: false, error: "Preferenze notifiche non aggiornate." };
+  revalidatePath("/profile/pokemon");
+  return { ok: true };
+}
+
 export async function setNameEmAllResultVisibilityAction(sessionId: string, visibility: "PUBLIC" | "PRIVATE") {
   const { user, client } = await getRpcClient();
   if (!user || !client) return { ok: false, error: "Devi accedere a Renqd." };
@@ -91,6 +98,8 @@ export async function setNameEmAllResultVisibilityAction(sessionId: string, visi
   });
   if (error) return { ok: false, error: "Visibilità del risultato non aggiornata." };
   revalidatePath("/profile/pokemon");
+  revalidatePath("/r/[slug]","page");
+  revalidatePath("/pokemon/name-em-all");
   return { ok: true };
 }
 
@@ -113,7 +122,23 @@ export async function submitNameEmAllMultiplayerAnswerAction(sessionId: string, 
     p_session_id: sessionId, p_answer: answer,
   });
   if (error || !data || typeof data !== "object") return { ok: false, error: error?.message ?? "Risposta non registrata." };
-  return { ok: true, data: data as Record<string, unknown> };
+  const payload = data as Record<string, unknown>;
+  if (payload.status === "ALREADY_FOUND" && typeof payload.speciesId === "number") {
+    const { data: discoveries } = await client.from("pokemon_name_em_all_discoveries")
+      .select("user_id,discovered_by")
+      .eq("session_id", sessionId)
+      .eq("species_id", payload.speciesId)
+      .limit(8);
+    const discovery = discoveries?.find(row => row.user_id === null || row.user_id === user.id);
+    if (typeof discovery?.discovered_by === "string") {
+      const { data: profile } = await client.from("public_profiles")
+        .select("display_name")
+        .eq("user_id", discovery.discovered_by)
+        .maybeSingle();
+      if (typeof profile?.display_name === "string") payload.discoveredByName = profile.display_name;
+    }
+  }
+  return { ok: true, data: payload };
 }
 
 export async function hintNameEmAllMultiplayerAction(sessionId: string, speciesId: number) {

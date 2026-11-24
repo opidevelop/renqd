@@ -1,9 +1,9 @@
-CREATE OR REPLACE FUNCTION public.renqd_pokemon_name_em_all_rejoin_session(p_session_id uuid)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public', 'private', 'pg_temp'
-AS $function$
+create or replace function public.renqd_pokemon_name_em_all_rejoin_session(p_session_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path=public,private,pg_temp
+as $$
 declare
   v_user_id uuid:=auth.uid();
   v_result jsonb;
@@ -39,8 +39,6 @@ begin
   end if;
   return v_result;
 end;
-$function$
-;
-
+$$;
 revoke all on function public.renqd_pokemon_name_em_all_rejoin_session(uuid) from public,anon;
 grant execute on function public.renqd_pokemon_name_em_all_rejoin_session(uuid) to authenticated;

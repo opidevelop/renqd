@@ -38,7 +38,7 @@ function Grid({
     if (!selection) return undefined;
     const species = catalog.species.find((item) => item.id === selection.speciesId);
     if (!species) return undefined;
-    return { species, form: selection.formId ? species.forms.find((item) => item.id === selection.formId) : undefined };
+    return { species, form: selection.formId ? (species.forms.find((item) => item.id === selection.formId) ?? species.megaForms.find((item) => item.id === selection.formId)) : undefined };
   };
   return (
     <div className="pokemon-favourite-scroll">

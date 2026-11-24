@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Crown, HelpCircle, LoaderCircle, LogOut, PauseCircle, Send, X, Link2, Copy, UserX, Settings } from "lucide-react";
+import { CheckCircle2, Crown, HelpCircle, LoaderCircle, LogOut, PauseCircle, Send, X, Link2, Copy, UserX, Settings, Search, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { playPokemonSound, preparePokemonAudio } from "@/lib/pokemon/sounds";
+import { usePokemonSoundPreference } from "@/components/pokemon/use-pokemon-sound-preference";
 import { PokemonCatalog, PokemonSpecies, normalizePokemonName } from "@/lib/pokemon/catalog";
 import { createNameEmAllInviteLinkAction, inviteNameEmAllUsersAction, expelNameEmAllParticipantAction, finishNameEmAllMultiplayerAction, heartbeatNameEmAllAction, hintNameEmAllMultiplayerAction, leaveNameEmAllAction, submitNameEmAllMultiplayerAnswerAction } from "@/app/(platform)/pokemon/name-em-all/actions";
 import type { NameEmAllParticipant } from "@/components/pokemon/multiplayer-lobby";
@@ -16,6 +18,8 @@ type MultiplayerSession={
 
 function formatClock(seconds:number){const value=Math.max(0,seconds);return Math.floor(value/60).toString().padStart(2,"0")+":"+Math.floor(value%60).toString().padStart(2,"0");}
 
+const specialLabels:Record<string,string>={mega:"Mega",legendary:"Leggendari",mythical:"Mitici",ultraBeast:"Ultracreature",paradox:"Paradosso"};
+
 export function PokemonNameEmAllMultiplayerGame({
   catalog,session:initialSession,initialDiscoveries,initialParticipants,initialDiscoverers,currentUserId,currentUserRole,
 }:{
@@ -25,9 +29,19 @@ export function PokemonNameEmAllMultiplayerGame({
   const router=useRouter();
   const [session,setSession]=useState(initialSession);
   const [participants,setParticipants]=useState(initialParticipants);
+  const [leaderboardOpen,setLeaderboardOpen]=useState(false);
   const [found,setFound]=useState<Set<number>>(new Set(initialDiscoveries));
   const [discoveryById,setDiscoveryById]=useState<Record<string,string>>(initialDiscoverers);
+  const previousFoundRef=useRef<Set<number>>(new Set(initialDiscoveries));
+  const previousCompletedGenerationsRef=useRef<string|null>(null);
+  const [recentlyFoundId,setRecentlyFoundId]=useState<number|null>(null);
+  const [generationCelebration,setGenerationCelebration]=useState<number|null>(null);
+  const [activeSection,setActiveSection]=useState("gen-"+String(Array.isArray(initialSession.config.generations)?initialSession.config.generations[0]??1:1));
   const [query,setQuery]=useState("");
+  const [confirmed,setConfirmed]=useState(false);
+  const [mobileSearchOpen,setMobileSearchOpen]=useState(false);
+  const [showSuggestions,setShowSuggestions]=useState(false);
+  const inputRef=useRef<HTMLInputElement>(null);
   const [selected,setSelected]=useState<PokemonSpecies|null>(null);
   const [hint,setHint]=useState<{nameLength:number;revealedPrefix:string;hintCount:number}|null>(null);
   const [countdown,setCountdown]=useState(0);
@@ -52,17 +66,29 @@ export function PokemonNameEmAllMultiplayerGame({
   const isPlatformOwner=currentUserRole==="OWNER";
   const config=session.config as Record<string,unknown>;
   const [settingsOpen,setSettingsOpen]=useState(false);
+  const {enabled:soundEnabled,setEnabled:setSoundEnabled}=usePokemonSoundPreference();
   const [visual,setVisual]=useState({shadows:config.shadows===true});
   const [sortOrder,setSortOrder]=useState(config.sortOrder==="POKEDEX"||config.sortOrder==="TYPE"?config.sortOrder:"RANDOM");
   const [randomOrder,setRandomOrder]=useState<number[]|null>(null);
   const spellingHelp=config.spellingHelp!==false;
+  const baseSpecies=useMemo(()=>session.catalog_species_ids.map(id=>catalog.species.find(item=>item.id===id)).filter((item):item is PokemonSpecies=>Boolean(item)),[catalog,session.catalog_species_ids]);
   const species=useMemo(()=>{
-    const base=session.catalog_species_ids.map(id=>catalog.species.find(item=>item.id===id)).filter((item):item is PokemonSpecies=>Boolean(item));
-    if(sortOrder==="POKEDEX")return [...base].sort((a,b)=>a.id-b.id);
-    if(sortOrder==="TYPE")return [...base].sort((a,b)=>(a.types[0]??"").localeCompare(b.types[0]??"")||a.id-b.id);
-    if(randomOrder){const rank=new Map(randomOrder.map((id,index)=>[id,index]));return [...base].sort((a,b)=>(rank.get(a.id)??0)-(rank.get(b.id)??0));}
-    return base;
-  },[catalog,session.catalog_species_ids,sortOrder,randomOrder]);
+    if(sortOrder==="POKEDEX")return [...baseSpecies].sort((a,b)=>a.id-b.id);
+    if(sortOrder==="TYPE")return [...baseSpecies].sort((a,b)=>(a.types[0]??"").localeCompare(b.types[0]??"")||a.id-b.id);
+    if(randomOrder){const rank=new Map(randomOrder.map((id,index)=>[id,index]));return [...baseSpecies].sort((a,b)=>(rank.get(a.id)??0)-(rank.get(b.id)??0));}
+    return baseSpecies;
+  },[baseSpecies,sortOrder,randomOrder]);
+  const generations=Array.isArray(config.generations)?(config.generations as number[]):[...new Set(baseSpecies.map(item=>item.generation))];
+  const sections=[
+    ...generations.map(generation=>({id:"gen-"+generation,label:"Gen. "+(["I","II","III","IV","V","VI","VII","VIII","IX"][generation-1]??generation),species:species.filter(item=>item.generation===generation)})),
+    ...Object.entries(session.special_species_ids??{}).filter(([,ids])=>Array.isArray(ids)&&ids.length>0).map(([key,ids])=>({id:"special-"+key,label:specialLabels[key]??key,species:species.filter(item=>ids.includes(item.id))})),
+  ];
+  const completedGenerations=generations.filter(generation=>{
+    const items=baseSpecies.filter(item=>item.generation===generation);
+    return items.length>0&&items.every(item=>found.has(item.id));
+  });
+  const completedGenerationKey=completedGenerations.join(",");
+  const sectionIdsKey=sections.map(section=>section.id).join("|");
   const changeSort=(value:"RANDOM"|"POKEDEX"|"TYPE")=>{
     setSortOrder(value);
     if(value==="RANDOM")setRandomOrder([...species].sort(()=>Math.random()-.5).map(item=>item.id));
@@ -71,9 +97,47 @@ export function PokemonNameEmAllMultiplayerGame({
     const value=normalizePokemonName(query);
     if(value.length<2)return [];
     return species.map(item=>({item,score:[item.name,item.nameEn,item.slug,...item.aliases].map(normalizePokemonName).reduce((best,name)=>name===value?0:name.startsWith(value)?Math.min(best,1):name.includes(value)?Math.min(best,2):best,3)}))
-      .filter(item=>item.score<3&&!found.has(item.item.id)).sort((a,b)=>a.score-b.score||a.item.id-b.item.id).slice(0,5).map(item=>item.item);
-  },[species,query,found]);
+      .filter(item=>item.score<3).sort((a,b)=>a.score-b.score||a.item.id-b.item.id).slice(0,5).map(item=>item.item);
+  },[species,query]);
   const percent=species.length?Math.round(found.size/species.length*100):0;
+
+  useEffect(()=>{
+    const newlyFound=[...found].find(id=>!previousFoundRef.current.has(id));
+    previousFoundRef.current=new Set(found);
+    if(newlyFound===undefined)return;
+    setRecentlyFoundId(newlyFound);
+    playPokemonSound("unlock",soundEnabled);
+    const timer=window.setTimeout(()=>setRecentlyFoundId(null),950);
+    return()=>window.clearTimeout(timer);
+  },[found,soundEnabled]);
+
+  useEffect(()=>{
+    if(previousCompletedGenerationsRef.current===null){previousCompletedGenerationsRef.current=completedGenerationKey;return;}
+    const previous=new Set(previousCompletedGenerationsRef.current.split(",").map(Number).filter(value=>value>0));
+    const newlyCompleted=completedGenerationKey.split(",").map(Number).find(generation=>generation>0&&!previous.has(generation));
+    previousCompletedGenerationsRef.current=completedGenerationKey;
+    if(newlyCompleted===undefined)return;
+    setGenerationCelebration(newlyCompleted);
+    setMessage("Generazione "+(["I","II","III","IV","V","VI","VII","VIII","IX"][newlyCompleted-1]??newlyCompleted)+" completata!");
+    const timer=window.setTimeout(()=>setGenerationCelebration(null),1600);
+    return()=>window.clearTimeout(timer);
+  },[completedGenerationKey]);
+
+  const openSection=(id:string)=>{
+    setActiveSection(id);
+    document.getElementById("nae-"+id)?.scrollIntoView({behavior:"smooth",block:"start"});
+  };
+
+  useEffect(()=>{
+    const targets=sectionIdsKey.split("|").filter(Boolean).map(id=>document.getElementById("nae-"+id)).filter((element):element is HTMLElement=>Boolean(element));
+    if(!targets.length)return;
+    const observer=new IntersectionObserver(entries=>{
+      const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top)[0];
+      if(visible)setActiveSection(visible.target.id.replace("nae-",""));
+    },{rootMargin:"-120px 0px -62% 0px",threshold:0});
+    targets.forEach(target=>observer.observe(target));
+    return()=>observer.disconnect();
+  },[sectionIdsKey]);
 
   const finish=useCallback(async(reason:string)=>{
     if(isFinishing)return;
@@ -175,6 +239,9 @@ export function PokemonNameEmAllMultiplayerGame({
 
   const submit=async(answer:string)=>{
     if(!answer.trim()||pending||playerCompleted||session.status!=="ACTIVE"||countdown>0)return;
+    setConfirmed(false);
+    preparePokemonAudio(soundEnabled);
+    setShowSuggestions(false);
     setPending(true);setError("");setMessage("");
     const result=await submitNameEmAllMultiplayerAnswerAction(session.id,answer);
     setPending(false);
@@ -182,15 +249,16 @@ export function PokemonNameEmAllMultiplayerGame({
     const data=result.data??{};
     if(typeof data.speciesId==="number"&&["CORRECT","CATALOG_COMPLETE","PLAYER_COMPLETE","ALL_COMPLETED"].includes(String(data.status))){
       setFound(current=>new Set(current).add(Number(data.speciesId)));
-      setQuery("");setSelected(null);setHint(null);
+      setConfirmed(true);setSelected(null);setHint(null);
+      playPokemonSound("correct",soundEnabled);
     }
-    if(data.status==="WRONG"){setMessage("Non è una risposta valida per questo catalogo.");return;}
-    if(data.status==="ALREADY_FOUND"){setMessage("Questo Pokémon è già stato scoperto.");return;}
+    if(data.status==="WRONG"){setConfirmed(false);playPokemonSound("incorrect",soundEnabled);setMessage("Non è una risposta valida per questo catalogo.");return;}
+    if(data.status==="ALREADY_FOUND"){setConfirmed(false);const discovererId=shared&&typeof data.speciesId==="number"?discoveryById[String(data.speciesId)]:null;const discoverer=discovererId?participants.find(player=>player.userId===discovererId):null;const discovererName=typeof data.discoveredByName==="string"?data.discoveredByName:discoverer?.displayName;setMessage(shared?(discovererName?"Già indovinato da "+discovererName:"Questo Pokémon è già stato scoperto."):"Hai già scoperto questo Pokémon!");return;}
     if(data.status==="PAUSED"){setSession(current=>({...current,status:"PAUSED"}));setMessage("La partita è in pausa.");return;}
     if(data.status==="TIME_EXPIRED"){await finish("TIMER_EXPIRED");return;}
-    if(data.status==="PLAYER_COMPLETE"){setPlayerCompleted(true);setMessage("Hai completato il tuo catalogo. Attendi gli altri Allenatori.");return;}
-    if(data.status==="CATALOG_COMPLETE"){setMessage("Pokédex condiviso completato!");await finish("CATALOG_COMPLETE");return;}
-    if(data.status==="ALL_COMPLETED"){setPlayerCompleted(true);await finish("ALL_COMPLETED");return;}
+    if(data.status==="PLAYER_COMPLETE"){setConfirmed(true);playPokemonSound("complete",soundEnabled);setPlayerCompleted(true);setMessage("Hai completato il tuo catalogo. Attendi gli altri Allenatori.");return;}
+    if(data.status==="CATALOG_COMPLETE"){setConfirmed(true);playPokemonSound("complete",soundEnabled);setMessage("Pokédex condiviso completato!");await finish("CATALOG_COMPLETE");return;}
+    if(data.status==="ALL_COMPLETED"){setConfirmed(true);playPokemonSound("complete",soundEnabled);setPlayerCompleted(true);await finish("ALL_COMPLETED");return;}
     if(data.status==="CORRECT"){setMessage("Corretto! "+String(data.name??""));return;}
     if(data.status==="COUNTDOWN"){setMessage("La partita sta per iniziare.");return;}
     if(data.status==="FINISHED"){router.refresh();}
@@ -242,7 +310,7 @@ export function PokemonNameEmAllMultiplayerGame({
   const sortedParticipants=[...participants].sort((a,b)=>b.foundCount-a.foundCount||
     (a.lastDiscoveryAt&&b.lastDiscoveryAt?new Date(a.lastDiscoveryAt).getTime()-new Date(b.lastDiscoveryAt).getTime():a.lastDiscoveryAt?-1:b.lastDiscoveryAt?1:0)||
     a.displayName.localeCompare(b.displayName,"it"));
-  return <section className="pokemon-nae-game pokemon-nae-multiplayer">
+  return <section className="pokemon-nae-game pokemon-nae-multiplayer" onPointerDown={()=>preparePokemonAudio(soundEnabled)}>
     <header className="pokemon-nae-game-header">
       <div><span className="pokemon-page-eyebrow">RENQD × POKÉMON · MULTIPLAYER</span><h1>Name ’Em All</h1><p>{shared?"Un unico catalogo per tutta la squadra.":"Stesso catalogo, progressi personali."} {isHost?"Sei l’host della partita.": "Segui la classifica in tempo reale."}</p></div>
       <div className="pokemon-nae-multiplayer-header-actions">
@@ -254,10 +322,11 @@ export function PokemonNameEmAllMultiplayerGame({
       </div>
     </header>
 
-    <div className="pokemon-nae-live-settings-toggle"><button type="button" className="pokemon-favourite-secondary" onClick={()=>setSettingsOpen(value=>!value)}><Settings size={15}/> Visualizzazione</button></div>
-    {settingsOpen&&<section className="pokemon-nae-live-settings" aria-label="Impostazioni visive">
+    <div className="pokemon-nae-live-settings-toggle"><button type="button" className="pokemon-favourite-secondary" onClick={()=>setSettingsOpen(value=>!value)}><Settings size={15}/> Impostazioni</button></div>
+    {settingsOpen&&<section className="pokemon-nae-live-settings" aria-label="Impostazioni di gioco">
       <div className="pokemon-nae-toggle-list">
         <label><span><strong>Shadows · Silhouette</strong></span><input type="checkbox" checked={visual.shadows} onChange={event=>setVisual(value=>({...value,shadows:event.target.checked}))}/></label>
+        <label><span><strong>Effetti sonori</strong><small>Risposte, sblocchi e completamento</small></span><input type="checkbox" checked={soundEnabled} onChange={event=>setSoundEnabled(event.target.checked)}/></label>
       </div>
       <div className="pokemon-nae-choice-row">{([["RANDOM","Casuale"],["POKEDEX","Pokédex"],["TYPE","Per tipo"]] as const).map(([value,label])=><button type="button" key={value} className={sortOrder===value?"is-selected":""} onClick={()=>changeSort(value)}>{label}</button>)}</div>
     </section>}
@@ -275,7 +344,10 @@ export function PokemonNameEmAllMultiplayerGame({
         <div><small>COMPLETAMENTO</small><strong>{percent}%</strong></div>
       </div>
       <div className="pokemon-nae-progress"><span style={{width:percent+"%"}}/></div>
-      <div className="pokemon-nae-multiplayer-players">
+      <button type="button" className={"pokemon-nae-leaderboard-toggle"+(shared?" is-shared":" is-individual")} onClick={()=>setLeaderboardOpen(value=>!value)} aria-expanded={leaderboardOpen}>
+        <span>{shared?"Contributi della squadra":"Classifica live"}</span><small>{sortedParticipants.length} Allenatori</small><ChevronDown size={15} className={leaderboardOpen?"is-open":""}/>
+      </button>
+      <div className={"pokemon-nae-multiplayer-players"+(leaderboardOpen?" is-open":"")+(shared?" is-shared":" is-individual")}>
         {sortedParticipants.map((item,index)=><article key={item.userId} className={item.userId===currentUserId?"is-me":""}>
           <span className="pokemon-nae-player-rank">{index+1}</span>
           <span className="pokemon-nae-player-avatar">{item.avatarUrl?<img src={item.avatarUrl} alt=""/>:item.displayName.slice(0,1).toUpperCase()}</span>
@@ -290,32 +362,62 @@ export function PokemonNameEmAllMultiplayerGame({
     {session.status==="PAUSED"&&<div className="pokemon-nae-multiplayer-paused" role="status"><PauseCircle size={22}/><div><strong>Timer in pausa</strong><span>La partita riprenderà quando un Allenatore sarà nuovamente connesso.</span></div><button type="button" onClick={()=>void heartbeat()}>Riconnetti</button></div>}
     {playerCompleted&&session.status!=="COMPLETED"&&<div className="pokemon-nae-multiplayer-completed"><CheckCircle2 size={18}/> Hai completato il catalogo. La partita continua per gli altri partecipanti.</div>}
 
-    <div className="pokemon-nae-multiplayer-answer">
-      <label htmlFor="pokemon-nae-multiplayer-answer">Scrivi il nome di un Pokémon</label>
-      <div><input id="pokemon-nae-multiplayer-answer" value={query} onChange={event=>setQuery(event.target.value)} onKeyDown={event=>{if(event.key==="Enter")void submit(query);}} placeholder="Es. Pikachu" autoComplete="off" disabled={pending||playerCompleted||session.status!=="ACTIVE"||countdown>0}/><button type="button" onClick={()=>void submit(query)} disabled={pending||playerCompleted||session.status!=="ACTIVE"||countdown>0||!query.trim()}>{pending?<LoaderCircle size={16}/>:<Send size={16}/>} Invio</button></div>
-      {suggestions.length>0&&<div className="pokemon-nae-multiplayer-suggestions">{suggestions.map(item=><button key={item.id} type="button" onClick={()=>{setQuery(item.name);void submit(item.name);}}>{item.name}</button>)}</div>}
-      {message&&<p role="status">{message}</p>}{error&&<p role="alert" className="pokemon-nae-error">{error}</p>}
-    </div>
+    <nav className="pokemon-nae-section-nav" aria-label="Navigazione catalogo">
+      {sections.map(section=>{
+        const generation=section.id.startsWith("gen-")?Number(section.id.slice(4)):null;
+        const isComplete=generation!==null&&completedGenerations.includes(generation);
+        const total=section.id==="special-mega"?section.species.reduce((sum,item)=>sum+item.megaForms.length,0):section.species.length;
+        const count=section.id==="special-mega"?section.species.reduce((sum,item)=>sum+(found.has(item.id)?item.megaForms.length:0),0):section.species.filter(item=>found.has(item.id)).length;
+        return <button type="button" key={section.id} onClick={()=>openSection(section.id)} className={[activeSection===section.id?"is-active":"",isComplete?"is-complete":"",generationCelebration===generation?"is-celebrating":""].filter(Boolean).join(" ")}>{section.label}{isComplete&&<CheckCircle2 size={11} aria-label="Completata"/>}<small>{count}/{total}</small></button>;
+      })}
+    </nav>
 
-    <div className="pokemon-nae-multiplayer-catalog">
-      {species.map(item=>{
-        const isFound=found.has(item.id);
+    <div className={"pokemon-nae-multiplayer-answer"+(mobileSearchOpen?" is-mobile-open":"")}>
+      <button type="button" className="pokemon-nae-mobile-search-toggle" onClick={()=>{setMobileSearchOpen(true);window.setTimeout(()=>inputRef.current?.focus(),0);}} aria-label="Apri la ricerca Pokémon" disabled={playerCompleted||session.status!=="ACTIVE"||countdown>0}><Search size={18}/><span>Cerca un Pokémon</span></button>
+      <div className="pokemon-nae-multiplayer-answer-controls">
+      <label htmlFor="pokemon-nae-multiplayer-answer">Scrivi il nome di un Pokémon</label>
+      <div className="pokemon-nae-multiplayer-input-row"><input ref={inputRef} id="pokemon-nae-multiplayer-answer" className={confirmed?"is-correct":message.startsWith("Non è una risposta")?"is-wrong":""} value={query} onChange={event=>{setQuery(event.target.value);setConfirmed(false);setMessage("");setShowSuggestions(true);}} onKeyDown={event=>{if(event.key==="Enter")void submit(query);}} placeholder="Es. Pikachu" autoComplete="off" disabled={pending||playerCompleted||session.status!=="ACTIVE"||countdown>0}/>{confirmed&&<CheckCircle2 size={16} className="pokemon-nae-search-confirmed"/>}<button type="button" className="pokemon-nae-mobile-search-close" onClick={()=>{setMobileSearchOpen(false);setQuery("");setConfirmed(false);setMessage("");setShowSuggestions(false);}} aria-label="Chiudi la ricerca"><X size={15}/></button><button type="button" onClick={()=>void submit(query)} disabled={pending||playerCompleted||session.status!=="ACTIVE"||countdown>0||!query.trim()}>{pending?<LoaderCircle size={16}/>:<Send size={16}/>} Invio</button></div>
+      {showSuggestions&&suggestions.length>0&&<div className="pokemon-nae-multiplayer-suggestions">{suggestions.map(item=>{
         const discovererId=shared?discoveryById[String(item.id)]:null;
         const discoverer=discovererId?participants.find(player=>player.userId===discovererId):null;
-        return <button key={item.id} type="button" disabled={isFound||playerCompleted||session.status!=="ACTIVE"} onClick={()=>{setSelected(item);setHint(null);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")}>
-          <span className="pokemon-nae-cell-art">{isFound?<img src={item.spriteUrl} alt="" loading="lazy"/>:visual.shadows?<img src={item.spriteUrl} alt="" loading="lazy" style={{filter:"brightness(0) saturate(0) opacity(.55)"}}/>:<span className="pokemon-nae-pokeball-placeholder">◉</span>}</span>
-          <strong className={isFound?"":"is-hidden"}>{isFound?item.name:visual.shadows?"???":"Pokémon"}</strong>
-          {shared&&isFound&&discoverer&&<span className="pokemon-nae-cell-discoverer" title={"Scoperto da "+discoverer.displayName}>{discoverer.avatarUrl?<img src={discoverer.avatarUrl} alt=""/>:discoverer.displayName.slice(0,1).toUpperCase()}</span>}
-        </button>;
+        const isFound=found.has(item.id);
+        return <button key={item.id} type="button" onClick={()=>{setQuery(item.name);setConfirmed(false);setShowSuggestions(false);void submit(item.name);}}><img src={item.spriteUrl} alt="" loading="lazy"/><span><strong>{item.name}</strong><small>{isFound?(shared&&discoverer?"Scoperto da "+discoverer.displayName:"Scoperto"):"Da scoprire"}</small></span></button>;
+      })}</div>}
+      {showSuggestions&&query.trim().length>=2&&suggestions.length===0&&<p className="pokemon-nae-no-suggestions">Nessun Pokémon trovato. Controlla la scrittura e riprova.</p>}
+      </div>
+      {message&&<p role="status" className={confirmed?"is-correct":""}>{message}</p>}{error&&<p role="alert" className="pokemon-nae-error">{error}</p>}
+    </div>
+
+    <div className="pokemon-nae-catalog pokemon-nae-multiplayer-catalog">
+      {sections.map(section=>{
+        const isMega=section.id==="special-mega";
+        const cells=isMega?section.species.flatMap(item=>item.megaForms.map(form=>({item,form}))):section.species.map(item=>({item,form:null}));
+        const total=isMega?cells.length:section.species.length;
+        const count=isMega?section.species.reduce((sum,item)=>sum+(found.has(item.id)?item.megaForms.length:0),0):section.species.filter(item=>found.has(item.id)).length;
+        return <section id={"nae-"+section.id} key={section.id} className="pokemon-nae-catalog-section">
+          <header><div><span className="pokemon-page-eyebrow">{section.id.startsWith("gen-")?"CATALOGO PRINCIPALE":"SEZIONE SPECIALE"}</span><h2>{section.label}</h2></div><small>{count}/{total} scoperti</small></header>
+          <div className="pokemon-nae-cell-grid">{cells.map(({item,form})=>{
+            const isFound=found.has(item.id);
+            const discovererId=shared?discoveryById[String(item.id)]:null;
+            const discoverer=discovererId?participants.find(player=>player.userId===discovererId):null;
+            const artwork=form?.spriteUrl??item.spriteUrl;
+            const displayName=form?item.name+" "+form.label:item.name;
+            return <button key={item.id+"-"+(form?.id??"base")} type="button" disabled={session.status!=="ACTIVE"||countdown>0} onClick={()=>{setSelected(item);setHint(null);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")+(recentlyFoundId===item.id?" is-revealing":"")} aria-label={isFound?displayName:"Pokémon da scoprire"}>
+              <span className="pokemon-nae-cell-art">{isFound||visual.shadows?<img src={artwork} alt="" loading="lazy" style={{filter:isFound?"none":"brightness(0) saturate(0) opacity(.55)"}}/>:<span className="pokemon-nae-pokeball-placeholder">◉</span>}</span>
+              <strong className={isFound?"":"is-hidden"}>{isFound?displayName:visual.shadows?"???":"Pokémon"}</strong>
+              {(item.forms.length>0||item.isLegendary||item.isMythical||item.isUltraBeast||item.isParadox)&&<span className="pokemon-nae-cell-indicators">{item.forms.length>0?"◇":""}{item.isLegendary?"★":""}{item.isMythical?"✦":""}{item.isUltraBeast?"◈":""}{item.isParadox?"⌁":""}</span>}
+              {shared&&isFound&&discoverer&&<span className="pokemon-nae-cell-discoverer" title={"Scoperto da "+discoverer.displayName}>{discoverer.avatarUrl?<img src={discoverer.avatarUrl} alt=""/>:discoverer.displayName.slice(0,1).toUpperCase()}</span>}
+            </button>;
+          })}</div>
+        </section>;
       })}
     </div>
 
-    {selected&&!found.has(selected.id)&&<div className="pokemon-nae-detail-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setSelected(null);}}>
-      <aside className="pokemon-nae-detail" role="dialog" aria-modal="true" aria-label={"Suggerimento per "+selected.name}>
-        <header><span className="pokemon-page-eyebrow">AIUTO ORTOGRAFICO</span><button type="button" onClick={()=>setSelected(null)} aria-label="Chiudi"><X size={18}/></button></header>
-        <div className="pokemon-nae-detail-hero"><span className="pokemon-nae-detail-question">?</span><div>{config.showDexNumber===true&&<h2>#{String(selected.id).padStart(4,"0")}</h2>}<small>Generazione {selected.generation}</small>{config.showType===true&&<p>{selected.types.join(" · ")}</p>}</div></div>
-        {hint&&<p className="pokemon-nae-hint-reveal">{hint.revealedPrefix}{hint.revealedPrefix.length<hint.nameLength?" _".repeat(Math.min(12,hint.nameLength-hint.revealedPrefix.length)):""} <small>{hint.nameLength} lettere</small></p>}
-        <button type="button" className="pokemon-favourite-primary" onClick={()=>void requestHint()} disabled={!spellingHelp||pending}> <HelpCircle size={15}/> Rivela lettere</button>
+    {selected&&<div className="pokemon-nae-detail-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setSelected(null);}}>
+      <aside className="pokemon-nae-detail" role="dialog" aria-modal="true" aria-label={"Dettaglio "+selected.name}>
+        <header><span className="pokemon-page-eyebrow">{found.has(selected.id)?"SCHEDA POKÉMON":"AIUTO ORTOGRAFICO"}</span><button type="button" onClick={()=>setSelected(null)} aria-label="Chiudi"><X size={18}/></button></header>
+        <div className="pokemon-nae-detail-hero">{found.has(selected.id)?<img src={selected.artworkUrl} alt={selected.name}/>:<span className="pokemon-nae-detail-question">?</span>}<div><h2>{found.has(selected.id)?selected.name:"Pokémon da scoprire"}</h2>{config.showDexNumber===true&&<small>#{String(selected.id).padStart(4,"0")}</small>}<small>Generazione {selected.generation}</small>{config.showType===true&&<p>{selected.types.join(" · ")}</p>}</div></div>
+        {found.has(selected.id)?<div className="pokemon-nae-detail-forms"><h3>Forme e rappresentazioni</h3>{selected.forms.length===0&&selected.megaForms.length===0&&<p>Nessuna forma alternativa registrata.</p>}{[...selected.forms,...selected.megaForms].map(form=><div key={form.id} className="pokemon-nae-detail-form"><img src={form.spriteUrl} alt="" loading="lazy"/><span>{form.label}</span>{form.isMega&&<small>Mega</small>}</div>)}</div>:<>{hint&&<p className="pokemon-nae-hint-reveal">{hint.revealedPrefix}{hint.revealedPrefix.length<hint.nameLength?" _".repeat(Math.min(12,hint.nameLength-hint.revealedPrefix.length)):""} <small>{hint.nameLength} lettere</small></p>}<button type="button" className="pokemon-favourite-primary" onClick={()=>void requestHint()} disabled={!spellingHelp||pending}> <HelpCircle size={15}/> Rivela lettere</button></>}
         <button type="button" className="pokemon-favourite-secondary" onClick={()=>setSelected(null)}>Chiudi</button>
       </aside>
     </div>}

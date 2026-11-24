@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "pokemon:catalog:sync": "node scripts/sync-pokemon-catalog.mjs",
-    "pokemon:catalog:verify": "node scripts/verify-pokemon-catalog.mjs"
+    "pokemon:catalog:verify": "node scripts/verify-pokemon-catalog.mjs",
+    "pokemon:implementation:verify": "node scripts/verify-pokemon-implementation.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

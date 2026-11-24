@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toPng } from "html-to-image";
 import { createClient } from "@/lib/supabase/client";
+import { playPokemonSound, preparePokemonAudio } from "@/lib/pokemon/sounds";
+import { usePokemonSoundPreference } from "@/components/pokemon/use-pokemon-sound-preference";
 import { PokemonResultSocial } from "@/components/pokemon/result-social";
 import { PokemonNameEmAllMultiplayerGame } from "@/components/pokemon/multiplayer-game";
 import { NameEmAllMultiplayerLobby } from "@/components/pokemon/multiplayer-lobby";
@@ -19,7 +21,7 @@ import {
 } from "@/lib/pokemon/catalog";
 import {
   createNameEmAllSoloAction, createNameEmAllMultiplayerAction, finishNameEmAllAction, hintNameEmAllAction,
-  pauseNameEmAllAction, resumeNameEmAllAction, submitNameEmAllAnswerAction,
+  pauseNameEmAllAction, resumeNameEmAllAction, submitNameEmAllAnswerAction, setNameEmAllResultVisibilityAction,
 } from "@/app/(platform)/pokemon/name-em-all/actions";
 
 type SpecialSections = { mega:boolean; legendary:boolean; mythical:boolean; ultraBeast:boolean; paradox:boolean };
@@ -190,6 +192,8 @@ function Game({
   const [found,setFound]=useState<Set<number>>(new Set(initialDiscoveries));
   const [query,setQuery]=useState("");
   const [confirmed,setConfirmed]=useState(false);
+  const [recentlyFoundId,setRecentlyFoundId]=useState<number|null>(null);
+  const [generationCelebration,setGenerationCelebration]=useState<number|null>(null);
   const [message,setMessage]=useState("");
   const [pending,setPending]=useState(false);
   const [deadline,setDeadline]=useState(session.deadline_at?new Date(session.deadline_at).getTime():0);
@@ -197,14 +201,16 @@ function Game({
   const [paused,setPaused]=useState(session.status==="PAUSED");
   const [pauseOverlay,setPauseOverlay]=useState(session.status==="PAUSED");
   const [confirmExit,setConfirmExit]=useState(false);
-  const [activeSection,setActiveSection]=useState("gen-1");
+  const [activeSection,setActiveSection]=useState("gen-"+String((session.config.generations as number[]|undefined)?.[0]??1));
   const [selected,setSelected]=useState<PokemonSpecies|null>(null);
   const [hint,setHint]=useState<{nameLength:number;revealedPrefix:string;hintCount:number}|null>(null);
   const [showSuggestions,setShowSuggestions]=useState(false);
+  const [mobileSearchOpen,setMobileSearchOpen]=useState(false);
   const [isFinishing,setIsFinishing]=useState(false);
   const inputRef=useRef<HTMLInputElement>(null);
   const config=session.config as WizardConfig;
   const [settingsOpen,setSettingsOpen]=useState(false);
+  const {enabled:soundEnabled,setEnabled:setSoundEnabled}=usePokemonSoundPreference();
   const [visual,setVisual]=useState({shadows:config.shadows===true});
   const [sortOrder,setSortOrder]=useState(config.sortOrder);
   const [randomOrder,setRandomOrder]=useState<number[]|null>(null);
@@ -223,12 +229,52 @@ function Game({
       species:species.filter(item=>(ids as number[]).includes(item.id)),
     })),
   ];
+  const sectionIdsKey=sections.map(section=>section.id).join("|");
+  useEffect(()=>{
+    const targets=sectionIdsKey.split("|").filter(Boolean).map(id=>document.getElementById("nae-"+id)).filter((element):element is HTMLElement=>Boolean(element));
+    if(!targets.length)return;
+    const observer=new IntersectionObserver(entries=>{
+      const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top)[0];
+      if(visible)setActiveSection(visible.target.id.replace("nae-",""));
+    },{rootMargin:"-120px 0px -62% 0px",threshold:0});
+    targets.forEach(target=>observer.observe(target));
+    return()=>observer.disconnect();
+  },[sectionIdsKey]);
+
   const suggestions=query.trim().length>0?species
     .map(item=>({item,score:scoreMatch(item,query)}))
     .filter(row=>row.score>0)
     .sort((a,b)=>b.score-a.score)
     .slice(0,5).map(row=>row.item):[];
   const percent=species.length?Math.round(found.size/species.length*100):0;
+  const completedGenerations=config.generations.filter(generation=>{
+    const generationSpecies=baseSpecies.filter(item=>item.generation===generation);
+    return generationSpecies.length>0&&generationSpecies.every(item=>found.has(item.id));
+  });
+  const completedGenerationKey=completedGenerations.join(",");
+  const previousFoundRef=useRef<Set<number>>(new Set(initialDiscoveries));
+  const previousCompletedGenerationsRef=useRef(completedGenerationKey);
+
+  useEffect(()=>{
+    const newlyFound=[...found].find(id=>!previousFoundRef.current.has(id));
+    previousFoundRef.current=new Set(found);
+    if(newlyFound===undefined)return;
+    setRecentlyFoundId(newlyFound);
+    playPokemonSound("unlock",soundEnabled);
+    const timer=window.setTimeout(()=>setRecentlyFoundId(null),950);
+    return()=>window.clearTimeout(timer);
+  },[found,soundEnabled]);
+
+  useEffect(()=>{
+    const previous=new Set(previousCompletedGenerationsRef.current.split(",").map(Number).filter(value=>value>0));
+    const newlyCompleted=completedGenerationKey.split(",").map(Number).find(generation=>generation>0&&!previous.has(generation));
+    previousCompletedGenerationsRef.current=completedGenerationKey;
+    if(newlyCompleted===undefined)return;
+    setGenerationCelebration(newlyCompleted);
+    setMessage("Generazione "+GENERATION_LABELS[newlyCompleted-1]+" completata!");
+    const timer=window.setTimeout(()=>setGenerationCelebration(null),1600);
+    return()=>window.clearTimeout(timer);
+  },[completedGenerationKey]);
 
   useEffect(()=>{
     if(paused||isFinishing)return;
@@ -248,6 +294,8 @@ function Game({
 
   const submit=async(answer:string)=>{
     if(!answer.trim()||pending||paused)return;
+    preparePokemonAudio(soundEnabled);
+    setShowSuggestions(false);
     setPending(true);setConfirmed(false);setMessage("");
     const result=await submitNameEmAllAnswerAction(session.id,answer);
     setPending(false);
@@ -256,10 +304,12 @@ function Game({
     if(data.status==="CORRECT"&&typeof data.speciesId==="number"){
       setFound(current=>new Set(current).add(data.speciesId as number));
       setConfirmed(true);setMessage("Pokémon scoperto!");
-      if(data.completed===true)void finish("CATALOG_COMPLETE");
+      playPokemonSound("correct",soundEnabled);
+      if(data.completed===true){playPokemonSound("complete",soundEnabled);void finish("CATALOG_COMPLETE");}
     }else if(data.status==="ALREADY_FOUND"){
       setMessage("Hai già scoperto questo Pokémon!");
     }else if(data.status==="INCORRECT"){
+      playPokemonSound("incorrect",soundEnabled);
       setMessage("Pokémon non riconosciuto.");
     }else if(data.status==="TIME_EXPIRED"){
       setMessage("Tempo scaduto.");void finish("TIMER_EXPIRED");
@@ -303,11 +353,12 @@ function Game({
     <section className="pokemon-nae-game">
       <header className="pokemon-nae-game-header">
         <div><span className="pokemon-page-eyebrow">RENQD × POKÉMON · IN PARTITA</span><h1>Name ’Em All</h1><p>Riconosci le specie del tuo catalogo. Le forme associate si sbloccano senza punti aggiuntivi.</p></div>
-        <div className="pokemon-nae-game-header-actions"><button type="button" className="pokemon-favourite-secondary" onClick={()=>setSettingsOpen(value=>!value)}><Settings size={15}/> Visualizzazione</button><button type="button" className="pokemon-favourite-secondary" onClick={()=>void togglePause()} disabled={paused}><Pause size={15}/> Pausa</button></div>
+        <div className="pokemon-nae-game-header-actions"><button type="button" className="pokemon-favourite-secondary" onClick={()=>setSettingsOpen(value=>!value)}><Settings size={15}/> Impostazioni</button><button type="button" className="pokemon-favourite-secondary" onClick={()=>void togglePause()} disabled={paused}><Pause size={15}/> Pausa</button></div>
       </header>
-      {settingsOpen&&<section className="pokemon-nae-live-settings" aria-label="Impostazioni visive">
+      {settingsOpen&&<section className="pokemon-nae-live-settings" aria-label="Impostazioni di gioco">
         <div className="pokemon-nae-toggle-list">
           <label><span><strong>Shadows · Silhouette</strong></span><input type="checkbox" checked={visual.shadows} onChange={event=>setVisual(value=>({...value,shadows:event.target.checked}))}/></label>
+          <label><span><strong>Effetti sonori</strong><small>Risposte, sblocchi e completamento</small></span><input type="checkbox" checked={soundEnabled} onChange={event=>setSoundEnabled(event.target.checked)}/></label>
         </div>
         <div className="pokemon-nae-choice-row">{([["RANDOM","Casuale"],["POKEDEX","Pokédex"],["TYPE","Per tipo"]] as const).map(([value,label])=><button type="button" key={value} className={sortOrder===value?"is-selected":""} onClick={()=>changeSort(value)}>{label}</button>)}</div>
       </section>}
@@ -320,10 +371,17 @@ function Game({
         <div className="pokemon-nae-progress"><span style={{width:percent+"%"}}/></div>
       </div>
       <nav className="pokemon-nae-section-nav" aria-label="Navigazione catalogo">
-        {sections.map(section=><button type="button" key={section.id} onClick={()=>openSection(section.id)} className={activeSection===section.id?"is-active":""}>{section.label}<small>{section.species.filter(s=>found.has(s.id)).length}/{section.species.length}</small></button>)}
+        {sections.map(section=>{
+          const generation=section.id.startsWith("gen-")?Number(section.id.slice(4)):null;
+          const isComplete=generation!==null&&completedGenerations.includes(generation);
+          const total=section.id==="special-mega"?section.species.reduce((sum,item)=>sum+item.megaForms.length,0):section.species.length;
+          const count=section.id==="special-mega"?section.species.reduce((sum,item)=>sum+(found.has(item.id)?item.megaForms.length:0),0):section.species.filter(item=>found.has(item.id)).length;
+          return <button type="button" key={section.id} onClick={()=>openSection(section.id)} className={[activeSection===section.id?"is-active":"",isComplete?"is-complete":"",generationCelebration===generation?"is-celebrating":""].filter(Boolean).join(" ")}>{section.label}{isComplete&&<CheckCircle2 size={11} aria-label="Completata"/>}<small>{count}/{total}</small></button>;
+        })}
       </nav>
-      <div className="pokemon-nae-search-wrap">
-        <label className="pokemon-nae-search"><Search size={17}/><input ref={inputRef} value={query} onChange={e=>{setQuery(e.target.value);setConfirmed(false);setMessage("");setShowSuggestions(true);}} onFocus={()=>setShowSuggestions(true)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();setShowSuggestions(false);void submit(query);}}} placeholder="Scrivi il nome di un Pokémon…" disabled={paused||isFinishing}/>{pending&&<LoaderCircle size={15}/>}</label>
+      <div className={"pokemon-nae-search-wrap"+(mobileSearchOpen?" is-mobile-open":"")}>
+        <button type="button" className="pokemon-nae-mobile-search-toggle" onClick={()=>{setMobileSearchOpen(true);window.setTimeout(()=>inputRef.current?.focus(),0);}} aria-label="Apri la ricerca Pokémon" disabled={paused||isFinishing}><Search size={18}/><span>Cerca un Pokémon</span></button>
+        <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Pokémon non riconosciuto."?" is-wrong":"")}><Search size={17}/><input ref={inputRef} value={query} onChange={e=>{setQuery(e.target.value);setConfirmed(false);setMessage("");setShowSuggestions(true);}} onFocus={()=>setShowSuggestions(true)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();setShowSuggestions(false);void submit(query);}}} placeholder="Scrivi il nome di un Pokémon…" disabled={paused||isFinishing}/>{confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}{pending&&<LoaderCircle size={15}/>}</label><button type="button" className="pokemon-nae-mobile-search-close" onClick={()=>{setMobileSearchOpen(false);setQuery("");setShowSuggestions(false);setConfirmed(false);}} aria-label="Chiudi la ricerca"><X size={15}/></button>
         {showSuggestions&&query.trim().length>0&&<div className="pokemon-nae-suggestions">
           {suggestions.map(item=><button type="button" key={item.id} onClick={()=>chooseSuggestion(item)}>
             <img src={item.spriteUrl} alt="" width={34} height={34}/><span><strong>{item.name}</strong><small>#{item.id.toString().padStart(4,"0")} · Gen. {GENERATION_LABELS[item.generation-1]}</small></span><em className={found.has(item.id)?"is-found":""}>{found.has(item.id)?"Scoperto":"Da scoprire"}</em>
@@ -342,7 +400,7 @@ function Game({
               const isFound=found.has(item.id);
               const artwork=form?.spriteUrl??item.spriteUrl;
               const displayName=form ? item.name+" "+form.label : item.name;
-              return <button type="button" key={item.id+"-"+(form?.id??"base")} onClick={()=>{setSelected(item);setHint(null);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")}>
+              return <button type="button" key={item.id+"-"+(form?.id??"base")} onClick={()=>{setSelected(item);setHint(null);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")+(recentlyFoundId===item.id?" is-revealing":"")}>
                 <span className="pokemon-nae-cell-art">{isFound||visual.shadows?<img src={artwork} alt="" loading="lazy" style={{filter:isFound?"none":"brightness(0) saturate(0) opacity(.55)"}}/>:<b className="pokemon-nae-pokeball">◉</b>}</span>
                 {isFound?<strong>{displayName}</strong>:<strong className="is-hidden">{visual.shadows?"???":"Pokémon"}</strong>}
                 {(item.forms.length>0||item.isLegendary||item.isMythical||item.isUltraBeast||item.isParadox)&&<span className="pokemon-nae-cell-indicators">{item.forms.length>0?"◇":""}{item.isLegendary?"★":""}{item.isMythical?"✦":""}{item.isUltraBeast?"◈":""}{item.isParadox?"⌁":""}</span>}
@@ -382,7 +440,10 @@ function Game({
   );
 }
 
-function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?:()=>void;catalog?:PokemonCatalog|null}) {
+function ResultView({result,onNewGame,catalog,canManageVisibility=false}:{result:ResultSnapshot;onNewGame?:()=>void;catalog?:PokemonCatalog|null;canManageVisibility?:boolean}) {
+  const [visibility,setVisibility]=useState<"PUBLIC"|"PRIVATE">(result.visibility==="PRIVATE"?"PRIVATE":"PUBLIC");
+  const [visibilityBusy,setVisibilityBusy]=useState(false);
+  const [visibilityMessage,setVisibilityMessage]=useState("");
   const [activeTab,setActiveTab]=useState("overview");
   const [exportSize,setExportSize]=useState<"VERTICAL"|"SQUARE">("VERTICAL");
   const [exportMode,setExportMode]=useState<"PERSONAL"|"FULL">("PERSONAL");
@@ -405,6 +466,14 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
   const finishLabels:Record<string,string>={TIMER_EXPIRED:"Timer scaduto",CATALOG_COMPLETE:"Pokédex completato",USER_EXIT:"Terminata dal giocatore",HOST_TERMINATED:"Terminata dall’host",ALL_COMPLETED:"Tutti i partecipanti hanno completato",PLAYER_LEFT:"Risultato parziale · uscita volontaria"};
   const exportWidth=1080;
   const exportHeight=exportSize==="VERTICAL"?1350:1080;
+  const updateVisibility=async(value:"PUBLIC"|"PRIVATE")=>{
+    if(typeof result.sessionId!=="string")return;
+    setVisibilityBusy(true);setVisibilityMessage("");
+    const response=await setNameEmAllResultVisibilityAction(result.sessionId,value);
+    if(response.ok){setVisibility(value);setVisibilityMessage("Visibilità del risultato aggiornata.");}
+    else setVisibilityMessage(response.error??"Impossibile aggiornare la visibilità.");
+    setVisibilityBusy(false);
+  };
   const handleExport=async()=>{
     if(!exportRef.current)return;
     setExporting(true);setExportError("");
@@ -424,16 +493,17 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
     <div className={"pokemon-nae-result-card medal-"+medal} style={{background:"linear-gradient(145deg,"+(colors[medal]??colors.eevee)+"30,#fffdfa 72%)"}}>
       <div className="pokemon-nae-result-artwork"><img src={medalArt} alt="" crossOrigin="anonymous"/></div>
       <div className="pokemon-nae-result-medal" style={{borderColor:colors[medal]??colors.eevee,background:"linear-gradient(145deg,#fffdf8,"+(colors[medal]??colors.eevee)+"22)"}}>
-        <img src={medalArt} alt="" crossOrigin="anonymous"/>
+        <span className="pokemon-nae-medal-silhouette" aria-hidden="true" style={{backgroundColor:colors[medal]??colors.eevee,WebkitMaskImage:"url("+medalArt+")",maskImage:"url("+medalArt+")"}}/>
       </div>
       <span className="pokemon-page-eyebrow">LIVELLO OTTENUTO</span><h2>{level}</h2>
       <strong className="pokemon-nae-result-score">{String(isShared?personalScore:result.score??result.foundCount??0)} <small>{isShared?"contributo personale":"Pokémon"}</small></strong>
       <div className="pokemon-nae-result-stats">
-        <div><strong>{String(result.completion??0)}%</strong><small>Completamento</small></div>
+        <div><strong>{String(result.completion??0)}%</strong><small>{isShared?"Completamento personale":"Completamento"}</small></div>
+        {isShared&&<div><strong>{String(result.teamCompletion??0)}%</strong><small>Squadra</small></div>}
         <div><strong>{String(result.accuracy??0)}%</strong><small>Precisione</small></div>
         <div><strong>{formatTime(Number(result.elapsedSeconds??0))}</strong><small>Tempo effettivo</small></div>
-        <div><strong>{String(result.errorsUnique??0)}</strong><small>Errori unici</small></div>
-        <div><strong>{String(result.assistedCount??0)}</strong><small>Assistiti</small></div>
+        <div><strong>{String(result.errorsUnique??result.errorCount??0)}</strong><small>Errori unici</small></div>
+        <div><strong>{String(result.assistedCount??result.hintCount??0)}</strong><small>Assistiti</small></div>
         <div><strong>{String(result.performanceIndex??0)}</strong><small>Indice di prestazione</small></div>
       </div>
       {result.perfect===true&&<p className="pokemon-nae-perfect"><CheckCircle2 size={16}/> Partita perfetta · Maestro Pokémon</p>}
@@ -447,11 +517,12 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
         <p>La partita è stata registrata nel tuo profilo Renqd. Il livello mostrato è quello ottenuto in questa specifica sessione.</p>
         <div><span>Pokémon trovati</span><strong>{String(teamScore)} / {String(result.catalogCount??0)}</strong></div>
         {isShared&&<div><span>Contributo personale</span><strong>{String(personalScore)} Pokémon</strong></div>}
-        <div><span>Generazioni completate</span><strong>{String(result.generationsCompleted??0)}</strong></div>
+        <div><span>Generazioni completate</span><strong>{String(Array.isArray(result.generationsCompleted)?result.generationsCompleted.length:Number(result.generationsCompleted??0))}</strong></div>
+        {isShared&&<div><span>Completamento squadra</span><strong>{String(result.teamCompletion??0)}%</strong></div>}
         <div><span>Conclusione</span><strong>{finishLabels[String(result.finishReason??"")]??"Risultato salvato"}</strong></div>
       </div>}
       {activeTab==="stats"&&<div className="pokemon-nae-result-detail-grid">
-        {[["Completamento",String(result.completion??0)+"%"],["Precisione",String(result.accuracy??0)+"%"],["Tempo effettivo",formatTime(Number(result.elapsedSeconds??0))],["Errori unici",String(result.errorsUnique??0)],["Pokémon assistiti",String(result.assistedCount??0)],["Indice di prestazione",String(result.performanceIndex??0)],["Generazioni completate",String(result.generationsCompleted??0)],["Modalità",String(result.mode??"Solo")]].map(([label,value])=><div key={label}><small>{label}</small><strong>{value}</strong></div>)}
+        {[[isShared?"Completamento personale":"Completamento",String(result.completion??0)+"%"],...(isShared?[["Completamento squadra",String(result.teamCompletion??0)+"%"]]:[]),["Precisione",String(result.accuracy??0)+"%"],["Tempo effettivo",formatTime(Number(result.elapsedSeconds??0))],["Errori unici",String(result.errorsUnique??result.errorCount??0)],["Pokémon assistiti",String(result.assistedCount??result.hintCount??0)],["Indice di prestazione",String(result.performanceIndex??0)],["Generazioni completate",String(Array.isArray(result.generationsCompleted)?result.generationsCompleted.length:Number(result.generationsCompleted??0))],["Modalità",result.gameMode==="COLLABORATIVE"?"Multiplayer condiviso":result.gameMode==="INDIVIDUAL"?"Multiplayer individuale":"Solo"]].map(([label,value])=><div key={label}><small>{label}</small><strong>{value}</strong></div>)}
       </div>}
       {activeTab==="pokedex"&&<div className="pokemon-nae-result-pokedex">
         {!catalog?<p>Caricamento del Pokédex…</p>:!discovered.length?<p>Il dettaglio delle specie scoperte non è disponibile in questo snapshot.</p>:discovered.map(item=><div key={item.id}><img src={item.spriteUrl} alt="" loading="lazy"/><span><strong>{item.name}</strong><small>#{String(item.id).padStart(4,"0")} · Gen. {GENERATION_LABELS[item.generation-1]}</small></span></div>)}
@@ -470,18 +541,19 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
       <button type="button" className="pokemon-favourite-primary" onClick={()=>void handleExport()} disabled={exporting}>{exporting?<LoaderCircle size={15}/>:<ArrowDownToLine size={15}/>} {exporting?"Preparazione PNG…":"Esporta PNG"}</button>
     </section>
     <div className="pokemon-nae-export-canvas" aria-hidden="true">
-      <div ref={exportRef} className={"pokemon-nae-export-card "+(exportSize==="SQUARE"?"is-square":"is-vertical")} style={{width:exportWidth,height:exportHeight}}>
+      <div ref={exportRef} className={"pokemon-nae-export-card medal-"+medal+" "+(exportSize==="SQUARE"?"is-square":"is-vertical")} style={{width:exportWidth,height:exportHeight}}>
         <div className="pokemon-nae-export-top"><img src="/brand/renqd-logo.svg" alt="Renqd" crossOrigin="anonymous"/><span>NAME ’EM ALL</span></div>
         <div className="pokemon-nae-export-main">
-          <div className="pokemon-nae-export-medal" style={{background:colors[medal]??colors.eevee}}><img src={medalArt} alt="" crossOrigin="anonymous"/></div>
+          <div className="pokemon-nae-export-medal" style={{background:colors[medal]??colors.eevee}}><img className="pokemon-nae-export-medal-silhouette" src={medalArt} alt="" crossOrigin="anonymous"/></div>
           <span>{exportMode==="FULL"&&isShared?"RISULTATO DI SQUADRA":"IL TUO LIVELLO"}</span><h2>{level}</h2><strong>{String(exportScore)} Pokémon</strong>
-          <div className="pokemon-nae-export-stats"><span><b>{String(result.completion??0)}%</b>Completamento</span><span><b>{String(result.accuracy??0)}%</b>Precisione</span><span><b>{formatTime(Number(result.elapsedSeconds??0))}</b>Tempo effettivo</span></div>
+          <div className="pokemon-nae-export-stats"><span><b>{String(result.completion??0)}%</b>{isShared?"Completamento personale":"Completamento"}</span>{isShared&&<span><b>{String(result.teamCompletion??0)}%</b>Squadra</span>}<span><b>{String(result.accuracy??0)}%</b>Precisione</span><span><b>{formatTime(Number(result.elapsedSeconds??0))}</b>Tempo effettivo</span></div>
           {result.perfect===true&&<em>MAESTRO POKÉMON · PARTITA PERFETTA</em>}
         </div>
         {exportMode==="FULL"&&leaderboard.length>0&&<div className="pokemon-nae-export-leaderboard"><span>CLASSIFICA COMPLETA</span>{leaderboard.slice(0,8).map((entry,index)=><div key={String(entry.userId??index)}><b>{String(entry.rankPosition??index+1)}</b><strong>{String(entry.displayName??entry.username??"Allenatore")}</strong><small>{String(entry.foundCount??0)} Pokémon</small></div>)}</div>}
         <div className="pokemon-nae-export-footer">RENQD · NAME ’EM ALL</div>
       </div>
     </div>
+    {(typeof result.publicSlug==="string"&&result.publicSlug||typeof result.rankingId==="string"&&result.rankingId)&&<Link className="pokemon-favourite-secondary" href={"/r/"+String(result.publicSlug??result.rankingId)}>Apri il risultato e la community <ArrowRight size={15}/></Link>}
     {onNewGame&&<button type="button" className="pokemon-favourite-primary" onClick={onNewGame}><Play size={15}/> Nuova partita</button>}
   </section>;
 }
@@ -533,19 +605,19 @@ export function NameEmAllExperience({activeSession,initialDiscoveries=[],latestR
   if(activeSession?.status==="LOBBY")return <NameEmAllMultiplayerLobby session={activeSession} participants={initialParticipants} currentUserId={currentUserId}/>;
   if(activeSession&&activeSession.game_mode!=="SOLO")return <PokemonNameEmAllMultiplayerGame catalog={catalog} session={activeSession} initialDiscoveries={initialDiscoveries} initialParticipants={initialParticipants} initialDiscoverers={initialDiscoverers} currentUserId={currentUserId} currentUserRole={currentUserRole}/>;
   if(activeSession)return <Game catalog={catalog} session={activeSession} initialDiscoveries={initialDiscoveries}/>;
-  if(latestResult&&!showWizard)return <ResultView result={latestResult} catalog={catalog} onNewGame={()=>setShowWizard(true)}/>;
+  if(latestResult&&!showWizard)return <ResultView result={latestResult} catalog={catalog} onNewGame={()=>setShowWizard(true)} canManageVisibility/>;
   return <><p className={catalogReady?"pokemon-catalog-sync is-ready":"pokemon-catalog-sync"}>{catalogReady?<CheckCircle2 size={14}/>:<LoaderCircle size={14}/>} {catalogReady?"Catalogo server verificato · "+catalog.speciesCount+" specie":syncError||"Verifica del catalogo server in corso…"}</p><Wizard catalog={catalog} onStart={start} catalogReady={catalogReady}/></>;
 }
 
 
-export function PokemonNameEmAllPublicResultView({result,ownerName,social}:{result:ResultSnapshot;ownerName:string;social?:{rankingId:string;initialLiked:boolean;initialLikeCount:number;initialComments:import("@/components/pokemon/result-social").PokemonResultComment[];currentUserId:string;canLike:boolean}}) {
+export function PokemonNameEmAllPublicResultView({result,ownerName,social,isOwner=false}:{result:ResultSnapshot;ownerName:string;isOwner?:boolean;social?:{rankingId:string;resultOwnerId:string;initialLiked:boolean;initialLikeCount:number;initialLikers:import("@/components/pokemon/result-social").PokemonResultLiker[];initialComments:import("@/components/pokemon/result-social").PokemonResultComment[];currentUserId:string;canLike:boolean;canComment:boolean;isOwner:boolean}}) {
   const [catalog,setCatalog]=useState<PokemonCatalog|null>(null);
   useEffect(()=>{let alive=true;fetch("/data/pokemon/catalog.json").then(response=>response.json()).then((data:PokemonCatalog)=>{if(alive)setCatalog(data);}).catch(()=>{});return()=>{alive=false;};},[]);
   return <main className="pokemon-page pokemon-nae-result-public">
     <header className="pokemon-favourite-heading">
       <div><span className="pokemon-page-eyebrow">RENQD × POKÉMON · NAME ’EM ALL</span><h1>Risultato di {ownerName}</h1><p>Una partita Name ’Em All registrata nel profilo Renqd.</p></div>
     </header>
-    <ResultView result={result} catalog={catalog}/>
+    <ResultView result={result} catalog={catalog} canManageVisibility={isOwner}/>
     {social&&<PokemonResultSocial {...social}/>}
   </main>;
 }
