@@ -1539,3 +1539,40 @@ I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI conco
 - Mantenuto il fallback `prefers-reduced-motion` e invariata la durata della transizione di pagina.
 - Modifica limitata a componente loading, CSS e documentazione. Nessuna modifica a Supabase, migrazioni, database o servizi esterni.
 - Verifiche CI e deployment Production da completare per il commit di questa revisione; nessun test visuale autenticato eseguito in questa sessione.
+
+
+## Macro-categoria Pokémon — stato lavori (24 novembre 2026)
+
+### Fonti vincolanti
+- Registro: Renqd_Documento_passaggio_progettazione_Pokemon_aggiornato_24-11-2026_decisioni_1-134_NameEmAll_chiusa_Doku.md nella Project Library.
+- Specifica di implementazione: Renqd_Specifica_MacroCategoria_Pokemon_Handoff.docx nella Project Library.
+- Name ’Em All decisioni 1–134: CHIUSE. Non riaprire né riproporre decisioni consolidate.
+
+### Implementato nel codice
+- Hub Pokémon con quattro modalità e relative route.
+- Ultimate Favourite: UI, catalogo, salvataggio e collegamento al profilo.
+- Name ’Em All: wizard, catalogo, partita solo, multiplayer individuale e collaborativo, lobby, inviti per username e link, modifica configurazione prima dell'avvio, rimozione partecipante in lobby con conferma, countdown di 3 secondi, timer e presenza, trasferimento host, pausa automatica quando tutti sono disconnessi, rientro automatico anche dopo la finestra di 10 minuti, espulsione riservata al ruolo OWNER, impostazioni visive modificabili durante la partita, risultati e card PNG personale/completa, socialità del risultato.
+- Doku e Connections: route con iframe dei giochi originali (https://pokedoku.com/ e https://pokennection.com/), stato giornaliero Da fare/Fatto basato sulla data Europe/Rome.
+- Migrazioni Name ’Em All ricostruite anche come file locali e allineate alle migrazioni già applicate al progetto Supabase.
+
+### Dati e servizi
+- Supabase project: dgbogctuqtxzckigccbf.
+- Edge Function pokemon-catalog-sync: ACTIVE, verify_jwt=true.
+- Il catalogo locale è verificato: 1.025 specie, 326 forme, 97 Mega, 9 generazioni.
+- Il catalogo remoto Supabase risulta ancora vuoto al controllo del 24 novembre 2026; la sincronizzazione è predisposta per partire da un account autenticato e approvato al primo accesso alla modalità. Non considerare la sincronizzazione remota verificata finché il conteggio non raggiunge almeno 1.000 specie.
+- Le tabelle di sessioni e risultati Name ’Em All erano vuote al controllo; nessun dato di gioco preesistente è stato alterato.
+
+### Verifiche
+- npx tsc --noEmit: superato.
+- npm run lint: completato senza errori; restano warning già presenti nel progetto e warning di immagini non ottimizzate.
+- npm run build: superato dopo le modifiche UI multiplayer; tutte le route Pokémon sono state generate correttamente.
+- npm run pokemon:catalog:verify: superato (valid=true, 1.025 specie, 326 forme, 97 Mega, 9 generazioni).
+- Non è ancora stato eseguito un collaudo end-to-end con due o più account approvati; non dichiarare il multiplayer collaudato in produzione.
+- Per Doku e Connections non è emersa una specifica pubblica e verificabile di postMessage per il completamento. Non dedurre il completamento dal semplice caricamento o dalla permanenza nell'iframe e non registrare Fatto senza un segnale attendibile.
+
+### Prossimi controlli obbligatori
+1. Verificare la sincronizzazione remota del catalogo con un account approvato.
+2. Eseguire il flusso multiplayer con più account: invito, accettazione, modifica lobby, avvio, countdown, risposte simultanee, disconnessione, rientro, completamento, espulsione OWNER e risultati.
+3. Confrontare i risultati, le card, la privacy e la cancellazione con tutte le decisioni 1–134, senza riaprire le decisioni.
+4. Eseguire test visuali desktop/mobile per tutte e quattro le modalità.
+5. Solo dopo questi controlli, considerare la macro-categoria pronta al rilascio.

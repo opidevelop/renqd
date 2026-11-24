@@ -25,7 +25,15 @@ export default async function PublicRenqPage({ params }: { params: Promise<{ slu
   }
   if (!ranking || ranking.status !== "COMPLETED") notFound();
   const isOwner = ranking.user_id === user.id;
-  if (!isStaff && !isOwner && (ranking.hidden_at || ranking.deleted_at || ranking.visibility !== "LIVE" || (ranking.settings as Record<string,unknown>)?.access === "private")) notFound();
+  let isSessionParticipant = false;
+  if (ranking.mode === "POKEMON_NAME_EM_ALL") {
+    const {data:resultMeta}=await supabase.from("pokemon_name_em_all_results").select("session_id").eq("ranking_id",ranking.id).maybeSingle();
+    if (resultMeta?.session_id) {
+      const {data:membership}=await supabase.from("pokemon_name_em_all_participants").select("user_id").eq("session_id",resultMeta.session_id).eq("user_id",user.id).is("expelled_at",null).maybeSingle();
+      isSessionParticipant=Boolean(membership);
+    }
+  }
+  if (!isStaff && !isOwner && !isSessionParticipant && (ranking.hidden_at || ranking.deleted_at || ranking.visibility !== "LIVE" || (ranking.settings as Record<string,unknown>)?.access === "private")) notFound();
   const settings = (ranking.settings ?? {}) as Record<string,unknown>;
   const snapshot = (settings.savedSnapshot ?? {}) as { items?: { id?:string; title:string; image_url?:string|null; description?:string|null; rank_position?:number|null }[] };
   const items = (snapshot.items ?? []).slice().sort((a,b)=>(a.rank_position??999)-(b.rank_position??999));
@@ -38,6 +46,10 @@ export default async function PublicRenqPage({ params }: { params: Promise<{ slu
   if (ranking.mode === "POKEMON_NAME_EM_ALL") {
     const result = (settings.resultSnapshot ?? {}) as Record<string, unknown>;
     const ownerName = profile?.display_name || profile?.username || "Utente Renqd";
+    const leaderboard = Array.isArray(result.leaderboard) ? await Promise.all((result.leaderboard as Array<Record<string,unknown>>).map(async item=>({
+      ...item,avatarUrl:await getProfileMediaUrl(supabase,typeof item.avatarUrl==="string"?item.avatarUrl:null),
+    }))) : [];
+    const resultWithAvatars={...result,leaderboard};
     const isPublic = !ranking.hidden_at && !ranking.deleted_at && ranking.visibility === "LIVE" && settings.access !== "private";
     const canReport = isPublic && actor?.status === "APPROVED" && !isOwner;
     const [{ data: comments }, { data: liked }, { count: likeCount }] = isPublic ? await Promise.all([
@@ -56,7 +68,7 @@ export default async function PublicRenqPage({ params }: { params: Promise<{ slu
     }));
     const reportStatus=canReport?await supabase.rpc("ranking_report_exists",{p_ranking_id:ranking.id}):{data:false};
     return <div className="pokemon-public-result-shell">
-      <PokemonNameEmAllPublicResultView result={result} ownerName={ownerName} social={isPublic?{
+      <PokemonNameEmAllPublicResultView result={resultWithAvatars} ownerName={ownerName} social={isPublic?{
         rankingId:ranking.id,initialLiked:Boolean(liked),initialLikeCount:likeCount??0,initialComments,
         currentUserId:user.id,canLike:!isOwner,
       }:undefined}/>

@@ -538,3 +538,12 @@ La precedente combinazione «Breathing Star + Morphing Star» è superata dalla 
 - animazione premium composta da una breve respirazione (leggera espansione e ritorno) seguita da una rotazione fluida e contenuta, con pausa tra i cicli;
 - nessun rimbalzo, traslazione o deformazione; rispettare `prefers-reduced-motion`;
 - restano invariati contenuto esclusivo della stellina e tempi/logica della transizione di pagina.
+
+
+## Registro vincolante della macro-categoria Pokémon
+
+- Fonte decisionale approvata: Renqd_Documento_passaggio_progettazione_Pokemon_aggiornato_24-11-2026_decisioni_1-134_NameEmAll_chiusa_Doku.md (Project Library).
+- Specifica operativa: Renqd_Specifica_MacroCategoria_Pokemon_Handoff.docx (Project Library).
+- Le decisioni 1–134 di Name ’Em All sono consolidate e chiuse: non devono essere riaperte, reinterpretate o sostituite da nuove proposte.
+- Le decisioni già approvate sono requisiti vincolanti; le scelte tecniche residue sono delegate all'assistente, salvo ambiguità realmente bloccanti.
+- Questo riferimento non introduce nuove decisioni e non modifica il contenuto del registro approvato.

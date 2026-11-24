@@ -1,20 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toPng } from "html-to-image";
 import { createClient } from "@/lib/supabase/client";
 import { PokemonResultSocial } from "@/components/pokemon/result-social";
+import { PokemonNameEmAllMultiplayerGame } from "@/components/pokemon/multiplayer-game";
+import { NameEmAllMultiplayerLobby } from "@/components/pokemon/multiplayer-lobby";
+import type { NameEmAllParticipant } from "@/components/pokemon/multiplayer-lobby";
 import {
-  ArrowDownToLine, ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronDown, Eye, EyeOff,
-  Grid3X3, HelpCircle, LoaderCircle, Pause, Play, Search, Sparkles, Trophy, X,
+  ArrowDownToLine, ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronDown, Eye, EyeOff, Settings,
+  Grid3X3, HelpCircle, LoaderCircle, Pause, Play, Search, Sparkles, X,
 } from "lucide-react";
 import {
   GENERATION_LABELS, POKEMON_TYPE_LABELS, POKEMON_TYPES,
   PokemonCatalog, PokemonSpecies, normalizePokemonName,
 } from "@/lib/pokemon/catalog";
 import {
-  createNameEmAllSoloAction, finishNameEmAllAction, hintNameEmAllAction,
+  createNameEmAllSoloAction, createNameEmAllMultiplayerAction, finishNameEmAllAction, hintNameEmAllAction,
   pauseNameEmAllAction, resumeNameEmAllAction, submitNameEmAllAnswerAction,
 } from "@/app/(platform)/pokemon/name-em-all/actions";
 
@@ -23,10 +27,10 @@ type WizardConfig = {
   generations:number[]; types:string[]; specialSections:SpecialSections;
   showDexNumber:boolean; showType:boolean; spellingHelp:boolean; shadows:boolean|null;
   sortOrder:"RANDOM"|"POKEDEX"|"TYPE"; durationMinutes:number; customMinutes:string;
-  mode:"SOLO"|"SHARED"|"INDIVIDUAL";
+  mode:"SOLO"|"COLLABORATIVE"|"INDIVIDUAL";
 };
 type ActiveSession = {
-  id:string; ranking_id:string; game_mode:string; status:string; config:Record<string,unknown>;
+  id:string; ranking_id:string; owner_id:string; host_id:string|null; game_mode:string; status:string; config:Record<string,unknown>;
   catalog_species_ids:number[]; special_species_ids:Record<string,number[]>;
   duration_seconds:number; started_at:string|null; deadline_at:string|null;
   paused_at:string|null; remaining_seconds:number|null; paused_total_seconds:number;
@@ -66,7 +70,7 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
   const toggleType=(type:string)=>update({types:config.types.includes(type)?config.types.filter(x=>x!==type):[...config.types,type]});
   const toggleSpecial=(key:keyof SpecialSections)=>update({specialSections:{...config.specialSections,[key]:!config.specialSections[key]}});
   const canContinue=step!==0||config.generations.length>0;
-  const canStart=catalogReady && config.mode==="SOLO" && config.shadows!==null && mainSpecies.length>0 &&
+  const canStart=catalogReady && config.shadows!==null && mainSpecies.length>0 &&
     (config.durationMinutes!==0 || (Number(config.customMinutes)>=1 && Number(config.customMinutes)<=1440));
   const start=()=>{setError("");startTransition(async()=>{try{await onStart({...config,durationMinutes:config.durationMinutes===0?Number(config.customMinutes):config.durationMinutes});}catch(e){setError(e instanceof Error?e.message:"Non è stato possibile avviare la partita.");}});};
 
@@ -134,8 +138,8 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
         <span className="pokemon-page-eyebrow">06 · MODALITÀ</span><h2>Come vuoi giocare?</h2>
         <div className="pokemon-nae-mode-grid">
           <button type="button" onClick={()=>update({mode:"SOLO"})} className={config.mode==="SOLO"?"is-selected":""}><strong>Solo</strong><small>Il tuo Pokédex, il tuo tempo</small><span className="pokemon-nae-mode-tag">Disponibile</span></button>
-          <button type="button" disabled className="is-disabled"><strong>Multiplayer condiviso</strong><small>Un unico catalogo per tutta la squadra</small><span className="pokemon-nae-mode-tag">Motore multiplayer in completamento</span></button>
-          <button type="button" disabled className="is-disabled"><strong>Multiplayer individuale</strong><small>Stesso catalogo, progressi personali</small><span className="pokemon-nae-mode-tag">Motore multiplayer in completamento</span></button>
+          <button type="button" onClick={()=>update({mode:"COLLABORATIVE"})} className={config.mode==="COLLABORATIVE"?"is-selected":""}><strong>Multiplayer condiviso</strong><small>Un unico catalogo per tutta la squadra</small><span className="pokemon-nae-mode-tag">Lobby · fino a 8 Allenatori</span></button>
+          <button type="button" onClick={()=>update({mode:"INDIVIDUAL"})} className={config.mode==="INDIVIDUAL"?"is-selected":""}><strong>Multiplayer individuale</strong><small>Stesso catalogo, progressi personali e classifica live</small><span className="pokemon-nae-mode-tag">Lobby · fino a 8 Allenatori</span></button>
         </div>
       </section>}
 
@@ -151,7 +155,7 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
           <div><span>Shadows</span><strong>{config.shadows?"Silhouette":"Poké Ball"}</strong></div>
           <div><span>Ordinamento</span><strong>{config.sortOrder==="RANDOM"?"Casuale":config.sortOrder==="POKEDEX"?"Numero Pokédex":"Per tipo"}</strong></div>
           <div><span>Durata</span><strong>{config.durationMinutes===0?config.customMinutes:config.durationMinutes} minuti</strong></div>
-          <div><span>Modalità</span><strong>Solo</strong></div>
+          <div><span>Modalità</span><strong>{config.mode==="SOLO"?"Solo":config.mode==="COLLABORATIVE"?"Multiplayer condiviso":"Multiplayer individuale"}</strong></div>
         </div>
         {!catalogReady&&<p className="pokemon-nae-error">Il catalogo server è in sincronizzazione. L&apos;avvio si abiliterà al termine della verifica.</p>}
         {catalogReady&&!canStart&&<p className="pokemon-nae-error">Completa la selezione di Shadows e verifica la durata prima di iniziare.</p>}
@@ -200,17 +204,30 @@ function Game({
   const [isFinishing,setIsFinishing]=useState(false);
   const inputRef=useRef<HTMLInputElement>(null);
   const config=session.config as WizardConfig;
-  const species=session.catalog_species_ids.map(id=>catalog.species.find(item=>item.id===id)).filter((item):item is PokemonSpecies=>Boolean(item));
-  const sections=useMemo(()=>[
-    ...config.generations.map(g=>({id:"gen-"+g,label:"Gen. "+GENERATION_LABELS[g-1],species:species.filter(s=>s.generation===g)})),
+  const [settingsOpen,setSettingsOpen]=useState(false);
+  const [visual,setVisual]=useState({showDexNumber:config.showDexNumber,showType:config.showType,shadows:config.shadows===true});
+  const [sortOrder,setSortOrder]=useState(config.sortOrder);
+  const [randomOrder,setRandomOrder]=useState<number[]|null>(null);
+  const baseSpecies=session.catalog_species_ids.map(id=>catalog.species.find(item=>item.id===id)).filter((item):item is PokemonSpecies=>Boolean(item));
+  const species=sortOrder==="POKEDEX"?[...baseSpecies].sort((a,b)=>a.id-b.id)
+    :sortOrder==="TYPE"?[...baseSpecies].sort((a,b)=>(a.types[0]??"").localeCompare(b.types[0]??"")||a.id-b.id)
+    :randomOrder?[...baseSpecies].sort((a,b)=>(randomOrder.indexOf(a.id))-(randomOrder.indexOf(b.id))):baseSpecies;
+  const changeSort=(value:"RANDOM"|"POKEDEX"|"TYPE")=>{
+    setSortOrder(value);
+    if(value==="RANDOM")setRandomOrder([...species].sort(()=>Math.random()-.5).map(item=>item.id));
+  };
+  const sections=[
+    ...config.generations.map(g=>({id:"gen-"+g,label:"Gen. "+GENERATION_LABELS[g-1],species:species.filter(item=>item.generation===g)})),
     ...Object.entries(session.special_species_ids??{}).filter(([,ids])=>Array.isArray(ids)&&ids.length>0).map(([key,ids])=>({
       id:"special-"+key,label:specialLabels[key as keyof SpecialSections]??key,
-      species:species.filter(s=>(ids as number[]).includes(s.id)),
+      species:species.filter(item=>(ids as number[]).includes(item.id)),
     })),
-  ],[config.generations,session.special_species_ids,species]);
-  const suggestions=useMemo(()=>query.trim().length>0?species
-    .map(item=>({item,score:scoreMatch(item,query)})).filter(x=>x.score<3)
-    .sort((a,b)=>a.score-b.score||a.item.id-b.item.id).slice(0,5).map(x=>x.item):[],[species,query]);
+  ];
+  const suggestions=query.trim().length>0?species
+    .map(item=>({item,score:scoreMatch(item,query)}))
+    .filter(row=>row.score>0)
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,5).map(row=>row.item):[];
   const percent=species.length?Math.round(found.size/species.length*100):0;
 
   useEffect(()=>{
@@ -286,8 +303,16 @@ function Game({
     <section className="pokemon-nae-game">
       <header className="pokemon-nae-game-header">
         <div><span className="pokemon-page-eyebrow">RENQD × POKÉMON · IN PARTITA</span><h1>Name ’Em All</h1><p>Riconosci le specie del tuo catalogo. Le forme associate si sbloccano senza punti aggiuntivi.</p></div>
-        <button type="button" className="pokemon-favourite-secondary" onClick={()=>void togglePause()} disabled={paused}><Pause size={15}/> Pausa</button>
+        <div className="pokemon-nae-game-header-actions"><button type="button" className="pokemon-favourite-secondary" onClick={()=>setSettingsOpen(value=>!value)}><Settings size={15}/> Visualizzazione</button><button type="button" className="pokemon-favourite-secondary" onClick={()=>void togglePause()} disabled={paused}><Pause size={15}/> Pausa</button></div>
       </header>
+      {settingsOpen&&<section className="pokemon-nae-live-settings" aria-label="Impostazioni visive">
+        <div className="pokemon-nae-toggle-list">
+          <label><span><strong>Numero Pokédex</strong></span><input type="checkbox" checked={visual.showDexNumber} onChange={event=>setVisual(value=>({...value,showDexNumber:event.target.checked}))}/></label>
+          <label><span><strong>Tipo Pokémon</strong></span><input type="checkbox" checked={visual.showType} onChange={event=>setVisual(value=>({...value,showType:event.target.checked}))}/></label>
+          <label><span><strong>Shadows · Silhouette</strong></span><input type="checkbox" checked={visual.shadows} onChange={event=>setVisual(value=>({...value,shadows:event.target.checked}))}/></label>
+        </div>
+        <div className="pokemon-nae-choice-row">{([["RANDOM","Casuale"],["POKEDEX","Pokédex"],["TYPE","Per tipo"]] as const).map(([value,label])=><button type="button" key={value} className={sortOrder===value?"is-selected":""} onClick={()=>changeSort(value)}>{label}</button>)}</div>
+      </section>}
       <div className="pokemon-nae-hud">
         <div className="pokemon-nae-hud-top">
           <div><small>TEMPO RIMANENTE</small><strong className={remaining<60?"is-urgent":""}>{formatTime(remaining)}</strong></div>
@@ -320,10 +345,10 @@ function Game({
               const artwork=form?.spriteUrl??item.spriteUrl;
               const displayName=form ? item.name+" "+form.label : item.name;
               return <button type="button" key={item.id+"-"+(form?.id??"base")} onClick={()=>{setSelected(item);setHint(null);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")}>
-                <span className="pokemon-nae-cell-art">{isFound||config.shadows?<img src={artwork} alt="" loading="lazy" style={{filter:isFound?"none":"brightness(0) saturate(0) opacity(.55)"}}/>:<b className="pokemon-nae-pokeball">◉</b>}</span>
-                {isFound?<strong>{displayName}</strong>:<strong className="is-hidden">{config.shadows?"???":"Pokémon"}</strong>}
-                {config.showDexNumber&&<small>#{item.id.toString().padStart(4,"0")}</small>}
-                {config.showType&&<small>{item.types.map(t=>POKEMON_TYPE_LABELS[t]??t).join(" · ")}</small>}
+                <span className="pokemon-nae-cell-art">{isFound||visual.shadows?<img src={artwork} alt="" loading="lazy" style={{filter:isFound?"none":"brightness(0) saturate(0) opacity(.55)"}}/>:<b className="pokemon-nae-pokeball">◉</b>}</span>
+                {isFound?<strong>{displayName}</strong>:<strong className="is-hidden">{visual.shadows?"???":"Pokémon"}</strong>}
+                {visual.showDexNumber&&<small>#{item.id.toString().padStart(4,"0")}</small>}
+                {visual.showType&&<small>{item.types.map(t=>POKEMON_TYPE_LABELS[t]??t).join(" · ")}</small>}
                 {(item.forms.length>0||item.isLegendary||item.isMythical||item.isUltraBeast||item.isParadox)&&<span className="pokemon-nae-cell-indicators">{item.forms.length>0?"◇":""}{item.isLegendary?"★":""}{item.isMythical?"✦":""}{item.isUltraBeast?"◈":""}{item.isParadox?"⌁":""}</span>}
               </button>;
             })}
@@ -376,7 +401,7 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
   const discoveredIds=Array.isArray(result.discoveredSpeciesIds)?(result.discoveredSpeciesIds as unknown[]).map(Number).filter(Number.isFinite):[];
   const discovered=useMemo(()=>discoveredIds.map(id=>catalog?.species.find(item=>item.id===id)).filter((item):item is PokemonSpecies=>Boolean(item)),[catalog,result.discoveredSpeciesIds]);
   const leaderboard=Array.isArray(result.leaderboard)?result.leaderboard as Array<Record<string,unknown>>:[];
-  const finishLabels:Record<string,string>={TIMER_EXPIRED:"Timer scaduto",CATALOG_COMPLETE:"Pokédex completato",USER_EXIT:"Terminata dal giocatore",HOST_TERMINATED:"Terminata dall’host"};
+  const finishLabels:Record<string,string>={TIMER_EXPIRED:"Timer scaduto",CATALOG_COMPLETE:"Pokédex completato",USER_EXIT:"Terminata dal giocatore",HOST_TERMINATED:"Terminata dall’host",ALL_COMPLETED:"Tutti i partecipanti hanno completato"};
   const exportWidth=1080;
   const exportHeight=exportSize==="VERTICAL"?1350:1080;
   const handleExport=async()=>{
@@ -429,7 +454,7 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
         {!catalog?<p>Caricamento del Pokédex…</p>:!discovered.length?<p>Il dettaglio delle specie scoperte non è disponibile in questo snapshot.</p>:discovered.map(item=><div key={item.id}><img src={item.spriteUrl} alt="" loading="lazy"/><span><strong>{item.name}</strong><small>#{String(item.id).padStart(4,"0")} · Gen. {GENERATION_LABELS[item.generation-1]}</small></span></div>)}
       </div>}
       {activeTab==="leaderboard"&&<div className="pokemon-nae-result-leaderboard">
-        {leaderboard.map((entry,index)=><div key={String(entry.userId??index)}><span>{String(entry.rankPosition??index+1).padStart(2,"0")}</span><div className="pokemon-nae-leader-avatar">{typeof entry.avatarUrl==="string"&&entry.avatarUrl?<img src={entry.avatarUrl} alt=""/>:String(entry.displayName??entry.username??"?").slice(0,1).toUpperCase()}</div><strong>{String(entry.displayName??entry.username??"Allenatore")}</strong><small>{String(entry.foundCount??0)} Pokémon · {String(entry.accuracy??0)}%</small></div>)}
+        {leaderboard.map((entry,index)=>{const content=<><span>{String(entry.rankPosition??index+1).padStart(2,"0")}</span><div className="pokemon-nae-leader-avatar">{typeof entry.avatarUrl==="string"&&entry.avatarUrl?<img src={entry.avatarUrl} alt=""/>:String(entry.displayName??entry.username??"?").slice(0,1).toUpperCase()}</div><strong>{String(entry.displayName??entry.username??"Allenatore")}</strong><small>{String(entry.foundCount??0)} Pokémon · {String(entry.accuracy??0)}%</small></>;return typeof entry.publicSlug==="string"&&entry.publicSlug?<Link key={String(entry.userId??index)} href={"/r/"+entry.publicSlug}>{content}</Link>:<div key={String(entry.userId??index)}>{content}</div>;})}
       </div>}
     </div>
     <section className="pokemon-nae-export-tools">
@@ -458,8 +483,9 @@ function ResultView({result,onNewGame,catalog}:{result:ResultSnapshot;onNewGame?
   </section>;
 }
 
-export function NameEmAllExperience({activeSession,initialDiscoveries=[],latestResult=null}:{
+export function NameEmAllExperience({activeSession,initialDiscoveries=[],latestResult=null,initialParticipants=[],currentUserId="",currentUserRole=""}:{
   activeSession:ActiveSession|null;initialDiscoveries?:number[];latestResult?:ResultSnapshot|null;
+  initialParticipants?:NameEmAllParticipant[];currentUserId?:string;currentUserRole?:string;
 }) {
   const router=useRouter();
   const [catalog,setCatalog]=useState<PokemonCatalog|null>(null);
@@ -489,15 +515,20 @@ export function NameEmAllExperience({activeSession,initialDiscoveries=[],latestR
     return()=>{alive=false;if(retry)window.clearTimeout(retry);};
   },[]);
   const start=async(config:WizardConfig)=>{
-    const result=await createNameEmAllSoloAction({
+    const payload={
       generations:config.generations,types:config.types,specialSections:config.specialSections,
       showDexNumber:config.showDexNumber,showType:config.showType,spellingHelp:config.spellingHelp,
-      shadows:config.shadows,sortOrder:config.sortOrder,durationMinutes:config.durationMinutes,mode:"SOLO",
-    });
+      shadows:config.shadows,sortOrder:config.sortOrder,durationMinutes:config.durationMinutes,mode:config.mode,
+    };
+    const result=config.mode==="SOLO"
+      ? await createNameEmAllSoloAction(payload)
+      : await createNameEmAllMultiplayerAction(payload,config.mode);
     if(!result.ok)throw new Error(result.error??"Avvio non riuscito.");
     router.refresh();
   };
   if(!catalog)return <div className="pokemon-favourite-loading"><LoaderCircle size={18}/> Caricamento Pokédex… {error}</div>;
+  if(activeSession?.status==="LOBBY")return <NameEmAllMultiplayerLobby session={activeSession} participants={initialParticipants} currentUserId={currentUserId}/>;
+  if(activeSession&&activeSession.game_mode!=="SOLO")return <PokemonNameEmAllMultiplayerGame catalog={catalog} session={activeSession} initialDiscoveries={initialDiscoveries} initialParticipants={initialParticipants} currentUserId={currentUserId} currentUserRole={currentUserRole}/>;
   if(activeSession)return <Game catalog={catalog} session={activeSession} initialDiscoveries={initialDiscoveries}/>;
   if(latestResult&&!showWizard)return <ResultView result={latestResult} catalog={catalog} onNewGame={()=>setShowWizard(true)}/>;
   return <><p className={catalogReady?"pokemon-catalog-sync is-ready":"pokemon-catalog-sync"}>{catalogReady?<CheckCircle2 size={14}/>:<LoaderCircle size={14}/>} {catalogReady?"Catalogo server verificato · "+catalog.speciesCount+" specie":syncError||"Verifica del catalogo server in corso…"}</p><Wizard catalog={catalog} onStart={start} catalogReady={catalogReady}/></>;
