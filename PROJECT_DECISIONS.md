@@ -510,3 +510,15 @@ No database schema, migration, role, permission, authentication or external-serv
 ### Autorizzazione operativa aggiornata il 24 novembre 2026 — push e rilascio
 
 L'utente autorizza a effettuare direttamente i push necessari sul solo branch main, senza chiedere una nuova conferma per ogni push. L'autorizzazione comprende la consapevolezza che l'integrazione GitHub–Vercel può avviare automaticamente un deployment Production a ogni push su main. Continuano a valere le regole di rilascio cumulativo, verifica preventiva e distinzione tra build, deployment e collaudo funzionale. Questa autorizzazione non equivale ad autorizzazione a modificare Supabase, applicare migrazioni, alterare dati o cambiare servizi esterni: per tali operazioni restano necessari verifica e consenso specifici quando richiesti.
+
+
+## Decisioni approvate — landing pubblica e aggiornamento UI del 24 novembre 2026
+
+- La landing page alla root `/` è una delle poche pagine pubbliche di Renqd e deve restare accessibile anche senza autenticazione. È la porta d'ingresso per login, registrazione e recupero credenziali. Il redesign grafico non deve introdurre protezioni o redirect che impediscano ai visitatori non autenticati di raggiungerla.
+- La grafica della landing e della pagina Login deve usare il wordmark SVG ufficiale `public/brand/renqd-logo.svg`.
+- Le card di categoria (Musica, Videogiochi, Film e serie, Libri, Sport e Lista personalizzata) in Home e Crea possono essere ridisegnate solo visivamente: selezione, link, cataloghi, dati e logiche di creazione restano invariati.
+- Loading: rimuovere il pittogramma R/stella statico e mantenere soltanto la stellina animata. La stellina deve conservare la posizione iniziale che aveva rispetto al pittogramma rimosso, senza una seconda stella visibile.
+- Reveal: le immagini usate come sfondo delle slide devono essere una sola copia, senza ripetizione a mosaico, con dimensionamento `cover`.
+- Commenti: ogni commento mostra il nome pubblico dell'autore e la sua immagine profilo Renqd; usare le iniziali solo come fallback quando non è disponibile una foto.
+- Lobby Multiplayer: non mostrare il tag «In preparazione» quando la sessione è in stato LOBBY. Il creatore può modificare titolo e copertina direttamente dalla Lobby, tramite la matitina e senza navigare verso una route esterna.
+- Queste modifiche non autorizzano interventi a schema Supabase, migrazioni, ruoli, permessi o servizi esterni.

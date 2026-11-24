@@ -1491,3 +1491,28 @@ I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI conco
 - `978e48e3f4c33f51bbc614a4560d85cb71d0171b` — ripristino card, stili Lobby, liste Appunti, autosave e refresh Attività.
 - `98bfd843cd1c4798d5fb2556cb34bd8bfc18e2f8` — riconciliazione degli snapshot Attività con gli eventi Realtime.
 - `3ea2351030371b570354c6352c56079078ded152` — correzione della collocazione dell'hook React per il tracciamento Realtime; commit finale verificato e distribuito.
+
+
+## 2026-11-24 — Landing pubblica, identità, categorie, Reveal, commenti e Lobby
+
+### Modifiche applicative su `main`
+- **Landing pubblica:** rinnovato il trattamento grafico della pagina root con palette avorio, tipografia editoriale, arancio Renqd, superfici morbide e motivo decorativo SVG ufficiale. Il percorso `/` resta pubblico; login e registrazione continuano a essere raggiungibili dalla landing. Il wordmark usa `/brand/renqd-logo.svg`.
+- **Login:** sostituito il vecchio wordmark testuale con il logo SVG ufficiale.
+- **Categorie Home/Crea:** aggiornato esclusivamente lo stile delle card, mantenendo invariati classi funzionali, link, selezione, dati e flusso di creazione.
+- **Loading:** rimossa la R statica che conteneva la stellina del logo; resta la sola stellina animata, mantenuta nella posizione iniziale precedente (angolo superiore destro del riquadro del pittogramma).
+- **Reveal:** gli sfondi immagine delle slide sono esplicitamente non ripetuti, centrati e dimensionati `cover`, per mostrare una sola copia della copertina.
+- **Commenti:** caricati i profili pubblici degli autori e risolte le immagini profilo; ogni commento mostra nome e avatar, con fallback alle iniziali. I nuovi commenti usano anche i dati del profilo dell'utente corrente.
+- **Lobby Multiplayer:** rimosso il tag «In preparazione» nello stato LOBBY. La matitina apre un editor inline nella Lobby per titolo e copertina, con salvataggio tramite le azioni già esistenti `update-title` e `update-cover`. Non viene introdotto un editor parallelo né una nuova migrazione.
+- **Nessuna modifica** a schema Supabase, migrazioni, RLS, ruoli, permessi o dati.
+
+### Commit applicativi
+- `879d43d7a38e6d5f9d10852d7937a8ce1c8ed9d1` — landing/login, card categorie, loading e Reveal.
+- `a61dd19e45d9e770a8496e75bdf90f6dc515788d` — identità autore e avatar nei commenti.
+- `0b668ad9db3f4b7ae0810267fbfb83de892483d5` — modifica inline titolo/copertina Lobby e rimozione stato «In preparazione».
+
+### Verifiche e deployment
+- Vercel Production per `0b668ad9db3f4b7ae0810267fbfb83de892483d5`: deployment `dpl_7nxTuap5H6bq4NRdNfB5JbMoGsHd`, stato **READY**.
+- La compilazione Vercel ha completato compilazione Next.js e controllo TypeScript; la build è stata completata con tutte le route generate.
+- GitHub Actions per `a61dd19e45d9e770a8496e75bdf90f6dc515788d`: workflow Code quality **SUCCESS** (TypeScript, ESLint e build).
+- GitHub Actions per `0b668ad9db3f4b7ae0810267fbfb83de892483d5`: controllo TypeScript ed ESLint superati; build Production in esecuzione al momento dell'aggiornamento di questa nota.
+- Non è stato eseguito un test browser autenticato o un collaudo manuale su dispositivo. Lo stato READY e la build non sostituiscono la verifica visuale dei flussi di login, commenti e modifica della Lobby.
