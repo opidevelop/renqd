@@ -1516,3 +1516,17 @@ I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI conco
 - GitHub Actions per `a61dd19e45d9e770a8496e75bdf90f6dc515788d`: workflow Code quality **SUCCESS** (TypeScript, ESLint e build).
 - GitHub Actions per `0b668ad9db3f4b7ae0810267fbfb83de892483d5`: controllo TypeScript ed ESLint superati; build Production in esecuzione al momento dell'aggiornamento di questa nota.
 - Non è stato eseguito un test browser autenticato o un collaudo manuale su dispositivo. Lo stato READY e la build non sostituiscono la verifica visuale dei flussi di login, commenti e modifica della Lobby.
+
+
+## 2026-11-24 — Loading premium con sola stellina
+
+### Modifica applicativa
+- La schermata di caricamento ora mostra esclusivamente una stellina SVG inline: rimossi dal contenuto di loading la serpentina, il logo/wordmark e la didascalia.
+- Implementata la combinazione approvata **Breathing Star + Morphing Star**: pulsazione lenta e contenuta, lieve rotazione, alone morbido e trasformazione fluida della sagoma tra una forma più appuntita e una più arrotondata.
+- La stellina usa il colore arancio Renqd e mantiene il fondale chiaro/avorio. Non è più presente il movimento a rimbalzo.
+- Aggiunto fallback `prefers-reduced-motion`: stellina statica, senza animazioni.
+- La durata e la logica della transizione di pagina restano invariate; nessuna modifica a Supabase, database, migrazioni o servizi esterni.
+
+### Verifiche e rilascio
+- Verifiche di build/CI e deployment Production da completare dopo il commit su `main`; non dichiarare il rilascio completato prima dello stato Vercel **READY**.
+- Il test visuale autenticato della schermata di caricamento resta da eseguire nel browser dell'utente.

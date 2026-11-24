@@ -522,3 +522,10 @@ L'utente autorizza a effettuare direttamente i push necessari sul solo branch ma
 - Commenti: ogni commento mostra il nome pubblico dell'autore e la sua immagine profilo Renqd; usare le iniziali solo come fallback quando non è disponibile una foto.
 - Lobby Multiplayer: non mostrare il tag «In preparazione» quando la sessione è in stato LOBBY. Il creatore può modificare titolo e copertina direttamente dalla Lobby, tramite la matitina e senza navigare verso una route esterna.
 - Queste modifiche non autorizzano interventi a schema Supabase, migrazioni, ruoli, permessi o servizi esterni.
+
+
+### Decisione approvata il 24 novembre 2026 — animazione stellina di caricamento
+- La schermata di caricamento mostra **soltanto la stellina**, senza wordmark, logo R, serpentina, didascalie o altri elementi decorativi.
+- Movimento approvato: combinazione **Breathing Star + Morphing Star**. La stellina respira con una variazione lenta e contenuta di scala, una lieve rotazione e un alone morbido; contemporaneamente la sagoma si trasforma in modo fluido tra una stella più appuntita e una più morbida, mantenendo riconoscibile il simbolo originale.
+- Il movimento deve essere elegante, discreto e premium, non un rimbalzo. Rispettare `prefers-reduced-motion` mostrando la stellina statica.
+- Conservare il fondo chiaro/avorio della schermata e non modificare il comportamento o la durata della transizione di pagina.
