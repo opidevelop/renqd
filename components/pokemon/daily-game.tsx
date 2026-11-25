@@ -1,11 +1,24 @@
 "use client";
 
-import { CheckCircle2, CircleDashed, ExternalLink } from "lucide-react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { CheckCircle2, CircleDashed, ExternalLink, LoaderCircle } from "lucide-react";
+import { setPokemonDailyCompletionAction } from "@/app/(platform)/pokemon/name-em-all/actions";
 
 export function DailyPokemonGame({
   title, description, url, completed,
 }: { title: string; description: string; url: string; completed: boolean }) {
   const provider = title === "Doku" ? "PokeDoku" : "Pokennection";
+  const gameMode = title === "Doku" ? "DOKU" : "CONNECTIONS";
+  const router = useRouter();
+  const [isCompleted, setIsCompleted] = useState(completed);
+  const [pending, startTransition] = useTransition();
+  const toggleCompletion = () => startTransition(async () => {
+    const result = await setPokemonDailyCompletionAction(gameMode, !isCompleted);
+    if (!result.ok) return;
+    setIsCompleted(result.completed);
+    router.refresh();
+  });
   return (
     <main className="pokemon-page pokemon-daily-page">
       <header className="pokemon-favourite-heading">
@@ -14,7 +27,7 @@ export function DailyPokemonGame({
           <h1>{title}</h1>
           <p>{description}</p>
         </div>
-        <div className={"pokemon-daily-state" + (completed ? " is-complete" : "")} aria-live="polite">
+        <div className={"pokemon-daily-state" + (isCompleted ? " is-complete" : "")} aria-live="polite">
           {completed ? <CheckCircle2 size={18}/> : <CircleDashed size={18}/>}
           <span>{completed ? "Completata oggi" : "Sfida disponibile"}</span>
         </div>
