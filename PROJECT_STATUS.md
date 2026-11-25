@@ -1720,3 +1720,16 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Alias production assegnati: `renqd.app`, `www.renqd.app`, `renqd.vercel.app`.
 - Runtime log error/fatal della nuova deployment: nessun evento trovato.
 - Non è stato possibile completare un test reale con due account distinti per invito, ready e avvio partita. Il fix database e la build sono verificati; il flusso multiplayer va confermato con un test utente effettivo.
+
+
+---
+
+## 2026-11-25 — Rifinitura visuale Pokémon e landing
+
+- Banner /pokemon: rimossi la didascalia testuale «GLACEON · LEAFEON · ESPEON» e il contatore «01 — 04»; restano soltanto le tre illustrazioni.
+- Risultato Name ’Em All: corretto il contrasto della metrica principale (che nella schermata allegata diventava una barra bianca), riordinata la card del livello e migliorata la leggibilità di statistiche, medaglia e navigazione dei dettagli. Contenitore limitato e centrato per desktop, con adattamento mobile.
+- Durata Name ’Em All: «Predefinito» è ora un tag compatto, non un testo corsivo che si confonde con le altre etichette.
+- Landing pubblica: rimossi dal menu superiore i collegamenti interni «Come funziona» e «Pokémon»; restano logo, accesso e registrazione. Le sezioni sono ancora presenti nella pagina, ma non vengono proposte come voci di navigazione.
+- Aiuti: il testo sulle impostazioni suggerite è stato trasformato in un riquadro informativo con icona, titolo e testo descrittivo.
+- Lobby multiplayer: riprogettata in una griglia desktop a due colonne, con intestazione dedicata, partecipanti più leggibili, area inviti distinta, stato pronto/host più chiaro e impostazioni raggruppate; su mobile torna a colonna singola.
+- Le modifiche sono state effettuate nei componenti components/pokemon/hub.tsx, components/pokemon/name-em-all.tsx, app/page.tsx e negli stili in app/(platform)/pokemon.css.
