@@ -1894,3 +1894,16 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Alias: renqd.app, www.renqd.app e renqd.vercel.app.
 - Build Next.js e controllo TypeScript completati correttamente dopo la correzione del tipo del valore di completamento giornaliero.
 - Rimane necessaria la verifica browser autenticata dei flussi multiplayer e dell'embed PokeDoku; lo stato READY certifica il build/deploy, non il test end-to-end.
+
+
+---
+
+## 2026-11-25 — Correzioni riconoscimento multiplayer e rifiuto inviti
+
+- Name ’Em All multiplayer (condiviso e individuale): riconoscimento delle corrispondenze esatte avviato direttamente da onChange, senza debounce.
+- Rimosso il controllo locale `found.has(exactMatch.id)` dal percorso di autocomplete: poteva intercettare un render transitorio dopo aver registrato un Pokémon e bloccare il nome successivo (caso Mew → Mewtwo). La RPC server decide se la specie esatta è già stata scoperta.
+- Dopo risposta corretta o duplicata, il campo viene svuotato e rifocalizzato dopo il completamento del render React.
+- Rifiuto invito: RPC `renqd_pokemon_name_em_all_respond_invite` resa tollerante verso inviti orfani/storici e già gestiti per il solo rifiuto; la relativa notifica viene marcata letta. L'accettazione non è consentita se l'invito non è valido e pendente.
+- Dopo un rifiuto riuscito, la notifica Name ’Em All viene rimossa immediatamente dalla lista Attività.
+- Migrazione applicata: `20261125210000_fix_name_em_all_invite_decline_stale_notifications`.
+- Test end-to-end autenticato non ancora effettuato; build Production da verificare.
