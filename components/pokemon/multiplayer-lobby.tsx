@@ -30,7 +30,7 @@ const defaultLobbyConfig=(config:Record<string,unknown>,gameMode:string,duration
   const types=Array.isArray(config.types)?config.types.filter((value):value is string=>typeof value==="string"):[];
   return {
     generations,types,
-    specialSections:{mega:Boolean(specials.mega),legendary:Boolean(specials.legendary),mythical:Boolean(specials.mythical),ultraBeast:Boolean(specials.ultraBeast),paradox:Boolean(specials.paradox)},
+    specialSections:{mega:specials.mega!==false,legendary:specials.legendary!==false,mythical:specials.mythical!==false,ultraBeast:specials.ultraBeast!==false,paradox:specials.paradox!==false},
     showDexNumber:config.showDexNumber!==false,showType:Boolean(config.showType),
     spellingHelp:config.spellingHelp!==false,shadows:typeof config.shadows==="boolean"?config.shadows:false,
     sortOrder:config.sortOrder==="RANDOM"||config.sortOrder==="TYPE"?config.sortOrder:"POKEDEX",
