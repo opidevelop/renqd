@@ -43,7 +43,7 @@ type ResultSnapshot = Record<string,unknown>;
 
 const defaults:WizardConfig = {
   generations:[1,2,3,4,5,6,7,8,9],types:[],
-  specialSections:{mega:false,legendary:false,mythical:false,ultraBeast:false,paradox:false},
+  specialSections:{mega:true,legendary:true,mythical:true,ultraBeast:true,paradox:true},
   showDexNumber:true,showType:false,spellingHelp:true,shadows:false,
   sortOrder:"POKEDEX",durationMinutes:0,customMinutes:"",mode:"SOLO",unlimited:true,
 };
@@ -152,9 +152,9 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
       {step===5&&<section className="pokemon-nae-wizard-panel">
         <span className="pokemon-page-eyebrow">06 · MODALITÀ</span><h2>Come vuoi giocare?</h2>
         <div className="pokemon-nae-mode-grid">
-          <button type="button" onClick={()=>update({mode:"SOLO"})} className={config.mode==="SOLO"?"is-selected":""}><strong>Solo</strong><small>Il tuo Pokédex, il tuo tempo</small><span className="pokemon-nae-mode-tag">Disponibile</span></button>
-          <button type="button" onClick={()=>update({mode:"COLLABORATIVE"})} className={config.mode==="COLLABORATIVE"?"is-selected":""}><strong>Multiplayer condiviso</strong><small>Un unico catalogo per tutta la squadra</small><span className="pokemon-nae-mode-tag">Lobby · fino a 8 Allenatori</span></button>
-          <button type="button" onClick={()=>update({mode:"INDIVIDUAL"})} className={config.mode==="INDIVIDUAL"?"is-selected":""}><strong>Multiplayer individuale</strong><small>Stesso catalogo, progressi personali e classifica live</small><span className="pokemon-nae-mode-tag">Lobby · fino a 8 Allenatori</span></button>
+          <button type="button" onClick={()=>update({mode:"SOLO"})} className={"pokemon-nae-mode-card mode-solo"+(config.mode==="SOLO"?" is-selected":"")}><span className="pokemon-nae-mode-art">◉</span><span className="pokemon-nae-mode-overline">ESPERIENZA PERSONALE</span><strong>Solo</strong><small>Il tuo Pokédex, il tuo tempo. Gioca al tuo ritmo e costruisci il tuo risultato.</small><span className="pokemon-nae-mode-tag">Una sola persona</span></button>
+          <button type="button" onClick={()=>update({mode:"COLLABORATIVE"})} className={"pokemon-nae-mode-card mode-shared"+(config.mode==="COLLABORATIVE"?" is-selected":"")}><span className="pokemon-nae-mode-art">♧</span><span className="pokemon-nae-mode-overline">SQUADRA · FINO A 8</span><strong>Multiplayer condiviso</strong><small>Un solo Pokédex per tutti: ogni scoperta fa avanzare l'intera squadra.</small><span className="pokemon-nae-mode-tag">Collaborate per completarlo</span></button>
+          <button type="button" onClick={()=>update({mode:"INDIVIDUAL"})} className={"pokemon-nae-mode-card mode-individual"+(config.mode==="INDIVIDUAL"?" is-selected":"")}><span className="pokemon-nae-mode-art">♜</span><span className="pokemon-nae-mode-overline">SFIDA · FINO A 8</span><strong>Multiplayer individuale</strong><small>Stesso catalogo per tutti, progressi separati e classifica in tempo reale.</small><span className="pokemon-nae-mode-tag">Confronta i tuoi risultati</span></button>
         </div>
       </section>}
 
