@@ -272,3 +272,14 @@ export async function removeNameEmAllLobbyParticipantAction(sessionId: string, u
   revalidatePath("/pokemon/name-em-all");
   return { ok: true, data: data as Record<string, unknown> };
 }
+
+export async function deleteNameEmAllSoloAction(sessionId: string) {
+  const { user, client } = await getRpcClient();
+  if (!user || !client) return { ok: false, error: "Devi accedere a Renqd." };
+  const { data, error } = await client.rpc("renqd_pokemon_name_em_all_delete_solo", { p_session_id: sessionId });
+  if (error || !data || typeof data !== "object") return { ok: false, error: error?.message ?? "Non è stato possibile eliminare la partita." };
+  revalidatePath("/pokemon/name-em-all");
+  revalidatePath("/profile/pokemon");
+  revalidatePath("/rankings");
+  return { ok: true };
+}
