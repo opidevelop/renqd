@@ -24,9 +24,7 @@ export function PokemonHub({ dokuCompleted, connectionsCompleted }: { dokuComple
           <img className="pokemon-hub-creature pokemon-hub-creature-one" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/471.png" alt="" />
           <img className="pokemon-hub-creature pokemon-hub-creature-two" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/470.png" alt="" />
           <img className="pokemon-hub-creature pokemon-hub-creature-three" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/196.png" alt="" />
-          <span className="pokemon-hub-art-caption">GLACEON · LEAFEON · ESPEON</span>
         </div>
-        <div className="pokemon-hub-hero-foot"><span>QUATTRO MODI DI GIOCARE</span><span>01 — 04</span></div>
       </section>
       <section className="pokemon-hub-modes">
         <div className="pokemon-section-heading"><div><span className="pokemon-page-eyebrow">SCEGLI LA TUA ESPERIENZA</span><h2>Le modalità.</h2></div></div>
