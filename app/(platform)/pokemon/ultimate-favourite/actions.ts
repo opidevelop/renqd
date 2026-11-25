@@ -22,7 +22,7 @@ export async function saveUltimateFavouriteAction(input: {
   const { data, error } = await client.rpc("renqd_save_pokemon_ultimate_favourite", {
     p_ranking_id: input.rankingId, p_matrix: input.matrix, p_publish: input.publish,
   });
-  if (error || !data || typeof data !== "object") return { ok: false, error: "Non è stato possibile salvare la matrice." };
+  if (error) {\n    console.error("[Ultimate Favourite] Salvataggio RPC non riuscito:", error.message);\n    return { ok: false, error: error.message || "Non è stato possibile salvare la matrice." };\n  }\n  if (!data || typeof data !== "object") return { ok: false, error: "Risposta di salvataggio non valida." };
   const result = data as { rankingId?: string; publicSlug?: string; published?: boolean };
   if (!result.rankingId) return { ok: false, error: "Risposta di salvataggio non valida." };
   revalidatePath("/pokemon"); revalidatePath("/pokemon/ultimate-favourite"); revalidatePath("/rankings");
