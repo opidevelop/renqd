@@ -1267,3 +1267,20 @@
 .notes-editor ul ul ul{list-style:square!important}
 .notes-editor ol ol{list-style:lower-alpha!important}
 .notes-editor ol ol ol{list-style:lower-roman!important}
+
+
+/* Grade mode — keep audio previews available while assigning every score */
+.mode-grade .grade-item-card{grid-template-columns:34px 52px minmax(0,1fr) auto auto auto;gap:12px}
+.mode-grade .grade-unrated-row{grid-template-columns:44px minmax(0,1fr) auto auto}
+.mode-grade .grade-item-music-actions{display:flex;align-items:center;justify-content:center;min-width:34px}
+.mode-grade .grade-item-music-actions .renq-music-actions{display:flex;align-items:center;gap:5px}
+.mode-grade .grade-item-music-actions .music-action{width:32px;height:32px}
+@media(max-width:680px){
+ .mode-grade .grade-item-card{grid-template-columns:28px 42px minmax(0,1fr) auto;gap:8px}
+ .mode-grade .grade-item-card .grade-item-music-actions{grid-column:3;grid-row:2;justify-content:flex-start}
+ .mode-grade .grade-item-score{grid-column:4;grid-row:1/3}
+ .mode-grade .grade-tie-controls{grid-column:1/-1;justify-self:end}
+ .mode-grade .grade-unrated-row{grid-template-columns:38px minmax(0,1fr) auto;gap:8px}
+ .mode-grade .grade-unrated-row .grade-item-music-actions{grid-column:2;grid-row:2;justify-content:flex-start}
+ .mode-grade .grade-unrated-row>label{grid-column:3;grid-row:1/3}
+}
