@@ -13,6 +13,18 @@ async function getRpcClient() {
   return { user, client: supabase };
 }
 
+export async function setPokemonDailyCompletionAction(gameMode: "DOKU" | "CONNECTIONS", completed: boolean) {
+  const { user, client } = await getRpcClient();
+  if (!user || !client) return { ok: false, error: "Devi accedere a Renqd." };
+  const { data, error } = await client.rpc("renqd_pokemon_daily_set_completion", {
+    p_game_mode: gameMode, p_completed: completed,
+  });
+  if (error || !data || typeof data !== "object") return { ok: false, error: error?.message ?? "Stato non aggiornato." };
+  revalidatePath("/pokemon");
+  revalidatePath(gameMode === "DOKU" ? "/pokemon/doku" : "/pokemon/connections");
+  return { ok: true, completed };
+}
+
 export async function createNameEmAllSoloAction(config: Record<string, unknown>) {
   const { user, client } = await getRpcClient();
   if (!user || !client) return { ok: false, error: "Devi accedere a Renqd." };
