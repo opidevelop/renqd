@@ -19,6 +19,7 @@ import {
   GENERATION_LABELS, POKEMON_TYPE_LABELS, POKEMON_TYPES,
   PokemonCatalog, PokemonSpecies, normalizePokemonName,
 } from "@/lib/pokemon/catalog";
+import { getPokemonTypeIconUrl } from "@/lib/pokemon/type-icons";
 import {
   createNameEmAllSoloAction, createNameEmAllMultiplayerAction, finishNameEmAllAction, hintNameEmAllAction,
   pauseNameEmAllAction, resumeNameEmAllAction, submitNameEmAllAnswerAction, setNameEmAllResultVisibilityAction,
@@ -29,7 +30,7 @@ type WizardConfig = {
   generations:number[]; types:string[]; specialSections:SpecialSections;
   showDexNumber:boolean; showType:boolean; spellingHelp:boolean; shadows:boolean|null;
   sortOrder:"RANDOM"|"POKEDEX"|"TYPE"; durationMinutes:number; customMinutes:string;
-  mode:"SOLO"|"COLLABORATIVE"|"INDIVIDUAL";
+  mode:"SOLO"|"COLLABORATIVE"|"INDIVIDUAL"; unlimited?:boolean;
 };
 type ActiveSession = {
   id:string; ranking_id:string; owner_id:string; host_id:string|null; game_mode:string; status:string; config:Record<string,unknown>;
@@ -42,8 +43,8 @@ type ResultSnapshot = Record<string,unknown>;
 const defaults:WizardConfig = {
   generations:[1,2,3,4,5,6,7,8,9],types:[],
   specialSections:{mega:false,legendary:false,mythical:false,ultraBeast:false,paradox:false},
-  showDexNumber:false,showType:false,spellingHelp:true,shadows:null,
-  sortOrder:"RANDOM",durationMinutes:30,customMinutes:"",mode:"SOLO",
+  showDexNumber:true,showType:false,spellingHelp:true,shadows:false,
+  sortOrder:"POKEDEX",durationMinutes:0,customMinutes:"",mode:"SOLO",unlimited:true,
 };
 const specialLabels:Record<keyof SpecialSections,string> = {
   mega:"Mega",legendary:"Leggendari",mythical:"Mitici",ultraBeast:"Ultracreature",paradox:"Paradosso",
@@ -72,9 +73,9 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
   const toggleType=(type:string)=>update({types:config.types.includes(type)?config.types.filter(x=>x!==type):[...config.types,type]});
   const toggleSpecial=(key:keyof SpecialSections)=>update({specialSections:{...config.specialSections,[key]:!config.specialSections[key]}});
   const canContinue=step!==0||config.generations.length>0;
-  const canStart=catalogReady && config.shadows!==null && mainSpecies.length>0 &&
-    (config.durationMinutes!==0 || (Number(config.customMinutes)>=1 && Number(config.customMinutes)<=1440));
-  const start=()=>{setError("");startTransition(async()=>{try{await onStart({...config,durationMinutes:config.durationMinutes===0?Number(config.customMinutes):config.durationMinutes});}catch(e){setError(e instanceof Error?e.message:"Non è stato possibile avviare la partita.");}});};
+  const canStart=catalogReady && mainSpecies.length>0 &&
+    (config.durationMinutes===0 || (config.durationMinutes===-1 && Number(config.customMinutes)>=1 && Number(config.customMinutes)<=1440));
+  const start=()=>{setError("");startTransition(async()=>{try{await onStart({...config,durationMinutes:config.durationMinutes===-1?Number(config.customMinutes):config.durationMinutes,unlimited:config.durationMinutes===0});}catch(e){setError(e instanceof Error?e.message:"Non è stato possibile avviare la partita.");}});};
 
   return (
     <section className="pokemon-nae-wizard">
@@ -93,13 +94,13 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
         <p className="pokemon-nae-help">Seleziona una o più generazioni. Selezionando anche i tipi, il catalogo applica l&apos;intersezione tra generazioni e tipi.</p>
         <div className="pokemon-nae-generation-grid">{GENERATION_LABELS.map((label,index)=><button type="button" key={label} onClick={()=>toggleGeneration(index+1)} className={config.generations.includes(index+1)?"is-selected":""}><small>GENERAZIONE</small><strong>{label}</strong><span>{catalog.species.filter(item=>item.generation===index+1).length} specie</span></button>)}</div>
         <div className="pokemon-nae-subheading"><strong>Tipi Pokémon</strong><span>{config.types.length?config.types.length+" selezionati":"Nessun filtro"}</span></div>
-        <div className="pokemon-nae-type-grid">{POKEMON_TYPES.map(type=><button type="button" key={type} onClick={()=>toggleType(type)} className={config.types.includes(type)?"is-selected":""}>{POKEMON_TYPE_LABELS[type]}</button>)}</div>
+        <div className="pokemon-nae-type-grid pokemon-nae-type-grid-visual">{POKEMON_TYPES.map(type=><button type="button" key={type} onClick={()=>toggleType(type)} className={config.types.includes(type)?"is-selected":""}><img src={getPokemonTypeIconUrl(type)} alt="" loading="lazy"/><span>{POKEMON_TYPE_LABELS[type]}</span></button>)}</div>
         <div className="pokemon-nae-inline-actions"><button type="button" onClick={()=>update({generations:[1,2,3,4,5,6,7,8,9]})}>Tutte le generazioni</button><button type="button" onClick={()=>update({types:[]})}>Rimuovi filtro tipi</button></div>
       </section>}
 
       {step===1&&<section className="pokemon-nae-wizard-panel">
         <span className="pokemon-page-eyebrow">02 · SEZIONI SPECIALI</span><h2>Vuoi esplorare anche le forme speciali?</h2>
-        <p className="pokemon-nae-help">Le sezioni mostrano soltanto specie già incluse nel catalogo principale. Scoprire la specie sblocca le rappresentazioni associate senza assegnare punti aggiuntivi.</p>
+        <div className="pokemon-nae-special-intro"><span><Sparkles size={18}/></span><div><strong>Una scoperta, tutte le sue forme</strong><p>Le sezioni speciali raccolgono soltanto specie già presenti nel catalogo principale. Quando riconosci una specie, sblocchi anche le sue rappresentazioni associate: non sono scoperte separate e non assegnano punti extra.</p></div></div>
         <div className="pokemon-nae-special-grid">{(Object.keys(specialLabels) as (keyof SpecialSections)[]).map(key=><label key={key} className={"pokemon-nae-option"+(config.specialSections[key]?" is-selected":"")+(counts[key]===0?" is-disabled":"")}>
           <input type="checkbox" checked={config.specialSections[key]} disabled={counts[key]===0} onChange={()=>toggleSpecial(key)}/>
           <span><strong>{specialLabels[key]}</strong><small>{counts[key]} specie disponibili</small></span><span className="pokemon-nae-option-check"><Check size={14}/></span>
@@ -124,16 +125,16 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
       {step===3&&<section className="pokemon-nae-wizard-panel">
         <span className="pokemon-page-eyebrow">04 · VISUALIZZAZIONE</span><h2>Come vuoi ordinare la griglia?</h2>
         <div className="pokemon-nae-sort-grid">
-          <button type="button" onClick={()=>update({sortOrder:"RANDOM"})} className={config.sortOrder==="RANDOM"?"is-selected":""}><Sparkles size={19}/><strong>Casuale</strong><small>Ordine diverso e imprevedibile</small><em>Predefinito</em></button>
-          <button type="button" onClick={()=>update({sortOrder:"POKEDEX"})} className={config.sortOrder==="POKEDEX"?"is-selected":""}><Grid3X3 size={19}/><strong>Numero Pokédex</strong><small>Ordine crescente nazionale</small></button>
+          <button type="button" onClick={()=>update({sortOrder:"RANDOM"})} className={config.sortOrder==="RANDOM"?"is-selected":""}><Sparkles size={19}/><strong>Casuale</strong><small>Ordine diverso e imprevedibile</small></button>
+          <button type="button" onClick={()=>update({sortOrder:"POKEDEX"})} className={config.sortOrder==="POKEDEX"?"is-selected":""}><Grid3X3 size={19}/><strong>Numero Pokédex</strong><small>Ordine crescente nazionale</small><em>Predefinito</em></button>
           <button type="button" onClick={()=>update({sortOrder:"TYPE"})} className={config.sortOrder==="TYPE"?"is-selected":""}><ChevronDown size={19}/><strong>Per tipo</strong><small>Specie raggruppate per tipo</small></button>
         </div>
       </section>}
 
       {step===4&&<section className="pokemon-nae-wizard-panel">
         <span className="pokemon-page-eyebrow">05 · DURATA</span><h2>Quanto tempo hai?</h2>
-        <div className="pokemon-nae-duration-grid">{[30,60,90].map(value=><button type="button" key={value} onClick={()=>update({durationMinutes:value})} className={config.durationMinutes===value?"is-selected":""}><strong>{value}</strong><small>minuti</small></button>)}<button type="button" onClick={()=>update({durationMinutes:0})} className={config.durationMinutes===0?"is-selected":""}><strong>Custom</strong><small>personalizzata</small></button></div>
-        {config.durationMinutes===0&&<label className="pokemon-nae-custom-duration">Durata in minuti<input type="number" min="1" max="1440" value={config.customMinutes} onChange={e=>update({customMinutes:e.target.value})} placeholder="Es. 45"/></label>}
+        <div className="pokemon-nae-duration-grid"><button type="button" onClick={()=>update({durationMinutes:0})} className={config.durationMinutes===0?"is-selected":""}><strong>Illimitato</strong><small>senza timer</small><em>Predefinito</em></button>{[30,60,90].map(value=><button type="button" key={value} onClick={()=>update({durationMinutes:value})} className={config.durationMinutes===value?"is-selected":""}><strong>{value}</strong><small>minuti</small></button>)}<button type="button" onClick={()=>update({durationMinutes:-1})} className={config.durationMinutes===-1?"is-selected":""}><strong>Custom</strong><small>personalizzata</small></button></div>
+        {config.durationMinutes===-1&&<label className="pokemon-nae-custom-duration">Durata in minuti<input type="number" min="1" max="1440" value={config.customMinutes} onChange={e=>update({customMinutes:e.target.value})} placeholder="Es. 45"/></label>}
       </section>}
 
       {step===5&&<section className="pokemon-nae-wizard-panel">
@@ -156,7 +157,7 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
           <div><span>Aiuto ortografico</span><strong>{config.spellingHelp?"Attivo":"Disattivo"}</strong></div>
           <div><span>Shadows</span><strong>{config.shadows?"Silhouette":"Poké Ball"}</strong></div>
           <div><span>Ordinamento</span><strong>{config.sortOrder==="RANDOM"?"Casuale":config.sortOrder==="POKEDEX"?"Numero Pokédex":"Per tipo"}</strong></div>
-          <div><span>Durata</span><strong>{config.durationMinutes===0?config.customMinutes:config.durationMinutes} minuti</strong></div>
+          <div><span>Durata</span><strong>{config.durationMinutes===0?"Illimitato":config.durationMinutes===-1?config.customMinutes+" minuti":config.durationMinutes+" minuti"}</strong></div>
           <div><span>Modalità</span><strong>{config.mode==="SOLO"?"Solo":config.mode==="COLLABORATIVE"?"Multiplayer condiviso":"Multiplayer individuale"}</strong></div>
         </div>
         {!catalogReady&&<p className="pokemon-nae-error">Il catalogo server è in sincronizzazione. L&apos;avvio si abiliterà al termine della verifica.</p>}
@@ -177,12 +178,6 @@ function formatTime(seconds:number) {
   const safe=Math.max(0,seconds);
   return Math.floor(safe/60).toString().padStart(2,"0")+":"+Math.floor(safe%60).toString().padStart(2,"0");
 }
-function scoreMatch(species:PokemonSpecies,query:string) {
-  const q=normalizePokemonName(query);
-  const names=[species.name,species.nameEn,species.slug,...species.aliases].map(normalizePokemonName);
-  return names.some(n=>n===q)?0:names.some(n=>n.startsWith(q))?1:names.some(n=>n.includes(q))?2:3;
-}
-
 function Game({
   catalog,session,initialDiscoveries,
 }:{
@@ -204,11 +199,12 @@ function Game({
   const [activeSection,setActiveSection]=useState("gen-"+String((session.config.generations as number[]|undefined)?.[0]??1));
   const [selected,setSelected]=useState<PokemonSpecies|null>(null);
   const [hint,setHint]=useState<{nameLength:number;revealedPrefix:string;hintCount:number}|null>(null);
-  const [showSuggestions,setShowSuggestions]=useState(false);
-  const [mobileSearchOpen,setMobileSearchOpen]=useState(false);
+  const autoSubmitRef=useRef("");
+  const [collapsedGenerations,setCollapsedGenerations]=useState<Set<number>>(new Set());
   const [isFinishing,setIsFinishing]=useState(false);
   const inputRef=useRef<HTMLInputElement>(null);
   const config=session.config as WizardConfig;
+  const unlimited=session.duration_seconds===0;
   const [settingsOpen,setSettingsOpen]=useState(false);
   const {enabled:soundEnabled,setEnabled:setSoundEnabled}=usePokemonSoundPreference();
   const [visual,setVisual]=useState({shadows:config.shadows===true});
@@ -241,11 +237,11 @@ function Game({
     return()=>observer.disconnect();
   },[sectionIdsKey]);
 
-  const suggestions=query.trim().length>0?species
-    .map(item=>({item,score:scoreMatch(item,query)}))
-    .filter(row=>row.score>0)
-    .sort((a,b)=>b.score-a.score)
-    .slice(0,5).map(row=>row.item):[];
+  const exactMatch=useMemo(()=>{
+    const normalized=normalizePokemonName(query);
+    if(!normalized)return null;
+    return species.find(item=>[item.name,item.nameEn,item.slug,...item.aliases].some(name=>normalizePokemonName(name)===normalized))??null;
+  },[species,query]);
   const percent=species.length?Math.round(found.size/species.length*100):0;
   const completedGenerations=config.generations.filter(generation=>{
     const generationSpecies=baseSpecies.filter(item=>item.generation===generation);
@@ -277,10 +273,10 @@ function Game({
   },[completedGenerationKey]);
 
   useEffect(()=>{
-    if(paused||isFinishing)return;
+    if(unlimited||paused||isFinishing||!deadline)return;
     const id=window.setInterval(()=>setRemaining(Math.max(0,Math.ceil((deadline-Date.now())/1000))),250);
     return ()=>window.clearInterval(id);
-  },[deadline,paused,isFinishing]);
+  },[deadline,paused,isFinishing,unlimited]);
 
   const finish=useCallback(async(reason:string)=>{
     if(isFinishing)return;
@@ -290,12 +286,11 @@ function Game({
     router.refresh();
   },[isFinishing,router,session.id]);
 
-  useEffect(()=>{if(remaining<=0&&!paused&&!isFinishing){const id=window.setTimeout(()=>{void finish("TIMER_EXPIRED");},0);return()=>window.clearTimeout(id);}},[remaining,paused,isFinishing,finish]);
+  useEffect(()=>{if(!unlimited&&remaining<=0&&!paused&&!isFinishing){const id=window.setTimeout(()=>{void finish("TIMER_EXPIRED");},0);return()=>window.clearTimeout(id);}},[remaining,paused,isFinishing,finish,unlimited]);
 
-  const submit=async(answer:string)=>{
+  const submit=useCallback(async(answer:string)=>{
     if(!answer.trim()||pending||paused)return;
     preparePokemonAudio(soundEnabled);
-    setShowSuggestions(false);
     setPending(true);setConfirmed(false);setMessage("");
     const result=await submitNameEmAllAnswerAction(session.id,answer);
     setPending(false);
@@ -303,11 +298,11 @@ function Game({
     const data=result.data??{};
     if(data.status==="CORRECT"&&typeof data.speciesId==="number"){
       setFound(current=>new Set(current).add(data.speciesId as number));
-      setConfirmed(true);setMessage("Pokémon scoperto!");
+      setQuery("");setConfirmed(true);setMessage("Pokémon scoperto!");
       playPokemonSound("correct",soundEnabled);
       if(data.completed===true){playPokemonSound("complete",soundEnabled);void finish("CATALOG_COMPLETE");}
     }else if(data.status==="ALREADY_FOUND"){
-      setMessage("Hai già scoperto questo Pokémon!");
+      setQuery("");setMessage("Hai già scoperto questo Pokémon!");
     }else if(data.status==="INCORRECT"){
       playPokemonSound("incorrect",soundEnabled);
       setMessage("Pokémon non riconosciuto.");
@@ -316,7 +311,23 @@ function Game({
     }else if(data.status==="PAUSED"){
       setMessage("La partita è in pausa.");
     }
-  };
+  },[pending,paused,soundEnabled,session.id,finish]);
+  useEffect(()=>{
+    const normalized=normalizePokemonName(query);
+    if(!normalized||!exactMatch||pending||paused||isFinishing)return;
+    const timer=window.setTimeout(()=>{
+      if(autoSubmitRef.current===normalized)return;
+      autoSubmitRef.current=normalized;
+      if(found.has(exactMatch.id)){
+        setQuery("");
+        setMessage("Hai già scoperto questo Pokémon!");
+        return;
+      }
+      void submit(exactMatch.name);
+    },420);
+    return()=>window.clearTimeout(timer);
+  },[query,exactMatch,pending,paused,isFinishing,found,submit]);
+
 
   const togglePause=async()=>{
     if(paused)return;
@@ -329,7 +340,7 @@ function Game({
     const result=await resumeNameEmAllAction(session.id);
     if(!result.ok){setMessage(result.error??"Ripresa non disponibile.");return;}
     const date=String(result.data?.deadlineAt??"");
-    setDeadline(new Date(date).getTime());setPaused(false);setPauseOverlay(false);
+    setDeadline(date?new Date(date).getTime():0);setRemaining(Number(result.data?.remainingSeconds??0));setPaused(false);setPauseOverlay(false);
   };
   const revealHint=async()=>{
     if(!selected)return;
@@ -364,7 +375,7 @@ function Game({
       </section>}
       <div className="pokemon-nae-hud">
         <div className="pokemon-nae-hud-top">
-          <div><small>TEMPO RIMANENTE</small><strong className={remaining<60?"is-urgent":""}>{formatTime(remaining)}</strong></div>
+          <div><small>TEMPO RIMANENTE</small><strong className={!unlimited&&remaining<60?"is-urgent":""}>{unlimited?"Illimitato":formatTime(remaining)}</strong></div>
           <div><small>POKÉMON TROVATI</small><strong>{found.size.toLocaleString("it-IT")} / {species.length.toLocaleString("it-IT")}</strong></div>
           <div><small>COMPLETAMENTO</small><strong>{percent}%</strong></div>
         </div>
@@ -379,21 +390,20 @@ function Game({
           return <button type="button" key={section.id} onClick={()=>openSection(section.id)} className={[activeSection===section.id?"is-active":"",isComplete?"is-complete":"",generationCelebration===generation?"is-celebrating":""].filter(Boolean).join(" ")}>{section.label}{isComplete&&<CheckCircle2 size={11} aria-label="Completata"/>}<small>{count}/{total}</small></button>;
         })}
       </nav>
-      <div className={"pokemon-nae-search-wrap"+(mobileSearchOpen?" is-mobile-open":"")}>
-        <button type="button" className="pokemon-nae-mobile-search-toggle" onClick={()=>{setMobileSearchOpen(true);window.setTimeout(()=>inputRef.current?.focus(),0);}} aria-label="Apri la ricerca Pokémon" disabled={paused||isFinishing}><Search size={18}/><span>Cerca un Pokémon</span></button>
-        <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Pokémon non riconosciuto."?" is-wrong":"")}><Search size={17}/><input ref={inputRef} value={query} onChange={e=>{setQuery(e.target.value);setConfirmed(false);setMessage("");setShowSuggestions(true);}} onFocus={()=>setShowSuggestions(true)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();setShowSuggestions(false);void submit(query);}}} placeholder="Scrivi il nome di un Pokémon…" disabled={paused||isFinishing}/>{confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}{pending&&<LoaderCircle size={15}/>}</label><button type="button" className="pokemon-nae-mobile-search-close" onClick={()=>{setMobileSearchOpen(false);setQuery("");setShowSuggestions(false);setConfirmed(false);}} aria-label="Chiudi la ricerca"><X size={15}/></button>
-        {showSuggestions&&query.trim().length>0&&<div className="pokemon-nae-suggestions">
-          {suggestions.map(item=><button type="button" key={item.id} onClick={()=>chooseSuggestion(item)}>
-            <img src={item.spriteUrl} alt="" width={34} height={34}/><span><strong>{item.name}</strong><small>#{item.id.toString().padStart(4,"0")} · Gen. {GENERATION_LABELS[item.generation-1]}</small></span><em className={found.has(item.id)?"is-found":""}>{found.has(item.id)?"Scoperto":"Da scoprire"}</em>
-          </button>)}
-          {suggestions.length===0&&<p>Nessun Pokémon trovato. Controlla il nome o prova un altro termine</p>}
-        </div>}
+      <div className="pokemon-nae-search-wrap">
+        <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Pokémon non riconosciuto."?" is-wrong":"")}>
+          <Search size={17}/>
+          <input ref={inputRef} value={query} onChange={event=>{autoSubmitRef.current="";setQuery(event.target.value);setConfirmed(false);setMessage("");}}
+            placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false} disabled={paused||isFinishing}/>
+          {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
+          {pending&&<LoaderCircle size={15}/>}
+        </label>
         {message&&<p className={"pokemon-nae-feedback"+(confirmed?" is-correct":"")} role="status">{message}</p>}
       </div>
       <div className="pokemon-nae-catalog">
         {sections.map(section=><section id={"nae-"+section.id} className="pokemon-nae-catalog-section" key={section.id}>
-          <header><div><span className="pokemon-page-eyebrow">{section.id.startsWith("gen-")?"POKÉDEX NAZIONALE":"SEZIONE SPECIALE"}</span><h2>{section.label}</h2></div><span>{section.species.filter(s=>found.has(s.id)).length} / {section.species.length}</span></header>
-          <div className="pokemon-nae-cell-grid">
+          <header><div><span className="pokemon-page-eyebrow">{section.id.startsWith("gen-")?"POKÉDEX NAZIONALE":"SEZIONE SPECIALE"}</span><h2>{section.label}</h2></div><div className="pokemon-nae-catalog-header-actions"><span>{section.species.filter(s=>found.has(s.id)).length} / {section.species.length}</span>{section.id.startsWith("gen-")&&(()=>{const generation=Number(section.id.slice(4));const collapsed=collapsedGenerations.has(generation);return <button type="button" className="pokemon-nae-collapse-toggle" aria-expanded={!collapsed} onClick={()=>setCollapsedGenerations(current=>{const next=new Set(current);if(next.has(generation))next.delete(generation);else next.add(generation);return next;})}><ChevronDown size={14} className={collapsed?"":"is-open"}/><span>{collapsed?"Espandi":"Comprimi"}</span></button>;})()}</div></header>
+          {!section.id.startsWith("gen-")||!collapsedGenerations.has(Number(section.id.slice(4))) ? <div className="pokemon-nae-cell-grid">
             {(section.id==="special-mega"
               ? section.species.flatMap(item=>item.megaForms.map(form=>({species:item,form})))
               : section.species.map(item=>({species:item,form:null}))).map(({species:item,form})=>{
@@ -406,7 +416,7 @@ function Game({
                 {(item.forms.length>0||item.isLegendary||item.isMythical||item.isUltraBeast||item.isParadox)&&<span className="pokemon-nae-cell-indicators">{item.forms.length>0?"◇":""}{item.isLegendary?"★":""}{item.isMythical?"✦":""}{item.isUltraBeast?"◈":""}{item.isParadox?"⌁":""}</span>}
               </button>;
             })}
-          </div>
+          </div> : null}
         </section>)}
       </div>
 
@@ -593,7 +603,7 @@ export function NameEmAllExperience({activeSession,initialDiscoveries=[],latestR
     const payload={
       generations:config.generations,types:config.types,specialSections:config.specialSections,
       showDexNumber:config.showDexNumber,showType:config.showType,spellingHelp:config.spellingHelp,
-      shadows:config.shadows,sortOrder:config.sortOrder,durationMinutes:config.durationMinutes,mode:config.mode,
+      shadows:config.shadows,sortOrder:config.sortOrder,durationMinutes:config.durationMinutes,unlimited:config.durationMinutes===0||config.unlimited===true,mode:config.mode,
     };
     const result=config.mode==="SOLO"
       ? await createNameEmAllSoloAction(payload)

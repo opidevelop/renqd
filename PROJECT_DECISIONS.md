@@ -547,3 +547,31 @@ La precedente combinazione «Breathing Star + Morphing Star» è superata dalla 
 - Le decisioni 1–134 di Name ’Em All sono consolidate e chiuse: non devono essere riaperte, reinterpretate o sostituite da nuove proposte.
 - Le decisioni già approvate sono requisiti vincolanti; le scelte tecniche residue sono delegate all'assistente, salvo ambiguità realmente bloccanti.
 - Questo riferimento non introduce nuove decisioni e non modifica il contenuto del registro approvato.
+
+
+## Decisioni approvate — rifiniture Pokémon del 25 novembre 2026
+
+Le seguenti richieste sono nuove rifiniture esplicitamente richieste dall'utente. Non riaprono le decisioni 1–134 di Name ’Em All né modificano le regole di gioco già consolidate, salvo i default e i comportamenti UI qui elencati.
+
+### Ultimate Favourite
+1. Rimuovere la dicitura «Aggiungi alla matrice» da tutti i selettori; usare una microcopy neutra di selezione.
+2. Le immagini Pokémon nel selettore devono essere mostrate a colori, senza filtri che le trasformino in silhouette nere.
+3. «Preferito Gen.» è filtrato in base alle selezioni già presenti nei 18 tipi della stessa generazione. Non deve proporre specie non ancora scelte in quei tipi.
+4. «Preferiti assoluti» è una scheda/tab separata dopo la Gen. IX. Ogni categoria mostra soltanto i Pokémon già selezionati in quella stessa categoria nelle generazioni; il Preferito assoluto globale può attingere alle selezioni già presenti nelle categorie delle nove generazioni.
+
+### Name ’Em All
+1. Mostrare i loghi ufficiali dei tipi nella selezione dei tipi.
+2. La visualizzazione iniziale deve essere Poké Ball, non silhouette (Shadows disattivato).
+3. Le descrizioni informative delle sezioni speciali devono avere una presentazione dedicata e gerarchia visiva più chiara, mantenendo invariato il significato.
+4. Il numero Pokédex è visibile per default nella scheda; l'ordinamento iniziale della griglia è per numero Pokédex.
+5. «Quanto tempo hai?» include «Illimitato», selezionato per default; restano disponibili le durate temporizzate e la durata personalizzata.
+6. L'inserimento di un nome completo valido invia automaticamente la risposta dopo una breve pausa di digitazione; non è necessario premere Invio.
+7. Il campo di inserimento resta sempre visibile e sticky durante lo scorrimento del catalogo. Non mostra suggerimenti, risultati di ricerca o stato «da scoprire». Dopo una scoperta riuscita il testo viene cancellato automaticamente.
+8. Ogni scheda di generazione può essere compressa ed espansa indipendentemente.
+
+### Comportamento tecnico dell'opzione Illimitato
+- Il valore canonico server-side è `duration_seconds = 0`, con `deadline_at` e `remaining_seconds` null.
+- Pause, ripresa e presenza multiplayer non devono creare una scadenza artificiale per le sessioni illimitate.
+- Una partita illimitata si conclude al completamento del catalogo o tramite le azioni di uscita/terminazione già previste; non può scadere per timer.
+- Il completamento al 100% senza aiuti resta idoneo al risultato perfetto anche in modalità illimitata.
+- Nessuna modifica allo schema delle selezioni Ultimate Favourite o alle regole di assegnazione punti di Name ’Em All.

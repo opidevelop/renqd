@@ -36,6 +36,8 @@ function Grid({
   onCell?: (row: number, column: number) => void; readOnly?: boolean;
 }) {
   const [activeGeneration, setActiveGeneration] = useState(0);
+  const isOverall = activeGeneration === 9;
+  const activeRow = isOverall ? 9 : activeGeneration;
   const selected = (selection?: FavouriteSelection): Candidate | undefined => {
     if (!selection) return undefined;
     const species = catalog.species.find((item) => item.id === selection.speciesId);
@@ -54,7 +56,7 @@ function Grid({
     ) : (
       <>
         <span className="pokemon-favourite-card-empty"><Plus size={summary ? 17 : 20} /></span>
-        <span className="pokemon-favourite-card-copy"><strong>{summary ? "Da scegliere" : "Scegli Pokémon"}</strong><small>{summary ? "Preferito generale" : "Aggiungi alla matrice"}</small></span>
+        <span className="pokemon-favourite-card-copy"><strong>{summary ? "Da scegliere" : "Scegli Pokémon"}</strong><small>Seleziona un Pokémon</small></span>
       </>
     );
     const className = "pokemon-favourite-choice-card" + (candidate ? " is-filled" : "") + (summary ? " is-summary" : "") + (row === 9 && column === 21 ? " is-ultimate" : "");
@@ -71,8 +73,8 @@ function Grid({
     <div className="pokemon-favourite-layout">
       <section className="pokemon-favourite-generation-section" aria-label="Seleziona una generazione">
         <div className="pokemon-favourite-section-heading">
-          <div><span>LA TUA COLLEZIONE</span><h3>Scegli una generazione</h3><p>Visualizza e completa i preferiti di una generazione alla volta.</p></div>
-          <span className="pokemon-favourite-generation-count">{activeGeneration + 1} / 9</span>
+          <div><span>LA TUA COLLEZIONE</span><h3>Scegli una generazione</h3><p>Ogni scheda raccoglie le tue selezioni; i preferiti assoluti arrivano dopo la Gen. IX.</p></div>
+          <span className="pokemon-favourite-generation-count">{activeGeneration + 1} / 10</span>
         </div>
         <div className="pokemon-favourite-generation-tabs">
           {GENERATION_LABELS.slice(0, 9).map((generation, index) => (
@@ -81,42 +83,37 @@ function Grid({
               <strong>{["I","II","III","IV","V","VI","VII","VIII","IX"][index]}</strong><span>Gen.</span>
             </button>
           ))}
+          <button type="button" key="overall" className={isOverall ? "is-active is-overall" : "is-overall"}
+            aria-pressed={isOverall} onClick={() => setActiveGeneration(9)}>
+            <strong>✦</strong><span>Assoluti</span>
+          </button>
         </div>
       </section>
       <section className="pokemon-favourite-generation-content">
         <div className="pokemon-favourite-section-heading">
-          <div><span>GENERAZIONE {GENERATION_LABELS[activeGeneration]}</span><h3>I tuoi Pokémon preferiti</h3><p>Seleziona un Pokémon per ogni tipo e categoria speciale.</p></div>
+          <div>
+            <span>{isOverall ? "PREFERITI ASSOLUTI" : "GENERAZIONE " + GENERATION_LABELS[activeGeneration]}</span>
+            <h3>{isOverall ? "I tuoi preferiti assoluti" : "I tuoi Pokémon preferiti"}</h3>
+            <p>{isOverall
+              ? "Ogni categoria propone soltanto i Pokémon che hai già scelto in quella categoria nelle generazioni."
+              : "Il Preferito Gen. propone esclusivamente i Pokémon già selezionati nei tipi di questa generazione."}</p>
+          </div>
         </div>
         <div className="pokemon-favourite-choice-grid">
           {columns.map((name, column) => {
             const type = POKEMON_TYPES[column];
             const special = column >= 18;
+            const label = isOverall && column === 21 ? "Preferito assoluto" : name;
             return (
               <div className={"pokemon-favourite-choice-wrap" + (special ? " is-special" : "")} key={name + column}>
                 <div className="pokemon-favourite-choice-label">
                   {type ? <img src={getPokemonTypeIconUrl(type)} alt="" loading="lazy" /> : <span className="pokemon-favourite-special-icon">{["✦","◆","★","♛"][column - 18] ?? "✦"}</span>}
-                  <strong>{name}</strong>
+                  <strong>{label}</strong>
                 </div>
-                {renderCell(activeGeneration, column)}
+                {renderCell(activeRow, column, isOverall)}
               </div>
             );
           })}
-        </div>
-      </section>
-      <section className="pokemon-favourite-overall-section">
-        <div className="pokemon-favourite-section-heading">
-          <div><span>IL QUADRO COMPLETO</span><h3>I tuoi preferiti assoluti</h3><p>Le scelte generali per ogni tipo e categoria, indipendenti dalla generazione.</p></div>
-        </div>
-        <div className="pokemon-favourite-overall-grid">
-          {columns.map((name, column) => (
-            <div className="pokemon-favourite-overall-wrap" key={"overall-" + name}>
-              <div className="pokemon-favourite-choice-label">
-                {POKEMON_TYPES[column] ? <img src={getPokemonTypeIconUrl(POKEMON_TYPES[column])} alt="" loading="lazy" /> : <span className="pokemon-favourite-special-icon">✦</span>}
-                <strong>{name}</strong>
-              </div>
-              {renderCell(9, column, true)}
-            </div>
-          ))}
         </div>
       </section>
     </div>
@@ -153,18 +150,47 @@ export function UltimateFavouriteEditor({
 
   const candidates = useMemo<Candidate[]>(() => {
     if (!catalog || !active) return [];
-    const available = catalog.species.filter((species) =>
-      isPokemonCompatibleWithFavouriteCell(species, active.row, active.column)
-    );
-    const options: Candidate[] = active.column === 18
-      ? available.flatMap((species) => species.megaForms.map((form) => ({ species, form })))
-      : available.map((species) => ({ species }));
+    const fromSelection = (selection?: FavouriteSelection): Candidate | undefined => {
+      if (!selection) return undefined;
+      const species = catalog.species.find((item) => item.id === selection.speciesId);
+      if (!species) return undefined;
+      const form = selection.formId
+        ? (species.forms.find((item) => item.id === selection.formId) ?? species.megaForms.find((item) => item.id === selection.formId))
+        : undefined;
+      return { species, form };
+    };
+    let options: Candidate[];
+    if (active.row === 9) {
+      const source = active.column === 21
+        ? Array.from({ length: 9 }, (_, row) => Array.from({ length: 21 }, (_, column) => matrix[getPokemonCellKey(row, column)]))
+        : Array.from({ length: 9 }, (_, row) => [matrix[getPokemonCellKey(row, active.column)]]);
+      const unique = new Map<string, Candidate>();
+      source.flat().forEach((selection) => {
+        const candidate = fromSelection(selection);
+        if (candidate) unique.set(candidate.species.id + ":" + (candidate.form?.id ?? ""), candidate);
+      });
+      options = [...unique.values()];
+    } else if (active.column === 21) {
+      const unique = new Map<string, Candidate>();
+      Array.from({ length: 18 }, (_, column) => matrix[getPokemonCellKey(active.row, column)]).forEach((selection) => {
+        const candidate = fromSelection(selection);
+        if (candidate) unique.set(candidate.species.id + ":" + (candidate.form?.id ?? ""), candidate);
+      });
+      options = [...unique.values()];
+    } else {
+      const available = catalog.species.filter((species) =>
+        isPokemonCompatibleWithFavouriteCell(species, active.row, active.column)
+      );
+      options = active.column === 18
+        ? available.flatMap((species) => species.megaForms.map((form) => ({ species, form })))
+        : available.map((species) => ({ species }));
+    }
     const normalized = normalizePokemonName(query);
     return (normalized ? options.filter(({ species, form }) =>
       [species.name, species.nameEn, species.slug, ...(species.aliases ?? []), form?.slug ?? "", form?.label ?? ""]
         .some((name) => normalizePokemonName(name).includes(normalized))
     ) : options).slice(0, 80);
-  }, [catalog, active, query]);
+  }, [catalog, active, query, matrix]);
 
   const choose = (candidate: Candidate) => {
     if (!active) return;
@@ -248,7 +274,7 @@ export function UltimateFavouriteEditor({
                   <span className="pokemon-picker-card-copy"><strong>{name}</strong><small>#{candidate.species.id.toString().padStart(4,"0")} <i/> Gen. {GENERATION_LABELS[candidate.species.generation-1]}</small></span>
                 </button>;
               })}
-              {!candidates.length && <p>Nessun Pokémon compatibile trovato.</p>}
+              {!candidates.length && <p>Nessun Pokémon già selezionato in questa categoria. Scegli prima i preferiti nelle generazioni.</p>}
             </div>
             {matrix[getPokemonCellKey(active.row,active.column)] && <button type="button" className="pokemon-picker-remove" onClick={remove}>Rimuovi selezione</button>}
           </section>

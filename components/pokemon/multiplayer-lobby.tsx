@@ -30,10 +30,10 @@ const defaultLobbyConfig=(config:Record<string,unknown>,gameMode:string,duration
   return {
     generations,types,
     specialSections:{mega:Boolean(specials.mega),legendary:Boolean(specials.legendary),mythical:Boolean(specials.mythical),ultraBeast:Boolean(specials.ultraBeast),paradox:Boolean(specials.paradox)},
-    showDexNumber:Boolean(config.showDexNumber),showType:Boolean(config.showType),
-    spellingHelp:config.spellingHelp!==false,shadows:typeof config.shadows==="boolean"?config.shadows:null,
-    sortOrder:config.sortOrder==="POKEDEX"||config.sortOrder==="TYPE"?config.sortOrder:"RANDOM",
-    durationMinutes:Math.max(1,Number(config.durationMinutes)||Math.round(durationSeconds/60)),
+    showDexNumber:config.showDexNumber!==false,showType:Boolean(config.showType),
+    spellingHelp:config.spellingHelp!==false,shadows:typeof config.shadows==="boolean"?config.shadows:false,
+    sortOrder:config.sortOrder==="RANDOM"||config.sortOrder==="TYPE"?config.sortOrder:"POKEDEX",
+    durationMinutes:durationSeconds===0?0:Math.max(1,Number(config.durationMinutes)||Math.round(durationSeconds/60)),
     mode:gameMode==="INDIVIDUAL"?"INDIVIDUAL":"COLLABORATIVE",
   };
 };
@@ -147,7 +147,7 @@ export function NameEmAllMultiplayerLobby({
 
   return <section className="pokemon-nae-lobby">
     <header className="pokemon-nae-lobby-header">
-      <div><span className="pokemon-page-eyebrow">NAME ’EM ALL · LOBBY</span><h1>La squadra si prepara.</h1><p>{gameMode} · {Math.round(session.duration_seconds/60)} minuti · {session.catalog_species_ids.length.toLocaleString("it-IT")} Pokémon</p></div>
+      <div><span className="pokemon-page-eyebrow">NAME ’EM ALL · LOBBY</span><h1>La squadra si prepara.</h1><p>{gameMode} · {session.duration_seconds===0?"Illimitato":Math.round(session.duration_seconds/60)+" minuti"} · {session.catalog_species_ids.length.toLocaleString("it-IT")} Pokémon</p></div>
       <span className="pokemon-nae-lobby-count"><Users size={17}/>{active.length}/8</span>
     </header>
     <section className="pokemon-nae-lobby-panel">
@@ -191,7 +191,9 @@ export function NameEmAllMultiplayerLobby({
           </div>
           <div className="pokemon-nae-subheading"><strong>Ordine della griglia</strong></div>
           <div className="pokemon-nae-choice-row">{([["RANDOM","Casuale"],["POKEDEX","Pokédex"],["TYPE","Per tipo"]] as const).map(([value,label])=><button type="button" key={value} className={editConfig.sortOrder===value?"is-selected":""} onClick={()=>setEditConfig(current=>({...current,sortOrder:value}))}>{label}</button>)}</div>
-          <label className="pokemon-nae-custom-duration">Durata in minuti<input type="number" min="1" max="1440" value={editConfig.durationMinutes} onChange={event=>setEditConfig(value=>({...value,durationMinutes:Math.min(1440,Math.max(1,Number(event.target.value)||1))}))}/></label>
+          <div className="pokemon-nae-subheading"><strong>Quanto tempo hai?</strong></div>
+          <div className="pokemon-nae-choice-row"><button type="button" className={editConfig.durationMinutes===0?"is-selected":""} onClick={()=>setEditConfig(value=>({...value,durationMinutes:0}))}>Illimitato</button><button type="button" className={editConfig.durationMinutes>0?"is-selected":""} onClick={()=>setEditConfig(value=>({...value,durationMinutes:value.durationMinutes>0?value.durationMinutes:30}))}>A tempo</button></div>
+          {editConfig.durationMinutes>0&&<label className="pokemon-nae-custom-duration">Durata in minuti<input type="number" min="1" max="1440" value={editConfig.durationMinutes} onChange={event=>setEditConfig(value=>({...value,durationMinutes:Math.min(1440,Math.max(1,Number(event.target.value)||1))}))}/></label>}
           <button type="button" className="pokemon-favourite-primary" disabled={busy||isPending||editConfig.generations.length===0} onClick={saveConfig}>{busy||isPending?<LoaderCircle size={15}/>:<Check size={15}/>} Salva configurazione</button>
         </div>}
       </div>}

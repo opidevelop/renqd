@@ -1641,3 +1641,19 @@ I commit 672354d, 8f95a3c e cc21cb8 avevano pubblicato parti del gruppo UI conco
 ### Prima del rilascio Production
 
 Restano test autenticati multi-account, controllo visuale mobile/iframe con account reali e revisione IP/licenze delle risorse Pokémon. Questi sono gate di collaudo/rilascio, non indicano che si debba riscrivere l'implementazione.
+
+
+---
+
+## Aggiornamento Pokémon — 25 novembre 2026
+
+### Rifiniture richieste
+- Ultimate Favourite: selettore a colori; Preferito Gen. limitato alle selezioni dei tipi della stessa generazione; Preferiti assoluti in una scheda dopo Gen. IX, con candidati derivati dalle selezioni esistenti per categoria.
+- Name ’Em All: loghi dei tipi, Poké Ball predefinita, Pokédex visibile e ordinamento Pokédex predefiniti, sezione descrittiva speciale ridisegnata, risposta automatica su corrispondenza esatta, input sticky senza suggerimenti e schede generazione comprimibili.
+- Name ’Em All: nuova opzione Illimitato predefinita, gestita anche server-side. Migrazione remota applicata: `20261125172713_pokemon_name_em_all_unlimited_mode`; le sessioni illimitate usano `duration_seconds=0` e non hanno deadline.
+
+### Verifiche e gate
+- Dry-run transazionale delle modifiche RPC Supabase: superato; la migrazione è stata poi applicata con successo.
+- Il codice applicativo e la migrazione locale sono inclusi nell'aggiornamento GitHub in preparazione su `main`.
+- La build/deploy Production e i test funzionali autenticati desktop/mobile devono essere verificati prima di dichiarare concluse le modifiche.
+- Nessun nuovo schema o tabella è stato introdotto; la migrazione aggiorna esclusivamente le funzioni RPC esistenti per il nuovo comportamento illimitato.
