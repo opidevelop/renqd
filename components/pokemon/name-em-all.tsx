@@ -391,6 +391,11 @@ function Game({
     const date=String(result.data?.deadlineAt??"");
     setDeadline(date?new Date(date).getTime():0);setRemaining(Number(result.data?.remainingSeconds??0));setPaused(false);setPauseOverlay(false);
   };
+  useEffect(()=>{
+    if(!selected)return;
+    window.scrollTo({top:0,behavior:"smooth"});
+  },[selected]);
+
   const revealHint=async()=>{
     if(!selected)return;
     const result=await hintNameEmAllAction(session.id,selected.id);
