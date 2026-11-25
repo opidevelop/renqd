@@ -652,3 +652,9 @@ Le seguenti richieste sono nuove rifiniture esplicitamente richieste dall'utente
 2. La verifica locale della lista dei Pokémon già scoperti non deve bloccare la digitazione/invio del successivo nome: il server resta l'autorità per stabilire se la specie esatta è già stata trovata. Questo evita che Mew blocchi Mewtwo per uno stato locale non aggiornato.
 3. Dopo ogni risposta registrata, il campo viene svuotato e il focus viene ripristinato dopo il render, senza richiedere un clic manuale.
 4. Rifiutare un invito Name ’Em All deve gestire anche notifiche orfane o inviti già gestiti: la notifica viene marcata letta e rimossa dalla lista Attività. L'accettazione continua a richiedere un invito valido e pendente.
+
+
+### Name ’Em All multiplayer — riconoscimento istantaneo
+- Il matching client deve usare `normalizedAliases` del catalogo, con fallback agli alias normalizzati, e deve avvenire direttamente nell'evento `onChange`.
+- Come in Solo, la scoperta viene mostrata in modo ottimistico (cella aggiornata e input svuotato subito); la RPC multiplayer conferma il risultato e un errore server annulla l'aggiornamento provvisorio.
+- Il lock della richiesta è gestito da un ref sincrono per evitare invii duplicati prima del successivo render React.
