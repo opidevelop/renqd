@@ -127,7 +127,7 @@ export function UltimateFavouriteEditor({
   initialPublicSlug: string | null; initiallyPublished: boolean;
 }) {
   const router = useRouter();
-  const boardRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
   const [catalog, setCatalog] = useState<PokemonCatalog | null>(null);
   const [matrix, setMatrix] = useState<FavouriteMatrix>(initialMatrix);
   const [rankingId, setRankingId] = useState(initialRankingId);
@@ -219,11 +219,13 @@ export function UltimateFavouriteEditor({
   });
 
   const exportPng = async () => {
-    if (!boardRef.current) return;
+    if (!exportRef.current) return;
     try {
-      const node = boardRef.current;
-      const url = await toPng(node, { cacheBust: true, pixelRatio: 2, width: node.scrollWidth, height: node.scrollHeight,
-        style: { width: node.scrollWidth + "px", height: node.scrollHeight + "px", overflow: "visible" } });
+      const node = exportRef.current;
+      const width = node.scrollWidth;
+      const height = node.scrollHeight;
+      const url = await toPng(node, { cacheBust: true, pixelRatio: 2, width, height, canvasWidth: width * 2, canvasHeight: height * 2,
+        style: { width: width + "px", height: height + "px", overflow: "visible" } });
       const link = document.createElement("a"); link.download = "renqd-ultimate-favourite.png"; link.href = url; link.click();
       setStatus("Esportazione PNG completata.");
     } catch { setStatus("Esportazione PNG non riuscita. Riprova."); }
@@ -259,6 +261,36 @@ export function UltimateFavouriteEditor({
         <div className="pokemon-favourite-board-title"><span>RENQD × POKÉMON</span><strong>Ultimate Favourite</strong><small>La mia matrice Pokémon</small></div>
         <Grid catalog={catalog} matrix={matrix} onCell={(row,column) => { setActive({row,column}); setQuery(""); }} />
       </section>
+      <div className="pokemon-favourite-export-stage" aria-hidden="true">
+        <div className="pokemon-favourite-export-sheet" ref={exportRef}>
+          <header className="pokemon-favourite-export-heading">
+            <span>RENQD × POKÉMON</span><strong>Ultimate Favourite</strong><small>La mia matrice Pokémon · 10 generazioni · 22 categorie</small>
+          </header>
+          {Array.from({ length: 10 }, (_, row) => (
+            <section className="pokemon-favourite-export-generation" key={row}>
+              <h2>{row === 9 ? "Preferiti assoluti e di categoria" : "Generazione " + GENERATION_LABELS[row]}</h2>
+              <div className="pokemon-favourite-export-grid">
+                {columns.map((category, column) => {
+                  const selection = matrix[getPokemonCellKey(row, column)];
+                  const species = selection ? catalog.species.find(item => item.id === selection.speciesId) : undefined;
+                  const form = species && selection?.formId
+                    ? (species.forms.find(item => item.id === selection.formId) ?? species.megaForms.find(item => item.id === selection.formId))
+                    : undefined;
+                  const name = species ? species.name + (form?.label ? " " + form.label : "") : "Non selezionato";
+                  const image = form?.artworkUrl ?? species?.artworkUrl;
+                  return <article className={"pokemon-favourite-export-cell" + (species ? " is-filled" : "")} key={category + "-" + column}>
+                    <small>{row === 9 && column === 21 ? "Preferito assoluto" : row === 9 ? "Preferito · " + category : category}</small>
+                    {image ? <img src={image} alt="" crossOrigin="anonymous" loading="eager"/> : <span className="pokemon-favourite-export-empty">—</span>}
+                    <strong>{name}</strong>
+                    {species && <em>#{String(species.id).padStart(4, "0")}</em>}
+                  </article>;
+                })}
+              </div>
+            </section>
+          ))}
+          <footer>RENQD · LA TUA MATRICE POKÉMON</footer>
+        </div>
+      </div>
       {status && <p className="pokemon-favourite-status" role="status">{status}</p>}
       {active && (
         <div className="pokemon-picker-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setActive(null); }}>
