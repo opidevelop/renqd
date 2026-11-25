@@ -1840,3 +1840,48 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 ### Verifiche
 - Build Vercel e TypeScript da completare sul deployment di produzione.
 - Verifica visuale autenticata della lobby, accettazione invito in tempo reale, griglia multiplayer e chiusura sessione da completare con una sessione multiplayer reale.
+
+
+---
+
+## 2026-11-25 — Name ’Em All multiplayer, Ultimate Favourite e giochi quotidiani
+
+### Name ’Em All multiplayer
+- Rimosso dalla schermata di partita attiva il riquadro «Invita altri Allenatori» e i relativi controlli; gli inviti restano nella lobby.
+- Il campo di risposta multiplayer ora usa la stessa struttura visiva del campo Solo, riconosce subito le corrispondenze esatte senza debounce e ripristina il focus dopo una risposta valida o già scoperta.
+- Le celle multiplayer riutilizzano il markup Poké Ball/immagine e la stessa geometria responsiva della griglia Solo.
+- La scheda di aiuto e la conferma di «Termina per tutti» portano automaticamente la vista sul dialogo.
+- Diagnosi timer Illimitato: la RPC multiplayer trattava deadline_at NULL come scadenza. La condizione è stata corretta in modo che soltanto le sessioni con duration_seconds diverso da zero richiedano una deadline valida e non scaduta. La stessa regola è stata applicata alla RPC degli aiuti.
+- Migrazione Supabase applicata: 20261125193000_fix_name_em_all_multiplayer_unlimited_timer.
+- Il passaggio al risultato dopo «Termina per tutti» resta affidato alla RPC di completamento, a Realtime e al refresh server-side esistenti; non è stato ancora collaudato con più account reali.
+
+### Ultimate Favourite
+- Il PNG viene generato su una tavola fissa 1200 × 1200 px.
+- Tutte le 220 celle sono disposte in 10 righe × 22 categorie, con immagini, nomi e numeri Pokédex in formato compatto.
+
+### Doku e Connections
+- Aggiunta una RPC sicura per registrare o annullare il completamento giornaliero dell'utente autenticato e approvato, per DOKU e CONNECTIONS, usando la data Europe/Rome.
+- Nelle pagine dei due giochi è disponibile l'azione esplicita «Segna fatto» / «Annulla»; il badge dell'hub si aggiorna leggendo il record giornaliero.
+- Gli iframe visitati restano montati nel layout autenticato anche quando si naviga tra le altre pagine Renqd: il passaggio interno a un'altra pagina non smonta più il gioco e non azzera il suo stato in memoria.
+- Migrazione Supabase applicata: 20261125193500_pokemon_daily_completion_toggle.
+- Limite PokeDoku: il gioco resta un servizio esterno in iframe. La release non può correggere gli script/API del provider o un eventuale blocco di inizializzazione nel contesto iframe. Il collegamento per aprire il provider direttamente resta disponibile. Non è stato possibile verificare la griglia con una sessione browser autenticata; non dichiarare risolto lo spinner finché non è stato provato sul dispositivo dell'utente.
+
+### File modificati
+- components/pokemon/multiplayer-game.tsx
+- components/pokemon/name-em-all.tsx
+- components/pokemon/ultimate-favourite.tsx
+- components/pokemon/daily-game.tsx
+- components/pokemon/daily-frames.tsx
+- app/(platform)/layout.tsx
+- app/(platform)/pokemon.css
+- app/(platform)/pokemon/name-em-all/actions.ts
+- supabase/migrations/20261125193000_fix_name_em_all_multiplayer_unlimited_timer.sql
+- supabase/migrations/20261125193500_pokemon_daily_completion_toggle.sql
+
+### Verifiche da completare
+- TypeScript, lint e build Production sul commit cumulativo.
+- Test multiplayer autenticato con sessione Illimitata: risposta corretta, risposta duplicata, aiuto ortografico, modalità condivisa e individuale.
+- Test visivo della griglia/input desktop e mobile, modali di aiuto e «Termina per tutti» con almeno due account.
+- Verifica che Connections mantenga lo stesso board/progresso dopo navigazione interna tra pagine Renqd.
+- Verifica della griglia PokeDoku dentro l'iframe; il provider diretto funziona secondo la segnalazione dell'utente, ma l'inizializzazione embed non è stata verificata e può essere limitata dal provider/browser.
+- Verifica del PNG quadrato: tutte le 220 celle, leggibilità delle etichette e assenza di clipping.
