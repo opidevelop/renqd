@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Crown, Grid3X3, Puzzle, Sparkles } from "lucide-react";
 
@@ -19,7 +18,14 @@ export function PokemonHub() {
           <h1>Il tuo universo<br /><em>Pokémon.</em></h1>
           <p>Colleziona preferenze, mettiti alla prova e affronta le sfide quotidiane. Tutto nel tuo spazio Renqd.</p>
         </div>
-        <div className="pokemon-hub-orbit" aria-hidden="true"><span /><i /><Image src="/brand/stellina.svg" alt="" width={24} height={24} /></div>
+        <div className="pokemon-hub-hero-art" aria-hidden="true">
+          <span className="pokemon-hub-art-orbit pokemon-hub-art-orbit-one" />
+          <span className="pokemon-hub-art-orbit pokemon-hub-art-orbit-two" />
+          <img className="pokemon-hub-creature pokemon-hub-creature-one" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="" />
+          <img className="pokemon-hub-creature pokemon-hub-creature-two" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png" alt="" />
+          <img className="pokemon-hub-creature pokemon-hub-creature-three" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png" alt="" />
+          <span className="pokemon-hub-art-caption">YOUR POKÉMON UNIVERSE</span>
+        </div>
         <div className="pokemon-hub-hero-foot"><span>QUATTRO MODI DI GIOCARE</span><span>01 — 04</span></div>
       </section>
       <section className="pokemon-hub-modes">

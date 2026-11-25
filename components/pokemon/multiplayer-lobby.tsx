@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Clipboard, Crown, Link2, LoaderCircle, LogOut, Play, Send, Users, Settings, UserMinus } from "lucide-react";
 import { GENERATION_LABELS, POKEMON_TYPES, POKEMON_TYPE_LABELS } from "@/lib/pokemon/catalog";
+import { getPokemonTypeIconUrl } from "@/lib/pokemon/type-icons";
 import {
   createNameEmAllInviteLinkAction, inviteNameEmAllUsersAction, leaveNameEmAllAction,
   setNameEmAllReadyAction, startNameEmAllMultiplayerAction,
@@ -172,7 +173,7 @@ export function NameEmAllMultiplayerLobby({
           <div className="pokemon-nae-generation-grid">{GENERATION_LABELS.map((label,index)=>{const generation=index+1;const selected=editConfig.generations.includes(generation);return <button type="button" key={generation} className={selected?"is-selected":""} onClick={()=>setEditConfig(value=>({...value,generations:selected?value.generations.filter(item=>item!==generation):[...value.generations,generation].sort((a,b)=>a-b)}))}>{label}</button>;})}</div>
           <div className="pokemon-nae-inline-actions"><button type="button" onClick={()=>setEditConfig(value=>({...value,generations:[1,2,3,4,5,6,7,8,9]}))}>Tutte</button><button type="button" onClick={()=>setEditConfig(value=>({...value,generations:[]}))}>Nessuna</button></div>
           <div className="pokemon-nae-subheading"><strong>Tipi</strong><span>Vuoto = tutti i tipi</span></div>
-          <div className="pokemon-nae-type-grid">{POKEMON_TYPES.map(type=><button type="button" key={type} className={editConfig.types.includes(type)?"is-selected":""} onClick={()=>setEditConfig(value=>({...value,types:value.types.includes(type)?value.types.filter(item=>item!==type):[...value.types,type]}))}>{POKEMON_TYPE_LABELS[type]}</button>)}</div>
+          <div className="pokemon-nae-type-grid pokemon-nae-type-grid-visual">{POKEMON_TYPES.map(type=><button type="button" key={type} className={editConfig.types.includes(type)?"is-selected":""} aria-pressed={editConfig.types.includes(type)} onClick={()=>setEditConfig(value=>({...value,types:value.types.includes(type)?value.types.filter(item=>item!==type):[...value.types,type]}))}><img src={getPokemonTypeIconUrl(type)} alt="" loading="lazy"/><span>{POKEMON_TYPE_LABELS[type]}</span></button>)}</div>
           <div className="pokemon-nae-subheading"><strong>Sezioni speciali</strong></div>
           <div className="pokemon-nae-toggle-list">
             {([["mega","Mega"],["legendary","Leggendari"],["mythical","Mitici"],["ultraBeast","Ultracreature"],["paradox","Paradosso"]] as const).map(([key,label])=><label key={key}><span><strong>{label}</strong></span><input type="checkbox" checked={editConfig.specialSections[key]} onChange={event=>setEditConfig(value=>({...value,specialSections:{...value.specialSections,[key]:event.target.checked}}))}/></label>)}

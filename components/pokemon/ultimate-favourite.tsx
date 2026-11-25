@@ -10,6 +10,7 @@ import {
   getPokemonCellKey, isPokemonCompatibleWithFavouriteCell, normalizePokemonName,
 } from "@/lib/pokemon/catalog";
 import { saveUltimateFavouriteAction } from "@/app/(platform)/pokemon/ultimate-favourite/actions";
+import { getPokemonTypeIconUrl } from "@/lib/pokemon/type-icons";
 
 type Candidate = { species: PokemonSpecies; form?: PokemonForm };
 const columns = [...POKEMON_TYPES.map((type) => POKEMON_TYPE_LABELS[type]), "Mega", "Mitici", "Leggendari", "Preferito Gen."];
@@ -34,47 +35,90 @@ function Grid({
   catalog: PokemonCatalog; matrix: FavouriteMatrix;
   onCell?: (row: number, column: number) => void; readOnly?: boolean;
 }) {
+  const [activeGeneration, setActiveGeneration] = useState(0);
   const selected = (selection?: FavouriteSelection): Candidate | undefined => {
     if (!selection) return undefined;
     const species = catalog.species.find((item) => item.id === selection.speciesId);
     if (!species) return undefined;
     return { species, form: selection.formId ? (species.forms.find((item) => item.id === selection.formId) ?? species.megaForms.find((item) => item.id === selection.formId)) : undefined };
   };
+  const renderCell = (row: number, column: number, summary = false) => {
+    const key = getPokemonCellKey(row, column);
+    const candidate = selected(matrix[key]);
+    const name = candidate ? candidate.species.name + (candidate.form?.label ? " " + candidate.form.label : "") : "";
+    const body = candidate ? (
+      <>
+        <span className="pokemon-favourite-card-art"><PokemonImage candidate={candidate} size={summary ? 58 : 76} /></span>
+        <span className="pokemon-favourite-card-copy"><strong>{name}</strong><small>#{candidate.species.id.toString().padStart(4, "0")}</small></span>
+      </>
+    ) : (
+      <>
+        <span className="pokemon-favourite-card-empty"><Plus size={summary ? 17 : 20} /></span>
+        <span className="pokemon-favourite-card-copy"><strong>{summary ? "Da scegliere" : "Scegli Pokémon"}</strong><small>{summary ? "Preferito generale" : "Aggiungi alla matrice"}</small></span>
+      </>
+    );
+    const className = "pokemon-favourite-choice-card" + (candidate ? " is-filled" : "") + (summary ? " is-summary" : "") + (row === 9 && column === 21 ? " is-ultimate" : "");
+    return readOnly ? (
+      <div className={className} key={key} aria-label={labelForCell(row, column)}>{body}</div>
+    ) : (
+      <button type="button" className={className} key={key} onClick={() => onCell?.(row, column)}
+        aria-label={labelForCell(row, column) + (candidate ? ": " + name : ", seleziona un Pokémon")}>
+        {body}
+      </button>
+    );
+  };
   return (
-    <div className="pokemon-favourite-scroll">
-      <div className="pokemon-favourite-grid">
-        <div className="pokemon-favourite-corner">Generazione</div>
-        {columns.map((name, index) => <div className="pokemon-favourite-colhead" key={name + index}>{name}</div>)}
-        {Array.from({ length: 10 }, (_, row) => (
-          <div className="pokemon-favourite-row" key={row}>
-            <div className="pokemon-favourite-rowhead">
-              <strong>{row === 9 ? "Preferito della colonna" : "Generazione " + GENERATION_LABELS[row]}</strong>
-              <small>{row === 9 ? "I tuoi preferiti per categoria" : "Pokédex nazionale"}</small>
+    <div className="pokemon-favourite-layout">
+      <section className="pokemon-favourite-generation-section" aria-label="Seleziona una generazione">
+        <div className="pokemon-favourite-section-heading">
+          <div><span>LA TUA COLLEZIONE</span><h3>Scegli una generazione</h3><p>Visualizza e completa i preferiti di una generazione alla volta.</p></div>
+          <span className="pokemon-favourite-generation-count">{activeGeneration + 1} / 9</span>
+        </div>
+        <div className="pokemon-favourite-generation-tabs">
+          {GENERATION_LABELS.slice(0, 9).map((generation, index) => (
+            <button type="button" key={generation} className={activeGeneration === index ? "is-active" : ""}
+              aria-pressed={activeGeneration === index} onClick={() => setActiveGeneration(index)}>
+              <strong>{["I","II","III","IV","V","VI","VII","VIII","IX"][index]}</strong><span>Gen.</span>
+            </button>
+          ))}
+        </div>
+      </section>
+      <section className="pokemon-favourite-generation-content">
+        <div className="pokemon-favourite-section-heading">
+          <div><span>GENERAZIONE {GENERATION_LABELS[activeGeneration]}</span><h3>I tuoi Pokémon preferiti</h3><p>Seleziona un Pokémon per ogni tipo e categoria speciale.</p></div>
+        </div>
+        <div className="pokemon-favourite-choice-grid">
+          {columns.map((name, column) => {
+            const type = POKEMON_TYPES[column];
+            const special = column >= 18;
+            return (
+              <div className={"pokemon-favourite-choice-wrap" + (special ? " is-special" : "")} key={name + column}>
+                <div className="pokemon-favourite-choice-label">
+                  {type ? <img src={getPokemonTypeIconUrl(type)} alt="" loading="lazy" /> : <span className="pokemon-favourite-special-icon">{["✦","◆","★","♛"][column - 18] ?? "✦"}</span>}
+                  <strong>{name}</strong>
+                </div>
+                {renderCell(activeGeneration, column)}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+      <section className="pokemon-favourite-overall-section">
+        <div className="pokemon-favourite-section-heading">
+          <div><span>IL QUADRO COMPLETO</span><h3>I tuoi preferiti assoluti</h3><p>Le scelte generali per ogni tipo e categoria, indipendenti dalla generazione.</p></div>
+        </div>
+        <div className="pokemon-favourite-overall-grid">
+          {columns.map((name, column) => (
+            <div className="pokemon-favourite-overall-wrap" key={"overall-" + name}>
+              <div className="pokemon-favourite-choice-label">
+                {POKEMON_TYPES[column] ? <img src={getPokemonTypeIconUrl(POKEMON_TYPES[column])} alt="" loading="lazy" /> : <span className="pokemon-favourite-special-icon">✦</span>}
+                <strong>{name}</strong>
+              </div>
+              {renderCell(9, column, true)}
             </div>
-            {Array.from({ length: 22 }, (_, column) => {
-              const key = getPokemonCellKey(row, column);
-              const candidate = selected(matrix[key]);
-              const name = candidate ? candidate.species.name + (candidate.form?.label ? " " + candidate.form.label : "") : "";
-              const body = candidate ? (
-                <>
-                  <PokemonImage candidate={candidate} />
-                  <span className="pokemon-favourite-name">{name}</span>
-                  <small>#{candidate.species.id.toString().padStart(4, "0")}</small>
-                </>
-              ) : <><span className="pokemon-favourite-plus"><Plus size={16} /></span><span className="pokemon-favourite-empty">Seleziona</span></>;
-              return readOnly ? (
-                <div className={"pokemon-favourite-cell" + (candidate ? " is-filled" : "")} key={key} aria-label={labelForCell(row,column)}>{body}</div>
-              ) : (
-                <button type="button" className={"pokemon-favourite-cell" + (candidate ? " is-filled" : "")}
-                  key={key} onClick={() => onCell?.(row,column)}
-                  aria-label={labelForCell(row,column) + (candidate ? ": " + name : ", seleziona un Pokémon")}>
-                  {body}
-                </button>
-              );
-            })}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
@@ -196,12 +240,12 @@ export function UltimateFavouriteEditor({
             <header><div><span className="pokemon-page-eyebrow">SELEZIONE POKÉMON</span><h2 id="pokemon-picker-title">{labelForCell(active.row,active.column)}</h2></div>
               <button type="button" onClick={() => setActive(null)} aria-label="Chiudi"><X size={18}/></button></header>
             <label className="pokemon-picker-search"><Search size={16}/><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cerca in italiano o inglese…"/></label>
-            <div className="pokemon-picker-list">
+            <div className="pokemon-picker-grid">
               {candidates.map((candidate) => {
                 const name = candidate.species.name + (candidate.form?.label ? " " + candidate.form.label : "");
-                return <button type="button" key={candidate.species.id + "-" + (candidate.form?.id ?? "base")} onClick={() => choose(candidate)}>
-                  <PokemonImage candidate={candidate} size={46}/>
-                  <span><strong>{name}</strong><small>#{candidate.species.id.toString().padStart(4,"0")} · Gen. {GENERATION_LABELS[candidate.species.generation-1]}</small></span>
+                return <button type="button" className="pokemon-picker-card" key={candidate.species.id + "-" + (candidate.form?.id ?? "base")} onClick={() => choose(candidate)}>
+                  <span className="pokemon-picker-silhouette"><PokemonImage candidate={candidate} size={76}/></span>
+                  <span className="pokemon-picker-card-copy"><strong>{name}</strong><small>#{candidate.species.id.toString().padStart(4,"0")} <i/> Gen. {GENERATION_LABELS[candidate.species.generation-1]}</small></span>
                 </button>;
               })}
               {!candidates.length && <p>Nessun Pokémon compatibile trovato.</p>}

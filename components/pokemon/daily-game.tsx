@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExternalLink, ShieldCheck } from "lucide-react";
+import { CheckCircle2, CircleDashed, ExternalLink, ShieldCheck } from "lucide-react";
 
 export function DailyPokemonGame({
   title, description, url, completed,
@@ -21,9 +21,10 @@ export function DailyPokemonGame({
           <h1>{title}</h1>
           <p>{description}</p>
         </div>
-        <span className={"pokemon-daily-state" + (completed ? " is-complete" : "")}>
-          <i /> {completed ? "Fatto" : "Da fare"}
-        </span>
+        <div className={"pokemon-daily-state" + (completed ? " is-complete" : "") } aria-live="polite">
+          {completed ? <CheckCircle2 size={18}/> : <CircleDashed size={18}/>}
+          <span>{completed ? "Completata oggi" : "Sfida disponibile"}</span>
+        </div>
       </header>
       <div className="pokemon-daily-notice">
         <ShieldCheck size={16} />
