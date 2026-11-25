@@ -16,7 +16,7 @@ export function DailyPokemonGame({
   const toggleCompletion = () => startTransition(async () => {
     const result = await setPokemonDailyCompletionAction(gameMode, !isCompleted);
     if (!result.ok) return;
-    setIsCompleted(result.completed);
+    setIsCompleted(Boolean(result.completed));
     router.refresh();
   });
   return (
