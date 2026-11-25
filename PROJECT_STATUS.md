@@ -1907,3 +1907,10 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Dopo un rifiuto riuscito, la notifica Name ’Em All viene rimossa immediatamente dalla lista Attività.
 - Migrazione applicata: `20261125210000_fix_name_em_all_invite_decline_stale_notifications`.
 - Test end-to-end autenticato non ancora effettuato; build Production da verificare.
+
+
+## 2026-11-25 — Name ’Em All multiplayer: matching immediato
+- Allineato il riconoscimento alla modalità Solo: `normalizedAliases` del catalogo viene consultato direttamente nell'evento `onChange`.
+- La cella del Pokémon viene aggiornata e il campo svuotato immediatamente, senza attendere la RPC; la risposta server conferma la scoperta oppure provoca rollback se non valida.
+- Aggiunto un lock sincrono della richiesta per prevenire invii duplicati causati da render/eventi ravvicinati.
+- Da verificare sul deployment: Mew seguito da Mewtwo, in entrambe le modalità multiplayer, oltre a risposte duplicate e rollback in caso di risposta non valida.
