@@ -607,3 +607,13 @@ Le seguenti richieste sono nuove rifiniture esplicitamente richieste dall'utente
 2. La lobby multiplayer Name ’Em All deve adottare il linguaggio visivo della lobby multiplayer Renq: intestazione ampia e morbida, superfici pulite, partecipanti e inviti chiaramente distinti, gerarchia e spaziature coerenti. Conservare integralmente azioni, stati, permessi e configurazione esistenti.
 3. Dopo una risposta Pokémon valida registrata e dopo la cancellazione automatica del campo, il focus deve rimanere/ritornare immediatamente nell'input. L'utente deve poter digitare la risposta successiva senza cliccare di nuovo.
 4. Il timer di Name ’Em All non deve concludere la partita prima della scadenza effettiva indicata da deadline_at. Il countdown client deve derivare dalla deadline assoluta quando disponibile, non da un valore remaining_seconds eventualmente obsoleto o nullo. Aggiungere una breve tolleranza di sincronizzazione con l'orologio server prima di invocare la conclusione automatica. Le sessioni Illimitate non devono mai attivare il timer.
+
+
+## Decisioni approvate — Name ’Em All e Ultimate Favourite (25 novembre 2026)
+
+1. Il percorso di configurazione Name ’Em All deve essere ridisegnato integralmente, non soltanto ritoccato: linguaggio visivo coerente con il banner Pokémon della Home e di /pokemon, progressione leggibile, scelte e riepilogo con gerarchia chiara.
+2. La vista risultato Name ’Em All deve avere un'identità grafica nuova e condivisa tra risultato personale e risultato aperto da un Renq pubblicato. I due ingressi devono usare lo stesso componente e lo stesso sistema visivo, con il nome del proprietario nella vista pubblica.
+3. Il dialogo di pausa deve essere centrato rispetto al viewport, indipendente dalla posizione di scorrimento della pagina. Deve consentire ripresa, salvataggio del risultato parziale ed eliminazione della sessione.
+4. L'eliminazione di una partita Name ’Em All Solo attiva o in pausa elimina la sessione e i dati collegati senza creare un risultato; è consentita soltanto al proprietario della sessione. Non si applica alle sessioni multiplayer.
+5. Il dialogo di conferma delle operazioni distruttive sui Renq deve essere coerente con il linguaggio visivo Renqd e distinguere chiaramente le azioni distruttive.
+6. Ultimate Favourite deve poter pubblicare e aggiornare la matrice. La funzione database deve contare le chiavi JSONB con una funzione PostgreSQL effettivamente disponibile; gli errori RPC devono essere registrati e restituiti in forma leggibile, invece di essere tutti sostituiti da un messaggio generico.
