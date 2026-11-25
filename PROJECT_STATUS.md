@@ -1756,3 +1756,38 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 
 ### Verifiche
 - Da completare con la build Vercel e con una sessione reale: avvio partita temporizzata, digitazione di più Pokémon consecutivi senza click aggiuntivo, lobby con almeno due account e viewport mobile.
+
+
+---
+
+## 2026-11-25 — Name ’Em All redesign, pause/discard and Ultimate Favourite publish fix
+
+### Name ’Em All
+- Rebuilt the configuration wizard presentation around the same warm Pokémon hub banner language: Eeveelution artwork, stronger hero, clearer seven-step progress, warmer selection cards, better generation/type selectors, duration/mode cards and a more deliberate summary/footer.
+- Rebuilt the result screen composition. The personal result and public Renq result now share the same ResultView and hero; the public version passes the owner's display name into the same hero instead of rendering a separate legacy heading.
+- Pause, save-partial and delete dialogs are rendered in a portal attached to document.body, fixed to the viewport center and lock background scrolling. This avoids their position being constrained by a scrolled game page.
+- Added an explicit «Elimina partita» path for solo sessions. A new owner-checked RPC deletes the active/paused solo ranking and cascades its session/discoveries without creating a result. Multiplayer sessions are not eligible.
+- Added deleteNameEmAllSoloAction and confirmation before permanent deletion.
+
+### Ultimate Favourite publish failure — root cause and fix
+- Supabase PostgreSQL logs for the user's failed publish request at 2026-11-25 18:34:49.790 UTC identify SQLSTATE 42883: function jsonb_object_length(jsonb) does not exist, in renqd_save_pokemon_ultimate_favourite, line 13. This was the direct cause of the generic publish failure.
+- Replaced the unsupported call with a count over jsonb_object_keys(...), preserving the 220-cell validation and the rest of the save/publish logic.
+- Applied migration 20261125183720_fix_ultimate_favourite_publish_jsonb_object_count.
+- Added clearer RPC error logging and surfaced the returned database message in the server action.
+- Verified the replacement RPC exists and the JSONB key-count expression returns the expected count. No user ranking was created or changed by verification.
+
+### Database migrations applied
+- 20261125183720_fix_ultimate_favourite_publish_jsonb_object_count
+- 20261125183742_add_name_em_all_solo_discard_action
+
+### Files changed
+- components/pokemon/name-em-all.tsx
+- app/(platform)/pokemon.css
+- app/(platform)/platform.css
+- app/(platform)/pokemon/ultimate-favourite/actions.ts
+- app/(platform)/pokemon/name-em-all/actions.ts
+- supabase/migrations/20261125183720_fix_ultimate_favourite_publish_jsonb_object_count.sql
+- supabase/migrations/20261125183742_add_name_em_all_solo_discard_action.sql
+
+### Verification remaining
+- Production build and authenticated browser checks of all seven wizard steps, pause/discard flow, personal/public result views and an actual Ultimate Favourite publish/update.
