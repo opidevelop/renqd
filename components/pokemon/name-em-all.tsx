@@ -13,7 +13,7 @@ import { NameEmAllMultiplayerLobby } from "@/components/pokemon/multiplayer-lobb
 import type { NameEmAllParticipant } from "@/components/pokemon/multiplayer-lobby";
 import {
   ArrowDownToLine, ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronDown, Eye, EyeOff, Settings,
-  Grid3X3, HelpCircle, LoaderCircle, Pause, Play, Search, Sparkles, X,
+  Grid3X3, HelpCircle, LoaderCircle, Pause, Play, Sparkles, X,
 } from "lucide-react";
 import {
   GENERATION_LABELS, POKEMON_TYPE_LABELS, POKEMON_TYPES,
@@ -391,7 +391,6 @@ function Game({
       </nav>
       <div className="pokemon-nae-search-wrap">
         <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Pokémon non riconosciuto."?" is-wrong":"")}>
-          <Search size={17}/>
           <input ref={inputRef} value={query} onChange={event=>{autoSubmitRef.current="";setQuery(event.target.value);setConfirmed(false);setMessage("");}}
             placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false} disabled={paused||isFinishing}/>
           {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
