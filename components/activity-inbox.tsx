@@ -42,8 +42,8 @@ export function ActivityInbox({notifications}:{notifications:Notice[]}){
   try{
    const result=await respondNameEmAllInviteAction(inviteId,accept);
    if(!result.ok)throw new Error(result.error??"Non è stato possibile rispondere all’invito.");
-   setItems(current=>current.map(item=>item.id===notificationId?{...item,read_at:new Date().toISOString(),payload:{...item.payload,response:accept?"ACCEPTED":"DECLINED"}}:item));
-   if(accept)router.push("/pokemon/name-em-all");
+   if(accept){setItems(current=>current.map(item=>item.id===notificationId?{...item,read_at:new Date().toISOString(),payload:{...item.payload,response:"ACCEPTED"}}:item));router.push("/pokemon/name-em-all");}
+   else{setItems(current=>current.filter(item=>item.id!==notificationId));}
   }catch(e){setError(e instanceof Error?e.message:"Errore.");}finally{setBusy(null);}
  }
  async function respondInvite(inviteId:string,accept:boolean,notificationId:string){
