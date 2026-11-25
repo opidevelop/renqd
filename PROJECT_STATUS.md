@@ -1712,3 +1712,11 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Verifica SQL successiva: `CHECK ((duration_seconds = 0) OR (duration_seconds >= 60 AND duration_seconds <= 86400))`.
 - La migrazione corrispondente è versionata in `supabase/migrations/20261125181037_pokemon_name_em_all_unlimited_duration_check.sql`.
 - Da verificare nel deployment: build, anteprime Grade con elementi musicali reali, esportazione PNG completa e creazione lobby in entrambe le modalità multiplayer. La verifica funzionale multi-account non può essere dedotta dal solo stato READY della build.
+
+
+### Ulteriori verifiche e correzioni del 25 novembre
+- La schermata di configurazione mostrava anche un secondo difetto: il controllo `canStart` consentiva soltanto Illimitato e Custom, nonostante l'interfaccia offrisse preset da 30, 60 e 90 minuti. Ora i tre preset sono ammessi e il pulsante di avvio è coerente con le opzioni mostrate.
+- Build Vercel del commit `c1ceead9440d62f42b1ee8d5280fbfc54041a881`: READY, TypeScript completato e route Pokémon incluse.
+- Alias production assegnati: `renqd.app`, `www.renqd.app`, `renqd.vercel.app`.
+- Runtime log error/fatal della nuova deployment: nessun evento trovato.
+- Non è stato possibile completare un test reale con due account distinti per invito, ready e avvio partita. Il fix database e la build sono verificati; il flusso multiplayer va confermato con un test utente effettivo.
