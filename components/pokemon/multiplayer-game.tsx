@@ -243,12 +243,12 @@ export function PokemonNameEmAllMultiplayerGame({
     const refocusInput=()=>window.requestAnimationFrame(()=>inputRef.current?.focus());
     if(typeof data.speciesId==="number"&&["CORRECT","CATALOG_COMPLETE","PLAYER_COMPLETE","ALL_COMPLETED"].includes(String(data.status))){
       setFound(current=>new Set(current).add(Number(data.speciesId)));
-      setQuery("");setConfirmed(true);setSelected(null);setHint(null);
+      setQuery("");autoSubmitRef.current="";setConfirmed(true);setSelected(null);setHint(null);
       playPokemonSound("correct",soundEnabled);
       refocusInput();
     }
     if(data.status==="WRONG"){setConfirmed(false);playPokemonSound("incorrect",soundEnabled);setMessage("Non è una risposta valida per questo catalogo.");return;}
-    if(data.status==="ALREADY_FOUND"){setQuery("");setConfirmed(false);refocusInput();const discovererId=shared&&typeof data.speciesId==="number"?discoveryById[String(data.speciesId)]:null;const discoverer=discovererId?participants.find(player=>player.userId===discovererId):null;const discovererName=typeof data.discoveredByName==="string"?data.discoveredByName:discoverer?.displayName;setMessage(shared?(discovererName?"Già indovinato da "+discovererName:"Questo Pokémon è già stato scoperto."):"Hai già scoperto questo Pokémon!");return;}
+    if(data.status==="ALREADY_FOUND"){setQuery("");autoSubmitRef.current="";setConfirmed(false);refocusInput();const discovererId=shared&&typeof data.speciesId==="number"?discoveryById[String(data.speciesId)]:null;const discoverer=discovererId?participants.find(player=>player.userId===discovererId):null;const discovererName=typeof data.discoveredByName==="string"?data.discoveredByName:discoverer?.displayName;setMessage(shared?(discovererName?"Già indovinato da "+discovererName:"Questo Pokémon è già stato scoperto."):"Hai già scoperto questo Pokémon!");return;}
     if(data.status==="PAUSED"){setSession(current=>({...current,status:"PAUSED"}));setMessage("La partita è in pausa.");return;}
     if(data.status==="TIME_EXPIRED"){await finish("TIMER_EXPIRED");return;}
     if(data.status==="PLAYER_COMPLETE"){setConfirmed(true);playPokemonSound("complete",soundEnabled);setPlayerCompleted(true);setMessage("Hai completato il tuo catalogo. Attendi gli altri Allenatori.");return;}
@@ -263,13 +263,17 @@ export function PokemonNameEmAllMultiplayerGame({
     if(!normalized||!exactMatch||pending||playerCompleted||session.status!=="ACTIVE"||countdown>0)return;
     if(autoSubmitRef.current===normalized)return;
     autoSubmitRef.current=normalized;
-    if(found.has(exactMatch.id)){
-      setQuery("");
-      setMessage("Questo Pokémon è già stato scoperto.");
-      return;
-    }
+    // The server decides whether this exact species was already found.
+    // Do not use the local found set here: after finding Mew, a stale render
+    // must not block the next exact answer (for example Mewtwo).
     void submit(exactMatch.name);
-  },[query,exactMatch,pending,playerCompleted,session.status,countdown,found,submit]);
+  },[query,exactMatch,pending,playerCompleted,session.status,countdown,submit]);
+  useEffect(()=>{
+    if(!pending&&!query&&session.status==="ACTIVE"&&!playerCompleted&&countdown===0){
+      const frame=window.requestAnimationFrame(()=>inputRef.current?.focus());
+      return()=>window.cancelAnimationFrame(frame);
+    }
+  },[pending,query,session.status,playerCompleted,countdown]);
 
 
   useEffect(()=>{
