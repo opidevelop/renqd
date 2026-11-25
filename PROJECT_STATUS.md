@@ -1791,3 +1791,13 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 
 ### Verification remaining
 - Production build and authenticated browser checks of all seven wizard steps, pause/discard flow, personal/public result views and an actual Ultimate Favourite publish/update.
+
+
+### Production release
+- Production deployment: dpl_A6zSTFZzSbfEDBJvzR28YgGb6o2j
+- Commit: 752c1a0bc8cf835550f7b86a514d08feb67e2e2a
+- Vercel target: production; status READY; aliases include renqd.app and www.renqd.app.
+- Build completed successfully (Next.js compile and TypeScript checks).
+- Runtime error scan for the deployment returned no error/fatal logs.
+- A first build attempt failed on a literal escaped newline introduced in the Ultimate Favourite action; the source was corrected and the subsequent production build passed.
+- Authenticated end-to-end browser verification is still outstanding. In particular, test a real published Ultimate Favourite update, solo pause/delete, and both private and public result screens.
