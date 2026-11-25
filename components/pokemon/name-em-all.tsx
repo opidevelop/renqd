@@ -356,7 +356,6 @@ function Game({
     setActiveSection(id);
     document.getElementById("nae-"+id)?.scrollIntoView({behavior:"smooth",block:"start"});
   };
-  const chooseSuggestion=(item:PokemonSpecies)=>{setShowSuggestions(false);void submit(item.name);};
   const discoveredName=(id:number)=>found.has(id);
   const selectedForms=selected?.forms??[];
 
