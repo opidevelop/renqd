@@ -424,7 +424,7 @@ export function PokemonNameEmAllMultiplayerGame({
               {(item.forms.length>0||item.isLegendary||item.isMythical||item.isUltraBeast||item.isParadox)&&<span className="pokemon-nae-cell-indicators">{item.forms.length>0?"◇":""}{item.isLegendary?"★":""}{item.isMythical?"✦":""}{item.isUltraBeast?"◈":""}{item.isParadox?"⌁":""}</span>}
               {shared&&isFound&&discoverer&&<span className="pokemon-nae-cell-discoverer" title={"Scoperto da "+discoverer.displayName}>{discoverer.avatarUrl?<img src={discoverer.avatarUrl} alt=""/>:discoverer.displayName.slice(0,1).toUpperCase()}</span>}
             </button>;
-          })}</div>
+          })}</div> : null}
         </section>;
       })}
     </div>
