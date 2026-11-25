@@ -624,3 +624,15 @@ Le seguenti richieste sono nuove rifiniture esplicitamente richieste dall'utente
 1. La lobby multiplayer Name ’Em All deve usare la palette blu notte/blu/azzurro già approvata per tutta la sezione Pokémon, con gerarchia grafica coerente con il banner Pokémon. La modifica è solo visiva: flussi, azioni, permessi, stati e configurazioni multiplayer restano invariati.
 2. Nella pagina pubblica di un Renq Name ’Em All, la conversazione/commenti deve essere presentata in un contenitore boxed, centrato e con larghezza massima leggibile, non esteso a tutta la viewport.
 3. La pagina pubblica del risultato Name ’Em All deve includere un'azione visibile «Torna al profilo», diretta al profilo dell'autore del Renq; per il proprietario deve puntare al proprio profilo.
+
+
+## Decisioni approvate — rifinitura lobby e multiplayer Name ’Em All (25 novembre 2026)
+
+1. Nella lobby, lo sfondo celeste deve coprire tutta l'area contenuti della piattaforma, lasciando invariati header superiore e menu laterale. Il banner deve includere Piplup.
+2. La lista partecipanti è verticale: ogni partecipante occupa una riga completa, con nome leggibile anche su due righe e senza comprimere la riga per adattarla ad altri partecipanti.
+3. L'esito dell'invio inviti deve essere molto visibile, in particolare il conteggio degli inviti inviati.
+4. Le icone dei tipi nello step Catalogo devono mantenere dimensioni grandi e leggibili.
+5. Tutte le sezioni speciali (Mega, Leggendari, Mitici, Ultracreature e Paradosso) sono selezionate per impostazione predefinita.
+6. Le modalità multiplayer condiviso e individuale devono avere card ad alto contrasto, con descrizioni leggibili e differenze funzionali esplicite.
+7. La lobby aggiorna automaticamente i partecipanti quando un invito viene accettato, usando Realtime e un aggiornamento periodico di sicurezza.
+8. La griglia multiplayer deve riutilizzare la stessa struttura di catalogo e la stessa griglia responsive a colonne della modalità Solo. La chiusura «Termina per tutti» deve portare ogni partecipante al risultato salvato, senza richiedere un refresh manuale.
