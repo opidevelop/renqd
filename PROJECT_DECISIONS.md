@@ -617,3 +617,10 @@ Le seguenti richieste sono nuove rifiniture esplicitamente richieste dall'utente
 4. L'eliminazione di una partita Name ’Em All Solo attiva o in pausa elimina la sessione e i dati collegati senza creare un risultato; è consentita soltanto al proprietario della sessione. Non si applica alle sessioni multiplayer.
 5. Il dialogo di conferma delle operazioni distruttive sui Renq deve essere coerente con il linguaggio visivo Renqd e distinguere chiaramente le azioni distruttive.
 6. Ultimate Favourite deve poter pubblicare e aggiornare la matrice. La funzione database deve contare le chiavi JSONB con una funzione PostgreSQL effettivamente disponibile; gli errori RPC devono essere registrati e restituiti in forma leggibile, invece di essere tutti sostituiti da un messaggio generico.
+
+
+## Decisioni approvate — lobby Name ’Em All e risultato pubblico (25 novembre 2026)
+
+1. La lobby multiplayer Name ’Em All deve usare la palette blu notte/blu/azzurro già approvata per tutta la sezione Pokémon, con gerarchia grafica coerente con il banner Pokémon. La modifica è solo visiva: flussi, azioni, permessi, stati e configurazioni multiplayer restano invariati.
+2. Nella pagina pubblica di un Renq Name ’Em All, la conversazione/commenti deve essere presentata in un contenitore boxed, centrato e con larghezza massima leggibile, non esteso a tutta la viewport.
+3. La pagina pubblica del risultato Name ’Em All deve includere un'azione visibile «Torna al profilo», diretta al profilo dell'autore del Renq; per il proprietario deve puntare al proprio profilo.
