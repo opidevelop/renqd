@@ -688,10 +688,11 @@ export function NameEmAllExperience({activeSession,initialDiscoveries=[],latestR
 }
 
 
-export function PokemonNameEmAllPublicResultView({result,ownerName,social,isOwner=false}:{result:ResultSnapshot;ownerName:string;isOwner?:boolean;social?:{rankingId:string;resultOwnerId:string;initialLiked:boolean;initialLikeCount:number;initialLikers:import("@/components/pokemon/result-social").PokemonResultLiker[];initialComments:import("@/components/pokemon/result-social").PokemonResultComment[];currentUserId:string;canLike:boolean;canComment:boolean;isOwner:boolean}}) {
+export function PokemonNameEmAllPublicResultView({result,ownerName,social,isOwner=false,profileHref="/profile"}:{result:ResultSnapshot;ownerName:string;isOwner?:boolean;profileHref?:string;social?:{rankingId:string;resultOwnerId:string;initialLiked:boolean;initialLikeCount:number;initialLikers:import("@/components/pokemon/result-social").PokemonResultLiker[];initialComments:import("@/components/pokemon/result-social").PokemonResultComment[];currentUserId:string;canLike:boolean;canComment:boolean;isOwner:boolean}}) {
   const [catalog,setCatalog]=useState<PokemonCatalog|null>(null);
   useEffect(()=>{let alive=true;fetch("/data/pokemon/catalog.json").then(response=>response.json()).then((data:PokemonCatalog)=>{if(alive)setCatalog(data);}).catch(()=>{});return()=>{alive=false;};},[]);
   return <main className="pokemon-page pokemon-nae-result-public">
+    <Link href={profileHref} className="pokemon-nae-public-profile-back"><ArrowLeft size={16}/> Torna al profilo</Link>
     <ResultView result={{...result,ownerName}} catalog={catalog} canManageVisibility={isOwner}/>
     {social&&<PokemonResultSocial {...social}/>}
   </main>;
