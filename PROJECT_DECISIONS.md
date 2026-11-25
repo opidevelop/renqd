@@ -599,3 +599,11 @@ Le seguenti richieste sono nuove rifiniture esplicitamente richieste dall'utente
 ### Limiti tecnici esterni
 - PokeDoku e Pokennection sono servizi di terze parti incorporati via iframe. Renqd può controllare il contenitore e offrire l'apertura diretta, ma non può correggere il codice, gli script, le API o le policy di embedding dei domini originali.
 - Se il gioco originale non inizializza la griglia in un iframe, l'apertura diretta sul dominio del provider è il fallback corretto; non aggirare CSP/X-Frame-Options né usare proxy per rimuovere tali protezioni.
+
+
+## Decisioni approvate — rifinitura Name ’Em All (25 novembre 2026)
+
+1. Nello step «Quanto tempo hai?» i cinque preset (Illimitato, 30, 60, 90 minuti e Custom) devono avere uguale larghezza e altezza e restare allineati su un'unica riga nei layout desktop; su schermi stretti è ammesso il riadattamento responsivo.
+2. La lobby multiplayer Name ’Em All deve adottare il linguaggio visivo della lobby multiplayer Renq: intestazione ampia e morbida, superfici pulite, partecipanti e inviti chiaramente distinti, gerarchia e spaziature coerenti. Conservare integralmente azioni, stati, permessi e configurazione esistenti.
+3. Dopo una risposta Pokémon valida registrata e dopo la cancellazione automatica del campo, il focus deve rimanere/ritornare immediatamente nell'input. L'utente deve poter digitare la risposta successiva senza cliccare di nuovo.
+4. Il timer di Name ’Em All non deve concludere la partita prima della scadenza effettiva indicata da deadline_at. Il countdown client deve derivare dalla deadline assoluta quando disponibile, non da un valore remaining_seconds eventualmente obsoleto o nullo. Aggiungere una breve tolleranza di sincronizzazione con l'orologio server prima di invocare la conclusione automatica. Le sessioni Illimitate non devono mai attivare il timer.
