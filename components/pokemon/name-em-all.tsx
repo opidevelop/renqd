@@ -110,7 +110,7 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
 
       {step===2&&<section className="pokemon-nae-wizard-panel">
         <span className="pokemon-page-eyebrow">03 · DIFFICOLTÀ</span><h2>Imposta il livello di aiuto.</h2>
-        <p className="pokemon-nae-help">Le impostazioni suggerite nascondono numero Pokédex e tipo, mantenendo attivo l&apos;aiuto ortografico.</p>
+        <div className="pokemon-nae-guidance"><span className="pokemon-nae-guidance-icon"><HelpCircle size={18}/></span><div><strong>Impostazioni suggerite</strong><p>Numero Pokédex e tipo restano nascosti. L’aiuto ortografico rimane attivo per accompagnarti senza svelare direttamente la risposta.</p></div></div>
         <div className="pokemon-nae-toggle-list">
           <label><span><strong>Numero Pokédex</strong><small>Mostra il numero nazionale nella scheda dettaglio</small></span><input type="checkbox" checked={config.showDexNumber} onChange={e=>update({showDexNumber:e.target.checked})}/></label>
           <label><span><strong>Tipo Pokémon</strong><small>Mostra i tipi nella scheda dettaglio</small></span><input type="checkbox" checked={config.showType} onChange={e=>update({showType:e.target.checked})}/></label>
@@ -134,7 +134,7 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
 
       {step===4&&<section className="pokemon-nae-wizard-panel">
         <span className="pokemon-page-eyebrow">05 · DURATA</span><h2>Quanto tempo hai?</h2>
-        <div className="pokemon-nae-duration-grid"><button type="button" onClick={()=>update({durationMinutes:0})} className={config.durationMinutes===0?"is-selected":""}><strong>Illimitato</strong><small>senza timer</small><em>Predefinito</em></button>{[30,60,90].map(value=><button type="button" key={value} onClick={()=>update({durationMinutes:value})} className={config.durationMinutes===value?"is-selected":""}><strong>{value}</strong><small>minuti</small></button>)}<button type="button" onClick={()=>update({durationMinutes:-1})} className={config.durationMinutes===-1?"is-selected":""}><strong>Custom</strong><small>personalizzata</small></button></div>
+        <div className="pokemon-nae-duration-grid"><button type="button" onClick={()=>update({durationMinutes:0})} className={config.durationMinutes===0?"is-selected":""}><strong>Illimitato</strong><small>senza timer</small><span className="pokemon-nae-default-tag">Predefinito</span></button>{[30,60,90].map(value=><button type="button" key={value} onClick={()=>update({durationMinutes:value})} className={config.durationMinutes===value?"is-selected":""}><strong>{value}</strong><small>minuti</small></button>)}<button type="button" onClick={()=>update({durationMinutes:-1})} className={config.durationMinutes===-1?"is-selected":""}><strong>Custom</strong><small>personalizzata</small></button></div>
         {config.durationMinutes===-1&&<label className="pokemon-nae-custom-duration">Durata in minuti<input type="number" min="1" max="1440" value={config.customMinutes} onChange={e=>update({customMinutes:e.target.value})} placeholder="Es. 45"/></label>}
       </section>}
 
