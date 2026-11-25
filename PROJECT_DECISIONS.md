@@ -636,3 +636,12 @@ Le seguenti richieste sono nuove rifiniture esplicitamente richieste dall'utente
 6. Le modalità multiplayer condiviso e individuale devono avere card ad alto contrasto, con descrizioni leggibili e differenze funzionali esplicite.
 7. La lobby aggiorna automaticamente i partecipanti quando un invito viene accettato, usando Realtime e un aggiornamento periodico di sicurezza.
 8. La griglia multiplayer deve riutilizzare la stessa struttura di catalogo e la stessa griglia responsive a colonne della modalità Solo. La chiusura «Termina per tutti» deve portare ogni partecipante al risultato salvato, senza richiedere un refresh manuale.
+
+## Decisioni approvate — rifiniture multiplayer, modali ed export Pokémon (25 novembre 2026)
+
+1. Durante una partita Name ’Em All multiplayer non deve essere mostrato il blocco «Invita altri Allenatori»: gli inviti si gestiscono nella lobby, prima dell'avvio.
+2. La partita Name ’Em All multiplayer deve riprendere il più possibile la stessa esperienza Solo: stessa struttura e resa della griglia Pokédex, stesso campo di risposta, riconoscimento immediato della corrispondenza esatta e ritorno automatico del focus al campo dopo una risposta.
+3. Le sessioni multiplayer Illimitate hanno duration_seconds = 0 e deadline_at = NULL: invio delle risposte e aiuti devono considerarle senza scadenza, senza convertirle in partite scadute.
+4. Quando si apre la scheda di aiuto di un Pokémon o la conferma «Termina per tutti», la pagina deve portare automaticamente il dialogo in vista.
+5. L'esportazione PNG di Ultimate Favourite deve essere quadrata (1200 × 1200), mantenendo rappresentate tutte le 10 righe e le 22 categorie in una matrice compatta.
+6. Gli iframe originali di Doku e Connections devono restare montati durante la navigazione interna alla piattaforma, così da non azzerare inutilmente lo stato in memoria del gioco. Non usare il semplice caricamento dell'iframe per segnare una sfida come completata.
