@@ -1819,3 +1819,24 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 
 ### Verifiche
 - Da completare: build Vercel e verifica visuale autenticata della lobby e del risultato pubblico Name ’Em All, inclusi il link di ritorno e il layout mobile.
+
+
+---
+
+## 2026-11-25 — Rifinitura lobby e multiplayer Name ’Em All
+
+### Implementato
+- Lobby: wrap celeste esteso a tutta l'area contenuti della piattaforma (senza coprire topbar e sidebar), banner con Piplup, partecipanti in righe verticali a larghezza piena e messaggio di inviti inviati molto più evidente.
+- Lobby realtime: sottoscrizione Supabase Realtime agli aggiornamenti di partecipanti/sessione, con refresh di sicurezza ogni 5 secondi per riflettere subito gli inviti accettati.
+- Wizard: tutte le cinque sezioni speciali attive di default; icone dei tipi ingrandite; card modalità ridisegnate con contrasto e gerarchia più chiari.
+- Multiplayer: corretta la regola CSS che trattava le sezioni di generazione come celle di catalogo. Ora il contenitore usa una singola colonna e ogni generazione contiene una griglia Pokédex responsive a 12/9/6/4 colonne, come la modalità Solo.
+- Fine partita: l'host termina tramite RPC e aggiorna la route; i partecipanti ricevono l'aggiornamento di sessione via Realtime e passano alla vista del risultato senza refresh manuale.
+
+### File modificati
+- components/pokemon/multiplayer-lobby.tsx
+- components/pokemon/name-em-all.tsx
+- app/(platform)/pokemon.css
+
+### Verifiche
+- Build Vercel e TypeScript da completare sul deployment di produzione.
+- Verifica visuale autenticata della lobby, accettazione invito in tempo reale, griglia multiplayer e chiusura sessione da completare con una sessione multiplayer reale.
