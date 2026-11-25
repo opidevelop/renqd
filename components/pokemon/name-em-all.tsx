@@ -692,10 +692,7 @@ export function PokemonNameEmAllPublicResultView({result,ownerName,social,isOwne
   const [catalog,setCatalog]=useState<PokemonCatalog|null>(null);
   useEffect(()=>{let alive=true;fetch("/data/pokemon/catalog.json").then(response=>response.json()).then((data:PokemonCatalog)=>{if(alive)setCatalog(data);}).catch(()=>{});return()=>{alive=false;};},[]);
   return <main className="pokemon-page pokemon-nae-result-public">
-    <header className="pokemon-favourite-heading">
-      <div><span className="pokemon-page-eyebrow">RENQD × POKÉMON · NAME ’EM ALL</span><h1>Risultato di {ownerName}</h1><p>Una partita Name ’Em All registrata nel profilo Renqd.</p></div>
-    </header>
-    <ResultView result={result} catalog={catalog} canManageVisibility={isOwner}/>
+    <ResultView result={{...result,ownerName}} catalog={catalog} canManageVisibility={isOwner}/>
     {social&&<PokemonResultSocial {...social}/>}
   </main>;
 }
