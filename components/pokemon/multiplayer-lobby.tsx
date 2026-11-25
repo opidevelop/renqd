@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Check, Clipboard, Crown, Link2, LoaderCircle, LogOut, Play, Send, Users, Settings, UserMinus } from "lucide-react";
 import { GENERATION_LABELS, POKEMON_TYPES, POKEMON_TYPE_LABELS } from "@/lib/pokemon/catalog";
 import { getPokemonTypeIconUrl } from "@/lib/pokemon/type-icons";
@@ -54,6 +55,18 @@ export function NameEmAllMultiplayerLobby({
   const [isPending,startTransition]=useTransition();
   const [editing,setEditing]=useState(false);
   const [editConfig,setEditConfig]=useState<LobbyConfig>(()=>defaultLobbyConfig(session.config,session.game_mode,session.duration_seconds));
+  useEffect(()=>{
+    let alive=true;
+    const client=createClient();
+    const refresh=()=>{if(alive)router.refresh();};
+    const channel=client.channel("pokemon-name-em-all-lobby-"+session.id)
+      .on("postgres_changes",{event:"*",schema:"public",table:"pokemon_name_em_all_participants",filter:"session_id=eq."+session.id},refresh)
+      .on("postgres_changes",{event:"*",schema:"public",table:"pokemon_name_em_all_sessions",filter:"id=eq."+session.id},refresh)
+      .subscribe();
+    const poll=window.setInterval(refresh,5000);
+    return()=>{alive=false;window.clearInterval(poll);void client.removeChannel(channel);};
+  },[session.id,router]);
+
   const isHost=session.host_id===currentUserId;
   const current=participants.find(item=>item.userId===currentUserId);
   const active=participants.filter(item=>item.isActive);
@@ -148,6 +161,7 @@ export function NameEmAllMultiplayerLobby({
   return <section className="pokemon-nae-lobby multiplayer-page multiplayer-session-panel">
     <header className="pokemon-nae-lobby-header multiplayer-session-heading">
       <div className="multiplayer-session-heading-copy"><span>NAME ’EM ALL · LOBBY</span><h1>La squadra si prepara.</h1><p>{gameMode} · {session.duration_seconds===0?"Illimitato":Math.round(session.duration_seconds/60)+" minuti"} · {session.catalog_species_ids.length.toLocaleString("it-IT")} Pokémon</p></div>
+      <img className="pokemon-nae-lobby-piplup" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/393.png" alt="Piplup" aria-hidden="true"/>
       <span className="multiplayer-session-status">{active.length} / 8 Allenatori</span>
     </header>
     <section className="pokemon-nae-lobby-panel multiplayer-participants">
@@ -155,7 +169,7 @@ export function NameEmAllMultiplayerLobby({
       <div className="pokemon-nae-lobby-participants">
         {participants.filter(item=>item.isActive).map(item=><article className="multiplayer-person" key={item.userId}>
           <span className="pokemon-nae-lobby-avatar multiplayer-avatar">{item.avatarUrl?<img src={item.avatarUrl} alt=""/>:item.displayName.slice(0,1).toUpperCase()}</span>
-          <div><strong>{item.displayName}{item.userId===currentUserId?" · Tu":""}</strong><small>@{item.username||"allenatore"} · {item.isConnected?"Connesso":"In attesa"}</small></div>
+          <div className="multiplayer-person-identity"><strong>{item.displayName}{item.userId===currentUserId?" · Tu":""}</strong><small>@{item.username||"allenatore"} · {item.isConnected?"Connesso":"In attesa"}</small></div>
           <span className={"multiplayer-person-state "+(item.isReady?"state-finished":"state-pending")}>{item.isReady?<><Check size={13}/> Pronto</>:"Non pronto"}</span>
           {item.userId===session.host_id&&<span className="pokemon-nae-host-tag"><Crown size={12}/> Host</span>}
           {isHost&&item.userId!==currentUserId&&<button type="button" className="pokemon-nae-remove-participant" disabled={busy||isPending} onClick={()=>removeParticipant(item.userId,item.displayName)} aria-label={"Rimuovi "+item.displayName}><UserMinus size={15}/></button>}
@@ -216,7 +230,7 @@ export function NameEmAllMultiplayerLobby({
         {inviteLink&&<button type="button" className="pokemon-favourite-secondary" onClick={copyLink}><Clipboard size={15}/> Copia link</button>}</div>
       {inviteLink&&<input className="pokemon-nae-lobby-link-input" readOnly value={inviteLink} onFocus={event=>event.currentTarget.select()} aria-label="Link di invito"/>}
     </section>}
-    {message&&<p className="pokemon-catalog-sync is-ready" role="status">{message}</p>}
+    {message&&<p className={"pokemon-nae-lobby-feedback"+(message.startsWith("Inviti inviati")?" is-invites-sent":"")} role="status">{message}</p>}
     {error&&<p className="pokemon-nae-error" role="alert">{error}</p>}
     <button type="button" className="pokemon-favourite-secondary pokemon-nae-lobby-leave" onClick={leave} disabled={busy||isPending}><LogOut size={15}/> Esci dalla lobby</button>
   </section>;
