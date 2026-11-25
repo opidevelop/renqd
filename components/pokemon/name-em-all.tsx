@@ -362,6 +362,13 @@ function Game({
     void submit(exactMatch.name,exactMatch);
   },[query,exactMatch,pending,paused,isFinishing,found,submit]);
 
+  useEffect(()=>{
+    if(!pauseOverlay&&!confirmExit&&!confirmDelete)return;
+    const previous=document.body.style.overflow;
+    document.body.style.overflow="hidden";
+    return()=>{document.body.style.overflow=previous;};
+  },[pauseOverlay,confirmExit,confirmDelete]);
+
   const discardGame=async()=>{
     if(deleting)return;
     setDeleting(true);setMessage("");
