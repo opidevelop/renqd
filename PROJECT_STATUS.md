@@ -1801,3 +1801,21 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Runtime error scan for the deployment returned no error/fatal logs.
 - A first build attempt failed on a literal escaped newline introduced in the Ultimate Favourite action; the source was corrected and the subsequent production build passed.
 - Authenticated end-to-end browser verification is still outstanding. In particular, test a real published Ultimate Favourite update, solo pause/delete, and both private and public result screens.
+
+
+---
+
+## 2026-11-25 — Lobby Name ’Em All e conversazione nei risultati pubblici
+
+### Modifiche
+- Lobby Name ’Em All: palette aggiornata al blu notte #101b31, blu #182d4b, blu medio #234a62 e accento #527fa4, con superfici azzurre chiare, intestazione navy con texture discreta, partecipanti e inviti riorganizzati visivamente. Nessuna modifica alle azioni o alle regole multiplayer.
+- Risultato pubblico Name ’Em All: conversazione racchiusa in una card centrata con larghezza massima di 980px, spaziature e controlli coerenti con la palette blu.
+- Aggiunto il collegamento «Torna al profilo» sopra al risultato pubblico. Per l'autore porta a /profile; per gli altri utenti porta al profilo pubblico dell'autore (/u/{username}).
+
+### File modificati
+- components/pokemon/name-em-all.tsx
+- app/r/[slug]/page.tsx
+- app/(platform)/pokemon.css
+
+### Verifiche
+- Da completare: build Vercel e verifica visuale autenticata della lobby e del risultato pubblico Name ’Em All, inclusi il link di ritorno e il layout mobile.
