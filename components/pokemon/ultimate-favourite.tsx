@@ -222,8 +222,8 @@ export function UltimateFavouriteEditor({
     if (!exportRef.current) return;
     try {
       const node = exportRef.current;
-      const width = node.scrollWidth;
-      const height = node.scrollHeight;
+      const width = 1200;
+      const height = 1200;
       const url = await toPng(node, { cacheBust: true, pixelRatio: 2, width, height, canvasWidth: width * 2, canvasHeight: height * 2,
         style: { width: width + "px", height: height + "px", overflow: "visible" } });
       const link = document.createElement("a"); link.download = "renqd-ultimate-favourite.png"; link.href = url; link.click();
