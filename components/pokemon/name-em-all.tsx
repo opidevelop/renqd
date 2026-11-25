@@ -551,7 +551,7 @@ function ResultView({result,onNewGame,catalog,canManageVisibility=false}:{result
     <header className="pokemon-nae-result-hero pokemon-hub-hero">
       <div className="pokemon-hub-hero-copy">
         <p className="pokemon-hub-kicker">RENQD × POKÉMON · NAME ’EM ALL</p>
-        <h1>{typeof result.ownerName==="string"?"La partita di "+result.ownerName:"La tua <em>sfida.</em>"}</h1>
+        <h1>{typeof result.ownerName==="string"?<>La partita di {result.ownerName}</>:<>La tua <em>sfida.</em></>}</h1>
         <p>Ogni Pokémon scoperto racconta un pezzo della tua partita. Ecco il riepilogo della sessione.</p>
       </div>
       <div className="pokemon-nae-result-characters" aria-hidden="true">
