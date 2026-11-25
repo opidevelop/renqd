@@ -949,3 +949,12 @@ button.pokemon-favourite-choice-card:hover{transform:translateY(-1px);border-col
   .pokemon-nae-catalog-header-actions{gap:7px}
   .pokemon-nae-collapse-toggle{padding:6px 8px}
 }
+
+/* Keep the answer field permanently visible on mobile; the old collapsible
+   mobile search controls are no longer part of Name 'Em All. */
+@media(max-width:680px){
+  .pokemon-nae-search-wrap:not(.is-mobile-open) .pokemon-nae-search{display:flex!important}
+  .pokemon-nae-search-wrap:not(.is-mobile-open) .pokemon-nae-mobile-search-toggle{display:none!important}
+  .pokemon-nae-multiplayer-answer:not(.is-mobile-open) .pokemon-nae-multiplayer-answer-controls{display:grid!important}
+  .pokemon-nae-multiplayer-answer:not(.is-mobile-open) .pokemon-nae-mobile-search-toggle{display:none!important}
+}
