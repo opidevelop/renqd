@@ -2,6 +2,7 @@ import "./renq-data-lifecycle.css";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PlatformShell } from "@/components/platform-shell";
+import { PokemonDailyFrames } from "@/components/pokemon/daily-frames";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import "./platform.css";
 import "../renqd-identity.css";
@@ -34,5 +35,5 @@ export default async function PlatformLayout({ children }: { children: React.Rea
   const mediaSettings=(publicProfile as {media_settings?:{avatar?:{x?:number;y?:number;zoom?:number}}}|null)?.media_settings?.avatar;
   const avatarPosition={x:Math.max(0,Math.min(100,Number(mediaSettings?.x??50))),y:Math.max(0,Math.min(100,Number(mediaSettings?.y??50)))};
   const avatarZoom=Math.max(100,Math.min(200,Number(mediaSettings?.zoom??100)));
-  return <PlatformShell userId={user.id} avatarUrl={avatarUrl} avatarPosition={avatarPosition} avatarZoom={avatarZoom} displayName={publicProfile?.display_name ?? profile.username} username={profile.username} role={profile.role}>{children}</PlatformShell>;
+  return <PlatformShell userId={user.id} avatarUrl={avatarUrl} avatarPosition={avatarPosition} avatarZoom={avatarZoom} displayName={publicProfile?.display_name ?? profile.username} username={profile.username} role={profile.role}><PokemonDailyFrames>{children}</PokemonDailyFrames></PlatformShell>;
 }
