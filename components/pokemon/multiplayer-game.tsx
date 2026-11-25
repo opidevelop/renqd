@@ -39,7 +39,6 @@ export function PokemonNameEmAllMultiplayerGame({
   const [activeSection,setActiveSection]=useState("gen-"+String(Array.isArray(initialSession.config.generations)?initialSession.config.generations[0]??1:1));
   const [query,setQuery]=useState("");
   const [confirmed,setConfirmed]=useState(false);
-  const autoSubmitRef=useRef("");
   const pendingRef=useRef(false);
   const [collapsedGenerations,setCollapsedGenerations]=useState<Set<number>>(new Set());
   const inputRef=useRef<HTMLInputElement>(null);
@@ -240,7 +239,7 @@ export function PokemonNameEmAllMultiplayerGame({
     setPending(true);setError("");setMessage("");
     if(optimisticSpecies){
       setFound(current=>new Set(current).add(optimisticSpecies.id));
-      setQuery("");autoSubmitRef.current="";
+      setQuery("");
       setConfirmed(true);setMessage("Pokémon scoperto!");
       playPokemonSound("correct",soundEnabled);
     }
@@ -255,7 +254,7 @@ export function PokemonNameEmAllMultiplayerGame({
     }
     if(typeof data.speciesId==="number"&&["CORRECT","CATALOG_COMPLETE","PLAYER_COMPLETE","ALL_COMPLETED"].includes(String(data.status))){
       setFound(current=>new Set(current).add(Number(data.speciesId)));
-      setQuery("");autoSubmitRef.current="";setConfirmed(true);setSelected(null);setHint(null);
+      setQuery("");setConfirmed(true);setSelected(null);setHint(null);
       if(!optimisticSpecies)playPokemonSound("correct",soundEnabled);
       refocusInput();
     }
@@ -264,7 +263,7 @@ export function PokemonNameEmAllMultiplayerGame({
       setConfirmed(false);playPokemonSound("incorrect",soundEnabled);setMessage("Non è una risposta valida per questo catalogo.");refocusInput();return;
     }
     if(data.status==="ALREADY_FOUND"){
-      setQuery("");autoSubmitRef.current="";setConfirmed(false);refocusInput();
+      setQuery("");setConfirmed(false);refocusInput();
       const discovererId=shared&&typeof data.speciesId==="number"?discoveryById[String(data.speciesId)]:null;
       const discoverer=discovererId?participants.find(player=>player.userId===discovererId):null;
       const discovererName=typeof data.discoveredByName==="string"?data.discoveredByName:discoverer?.displayName;
@@ -382,7 +381,7 @@ export function PokemonNameEmAllMultiplayerGame({
 
     <div className="pokemon-nae-search-wrap">
       <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Non è una risposta valida per questo catalogo."?" is-wrong":"")}>
-        <input ref={inputRef} value={query} onChange={event=>{const value=event.target.value;setQuery(value);setConfirmed(false);setMessage("");const normalized=normalizePokemonName(value);if(normalized&&!pendingRef.current&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){const match=species.find(item=>(item.normalizedAliases?.length?item.normalizedAliases:[item.name,item.nameEn,item.slug,...item.aliases].map(normalizePokemonName)).includes(normalized));if(match){autoSubmitRef.current=normalized;void submit(match.name,match);}}}}
+        <input ref={inputRef} value={query} onChange={event=>{const value=event.target.value;setQuery(value);setConfirmed(false);setMessage("");const normalized=normalizePokemonName(value);if(normalized&&!pendingRef.current&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){const match=species.find(item=>(item.normalizedAliases?.length?item.normalizedAliases:[item.name,item.nameEn,item.slug,...item.aliases].map(normalizePokemonName)).includes(normalized));if(match){void submit(match.name,match);}}}}
           placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false}
           disabled={pending||playerCompleted||session.status!=="ACTIVE"||countdown>0}/>
         {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
