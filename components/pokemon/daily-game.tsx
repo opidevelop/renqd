@@ -39,8 +39,6 @@ export function DailyPokemonGame({
           Apri in una nuova scheda <ExternalLink size={14}/>
         </a>
       </div>
-      <div className="pokemon-daily-frame-placeholder" aria-hidden="true" />
-      <p className="pokemon-daily-footnote">Il gioco è ospitato dal sito originale. Se la griglia non compare qui, aprilo direttamente nella nuova scheda.</p>
     </main>
   );
 }
