@@ -28,8 +28,9 @@ export function DailyPokemonGame({
           <p>{description}</p>
         </div>
         <div className={"pokemon-daily-state" + (isCompleted ? " is-complete" : "")} aria-live="polite">
-          {completed ? <CheckCircle2 size={18}/> : <CircleDashed size={18}/>}
-          <span>{completed ? "Completata oggi" : "Sfida disponibile"}</span>
+          {isCompleted ? <CheckCircle2 size={18}/> : <CircleDashed size={18}/>}
+          <span>{isCompleted ? "Fatto oggi" : "Non fatto"}</span>
+          <button type="button" onClick={toggleCompletion} disabled={pending} aria-label={isCompleted ? "Segna come non fatto" : "Segna come fatto"}>{pending ? <LoaderCircle size={14}/> : isCompleted ? "Annulla" : "Segna fatto"}</button>
         </div>
       </header>
       <div className="pokemon-daily-embed-toolbar">
@@ -38,16 +39,7 @@ export function DailyPokemonGame({
           Apri in una nuova scheda <ExternalLink size={14}/>
         </a>
       </div>
-      <div className="pokemon-daily-frame-wrap">
-        <iframe
-          title={title + " — gioco originale"}
-          src={url}
-          loading="eager"
-          referrerPolicy="strict-origin-when-cross-origin"
-          allow="fullscreen; autoplay; clipboard-read; clipboard-write"
-          allowFullScreen
-        />
-      </div>
+      <div className="pokemon-daily-frame-placeholder" aria-hidden="true" />
       <p className="pokemon-daily-footnote">Il gioco è ospitato dal sito originale. Se la griglia non compare qui, aprilo direttamente nella nuova scheda.</p>
     </main>
   );
