@@ -145,18 +145,18 @@ export function NameEmAllMultiplayerLobby({
     });
   };
 
-  return <section className="pokemon-nae-lobby">
-    <header className="pokemon-nae-lobby-header">
-      <div><span className="pokemon-page-eyebrow">NAME ’EM ALL · LOBBY</span><h1>La squadra si prepara.</h1><p>{gameMode} · {session.duration_seconds===0?"Illimitato":Math.round(session.duration_seconds/60)+" minuti"} · {session.catalog_species_ids.length.toLocaleString("it-IT")} Pokémon</p></div>
-      <span className="pokemon-nae-lobby-count"><Users size={17}/>{active.length}/8</span>
+  return <section className="pokemon-nae-lobby multiplayer-page multiplayer-session-panel">
+    <header className="pokemon-nae-lobby-header multiplayer-session-heading">
+      <div className="multiplayer-session-heading-copy"><span>NAME ’EM ALL · LOBBY</span><h1>La squadra si prepara.</h1><p>{gameMode} · {session.duration_seconds===0?"Illimitato":Math.round(session.duration_seconds/60)+" minuti"} · {session.catalog_species_ids.length.toLocaleString("it-IT")} Pokémon</p></div>
+      <span className="multiplayer-session-status">{active.length} / 8 Allenatori</span>
     </header>
-    <section className="pokemon-nae-lobby-panel">
-      <div className="pokemon-nae-lobby-section-title"><div><span className="pokemon-page-eyebrow">PARTECIPANTI</span><h2>Chi è in partita.</h2></div><span>{active.filter(item=>item.isReady).length} pronti</span></div>
+    <section className="pokemon-nae-lobby-panel multiplayer-participants">
+      <div className="pokemon-nae-lobby-section-title multiplayer-section-title"><div><span className="pokemon-page-eyebrow">PARTECIPANTI</span><h2>Chi è in partita.</h2></div><span>{active.filter(item=>item.isReady).length} pronti</span></div>
       <div className="pokemon-nae-lobby-participants">
-        {participants.filter(item=>item.isActive).map(item=><article key={item.userId}>
-          <span className="pokemon-nae-lobby-avatar">{item.avatarUrl?<img src={item.avatarUrl} alt=""/>:item.displayName.slice(0,1).toUpperCase()}</span>
+        {participants.filter(item=>item.isActive).map(item=><article className="multiplayer-person" key={item.userId}>
+          <span className="pokemon-nae-lobby-avatar multiplayer-avatar">{item.avatarUrl?<img src={item.avatarUrl} alt=""/>:item.displayName.slice(0,1).toUpperCase()}</span>
           <div><strong>{item.displayName}{item.userId===currentUserId?" · Tu":""}</strong><small>@{item.username||"allenatore"} · {item.isConnected?"Connesso":"In attesa"}</small></div>
-          <span className={item.isReady?"pokemon-nae-ready is-ready":"pokemon-nae-ready"}>{item.isReady?<><Check size={13}/> Pronto</>:"Non pronto"}</span>
+          <span className={"multiplayer-person-state "+(item.isReady?"state-finished":"state-pending")}>{item.isReady?<><Check size={13}/> Pronto</>:"Non pronto"}</span>
           {item.userId===session.host_id&&<span className="pokemon-nae-host-tag"><Crown size={12}/> Host</span>}
           {isHost&&item.userId!==currentUserId&&<button type="button" className="pokemon-nae-remove-participant" disabled={busy||isPending} onClick={()=>removeParticipant(item.userId,item.displayName)} aria-label={"Rimuovi "+item.displayName}><UserMinus size={15}/></button>}
         </article>)}
@@ -201,14 +201,14 @@ export function NameEmAllMultiplayerLobby({
         <button type="button" className={current?.isReady?"pokemon-favourite-secondary":"pokemon-favourite-primary"} onClick={toggleReady} disabled={busy||isPending||!current}>
           {busy||isPending?<LoaderCircle size={15}/>:<Check size={15}/>} {current?.isReady?"Non sono pronto":"Sono pronto"}
         </button>
-        {isHost&&<button type="button" className="pokemon-favourite-primary" onClick={start} disabled={busy||isPending||!allReady}>
+        {isHost&&<button type="button" className="pokemon-favourite-primary multiplayer-primary" onClick={start} disabled={busy||isPending||!allReady}>
           {busy||isPending?<LoaderCircle size={15}/>:<Play size={15}/>} Avvia partita
         </button>}
       </div>
       {isHost&&!allReady&&<p className="pokemon-nae-lobby-note">L’avvio si abiliterà quando ci saranno almeno due partecipanti e tutti saranno pronti.</p>}
     </section>
 
-    {isHost&&<section className="pokemon-nae-lobby-panel">
+    {isHost&&<section className="pokemon-nae-lobby-panel multiplayer-invite-box">
       <div className="pokemon-nae-lobby-section-title"><div><span className="pokemon-page-eyebrow">INVITI</span><h2>Chi vuoi chiamare?</h2></div><Send size={18}/></div>
       <label className="pokemon-nae-lobby-invite-label">Username Renqd <input value={usernames} onChange={event=>setUsernames(event.target.value)} placeholder="@username, un altro username…" /></label>
       <button type="button" className="pokemon-favourite-secondary" onClick={invite} disabled={busy||isPending||!usernames.trim()}><Send size={15}/> Invia inviti</button>
