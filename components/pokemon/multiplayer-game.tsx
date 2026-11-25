@@ -371,7 +371,7 @@ export function PokemonNameEmAllMultiplayerGame({
 
     <div className="pokemon-nae-search-wrap">
       <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Non è una risposta valida per questo catalogo."?" is-wrong":"")}>
-        <input ref={inputRef} value={query} onChange={event=>{autoSubmitRef.current="";setQuery(event.target.value);setConfirmed(false);setMessage("");}}
+        <input ref={inputRef} value={query} onChange={event=>{const value=event.target.value;autoSubmitRef.current="";setQuery(value);setConfirmed(false);setMessage("");const normalized=normalizePokemonName(value);if(normalized&&!pending&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){const match=species.find(item=>[item.name,item.nameEn,item.slug,...item.aliases].some(name=>normalizePokemonName(name)===normalized));if(match){autoSubmitRef.current=normalized;void submit(match.name);}}}}
           placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false}
           disabled={pending||playerCompleted||session.status!=="ACTIVE"||countdown>0}/>
         {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
