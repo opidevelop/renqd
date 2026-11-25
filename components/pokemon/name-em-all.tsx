@@ -74,7 +74,8 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
   const toggleSpecial=(key:keyof SpecialSections)=>update({specialSections:{...config.specialSections,[key]:!config.specialSections[key]}});
   const canContinue=step!==0||config.generations.length>0;
   const canStart=catalogReady && mainSpecies.length>0 &&
-    (config.durationMinutes===0 || (config.durationMinutes===-1 && Number(config.customMinutes)>=1 && Number(config.customMinutes)<=1440));
+    (config.durationMinutes===0 || [30,60,90].includes(config.durationMinutes) ||
+      (config.durationMinutes===-1 && Number(config.customMinutes)>=1 && Number(config.customMinutes)<=1440));
   const start=()=>{setError("");startTransition(async()=>{try{await onStart({...config,durationMinutes:config.durationMinutes===-1?Number(config.customMinutes):config.durationMinutes,unlimited:config.durationMinutes===0});}catch(e){setError(e instanceof Error?e.message:"Non è stato possibile avviare la partita.");}});};
 
   return (
