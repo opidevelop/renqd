@@ -1885,3 +1885,12 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Verifica che Connections mantenga lo stesso board/progresso dopo navigazione interna tra pagine Renqd.
 - Verifica della griglia PokeDoku dentro l'iframe; il provider diretto funziona secondo la segnalazione dell'utente, ma l'inizializzazione embed non è stata verificata e può essere limitata dal provider/browser.
 - Verifica del PNG quadrato: tutte le 220 celle, leggibilità delle etichette e assenza di clipping.
+
+
+### Release Production
+- Deployment: dpl_Ba7aD9RJ7pPLmBh8oh7XeD5TA7hw
+- Commit: c26faeedeaa029534b300313e6aaa99b165e20f5
+- Stato Vercel: READY, target production.
+- Alias: renqd.app, www.renqd.app e renqd.vercel.app.
+- Build Next.js e controllo TypeScript completati correttamente dopo la correzione del tipo del valore di completamento giornaliero.
+- Rimane necessaria la verifica browser autenticata dei flussi multiplayer e dell'embed PokeDoku; lo stato READY certifica il build/deploy, non il test end-to-end.
