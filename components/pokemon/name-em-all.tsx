@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toPng } from "html-to-image";
@@ -21,7 +22,7 @@ import {
 } from "@/lib/pokemon/catalog";
 import { getPokemonTypeIconUrl } from "@/lib/pokemon/type-icons";
 import {
-  createNameEmAllSoloAction, createNameEmAllMultiplayerAction, finishNameEmAllAction, hintNameEmAllAction,
+  createNameEmAllSoloAction, createNameEmAllMultiplayerAction, deleteNameEmAllSoloAction, finishNameEmAllAction, hintNameEmAllAction,
   pauseNameEmAllAction, resumeNameEmAllAction, submitNameEmAllAnswerAction, setNameEmAllResultVisibilityAction,
 } from "@/app/(platform)/pokemon/name-em-all/actions";
 
@@ -197,6 +198,8 @@ function Game({
   const [paused,setPaused]=useState(session.status==="PAUSED");
   const [pauseOverlay,setPauseOverlay]=useState(session.status==="PAUSED");
   const [confirmExit,setConfirmExit]=useState(false);
+  const [confirmDelete,setConfirmDelete]=useState(false);
+  const [deleting,setDeleting]=useState(false);
   const [activeSection,setActiveSection]=useState("gen-"+String((session.config.generations as number[]|undefined)?.[0]??1));
   const [selected,setSelected]=useState<PokemonSpecies|null>(null);
   const [hint,setHint]=useState<{nameLength:number;revealedPrefix:string;hintCount:number}|null>(null);
@@ -349,6 +352,15 @@ function Game({
     void submit(exactMatch.name,exactMatch);
   },[query,exactMatch,pending,paused,isFinishing,found,submit]);
 
+  const discardGame=async()=>{
+    if(deleting)return;
+    setDeleting(true);setMessage("");
+    const result=await deleteNameEmAllSoloAction(session.id);
+    if(!result.ok){setMessage(result.error??"Non è stato possibile eliminare la partita.");setDeleting(false);setConfirmDelete(false);return;}
+    router.replace("/pokemon/name-em-all");
+    router.refresh();
+  };
+
   const togglePause=async()=>{
     if(paused)return;
     const result=await pauseNameEmAllAction(session.id);
@@ -449,21 +461,31 @@ function Game({
       </aside>
       </div>}
 
-      {pauseOverlay&&<div className="pokemon-nae-pause-backdrop"><section className="pokemon-nae-pause-card">
-        <span className="pokemon-page-eyebrow">PARTITA IN PAUSA</span><h2>Riprendi quando vuoi.</h2><p>Il timer è fermo e la griglia non è consultabile durante la pausa.</p>
-        <strong>{formatTime(remaining)}</strong>
-        <button type="button" className="pokemon-favourite-primary" onClick={()=>void resume()}><Play size={15}/> Riprendi</button>
-        <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmExit(true)}>Salva e termina</button>
-      </section></div>}
-      {confirmExit&&<div className="pokemon-nae-pause-backdrop" role="presentation">
+      {pauseOverlay&&typeof document!=="undefined"&&createPortal(<div className="pokemon-nae-pause-backdrop" role="presentation">
+        <section className="pokemon-nae-pause-card" role="dialog" aria-modal="true" aria-labelledby="pokemon-nae-pause-title">
+          <span className="pokemon-page-eyebrow">PARTITA IN PAUSA</span><h2 id="pokemon-nae-pause-title">La partita è in pausa.</h2><p>Il timer è fermo e la griglia non è consultabile. Puoi riprendere, salvare il risultato parziale oppure eliminare questa partita.</p>
+          <strong>{formatTime(remaining)}</strong>
+          <button type="button" className="pokemon-favourite-primary" onClick={()=>void resume()}><Play size={15}/> Riprendi partita</button>
+          <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmExit(true)}>Salva e termina</button>
+          <button type="button" className="pokemon-nae-delete-game" onClick={()=>setConfirmDelete(true)}><X size={15}/> Elimina partita</button>
+        </section>
+      </div>,document.body)}
+      {confirmExit&&typeof document!=="undefined"&&createPortal(<div className="pokemon-nae-pause-backdrop" role="presentation">
         <section className="pokemon-nae-pause-card" role="alertdialog" aria-modal="true" aria-labelledby="pokemon-nae-exit-title">
-          <span className="pokemon-page-eyebrow">CONFERMA USCITA</span>
-          <h2 id="pokemon-nae-exit-title">Salvare il risultato parziale?</h2>
+          <span className="pokemon-page-eyebrow">SALVATAGGIO RISULTATO</span><h2 id="pokemon-nae-exit-title">Salvare il risultato parziale?</h2>
           <p>La partita terminerà e il risultato verrà conservato nel tuo profilo Renqd.</p>
           <button type="button" className="pokemon-favourite-primary" onClick={()=>{setConfirmExit(false);void finish("USER_EXIT");}}>Salva e termina</button>
-          <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmExit(false)}>Continua a giocare</button>
+          <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmExit(false)}>Torna alla partita</button>
         </section>
-      </div>}
+      </div>,document.body)}
+      {confirmDelete&&typeof document!=="undefined"&&createPortal(<div className="pokemon-nae-pause-backdrop" role="presentation">
+        <section className="pokemon-nae-pause-card" role="alertdialog" aria-modal="true" aria-labelledby="pokemon-nae-delete-title">
+          <span className="pokemon-page-eyebrow">ELIMINAZIONE PARTITA</span><h2 id="pokemon-nae-delete-title">Vuoi eliminare questa partita?</h2>
+          <p>La sessione e tutte le scoperte effettuate verranno eliminate. Non sarà creato alcun risultato nel profilo.</p>
+          <button type="button" className="pokemon-nae-delete-game" onClick={()=>void discardGame()} disabled={deleting}>{deleting?<LoaderCircle size={15}/>:<X size={15}/>} Elimina definitivamente</button>
+          <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmDelete(false)} disabled={deleting}>Annulla</button>
+        </section>
+      </div>,document.body)}
     </section>
   );
 }
