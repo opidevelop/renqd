@@ -1717,3 +1717,148 @@ button.pokemon-favourite-cell:hover{background:var(--pokemon-blue-pale)!importan
  .pokemon-nae-result-public .pokemon-result-social-heading{align-items:flex-start;flex-direction:column}
  .pokemon-nae-result-public .pokemon-result-comments-heading{align-items:flex-start;flex-direction:column}
 }
+
+
+/* Name 'Em All lobby: full-page icy-blue wrap, Piplup hero and spacious roster. */
+.platform-content:has(.pokemon-nae-lobby){
+  padding:0!important;min-height:calc(100dvh - 72px);
+  background:#eaf3fb!important;
+}
+.platform-content:has(.pokemon-nae-lobby)>.pokemon-page.pokemon-name-em-all{
+  width:100%!important;max-width:none!important;min-height:calc(100dvh - 72px)!important;
+  margin:0!important;padding:0!important;background:transparent!important;
+}
+.platform-content:has(.pokemon-nae-lobby) .pokemon-nae-lobby.multiplayer-page{
+  width:100%!important;max-width:none!important;min-height:calc(100dvh - 72px)!important;
+  margin:0!important;padding:clamp(22px,3vw,44px)!important;
+  grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr)!important;
+  align-content:start!important;gap:20px!important;
+  background:linear-gradient(145deg,#eaf3fb 0%,#e2eef8 48%,#edf5fb 100%)!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+}
+.pokemon-nae-lobby .pokemon-nae-lobby-header.multiplayer-session-heading{
+  min-height:220px!important;padding:34px 38px!important;
+  background:radial-gradient(ellipse at 86% 12%,rgba(151,196,226,.34),transparent 36%),linear-gradient(116deg,#101b31 0%,#182d4b 58%,#234a62 100%)!important;
+}
+.pokemon-nae-lobby .multiplayer-session-heading-copy{max-width:62%!important}
+.pokemon-nae-lobby-piplup{
+  position:absolute!important;z-index:1!important;right:15%!important;bottom:-13px!important;
+  display:block!important;width:clamp(130px,17vw,205px)!important;height:clamp(130px,17vw,205px)!important;
+  object-fit:contain!important;filter:drop-shadow(0 16px 20px rgba(0,0,0,.2))!important;
+  pointer-events:none!important;
+}
+.pokemon-nae-lobby .multiplayer-session-status{margin-left:auto!important;align-self:flex-start!important}
+.pokemon-nae-lobby .pokemon-nae-lobby-panel.multiplayer-participants{
+  grid-column:1!important;grid-row:2!important;width:100%!important;min-width:0!important;
+}
+.pokemon-nae-lobby .pokemon-nae-lobby-panel.multiplayer-invite-box{
+  grid-column:2!important;grid-row:2!important;width:100%!important;min-width:0!important;
+}
+.pokemon-nae-lobby .pokemon-nae-lobby-participants{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:9px!important;width:100%!important}
+.pokemon-nae-lobby .pokemon-nae-lobby-participants>.multiplayer-person{
+  display:grid!important;grid-template-columns:48px minmax(0,1fr) auto auto auto!important;
+  align-items:center!important;gap:12px!important;width:100%!important;min-width:0!important;
+  min-height:76px!important;padding:13px 15px!important;margin:0!important;
+  border:1px solid #e2eaf2!important;border-radius:14px!important;background:#fff!important;
+  box-shadow:0 4px 14px rgba(24,45,75,.035)!important;
+}
+.pokemon-nae-lobby .multiplayer-person-identity{display:grid!important;gap:5px!important;min-width:0!important}
+.pokemon-nae-lobby .multiplayer-person-identity strong{
+  display:block!important;overflow:visible!important;white-space:normal!important;
+  overflow-wrap:anywhere!important;color:#1b2d45!important;font-size:13px!important;line-height:1.35!important
+}
+.pokemon-nae-lobby .multiplayer-person-identity small{font-size:10px!important;line-height:1.4!important;color:#75879a!important}
+.pokemon-nae-lobby .multiplayer-avatar{width:46px!important;height:46px!important;flex:none!important}
+.pokemon-nae-lobby .multiplayer-person-state{white-space:nowrap!important;font-size:10px!important}
+.pokemon-nae-lobby .pokemon-nae-host-tag{white-space:nowrap!important}
+.pokemon-nae-lobby .pokemon-nae-lobby-feedback{
+  display:flex!important;align-items:center!important;gap:10px!important;width:100%!important;
+  margin:0!important;padding:14px 16px!important;border:1px solid #b9d4e9!important;
+  border-radius:14px!important;background:#eaf5ff!important;color:#244e72!important;
+  font-size:12px!important;font-weight:750!important;line-height:1.5!important;
+}
+.pokemon-nae-lobby .pokemon-nae-lobby-feedback.is-invites-sent{
+  min-height:62px!important;padding:16px 18px!important;border:2px solid #76a9d0!important;
+  background:linear-gradient(110deg,#e2f2ff,#f2f8ff)!important;color:#163f63!important;
+  font-size:15px!important;font-weight:900!important;box-shadow:0 8px 20px rgba(44,105,153,.1)!important;
+}
+.pokemon-nae-lobby .pokemon-nae-lobby-feedback.is-invites-sent:before{
+  content:"✓";display:grid;place-items:center;flex:none;width:30px;height:30px;
+  border-radius:50%;background:#c7e6fb;color:#1c6396;font-size:16px;font-weight:900
+}
+@media(max-width:980px){
+ .platform-content:has(.pokemon-nae-lobby)>.pokemon-page.pokemon-name-em-all{min-height:calc(100dvh - 64px)!important}
+ .platform-content:has(.pokemon-nae-lobby) .pokemon-nae-lobby.multiplayer-page{grid-template-columns:minmax(0,1fr)!important;padding:20px!important}
+ .pokemon-nae-lobby .pokemon-nae-lobby-panel.multiplayer-participants,
+ .pokemon-nae-lobby .pokemon-nae-lobby-panel.multiplayer-invite-box{grid-column:1!important;grid-row:auto!important}
+ .pokemon-nae-lobby-piplup{right:12%!important;width:150px!important;height:150px!important}
+}
+@media(max-width:600px){
+ .pokemon-nae-lobby .pokemon-nae-lobby-header.multiplayer-session-heading{min-height:190px!important;padding:24px!important}
+ .pokemon-nae-lobby .multiplayer-session-heading-copy{max-width:75%!important}
+ .pokemon-nae-lobby-piplup{right:2%!important;bottom:-8px!important;width:118px!important;height:118px!important;opacity:.9}
+ .pokemon-nae-lobby .pokemon-nae-lobby-participants>.multiplayer-person{
+  grid-template-columns:42px minmax(0,1fr) auto!important;gap:9px!important;min-height:72px!important;padding:11px!important
+ }
+ .pokemon-nae-lobby .multiplayer-person-state{grid-column:2!important;justify-self:start!important}
+ .pokemon-nae-lobby .pokemon-nae-host-tag{grid-column:3!important;grid-row:2!important}
+ .pokemon-nae-lobby .pokemon-nae-remove-participant{grid-column:3!important;grid-row:1!important}
+}
+
+/* Wizard step 1: restore clearly readable Pokémon type logos. */
+.pokemon-nae-wizard .pokemon-nae-type-grid-visual{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))!important;gap:10px!important}
+.pokemon-nae-wizard .pokemon-nae-type-grid-visual button{min-height:88px!important;gap:8px!important;padding:12px 8px!important}
+.pokemon-nae-wizard .pokemon-nae-type-grid-visual button img{
+  display:block!important;width:76px!important;height:30px!important;max-width:100%!important;
+  object-fit:contain!important;flex:none!important
+}
+
+/* Mode selection: high-contrast, descriptive multiplayer cards. */
+.pokemon-nae-wizard .pokemon-nae-mode-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+.pokemon-nae-wizard .pokemon-nae-mode-card{
+  position:relative!important;display:flex!important;min-height:225px!important;
+  flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;
+  gap:9px!important;overflow:hidden!important;padding:22px!important;border:1px solid #dce7f1!important;
+  border-radius:20px!important;background:#fff!important;color:#1b2d45!important;text-align:left!important;
+  box-shadow:0 8px 22px rgba(24,45,75,.055)!important;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease!important
+}
+.pokemon-nae-wizard .pokemon-nae-mode-card:hover{transform:translateY(-3px)!important;box-shadow:0 14px 28px rgba(24,45,75,.1)!important}
+.pokemon-nae-wizard .pokemon-nae-mode-card .pokemon-nae-mode-art{
+  display:grid!important;place-items:center!important;width:42px!important;height:42px!important;
+  margin-bottom:4px!important;border:1px solid rgba(255,255,255,.3)!important;border-radius:13px!important;
+  background:rgba(255,255,255,.15)!important;color:inherit!important;font-size:25px!important
+}
+.pokemon-nae-wizard .pokemon-nae-mode-overline{font-size:8px!important;font-weight:900!important;letter-spacing:1.5px!important;opacity:.76!important}
+.pokemon-nae-wizard .pokemon-nae-mode-card strong{font-size:19px!important;font-weight:900!important;line-height:1.2!important;letter-spacing:-.5px!important}
+.pokemon-nae-wizard .pokemon-nae-mode-card small{max-width:34ch!important;font-size:11px!important;line-height:1.65!important;opacity:.9!important}
+.pokemon-nae-wizard .pokemon-nae-mode-tag{display:inline-flex!important;align-items:center!important;margin-top:auto!important;padding:7px 10px!important;border:1px solid currentColor!important;border-radius:999px!important;font-size:9px!important;font-weight:850!important}
+.pokemon-nae-wizard .pokemon-nae-mode-card.mode-solo{grid-column:1/-1!important;min-height:150px!important;background:linear-gradient(110deg,#f7f9fc,#fff)!important}
+.pokemon-nae-wizard .pokemon-nae-mode-card.mode-shared{
+  background:radial-gradient(circle at 100% 0,rgba(152,198,229,.28),transparent 45%),linear-gradient(140deg,#13243d,#244b70)!important;
+  border-color:#244b70!important;color:#fff!important
+}
+.pokemon-nae-wizard .pokemon-nae-mode-card.mode-individual{
+  background:radial-gradient(circle at 100% 0,rgba(178,211,235,.35),transparent 45%),linear-gradient(140deg,#eaf3fb,#d9e9f6)!important;
+  border-color:#c1d7e9!important;color:#183a5a!important
+}
+.pokemon-nae-wizard .pokemon-nae-mode-card.is-selected{outline:3px solid #75a5ce!important;outline-offset:2px!important;box-shadow:0 0 0 6px rgba(93,151,196,.13),0 14px 28px rgba(24,45,75,.12)!important}
+@media(max-width:640px){.pokemon-nae-wizard .pokemon-nae-mode-grid{grid-template-columns:minmax(0,1fr)!important}.pokemon-nae-wizard .pokemon-nae-mode-card.mode-solo{grid-column:auto!important}}
+
+/* Multiplayer catalogue: same full-width section + 12-column Pokédex grid as Solo.
+   The former auto-fill rule was incorrectly laying out whole generations as cells. */
+.pokemon-nae-multiplayer .pokemon-nae-multiplayer-catalog{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:28px!important;
+  width:100%!important;min-width:0!important;padding:16px!important;
+}
+.pokemon-nae-multiplayer .pokemon-nae-multiplayer-catalog .pokemon-nae-catalog-section{width:100%!important;min-width:0!important}
+.pokemon-nae-multiplayer .pokemon-nae-multiplayer-catalog .pokemon-nae-cell-grid{
+  display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:6px!important;width:100%!important
+}
+.pokemon-nae-multiplayer .pokemon-nae-multiplayer-catalog .pokemon-nae-cell{
+  min-width:0!important;min-height:105px!important;padding:8px 4px!important;border-radius:10px!important
+}
+.pokemon-nae-multiplayer .pokemon-nae-multiplayer-catalog .pokemon-nae-cell-art{width:58px!important;height:58px!important}
+.pokemon-nae-multiplayer .pokemon-nae-multiplayer-catalog .pokemon-nae-cell-art img{width:56px!important;height:56px!important}
+@media(max-width:1050px){.pokemon-nae-multiplayer .pokemon-nae-multiplayer-catalog .pokemon-nae-cell-grid{grid-template-columns:repeat(9,minmax(0,1fr))!important}}
+@media(max-width:760px){.pokemon-nae-multiplayer .pokemon-nae-multiplayer-catalog .pokemon-nae-cell-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}}
+@media(max-width:460px){.pokemon-nae-multiplayer .pokemon-nae-multiplayer-catalog .pokemon-nae-cell-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
