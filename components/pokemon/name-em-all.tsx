@@ -81,9 +81,19 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
 
   return (
     <section className="pokemon-nae-wizard">
-      <header className="pokemon-favourite-heading">
-        <div><span className="pokemon-page-eyebrow">RENQD × POKÉMON</span><h1>Name ’Em All</h1><p>Configura il tuo Pokédex e prova a riconoscere tutte le specie selezionate.</p></div>
-        <span className="pokemon-favourite-counter">PASSAGGIO {step+1} / 7</span>
+      <header className="pokemon-nae-wizard-hero pokemon-hub-hero">
+        <div className="pokemon-hub-hero-copy">
+          <p className="pokemon-hub-kicker">RENQD × POKÉMON · NAME ’EM ALL</p>
+          <h1>La tua prossima <em>sfida.</em></h1>
+          <p>Componi il Pokédex, scegli come giocare e prepara la tua sessione. Ogni dettaglio è nelle tue mani.</p>
+          <span className="pokemon-nae-wizard-count">PASSAGGIO {step+1} DI 7 <i/> {mainSpecies.length.toLocaleString("it-IT")} SPECIE SELEZIONABILI</span>
+        </div>
+        <div className="pokemon-nae-wizard-characters" aria-hidden="true">
+          <span className="pokemon-hub-orbit"/>
+          <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/196.png" alt=""/>
+          <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/470.png" alt=""/>
+          <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/471.png" alt=""/>
+        </div>
       </header>
       <nav className="pokemon-nae-stepper" aria-label="Passaggi configurazione">
         {wizardTitles.map((title,index)=><button type="button" key={title} onClick={()=>index<=step&&setStep(index)} className={index===step?"is-active":index<step?"is-done":""} disabled={index>step}>
@@ -538,7 +548,18 @@ function ResultView({result,onNewGame,catalog,canManageVisibility=false}:{result
     }finally{setExporting(false);}
   };
   return <section className="pokemon-nae-result">
-    <span className="pokemon-page-eyebrow">RENQD × POKÉMON · RISULTATO</span><h1>La tua partita.</h1>
+    <header className="pokemon-nae-result-hero pokemon-hub-hero">
+      <div className="pokemon-hub-hero-copy">
+        <p className="pokemon-hub-kicker">RENQD × POKÉMON · NAME ’EM ALL</p>
+        <h1>{typeof result.ownerName==="string"?"La partita di "+result.ownerName:"La tua <em>sfida.</em>"}</h1>
+        <p>Ogni Pokémon scoperto racconta un pezzo della tua partita. Ecco il riepilogo della sessione.</p>
+      </div>
+      <div className="pokemon-nae-result-characters" aria-hidden="true">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/196.png" alt=""/>
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/470.png" alt=""/>
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/471.png" alt=""/>
+      </div>
+    </header>
     {result.partial===true&&<p className="pokemon-nae-partial-tag">Risultato parziale salvato · potrai rientrare nella sessione finché resta attiva.</p>}
     <div className={"pokemon-nae-result-card medal-"+medal} style={{background:"linear-gradient(145deg,"+(colors[medal]??colors.eevee)+"30,#fffdfa 72%)"}}>
       <div className="pokemon-nae-result-artwork"><img src={medalArt} alt="" crossOrigin="anonymous"/></div>
