@@ -1682,3 +1682,14 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Nessuna migrazione Supabase o modifica dei dati: lettura della tabella esistente `pokemon_daily_completions`.
 - Nessuna modifica a ruoli, permessi o policy.
 - La verifica visuale dell'iframe con sessione autenticata resta limitata: il provider è esterno e non è possibile ispezionare il suo DOM cross-origin dal contesto Renqd.
+
+
+### Rilascio Production — 25 novembre 2026
+- Commit applicativo: `d8a2dc2b5fd9848dbc984b7804df51ae5f6d2f8b`.
+- Deployment Vercel: `dpl_13fzba6jn2GEZ8bui6oG6o2d7JZk`, stato `READY`, target `production`.
+- Alias verificati: `renqd.app`, `www.renqd.app`, `renqd.vercel.app`.
+- Build Next.js completata in 13 secondi; le route `/pokemon`, `/pokemon/doku` e `/pokemon/connections` risultano incluse nel build.
+- Smoke check HTTP della landing pubblica `https://renqd.app/`: HTTP 200; wordmark, nuovo hero, sezione Pokémon e link login/registrazione presenti nel markup.
+- Scansione runtime logs sul deployment negli ultimi 15 minuti: nessun log di livello error/fatal trovato.
+- Non è stato possibile eseguire un test visuale autenticato della pagina `/pokemon` né verificare l'effettiva inizializzazione della griglia PokeDoku nell'iframe. Il fallback apre il provider direttamente in una nuova scheda.
+- La revisione IP Pokémon già indicata nel registro di progetto resta una verifica separata da completare; la release è stata effettuata su richiesta esplicita dell'utente.
