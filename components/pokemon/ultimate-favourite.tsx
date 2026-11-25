@@ -10,6 +10,7 @@ import {
   getPokemonCellKey, isPokemonCompatibleWithFavouriteCell, normalizePokemonName,
 } from "@/lib/pokemon/catalog";
 import { saveUltimateFavouriteAction } from "@/app/(platform)/pokemon/ultimate-favourite/actions";
+import { getPokemonTypeIconUrl } from "@/lib/pokemon/type-icons";
 
 type Candidate = { species: PokemonSpecies; form?: PokemonForm };
 const columns = [...POKEMON_TYPES.map((type) => POKEMON_TYPE_LABELS[type]), "Mega", "Mitici", "Leggendari", "Preferito Gen."];
@@ -44,7 +45,12 @@ function Grid({
     <div className="pokemon-favourite-scroll">
       <div className="pokemon-favourite-grid">
         <div className="pokemon-favourite-corner">Generazione</div>
-        {columns.map((name, index) => <div className="pokemon-favourite-colhead" key={name + index}>{name}</div>)}
+        {columns.map((name, index) => {
+          const type = POKEMON_TYPES[index];
+          return <div className={"pokemon-favourite-colhead" + (type ? " pokemon-favourite-type-head" : "")} key={name + index}>
+            {type ? <><img src={getPokemonTypeIconUrl(type)} alt="" loading="lazy"/><span>{name}</span></> : <span>{name}</span>}
+          </div>;
+        })}
         {Array.from({ length: 10 }, (_, row) => (
           <div className="pokemon-favourite-row" key={row}>
             <div className="pokemon-favourite-rowhead">
@@ -196,12 +202,12 @@ export function UltimateFavouriteEditor({
             <header><div><span className="pokemon-page-eyebrow">SELEZIONE POKÉMON</span><h2 id="pokemon-picker-title">{labelForCell(active.row,active.column)}</h2></div>
               <button type="button" onClick={() => setActive(null)} aria-label="Chiudi"><X size={18}/></button></header>
             <label className="pokemon-picker-search"><Search size={16}/><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cerca in italiano o inglese…"/></label>
-            <div className="pokemon-picker-list">
+            <div className="pokemon-picker-grid">
               {candidates.map((candidate) => {
                 const name = candidate.species.name + (candidate.form?.label ? " " + candidate.form.label : "");
-                return <button type="button" key={candidate.species.id + "-" + (candidate.form?.id ?? "base")} onClick={() => choose(candidate)}>
-                  <PokemonImage candidate={candidate} size={46}/>
-                  <span><strong>{name}</strong><small>#{candidate.species.id.toString().padStart(4,"0")} · Gen. {GENERATION_LABELS[candidate.species.generation-1]}</small></span>
+                return <button type="button" className="pokemon-picker-card" key={candidate.species.id + "-" + (candidate.form?.id ?? "base")} onClick={() => choose(candidate)}>
+                  <span className="pokemon-picker-silhouette"><PokemonImage candidate={candidate} size={76}/></span>
+                  <span className="pokemon-picker-card-copy"><strong>{name}</strong><small>#{candidate.species.id.toString().padStart(4,"0")} <i/> Gen. {GENERATION_LABELS[candidate.species.generation-1]}</small></span>
                 </button>;
               })}
               {!candidates.length && <p>Nessun Pokémon compatibile trovato.</p>}
