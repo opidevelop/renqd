@@ -193,7 +193,7 @@ function Game({
   const [message,setMessage]=useState("");
   const [pending,setPending]=useState(false);
   const [deadline,setDeadline]=useState(session.deadline_at?new Date(session.deadline_at).getTime():0);
-  const [remaining,setRemaining]=useState(session.status==="PAUSED"?(session.remaining_seconds??0):(session.remaining_seconds??session.duration_seconds));
+  const [remaining,setRemaining]=useState(()=>session.deadline_at?Math.max(0,Math.ceil((new Date(session.deadline_at).getTime()-Date.now())/1000)):(session.status==="PAUSED"?(session.remaining_seconds??0):(session.remaining_seconds??session.duration_seconds)));
   const [paused,setPaused]=useState(session.status==="PAUSED");
   const [pauseOverlay,setPauseOverlay]=useState(session.status==="PAUSED");
   const [confirmExit,setConfirmExit]=useState(false);
@@ -275,19 +275,29 @@ function Game({
 
   useEffect(()=>{
     if(unlimited||paused||isFinishing||!deadline)return;
-    const id=window.setInterval(()=>setRemaining(Math.max(0,Math.ceil((deadline-Date.now())/1000))),250);
+    const tick=()=>setRemaining(Math.max(0,Math.ceil((deadline-Date.now())/1000)));
+    tick();
+    const id=window.setInterval(tick,250);
     return ()=>window.clearInterval(id);
   },[deadline,paused,isFinishing,unlimited]);
 
   const finish=useCallback(async(reason:string)=>{
     if(isFinishing)return;
+    if(reason==="TIMER_EXPIRED"&&(!deadline||Date.now()<deadline)){
+      if(deadline)setRemaining(Math.max(1,Math.ceil((deadline-Date.now())/1000)));
+      return;
+    }
     setIsFinishing(true);
     const result=await finishNameEmAllAction(session.id,reason);
     if(!result.ok){setMessage(result.error??"Non è stato possibile salvare il risultato.");setIsFinishing(false);return;}
     router.refresh();
-  },[isFinishing,router,session.id]);
+  },[deadline,isFinishing,router,session.id]);
 
-  useEffect(()=>{if(!unlimited&&remaining<=0&&!paused&&!isFinishing){const id=window.setTimeout(()=>{void finish("TIMER_EXPIRED");},0);return()=>window.clearTimeout(id);}},[remaining,paused,isFinishing,finish,unlimited]);
+  useEffect(()=>{
+    if(unlimited||paused||isFinishing||!deadline||Date.now()<deadline)return;
+    const id=window.setTimeout(()=>{void finish("TIMER_EXPIRED");},0);
+    return()=>window.clearTimeout(id);
+  },[deadline,paused,isFinishing,finish,unlimited]);
 
   const submit=useCallback(async(answer:string,optimisticSpecies?:PokemonSpecies)=>{
     if(!answer.trim()||pending||paused)return;
@@ -305,13 +315,15 @@ function Game({
       setConfirmed(false);setMessage(result.error??"Risposta non registrata.");return;
     }
     const data=result.data??{};
+    const refocusInput=()=>window.requestAnimationFrame(()=>inputRef.current?.focus());
     if(data.status==="CORRECT"&&typeof data.speciesId==="number"){
       setFound(current=>new Set(current).add(data.speciesId as number));
       setQuery("");setConfirmed(true);setMessage("Pokémon scoperto!");
       if(!optimisticSpecies)playPokemonSound("correct",soundEnabled);
+      refocusInput();
       if(data.completed===true){playPokemonSound("complete",soundEnabled);void finish("CATALOG_COMPLETE");}
     }else if(data.status==="ALREADY_FOUND"){
-      setQuery("");setMessage("Hai già scoperto questo Pokémon!");
+      setQuery("");setMessage("Hai già scoperto questo Pokémon!");refocusInput();
     }else if(data.status==="INCORRECT"){
       if(optimisticSpecies)setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
       setConfirmed(false);playPokemonSound("incorrect",soundEnabled);
