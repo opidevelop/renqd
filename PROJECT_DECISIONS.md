@@ -575,3 +575,27 @@ Le seguenti richieste sono nuove rifiniture esplicitamente richieste dall'utente
 - Una partita illimitata si conclude al completamento del catalogo o tramite le azioni di uscita/terminazione già previste; non può scadere per timer.
 - Il completamento al 100% senza aiuti resta idoneo al risultato perfetto anche in modalità illimitata.
 - Nessuna modifica allo schema delle selezioni Ultimate Favourite o alle regole di assegnazione punti di Name ’Em All.
+
+
+## Decisioni approvate — banner Pokémon, giochi quotidiani e landing pubblica (25 novembre 2026)
+
+### Home e hub Pokémon
+1. Il banner Pokémon nella Home autenticata mostra esclusivamente **Glaceon, Leafeon ed Espeon** e deve avere uno spazio visibile rispetto alla sezione «Cosa mettiamo in classifica».
+2. Il banner della pagina `/pokemon` deve avere un trattamento grafico più curato e mostrare le stesse tre Eeveelutions: Glaceon, Leafeon ed Espeon.
+3. Nelle card Doku e Connections dell'hub `/pokemon` deve comparire un tag «Fatto» o «Non fatto», basato esclusivamente sulla presenza del completamento giornaliero verificato nel registro Renqd. Non creare completamenti fittizi o basati sul semplice caricamento dell'iframe.
+
+### Doku e Connections
+1. Rimuovere integralmente il riquadro informativo che spiega che Renqd registra il completamento solo con un segnale tecnico attendibile.
+2. Mantenere i giochi originali nei rispettivi iframe; non sostituirli con cloni o implementazioni autonome.
+3. Non mostrare uno spinner/overlay di caricamento Renqd che possa coprire il contenuto del gioco esterno. Fornire un collegamento ben visibile per aprire il gioco originale in una nuova scheda come fallback.
+4. Il caricamento dell'iframe non equivale al caricamento della griglia interattiva: non usarlo per segnare la sfida come completata.
+
+### Landing pubblica
+1. Ricostruire integralmente la landing `/` con una nuova gerarchia visiva editoriale, mantenendo accessibilità senza autenticazione e i percorsi Accedi/Registrati.
+2. Usare il wordmark ufficiale `/brand/renqd-logo.svg`.
+3. Inserire riferimenti testuali e di contenuto al mondo Pokémon, mantenendo chiara la natura di piattaforma di classifiche e confronto di passioni.
+4. Non modificare il comportamento di redirect degli utenti autenticati verso `/home`, né i flussi di autenticazione.
+
+### Limiti tecnici esterni
+- PokeDoku e Pokennection sono servizi di terze parti incorporati via iframe. Renqd può controllare il contenitore e offrire l'apertura diretta, ma non può correggere il codice, gli script, le API o le policy di embedding dei domini originali.
+- Se il gioco originale non inizializza la griglia in un iframe, l'apertura diretta sul dominio del provider è il fallback corretto; non aggirare CSP/X-Frame-Options né usare proxy per rimuovere tali protezioni.

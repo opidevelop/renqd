@@ -1659,3 +1659,26 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Nessun nuovo schema o tabella è stato introdotto; la migrazione aggiorna esclusivamente le funzioni RPC esistenti per il nuovo comportamento illimitato.
 
 - Verifica visuale/interattiva desktop e mobile non eseguita: la pagina applicativa richiede login e non era disponibile una sessione browser autenticata per il test. Necessaria conferma funzionale dell’utente dopo l’accesso.
+
+
+---
+
+## Aggiornamento Pokémon e landing — 25 novembre 2026
+
+### Modifiche richieste
+- Home: banner con Glaceon (#471), Espeon (#196) e Leafeon (#470), con maggiore distanza dalla sezione principale.
+- Hub `/pokemon`: hero rinnovato con le stesse tre Eeveelutions.
+- Card Doku e Connections: badge «Fatto»/«Non fatto» letti da `pokemon_daily_completions` per la data corrente Europe/Rome; nessuna scrittura manuale o completamento al caricamento dell'iframe.
+- Doku/Connections: rimosso l'avviso richiesto; rimosso l'overlay Renqd di caricamento che poteva coprire il gioco; aggiunto un collegamento visibile per aprire il provider in una nuova scheda.
+- Landing pubblica `/`: ricostruita con il wordmark SVG ufficiale, nuova sezione hero, presentazione dei flussi Renqd, area Pokémon e CTA; i percorsi login/registrazione e il redirect degli utenti autenticati restano invariati.
+
+### Diagnosi PokeDoku
+- Il gioco viene caricato da `https://pokedoku.com/` dentro un iframe di terze parti. Il suo evento `load` non dimostra che la griglia sia stata inizializzata.
+- La pagina pubblica indicizzata del provider espone uno stato «Loading…» e i contenuti del gioco sono gestiti lato provider; il problema non può essere risolto intervenendo sul CSS della griglia Renqd. Il codice di PokeDoku, i suoi script/API e le sue policy non sono controllati da Renqd.
+- La release elimina l'overlay locale e rende disponibile l'apertura diretta del provider. Il caricamento della griglia all'interno dell'iframe deve essere verificato nel browser autenticato; se resta bloccato, la causa esatta va letta dalla console/network del browser e può richiedere un intervento del provider.
+- Il badge «Fatto» rimane legato a un completamento verificato già presente nel database. In assenza del segnale attendibile, mostra «Non fatto»; non viene introdotto un pulsante che falsifichi il completamento.
+
+### Database e verifiche
+- Nessuna migrazione Supabase o modifica dei dati: lettura della tabella esistente `pokemon_daily_completions`.
+- Nessuna modifica a ruoli, permessi o policy.
+- La verifica visuale dell'iframe con sessione autenticata resta limitata: il provider è esterno e non è possibile ispezionare il suo DOM cross-origin dal contesto Renqd.

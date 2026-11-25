@@ -958,3 +958,41 @@ button.pokemon-favourite-choice-card:hover{transform:translateY(-1px);border-col
   .pokemon-nae-multiplayer-answer:not(.is-mobile-open) .pokemon-nae-multiplayer-answer-controls{display:grid!important}
   .pokemon-nae-multiplayer-answer:not(.is-mobile-open) .pokemon-nae-mobile-search-toggle{display:none!important}
 }
+
+/* Eeveelution banners and daily game embeds — Nov 25 2026 */
+.home-pokemon-banner{margin:34px 0 32px}
+.home-pokemon-banner-art{right:7%;width:48%}
+.home-pokemon-mon-back{width:39%;left:-2%;bottom:4%}
+.home-pokemon-mon-mid{width:45%;left:28%;top:0;z-index:2}
+.home-pokemon-mon-front{width:39%;right:-1%;bottom:2%;z-index:3}
+.pokemon-hub-hero{background:radial-gradient(ellipse at 78% 45%,rgba(117,169,203,.34),transparent 36%),radial-gradient(ellipse at 12% 100%,rgba(88,139,116,.19),transparent 35%),linear-gradient(118deg,#101b31 0%,#182d4b 52%,#234a62 100%)}
+.pokemon-hub-hero:after{position:absolute;content:"";inset:0;pointer-events:none;background:radial-gradient(circle at 85% 15%,rgba(255,255,255,.08) 0 1px,transparent 2px),radial-gradient(circle at 68% 76%,rgba(255,255,255,.09) 0 1px,transparent 2px);background-size:74px 74px,96px 96px;opacity:.55}
+.pokemon-hub-hero-art{right:2%;width:min(53%,570px)}
+.pokemon-hub-art-orbit-one{width:84%;border-color:rgba(232,201,142,.32);box-shadow:0 0 0 20px rgba(232,201,142,.035),0 0 0 44px rgba(232,201,142,.02)}
+.pokemon-hub-art-orbit-two{width:66%;border-color:rgba(184,211,231,.26)}
+.pokemon-hub-creature{filter:drop-shadow(0 20px 20px rgba(0,0,0,.34))}
+.pokemon-hub-creature-one{width:43%;left:0;bottom:7%}
+.pokemon-hub-creature-two{width:53%;left:31%;top:0}
+.pokemon-hub-creature-three{width:41%;right:-1%;bottom:5%}
+.pokemon-hub-art-caption{padding:7px 11px;border:1px solid rgba(220,201,160,.25);border-radius:999px;background:rgba(10,22,39,.45);color:#e8d7b2;font-size:8px;letter-spacing:.16em}
+.pokemon-mode-completion{display:inline-flex;align-items:center;gap:6px;width:max-content;padding:7px 10px;border:1px solid #e3e8ef;border-radius:999px;background:#f6f8fb;color:#77869a;font-size:10px;font-weight:800}
+.pokemon-mode-completion.is-done{border-color:#cfe5d7;background:#eef8f1;color:#397a52}
+.pokemon-mode-completion svg{stroke-width:2.3}
+.pokemon-daily-page{gap:16px}
+.pokemon-daily-embed-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 17px;border:1px solid #e3eaf1;border-radius:14px;background:linear-gradient(110deg,#f8fafc,#fff)}
+.pokemon-daily-embed-toolbar>div{display:grid;gap:4px}
+.pokemon-daily-embed-toolbar>div>span{color:#91a0b2;font-size:8px;font-weight:900;letter-spacing:.17em}
+.pokemon-daily-embed-toolbar>div>strong{color:#23344b;font-size:14px}
+.pokemon-daily-embed-toolbar>a{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid #dce5ef;border-radius:999px;background:#fff;color:#345c83;font-size:10px;font-weight:800;white-space:nowrap}
+.pokemon-daily-frame-wrap{position:relative;min-height:720px;overflow:hidden;border:1px solid #dfe7ef;border-radius:20px;background:#fff;box-shadow:0 14px 36px rgba(24,43,68,.07)}
+.pokemon-daily-frame-wrap iframe{display:block;width:100%;height:calc(100dvh - 245px);min-height:720px;border:0;background:#fff}
+.pokemon-daily-footnote{margin:0;color:#8a98aa;font-size:10px;line-height:1.6}
+@media(max-width:760px){
+ .home-pokemon-banner{margin:28px 0 26px}
+ .pokemon-hub-hero-art{right:0;width:82%;height:48%}
+ .pokemon-hub-hero-copy{margin-bottom:178px}
+ .pokemon-daily-embed-toolbar{align-items:flex-start;flex-direction:column}
+ .pokemon-daily-embed-toolbar>a{width:100%;justify-content:center}
+ .pokemon-daily-frame-wrap,.pokemon-daily-frame-wrap iframe{min-height:620px}
+ .pokemon-daily-frame-wrap iframe{height:calc(100dvh - 270px)}
+}
