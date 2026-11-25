@@ -101,7 +101,7 @@ export default async function PublicRenqPage({ params }: { params: Promise<{ slu
     }));
     const reportStatus=canReport?await supabase.rpc("ranking_report_exists",{p_ranking_id:ranking.id}):{data:false};
     return <div className="pokemon-public-result-shell">
-      <PokemonNameEmAllPublicResultView result={resultWithAvatars} ownerName={ownerName} isOwner={isOwner} social={canViewSocial?{
+      <PokemonNameEmAllPublicResultView result={resultWithAvatars} ownerName={ownerName} isOwner={isOwner} profileHref={isOwner?"/profile":profile?.username?"/u/"+profile.username:"/profile"} social={canViewSocial?{
         rankingId:ranking.id,resultOwnerId:ranking.user_id,initialLiked:Boolean(liked),initialLikeCount:likeCount??0,initialLikers,initialComments,
         currentUserId:user.id,canLike:canSocial&&!isOwner,canComment:canSocial,isOwner,
       }:undefined}/>
