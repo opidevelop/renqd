@@ -161,7 +161,7 @@ function Wizard({catalog,onStart,catalogReady}:{catalog:PokemonCatalog;onStart:(
           <div><span>Modalità</span><strong>{config.mode==="SOLO"?"Solo":config.mode==="COLLABORATIVE"?"Multiplayer condiviso":"Multiplayer individuale"}</strong></div>
         </div>
         {!catalogReady&&<p className="pokemon-nae-error">Il catalogo server è in sincronizzazione. L&apos;avvio si abiliterà al termine della verifica.</p>}
-        {catalogReady&&!canStart&&<p className="pokemon-nae-error">Completa la selezione di Shadows e verifica la durata prima di iniziare.</p>}
+        {catalogReady&&!canStart&&<p className="pokemon-nae-error">Completa la configurazione e verifica la durata prima di iniziare.</p>}
         {error&&<p className="pokemon-nae-error" role="alert">{error}</p>}
       </section>}
 
