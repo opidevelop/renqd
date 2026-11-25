@@ -283,7 +283,7 @@ function Game({
 
   const finish=useCallback(async(reason:string)=>{
     if(isFinishing)return;
-    if(reason==="TIMER_EXPIRED"&&(!deadline||Date.now()<deadline)){
+    if(reason==="TIMER_EXPIRED"&&(!deadline||Date.now()<deadline+2000)){
       if(deadline)setRemaining(Math.max(1,Math.ceil((deadline-Date.now())/1000)));
       return;
     }
@@ -294,7 +294,7 @@ function Game({
   },[deadline,isFinishing,router,session.id]);
 
   useEffect(()=>{
-    if(unlimited||paused||isFinishing||!deadline||Date.now()<deadline)return;
+    if(unlimited||paused||isFinishing||!deadline||Date.now()<deadline+2000)return;
     const id=window.setTimeout(()=>{void finish("TIMER_EXPIRED");},0);
     return()=>window.clearTimeout(id);
   },[deadline,paused,isFinishing,finish,unlimited]);
