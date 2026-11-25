@@ -1895,3 +1895,7 @@ button.pokemon-favourite-cell:hover{background:var(--pokemon-blue-pale)!importan
 .pokemon-favourite-export-sheet>footer{margin:0!important;padding-top:6px!important;font-size:8px!important}
 .pokemon-daily-state button{margin-left:8px;padding:7px 11px;border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;font-size:11px;font-weight:800;cursor:pointer}
 .pokemon-daily-state button:disabled{opacity:.55;cursor:wait}
+
+.pokemon-daily-persistent-frame{position:relative;width:100%;margin:16px 0 28px;overflow:hidden;border:1px solid #e5eaf0;border-radius:18px;background:#fff;box-shadow:0 10px 28px rgba(20,38,60,.07)}
+.pokemon-daily-persistent-frame iframe{display:block;width:100%;height:min(78dvh,920px);min-height:620px;border:0;background:#fff}
+@media(max-width:680px){.pokemon-daily-persistent-frame{margin:12px 0 20px;border-radius:12px}.pokemon-daily-persistent-frame iframe{height:78dvh;min-height:540px}}
