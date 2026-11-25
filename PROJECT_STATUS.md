@@ -1654,6 +1654,8 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 
 ### Verifiche e gate
 - Dry-run transazionale delle modifiche RPC Supabase: superato; la migrazione è stata poi applicata con successo.
-- Il codice applicativo e la migrazione locale sono inclusi nell'aggiornamento GitHub in preparazione su `main`.
-- La build/deploy Production e i test funzionali autenticati desktop/mobile devono essere verificati prima di dichiarare concluse le modifiche.
+- Il codice applicativo e la migrazione locale sono stati pubblicati su `main` (commit `a7036ddb9ab60b6d5c3f1c49df3bf2160b8ad1e5`).
+- Deploy Production del commit applicativo completato con stato `READY` (deployment `dpl_FhpVDZkFH8D9pS5SvVsBenFyLy3F`); alias `renqd.app` assegnato alla release. Compilazione Next.js, controllo TypeScript e generazione delle pagine statiche superati.
 - Nessun nuovo schema o tabella è stato introdotto; la migrazione aggiorna esclusivamente le funzioni RPC esistenti per il nuovo comportamento illimitato.
+
+- Verifica visuale/interattiva desktop e mobile non eseguita: la pagina applicativa richiede login e non era disponibile una sessione browser autenticata per il test. Necessaria conferma funzionale dell’utente dopo l’accesso.
