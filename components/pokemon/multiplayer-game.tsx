@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Crown, HelpCircle, LoaderCircle, LogOut, PauseCircle, Send, X, Link2, Copy, UserX, Settings, ChevronDown } from "lucide-react";
+import { CheckCircle2, Crown, HelpCircle, LoaderCircle, LogOut, PauseCircle, X, UserX, Settings, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { playPokemonSound, preparePokemonAudio } from "@/lib/pokemon/sounds";
 import { usePokemonSoundPreference } from "@/components/pokemon/use-pokemon-sound-preference";
 import { PokemonCatalog, PokemonSpecies, normalizePokemonName } from "@/lib/pokemon/catalog";
-import { createNameEmAllInviteLinkAction, inviteNameEmAllUsersAction, expelNameEmAllParticipantAction, finishNameEmAllMultiplayerAction, heartbeatNameEmAllAction, hintNameEmAllMultiplayerAction, leaveNameEmAllAction, submitNameEmAllMultiplayerAnswerAction } from "@/app/(platform)/pokemon/name-em-all/actions";
+import { expelNameEmAllParticipantAction, finishNameEmAllMultiplayerAction, heartbeatNameEmAllAction, hintNameEmAllMultiplayerAction, leaveNameEmAllAction, submitNameEmAllMultiplayerAnswerAction } from "@/app/(platform)/pokemon/name-em-all/actions";
 import type { NameEmAllParticipant } from "@/components/pokemon/multiplayer-lobby";
 
 type MultiplayerSession={
@@ -54,15 +54,9 @@ export function PokemonNameEmAllMultiplayerGame({
   const [error,setError]=useState("");
   const [confirmExit,setConfirmExit]=useState(false);
   const [confirmTerminate,setConfirmTerminate]=useState(false);
-  const [inviteNames,setInviteNames]=useState("");
-  const [inviteLink,setInviteLink]=useState("");
-  const [inviteFeedback,setInviteFeedback]=useState("");
-  const [inviteError,setInviteError]=useState("");
-  const [inviteBusy,setInviteBusy]=useState(false);
   const shared=session.game_mode==="COLLABORATIVE";
   const isHost=session.host_id===currentUserId;
   const isOwner=session.owner_id===currentUserId;
-  const canInvite=isHost||isOwner;
   const isPlatformOwner=currentUserRole==="OWNER";
   const config=session.config as Record<string,unknown>;
   const unlimited=session.duration_seconds===0;
@@ -266,20 +260,26 @@ export function PokemonNameEmAllMultiplayerGame({
   useEffect(()=>{
     const normalized=normalizePokemonName(query);
     if(!normalized||!exactMatch||pending||playerCompleted||session.status!=="ACTIVE"||countdown>0)return;
-    const timer=window.setTimeout(()=>{
-      if(autoSubmitRef.current===normalized)return;
-      autoSubmitRef.current=normalized;
-      if(found.has(exactMatch.id)){
-        setQuery("");
-        setMessage("Questo Pokémon è già stato scoperto.");
-        return;
-      }
-      void submit(exactMatch.name);
-    },420);
-    return()=>window.clearTimeout(timer);
+    if(autoSubmitRef.current===normalized)return;
+    autoSubmitRef.current=normalized;
+    if(found.has(exactMatch.id)){
+      setQuery("");
+      setMessage("Questo Pokémon è già stato scoperto.");
+      return;
+    }
+    void submit(exactMatch.name);
   },[query,exactMatch,pending,playerCompleted,session.status,countdown,found,submit]);
 
 
+  useEffect(()=>{
+    if(!selected)return;
+    const frame=window.requestAnimationFrame(()=>document.querySelector(".pokemon-nae-detail")?.scrollIntoView({behavior:"smooth",block:"center"}));
+    return()=>window.cancelAnimationFrame(frame);
+  },[selected]);
+  useEffect(()=>{
+    if(!confirmTerminate&&!confirmExit)return;
+    window.scrollTo({top:0,behavior:"smooth"});
+  },[confirmTerminate,confirmExit]);
   const requestHint=async()=>{
     if(!selected||!spellingHelp||pending||found.has(selected.id))return;
     const result=await hintNameEmAllMultiplayerAction(session.id,selected.id);
@@ -299,29 +299,11 @@ export function PokemonNameEmAllMultiplayerGame({
     await finish("HOST_TERMINATED");
   };
 
-  const inviteUsers=async()=>{
-    const names=inviteNames.split(/[,\\n; ]+/).map(value=>value.trim()).filter(Boolean);
-    if(!names.length)return;
-    setInviteBusy(true);setInviteError("");setInviteFeedback("");
-    const result=await inviteNameEmAllUsersAction(session.id,names);
-    setInviteBusy(false);
-    if(!result.ok){setInviteError(result.error??"Inviti non inviati.");return;}
-    setInviteFeedback("Inviti inviati: "+String(result.data?.count??0)+".");setInviteNames("");
-  };
-  const createInviteLink=async()=>{
-    setInviteBusy(true);setInviteError("");setInviteFeedback("");
-    const result=await createNameEmAllInviteLinkAction(session.id);
-    setInviteBusy(false);
-    if(!result.ok){setInviteError(result.error??"Link non disponibile.");return;}
-    setInviteLink(result.url??"");setInviteFeedback("Link pronto da condividere.");
-  };
   const expelParticipant=async(userId:string,displayName:string)=>{
     if(!window.confirm("Espellere "+displayName+" dalla partita? Il suo contributo già registrato sarà conservato."))return;
-    setInviteBusy(true);setInviteError("");setInviteFeedback("");
     const result=await expelNameEmAllParticipantAction(session.id,userId);
-    setInviteBusy(false);
-    if(!result.ok){setInviteError(result.error??"Espulsione non riuscita.");return;}
-    setInviteFeedback(displayName+" è stato espulso dalla partita.");
+    if(!result.ok){setError(result.error??"Espulsione non riuscita.");return;}
+    setMessage(displayName+" è stato espulso dalla partita.");
   };
   const sortedParticipants=[...participants].sort((a,b)=>b.foundCount-a.foundCount||
     (a.lastDiscoveryAt&&b.lastDiscoveryAt?new Date(a.lastDiscoveryAt).getTime()-new Date(b.lastDiscoveryAt).getTime():a.lastDiscoveryAt?-1:b.lastDiscoveryAt?1:0)||
@@ -346,12 +328,6 @@ export function PokemonNameEmAllMultiplayerGame({
       </div>
       <div className="pokemon-nae-choice-row">{([["RANDOM","Casuale"],["POKEDEX","Pokédex"],["TYPE","Per tipo"]] as const).map(([value,label])=><button type="button" key={value} className={sortOrder===value?"is-selected":""} onClick={()=>changeSort(value)}>{label}</button>)}</div>
     </section>}
-    {canInvite&&<section className="pokemon-nae-lobby-panel pokemon-nae-live-invites">
-      <div className="pokemon-nae-lobby-section-title"><div><span className="pokemon-page-eyebrow">PARTITA IN CORSO</span><h2>Invita altri Allenatori</h2></div><Link2 size={17}/></div>
-      <div className="pokemon-nae-lobby-link-row"><input value={inviteNames} onChange={event=>setInviteNames(event.target.value)} placeholder="@username, un altro username…" aria-label="Username da invitare"/><button type="button" onClick={()=>void inviteUsers()} disabled={inviteBusy||!inviteNames.trim()}><Send size={14}/> Invita</button></div>
-      <div className="pokemon-nae-lobby-link-row"><button type="button" onClick={()=>void createInviteLink()} disabled={inviteBusy}><Link2 size={14}/> Crea link</button>{inviteLink&&<><input readOnly value={inviteLink} aria-label="Link invito"/><button type="button" onClick={()=>void navigator.clipboard.writeText(inviteLink)}><Copy size={14}/> Copia</button></>}</div>
-      {inviteFeedback&&<p role="status">{inviteFeedback}</p>}{inviteError&&<p role="alert" className="pokemon-nae-error">{inviteError}</p>}
-    </section>}
     {countdown>0&&<div className="pokemon-nae-multiplayer-countdown" role="status"><span>La partita inizia tra</span><strong>{countdown}</strong></div>}
     <section className="pokemon-nae-multiplayer-scoreboard">
       <div className="pokemon-nae-hud-top">
@@ -370,7 +346,7 @@ export function PokemonNameEmAllMultiplayerGame({
           <span className="pokemon-nae-player-name"><strong>{item.displayName}{item.userId===currentUserId?" · Tu":""}</strong><small>{item.isConnected?"Connesso":"Disconnesso"}{item.completed?" · Completato":""}</small></span>
           <strong className="pokemon-nae-player-score">{item.foundCount}</strong>
           {item.userId===session.host_id&&<Crown size={13} className="pokemon-nae-player-crown"/>}
-          {isPlatformOwner&&item.userId!==currentUserId&&<button type="button" className="pokemon-nae-remove-participant" disabled={inviteBusy} onClick={()=>void expelParticipant(item.userId,item.displayName)} aria-label={"Espelli "+item.displayName}><UserX size={14}/></button>}
+          {isPlatformOwner&&item.userId!==currentUserId&&<button type="button" className="pokemon-nae-remove-participant" onClick={()=>void expelParticipant(item.userId,item.displayName)} aria-label={"Espelli "+item.displayName}><UserX size={14}/></button>}
         </article>)}
       </div>
     </section>
@@ -388,19 +364,15 @@ export function PokemonNameEmAllMultiplayerGame({
       })}
     </nav>
 
-    <div className="pokemon-nae-multiplayer-answer">
-      <div className="pokemon-nae-multiplayer-answer-controls">
-        <label htmlFor="pokemon-nae-multiplayer-answer">Scrivi il nome di un Pokémon</label>
-        <div className="pokemon-nae-multiplayer-input-row">
-          <input ref={inputRef} id="pokemon-nae-multiplayer-answer" className={confirmed?"is-correct":message.startsWith("Non è una risposta")?"is-wrong":""}
-            value={query} onChange={event=>{autoSubmitRef.current="";setQuery(event.target.value);setConfirmed(false);setMessage("");}}
-            placeholder="Scrivi un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false}
-            disabled={pending||playerCompleted||session.status!=="ACTIVE"||countdown>0}/>
-          {confirmed&&<CheckCircle2 size={16} className="pokemon-nae-search-confirmed"/>}
-          {pending&&<LoaderCircle size={16}/>}
-        </div>
-      </div>
-      {message&&<p role="status" className={confirmed?"is-correct":""}>{message}</p>}
+    <div className="pokemon-nae-search-wrap">
+      <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Non è una risposta valida per questo catalogo."?" is-wrong":"")}>
+        <input ref={inputRef} value={query} onChange={event=>{autoSubmitRef.current="";setQuery(event.target.value);setConfirmed(false);setMessage("");}}
+          placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false}
+          disabled={pending||playerCompleted||session.status!=="ACTIVE"||countdown>0}/>
+        {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
+        {pending&&<LoaderCircle size={15}/>}
+      </label>
+      {message&&<p className={"pokemon-nae-feedback"+(confirmed?" is-correct":"")} role="status">{message}</p>}
       {error&&<p role="alert" className="pokemon-nae-error">{error}</p>}
     </div>
 
