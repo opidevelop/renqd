@@ -1502,3 +1502,91 @@ button.pokemon-favourite-choice-card:hover{transform:translateY(-1px);border-col
  .pokemon-nae-result .pokemon-nae-result-card>.pokemon-nae-result-medal{width:88px!important;height:88px!important;border-radius:23px!important}
  .pokemon-nae-result .pokemon-nae-result-card>.pokemon-nae-result-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
+
+
+/* RENQD Pokémon visual identity — replace the former orange accent with the hub's navy/blue. */
+.pokemon-hub,.pokemon-page{
+  --pokemon-blue:#182d4b;
+  --pokemon-blue-deep:#101b31;
+  --pokemon-blue-mid:#234a62;
+  --pokemon-blue-accent:#527fa4;
+  --pokemon-blue-soft:#eaf1f7;
+  --pokemon-blue-pale:#f4f8fb;
+  --pokemon-blue-line:#d6e2ec;
+  --pokemon-blue-text:#345b7a;
+}
+.pokemon-page-eyebrow,.pokemon-hub-kicker,.pokemon-hub-hero h1 em,
+.pokemon-mode-status,.pokemon-mode-arrow,.pokemon-mode-icon,
+.pokemon-back-link,.pokemon-daily-external,.pokemon-name-intro h2 em,
+.pokemon-name-step-icon,.pokemon-profile-page>header>svg,.pokemon-profile-actions>a svg,
+.pokemon-profile-result-icon,.pokemon-profile-result>svg,.profile-pokemon-trigger,
+.pokemon-nae-wizard-count,.pokemon-nae-guidance-icon,.pokemon-nae-sort-grid button svg,
+.pokemon-nae-inline-actions button,.pokemon-nae-option-check,.pokemon-catalog-sync.is-ready{
+  color:var(--pokemon-blue-accent)!important;
+}
+.pokemon-mode-icon,.pokemon-name-step-icon,.pokemon-profile-result-icon,
+.pokemon-nae-stepper button.is-active,.pokemon-nae-guidance-icon{
+  border-color:var(--pokemon-blue-line)!important;background:var(--pokemon-blue-soft)!important;
+}
+.pokemon-mode-card:hover,.pokemon-favourite-cell:focus-visible,.pokemon-picker-list>button:hover{
+  border-color:#9bb6cc!important;box-shadow:0 12px 28px rgba(24,45,75,.08)!important;
+}
+.pokemon-mode-status,.pokemon-mode-completion,.pokemon-daily-state,
+.pokemon-nae-default-tag,.pokemon-nae-mode-tag,.pokemon-favourite-counter,
+.pokemon-favourite-board-title span,.pokemon-nae-subheading span{
+  color:var(--pokemon-blue-text)!important;
+}
+.pokemon-mode-completion{border-color:var(--pokemon-blue-line)!important;background:var(--pokemon-blue-pale)!important}
+.pokemon-nae-stepper button.is-active{color:var(--pokemon-blue)!important;background:var(--pokemon-blue-soft)!important}
+.pokemon-nae-stepper button.is-active span,.pokemon-nae-stepper button.is-done span{
+  border-color:var(--pokemon-blue-mid)!important;background:var(--pokemon-blue-mid)!important;color:#fff!important;
+}
+.pokemon-nae-generation-grid button.is-selected,.pokemon-nae-type-grid button.is-selected,
+.pokemon-nae-option.is-selected,.pokemon-nae-choice-row button.is-selected,
+.pokemon-nae-sort-grid button.is-selected,.pokemon-nae-duration-grid button.is-selected,
+.pokemon-nae-mode-grid button.is-selected{
+  border-color:#789bb8!important;background:var(--pokemon-blue-soft)!important;color:var(--pokemon-blue)!important;
+}
+.pokemon-nae-option.is-selected .pokemon-nae-option-check{
+  border-color:var(--pokemon-blue-mid)!important;background:var(--pokemon-blue-mid)!important;color:#fff!important;
+}
+.pokemon-nae-default-tag,.pokemon-nae-mode-tag{
+  border-color:var(--pokemon-blue-line)!important;background:var(--pokemon-blue-pale)!important;
+}
+.pokemon-favourite-primary,.pokemon-nae-delete-game{
+  border-color:var(--pokemon-blue)!important;background:var(--pokemon-blue)!important;color:#fff!important;
+  box-shadow:0 7px 16px rgba(24,45,75,.18)!important;
+}
+.pokemon-favourite-primary:hover,.pokemon-nae-delete-game:hover{background:var(--pokemon-blue-mid)!important}
+.pokemon-favourite-secondary{border-color:var(--pokemon-blue-line)!important;background:#f8fbfd!important;color:var(--pokemon-blue-text)!important}
+.pokemon-favourite-board-title span,.pokemon-favourite-plus,.pokemon-favourite-cell.is-selected,
+.pokemon-picker-remove:not(:hover){color:var(--pokemon-blue-accent)!important}
+.pokemon-favourite-plus{border-color:#a9bfd1!important}
+button.pokemon-favourite-cell:hover{background:var(--pokemon-blue-pale)!important}
+.pokemon-favourite-status,.pokemon-picker-list>button:hover,.pokemon-picker-search:focus-within{
+  border-color:var(--pokemon-blue-line)!important;background:var(--pokemon-blue-pale)!important;
+}
+.pokemon-picker-list>button:hover{color:var(--pokemon-blue)!important}
+.pokemon-daily-state{border-color:var(--pokemon-blue-line)!important;background:var(--pokemon-blue-pale)!important;color:var(--pokemon-blue-text)!important}
+.pokemon-daily-state i{background:var(--pokemon-blue-accent)!important}
+.pokemon-daily-external{color:var(--pokemon-blue-accent)!important}
+.pokemon-nae-search:focus-within,.pokemon-nae-custom-duration input:focus,
+.pokemon-picker-search:focus-within{outline:2px solid rgba(82,127,164,.18)!important;border-color:var(--pokemon-blue-accent)!important}
+.pokemon-nae-progress span{background:linear-gradient(90deg,var(--pokemon-blue),var(--pokemon-blue-mid))!important}
+.pokemon-nae-section-nav button.is-active{
+  border-color:#789bb8!important;background:var(--pokemon-blue-soft)!important;color:var(--pokemon-blue)!important;
+}
+.pokemon-nae-result-tabs button.is-active{background:var(--pokemon-blue)!important}
+.pokemon-nae-result-detail-grid>div strong{color:var(--pokemon-blue)!important}
+.pokemon-profile-actions>a:hover,.pokemon-profile-result:hover,.pokemon-name-step:hover{
+  border-color:#a9bfd1!important;background:var(--pokemon-blue-pale)!important;
+}
+.pokemon-profile-trigger,.profile-pokemon-trigger{
+  border-color:var(--pokemon-blue-line)!important;background:var(--pokemon-blue-pale)!important;color:var(--pokemon-blue-text)!important;
+}
+.pokemon-nae-error{color:#a14f3b}
+.pokemon-nae-wizard .pokemon-nae-wizard-hero .pokemon-hub-kicker,
+.pokemon-nae-result .pokemon-nae-result-hero .pokemon-hub-kicker{color:#b8d1e6!important}
+@media(hover:hover){
+ .pokemon-mode-card:hover .pokemon-mode-icon{border-color:#a9bfd1!important;background:#eaf1f7!important;color:var(--pokemon-blue)!important}
+}
