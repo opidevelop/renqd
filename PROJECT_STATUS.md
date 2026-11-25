@@ -1693,3 +1693,22 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Scansione runtime logs sul deployment negli ultimi 15 minuti: nessun log di livello error/fatal trovato.
 - Non è stato possibile eseguire un test visuale autenticato della pagina `/pokemon` né verificare l'effettiva inizializzazione della griglia PokeDoku nell'iframe. Il fallback apre il provider direttamente in una nuova scheda.
 - La revisione IP Pokémon già indicata nel registro di progetto resta una verifica separata da completare; la release è stata effettuata su richiesta esplicita dell'utente.
+
+
+---
+
+## 2026-11-25 — Grade, Ultimate Favourite e Name ’Em All: correzioni
+
+### Modifiche applicative pubblicate su main
+- Grade: le card valutate e quelle ancora da valutare mostrano ora le anteprime audio, usando `RenqMusicActions` e i metadati `previewUrl` già idratati dal dettaglio Renq.
+- Ultimate Favourite: il comando PNG cattura una tavola export dedicata che rappresenta tutte le 10 righe e le 22 categorie; non dipende più dalla generazione aperta nell'editor. Include le selezioni e gli slot non compilati.
+- Name ’Em All: eliminato il debounce di 420 ms. Il riconoscimento esatto nel catalogo locale aggiorna immediatamente la griglia e il feedback; la chiamata RPC resta autorevole e l'aggiornamento ottimistico viene annullato in caso di errore server.
+- Name ’Em All: restyling completo della pagina risultato e nuova gerarchia visiva per medaglia/livello, statistiche, dettaglio Pokédex, classifica e strumenti export.
+- Name ’Em All: «Predefinito» è ora un tag dedicato con dimensioni e allineamento controllati sotto «Illimitato».
+- Multiplayer Name ’Em All: il vincolo `pokemon_name_em_all_sessions_duration_seconds_check` è stato corretto per accettare `duration_seconds=0` come sentinel illimitato, mantenendo `60–86400` per le durate finite. La causa era la mancata estensione del CHECK nella precedente migrazione della modalità Illimitato, non un problema di rendering della lobby.
+
+### Database e verifica
+- Migrazione remota applicata: `20261125181037_pokemon_name_em_all_unlimited_duration_check`.
+- Verifica SQL successiva: `CHECK ((duration_seconds = 0) OR (duration_seconds >= 60 AND duration_seconds <= 86400))`.
+- La migrazione corrispondente è versionata in `supabase/migrations/20261125181037_pokemon_name_em_all_unlimited_duration_check.sql`.
+- Da verificare nel deployment: build, anteprime Grade con elementi musicali reali, esportazione PNG completa e creazione lobby in entrambe le modalità multiplayer. La verifica funzionale multi-account non può essere dedotta dal solo stato READY della build.
