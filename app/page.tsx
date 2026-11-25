@@ -13,8 +13,6 @@ export default async function HomePage() {
       <header className="landing-header">
         <Link className="landing-logo" href="/" aria-label="Renqd home"><img src="/brand/renqd-logo.svg" alt="Renqd"/></Link>
         <nav>
-          <a href="#come-funziona">Come funziona</a>
-          <a href="#pokemon">Pokémon</a>
           <Link href="/login" className="landing-login">Accedi</Link>
           <Link href="/register" className="landing-signup">Crea il tuo account <ArrowUpRight size={15}/></Link>
         </nav>
