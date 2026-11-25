@@ -1733,3 +1733,26 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Aiuti: il testo sulle impostazioni suggerite è stato trasformato in un riquadro informativo con icona, titolo e testo descrittivo.
 - Lobby multiplayer: riprogettata in una griglia desktop a due colonne, con intestazione dedicata, partecipanti più leggibili, area inviti distinta, stato pronto/host più chiaro e impostazioni raggruppate; su mobile torna a colonna singola.
 - Le modifiche sono state effettuate nei componenti components/pokemon/hub.tsx, components/pokemon/name-em-all.tsx, app/page.tsx e negli stili in app/(platform)/pokemon.css.
+
+
+---
+
+## 2026-11-25 — Name ’Em All: lobby, durata, input e timer
+
+### Modifiche applicative
+- Step «Quanto tempo hai?»: i cinque selettori hanno larghezza e altezza uniformi e sono disposti su una riga desktop; il layout si riadatta su schermi stretti.
+- Lobby multiplayer Name ’Em All: ricostruita con il linguaggio visivo della lobby multiplayer Renq, usando intestazione ampia, schede partecipanti/inviti pulite, avatar e stati più leggibili, azioni principali coerenti e impaginazione desktop a due colonne con fallback mobile. Le azioni e le regole esistenti sono mantenute.
+- Input di gioco: dopo la registrazione riuscita di una specie il campo viene svuotato e il focus viene riportato automaticamente all'input; lo stesso avviene quando il Pokémon risulta già scoperto.
+- Timer: il valore iniziale del countdown deriva da deadline_at quando presente. Il tick aggiorna il tempo dalla deadline assoluta; la conclusione automatica non viene invocata se la deadline manca o non è realmente trascorsa, e applica 2 secondi di tolleranza per la differenza tra orologio browser e server. Le sessioni Illimitate restano escluse.
+
+### Diagnosi del falso avviso timer
+- Il precedente effetto client concludeva la sessione sulla sola condizione remaining <= 0. remaining poteva essere inizializzato da remaining_seconds restituito dal server, anche quando quel valore era obsoleto rispetto a deadline_at; ciò poteva invocare la RPC di conclusione prima della deadline e far apparire l'errore «Il timer non è ancora scaduto».
+- La condizione è stata resa dipendente dalla deadline assoluta e protetta da una tolleranza di sincronizzazione. Non sono state modificate RPC, schema, dati o migrazioni Supabase.
+
+### File applicativi
+- components/pokemon/name-em-all.tsx
+- components/pokemon/multiplayer-lobby.tsx
+- app/(platform)/pokemon.css
+
+### Verifiche
+- Da completare con la build Vercel e con una sessione reale: avvio partita temporizzata, digitazione di più Pokémon consecutivi senza click aggiuntivo, lobby con almeno due account e viewport mobile.
