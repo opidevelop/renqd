@@ -257,7 +257,7 @@ export function UltimateFavouriteEditor({
           <Share2 size={15}/> {published ? "Aggiorna" : "Pubblica"}
         </button>
       </div>
-      <section className="pokemon-favourite-board" ref={boardRef}>
+      <section className="pokemon-favourite-board">
         <div className="pokemon-favourite-board-title"><span>RENQD × POKÉMON</span><strong>Ultimate Favourite</strong><small>La mia matrice Pokémon</small></div>
         <Grid catalog={catalog} matrix={matrix} onCell={(row,column) => { setActive({row,column}); setQuery(""); }} />
       </section>
