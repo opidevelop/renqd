@@ -103,7 +103,7 @@ export function Dialog({
       if (!topDialog || (previousFocus && topDialog.contains(previousFocus))) previousFocus?.focus();
       else topDialog.querySelector<HTMLElement>(focusableSelector)?.focus();
     };
-  }, [open, closeOnEscape]);
+  }, [open, closeOnEscape, onClose]);
 
   if (!open || typeof document === "undefined") return null;
 
