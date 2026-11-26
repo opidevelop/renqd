@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type MouseEvent } from 'react';
-import { createPortal } from 'react-dom';
+import { Dialog } from '@/components/ui/dialog';
 import Link from 'next/link';
 import { Users, X, UserRound, ArrowUpRight } from 'lucide-react';
 
@@ -78,32 +78,29 @@ export function ProfileFollowLists({
         </div>
       )}
 
-      {open && typeof document !== 'undefined' && createPortal(
-        <div className='profile-follow-modal-backdrop' onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(null); }}>
-          <section className='profile-follow-modal' role='dialog' aria-modal='true' aria-labelledby='profile-follow-modal-title'>
-            <header>
-              <div><span>LA TUA COMMUNITY</span><h2 id='profile-follow-modal-title'>{title}</h2></div>
-              <button type='button' aria-label='Chiudi' onClick={() => setOpen(null)}><X size={18} /></button>
-            </header>
-            <div className='profile-follow-modal-list'>
-              {entries.length ? entries.map((entry) => (
-                <div className='profile-follow-modal-entry' key={entry.userId}>
-                  <span className='profile-follow-modal-avatar'>
-                    {entry.avatarUrl ? <img src={entry.avatarUrl} alt='' /> : <b>{entry.username ? entry.displayName.slice(0, 1).toUpperCase() : <UserRound size={17} />}</b>}
-                  </span>
-                  <span className='profile-follow-modal-copy'>
-                    <strong>{entry.displayName}</strong>
-                    {entry.username && <small>@{entry.username}</small>}
-                    {!entry.username && <small>Informazioni non visibili</small>}
-                  </span>
-                  {entry.username && <Link href={'/u/' + entry.username} onClick={() => setOpen(null)} aria-label={'Apri il profilo di ' + entry.username}><ArrowUpRight size={16} /></Link>}
-                </div>
-              )) : <div className='profile-follow-modal-empty'>Ancora nessun profilo in questa lista.</div>}
-            </div>
-          </section>
-        </div>,
-        document.body
-      )}
+      <Dialog open={Boolean(open)} onClose={() => setOpen(null)} overlayClassName='profile-follow-modal-backdrop' className='profile-follow-modal' labelledBy='profile-follow-modal-title'>
+        {open&&<>
+          <header>
+            <div><span>LA TUA COMMUNITY</span><h2 id='profile-follow-modal-title'>{title}</h2></div>
+            <button type='button' aria-label='Chiudi' onClick={() => setOpen(null)}><X size={18} /></button>
+          </header>
+          <div className='profile-follow-modal-list'>
+            {entries.length ? entries.map((entry) => (
+              <div className='profile-follow-modal-entry' key={entry.userId}>
+                <span className='profile-follow-modal-avatar'>
+                  {entry.avatarUrl ? <img src={entry.avatarUrl} alt='' /> : <b>{entry.username ? entry.displayName.slice(0, 1).toUpperCase() : <UserRound size={17} />}</b>}
+                </span>
+                <span className='profile-follow-modal-copy'>
+                  <strong>{entry.displayName}</strong>
+                  {entry.username && <small>@{entry.username}</small>}
+                  {!entry.username && <small>Informazioni non visibili</small>}
+                </span>
+                {entry.username && <Link href={'/u/' + entry.username} onClick={() => setOpen(null)} aria-label={'Apri il profilo di ' + entry.username}><ArrowUpRight size={16} /></Link>}
+              </div>
+            )) : <div className='profile-follow-modal-empty'>Ancora nessun profilo in questa lista.</div>}
+          </div>
+        </>}
+      </Dialog>
     </>
   );
 }
