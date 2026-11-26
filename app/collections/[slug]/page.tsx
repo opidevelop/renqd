@@ -30,7 +30,7 @@ export default async function CollectionPage({ params, searchParams }: { params:
   const firstSettings = ordered[0]?.settings as Record<string, unknown> | undefined;
   const firstSnapshot = firstSettings?.savedSnapshot as { items?: { image_url?: string | null }[] } | undefined;
   const collectionCover = collectionBannerUrl || (typeof firstSettings?.coverImageUrl === "string" ? firstSettings.coverImageUrl : null) || firstSnapshot?.items?.find(item => item.image_url)?.image_url || null;
-  return <main className="public-profile-page collection-detail-page">
+  return <div className="public-profile-page collection-detail-page">
     <Link href={isOwner ? "/profile" : "/u/" + profile.username} className="public-profile-back"><ArrowLeft size={15}/> {isOwner ? "Il tuo profilo" : (profile.display_name || profile.username)}</Link>
     <section className="profile-cover collection-detail-cover" style={collectionCover ? { backgroundImage: "linear-gradient(90deg,rgba(18,14,11,.82),rgba(18,14,11,.15)),url(" + collectionCover + ")" } : undefined}>
       <div className="profile-cover-copy"><span>COLLEZIONE DI @{profile.username}</span><h1>{collection.title}</h1><p>{collection.description || "Una raccolta personale di Renq."}</p></div>
@@ -40,5 +40,5 @@ export default async function CollectionPage({ params, searchParams }: { params:
     <section className="profile-renqs-section"><div className="profile-section-heading"><div><span>LA RACCOLTA</span><h2>{ordered.length} Renq</h2></div><Trophy size={20}/></div>
       {ordered.length ? <div className="profile-renq-grid">{ordered.map(ranking => { const settings = ranking!.settings as Record<string, unknown>; const snapshot = settings.savedSnapshot as { items?: { image_url?: string | null }[] } | undefined; const cover = (typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null) || snapshot?.items?.find(item => item.image_url)?.image_url || null; return <Link key={ranking!.id} href={(isOwner ? "/renq/" : "/r/") + (ranking!.public_slug || ranking!.id)} className="profile-renq-card"><div style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.75),rgba(15,12,10,.05)),url(" + cover + ")" } : undefined}><span>{String(ranking!.mode).replaceAll("_"," ")}</span><ArrowUpRight size={17}/></div><strong>{ranking!.title}</strong></Link>; })}</div> : <div className="profile-empty-state"><Trophy size={23}/><strong>Questa collezione è ancora vuota</strong></div>}
     </section>
-  </main>;
+  </div>;
 }
