@@ -2050,3 +2050,12 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Impostazioni Name ’Em All rese comprimibili con `details/summary`, chiuse per impostazione predefinita e accessibili tramite il riepilogo «Privacy e notifiche».
 - Esclusi `POKEMON_NAME_EM_ALL` e `POKEMON_ULTIMATE_FAVOURITE` dagli elenchi Renq del profilo proprietario e del profilo pubblico e dai preferiti presentati come Renq. I risultati restano caricati nella scheda Pokémon e mantengono le regole di visibilità e accesso già esistenti.
 - Modifiche applicative e documentazione aggiornate su `main`. TypeScript, lint, build e deployment cumulativo da verificare; nessun deployment Production avviato da questa modifica.
+
+## 2026-11-26 — Rilascio rifiniture profilo Pokémon integrato
+
+- Verificate nel diff del commit applicativo `8ccea964ba2e98e5dfce6c07a1106ea8f627aa82` le tre modifiche approvate: rimozione del link legacy Pokémon accanto al badge Pubblico/Privato; pannello «Privacy e notifiche» Name ’Em All chiuso per default tramite `details/summary`; esclusione di Name ’Em All e Ultimate Favourite dagli elenchi Renq e dai preferiti presentati come Renq, mantenendo i risultati nella scheda Pokémon.
+- Deployment Production Vercel: `dpl_9WSHQZDBE8M5zFJH9zMyPAgmSy3Z`, commit `8ccea964ba2e98e5dfce6c07a1106ea8f627aa82`, stato `READY`; alias `renqd.app`, `renqd.vercel.app` e `www.renqd.app` associati.
+- Build Production superata: compilazione Next.js, controllo TypeScript, generazione delle pagine statiche e route completati.
+- Il controllo runtime Vercel per errori/fatal negli ultimi 30 minuti non ha restituito log.
+- ESLint non è stato eseguito separatamente in questa sessione: l'ambiente container non ha accesso di rete per clonare/installare il repository e non è disponibile un'azione GitHub Actions dispatch nel connettore. Non dichiarare il lint superato sulla sola base della build Vercel.
+- Test funzionali autenticati e collaudo visuale desktop/mobile non eseguiti: il browser collegato non è disponibile in questa sessione. Verificare con account autenticato la scheda Pokémon, l'espansione delle preferenze e l'assenza dei due tipi di risultato nelle schede Renq e Preferiti, sia nel profilo proprietario sia in quello pubblico.
