@@ -425,7 +425,7 @@ export function PokemonNameEmAllMultiplayerGame({
             const displayName=form?item.name+" "+form.label:item.name;
             return <button key={item.id+"-"+(form?.id??"base")} type="button" disabled={session.status!=="ACTIVE"||countdown>0} onClick={()=>{setSelected(item);setHint(null);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")+(recentlyFoundId===item.id?" is-revealing":"")} aria-label={isFound?displayName:"Pokémon da scoprire"}>
               <span className="pokemon-nae-cell-art">{isFound||visual.shadows?<img src={artwork} alt="" loading="lazy" style={{filter:isFound?"none":"brightness(0) saturate(0) opacity(.55)"}}/>:<b className="pokemon-nae-pokeball">◉</b>}</span>
-              {isFound?<strong>{displayName}</strong>:<strong className="is-hidden">"???"</strong>}
+              {isFound?<strong>{displayName}</strong>:<strong className="is-hidden">???</strong>}
               {(item.forms.length>0||item.isLegendary||item.isMythical||item.isUltraBeast||item.isParadox)&&<span className="pokemon-nae-cell-indicators">{item.forms.length>0?"◇":""}{item.isLegendary?"★":""}{item.isMythical?"✦":""}{item.isUltraBeast?"◈":""}{item.isParadox?"⌁":""}</span>}
               {shared&&isFound&&discoverer&&<span className="pokemon-nae-cell-discoverer" title={"Scoperto da "+discoverer.displayName}>{discoverer.avatarUrl?<img src={discoverer.avatarUrl} alt=""/>:discoverer.displayName.slice(0,1).toUpperCase()}</span>}
             </button>;
