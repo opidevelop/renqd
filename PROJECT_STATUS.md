@@ -1977,3 +1977,9 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Ultimo deployment codice verificato READY: `dpl_4CdF2xb6sAZsu61S9jUNq7qrqJ8t`, commit `5be10a2cc9ca62aa441ee47ac3c051aa2fd2f01f`.
 - Dopo quel deployment sono stati aggiornati soltanto i documenti di progetto e l'archivio decisioni; verificare il deployment associato al commit documentale più recente.
 - Restano necessari test E2E autenticati per coda rapida, collisioni (Mew/Mewtwo), rollback e persistenza dopo refresh in tutte le modalità, oltre al collaudo visivo mobile/desktop dei modal e della pagina profilo.
+
+
+### Aggiornamento tecnico — 26 novembre 2026
+- Allineato anche Solo al matching diretto nell'evento `onChange`: il nome non ambiguo viene messo in coda nello stesso evento, senza attendere un effetto successivo. Per i nomi ambigui, Invio conferma il nome più breve; se si continua a digitare, il nome completo più lungo viene riconosciuto al completamento.
+- Gestite anche le ripetizioni di un nome già scoperto o già presente nella coda: il campo viene svuotato e mostra il feedback corretto, senza creare richieste duplicate.
+- Deployment Production Vercel verificato READY: `dpl_9r76CYBxxGXdz5WFcCFg5vCCpUgS`, commit `8e67ee0bd7ccfed8d7c54469b7068f641c83ce16`. Build Next.js completata, compilazione riuscita e controllo TypeScript concluso senza errori.
