@@ -31,8 +31,9 @@ export function GuessTheLipsyncGame({franchises,seasons,queens,lipsyncs}:Props){
  const [showAbandon,setShowAbandon]=useState(false);
  const [finished,setFinished]=useState(false);
  const finishLock=useRef(false);
- const supabase=useMemo(()=>createClient(),[]);
+ const supabase=useMemo(()=>createClient(),[]);const {preferences}=useDragRacePreferences();const playerRef=useRef<HTMLAudioElement>(null);
  const current=queue[index]??null;
+ useEffect(()=>{const player=playerRef.current;if(!player)return;player.volume=preferences.sounds_enabled?preferences.player_volume:0;if(current?.preview_url&&preferences.player_autoplay&&preferences.sounds_enabled)void player.play().catch(()=>{});else player.pause();},[current?.id,current?.preview_url,preferences.player_autoplay,preferences.player_volume,preferences.sounds_enabled]);
  const queenMap=useMemo(()=>new Map(queens.map(q=>[q.id,q])),[queens]);
  const seasonOptions=seasons.filter(s=>selectedFranchises.includes(s.franchise_code));
  const filtered=useMemo(()=>lipsyncs.filter(x=>{const season=seasons.find(s=>s.id===x.season_id);return Boolean(season&&selectedFranchises.includes(season.franchise_code)&&(allSeasons||selectedSeasons.includes(x.season_id)));}),[lipsyncs,seasons,selectedFranchises,allSeasons,selectedSeasons]);
