@@ -6,7 +6,7 @@ import { CheckCircle2, Crown, HelpCircle, LoaderCircle, LogOut, PauseCircle, X, 
 import { createClient } from "@/lib/supabase/client";
 import { playPokemonSound, preparePokemonAudio } from "@/lib/pokemon/sounds";
 import { usePokemonSoundPreference } from "@/components/pokemon/use-pokemon-sound-preference";
-import { PokemonCatalog, PokemonSpecies, normalizePokemonName } from "@/lib/pokemon/catalog";
+import { PokemonCatalog, PokemonSpecies, normalizePokemonName, findExactPokemonMatch, isAmbiguousPokemonName } from "@/lib/pokemon/catalog";
 import { expelNameEmAllParticipantAction, finishNameEmAllMultiplayerAction, heartbeatNameEmAllAction, hintNameEmAllMultiplayerAction, leaveNameEmAllAction, submitNameEmAllMultiplayerAnswerAction } from "@/app/(platform)/pokemon/name-em-all/actions";
 import type { NameEmAllParticipant } from "@/components/pokemon/multiplayer-lobby";
 
@@ -87,11 +87,9 @@ export function PokemonNameEmAllMultiplayerGame({
     setSortOrder(value);
     if(value==="RANDOM")setRandomOrder([...species].sort(()=>Math.random()-.5).map(item=>item.id));
   };
-  const exactMatch=useMemo(()=>{
-    const normalized=normalizePokemonName(query);
-    if(!normalized)return null;
-    return species.find(item=>[item.name,item.nameEn,item.slug,...item.aliases].some(name=>normalizePokemonName(name)===normalized))??null;
-  },[species,query]);
+  const normalizedQuery=normalizePokemonName(query);
+  const exactMatch=useMemo(()=>findExactPokemonMatch(species,normalizedQuery),[species,normalizedQuery]);
+  const exactMatchIsAmbiguous=Boolean(exactMatch&&isAmbiguousPokemonName(species,exactMatch,normalizedQuery));
   const percent=species.length?Math.round(found.size/species.length*100):0;
 
   useEffect(()=>{
@@ -381,7 +379,8 @@ export function PokemonNameEmAllMultiplayerGame({
 
     <div className="pokemon-nae-search-wrap">
       <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Non è una risposta valida per questo catalogo."?" is-wrong":"")}>
-        <input ref={inputRef} value={query} onChange={event=>{const value=event.target.value;setQuery(value);setConfirmed(false);setMessage("");const normalized=normalizePokemonName(value);if(normalized&&!pendingRef.current&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){const match=species.find(item=>(item.normalizedAliases?.length?item.normalizedAliases:[item.name,item.nameEn,item.slug,...item.aliases].map(normalizePokemonName)).includes(normalized));if(match){void submit(match.name,match);}}}}
+        <input ref={inputRef} value={query} onChange={event=>{const value=event.target.value;setQuery(value);setConfirmed(false);setMessage("");const normalized=normalizePokemonName(value);if(normalized&&!pendingRef.current&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){const match=findExactPokemonMatch(species,normalized);if(match&&!isAmbiguousPokemonName(species,match,normalized)){void submit(match.name,match);}}}}
+          onKeyDown={event=>{if(event.key==="Enter"&&exactMatch&&exactMatchIsAmbiguous&&!pendingRef.current&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){event.preventDefault();void submit(exactMatch.name,exactMatch);}}}
           placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false}
           disabled={pending||playerCompleted||session.status!=="ACTIVE"||countdown>0}/>
         {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
