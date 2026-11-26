@@ -4,10 +4,10 @@
 >
 > Per le decisioni vincolanti consultare prima `PROJECT_DECISIONS.md`. Se questo documento descrive uno stato tecnico che contraddice una decisione, prevale `PROJECT_DECISIONS.md`.
 >
-> **Aggiornato:** 24 novembre 2026
+> **Aggiornato:** 26 novembre 2026
 > **Repository:** https://github.com/opidevelop/renqd
 > **Branch operativo:** `main`
-> **Ultimo commit applicativo analizzato su main:** `3ea2351030371b570354c6352c56079078ded152`
+> **Ultimo commit applicativo analizzato su main:** `e7f2942bcc9980669397f7577ee7aa135c3dc860`
 
 ## 1. Sintesi esecutiva
 
@@ -2167,9 +2167,20 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Aggiunta cancellazione definitiva della singola partita e dell'intera cronologia Drag Race. La cancellazione singola elimina anche risultato e attività collegati e ricostruisce statistiche e classifiche dalle sessioni rimaste; la cancellazione completa azzera anche le statistiche aggregate Guess Them All. La UI usa il dialogo di conferma condiviso.
 - Le partite completate vengono registrate automaticamente in drag_race_activity tramite trigger su drag_race_results e compaiono nel feed sociale Renqd. Il feed applica follow accettato, profilo pubblico, privacy per modalità e blocchi reciproci. L'accesso diretto alla tabella attività è intenzionalmente negato: la lettura avviene tramite RPC feed.
 - La Home ora ha due card hub con geometria e comportamento condivisi su desktop e mobile. Le immagini Drag Race usano thumbnail dirette Wikimedia per Trixie Mattel e Monét X Change; la sorgente già verificata di Naomi Smalls è rimasta invariata. Sono stati aggiunti fallback e attribuzioni/licenze anche per le immagini di riserva. La grafica CSS delle card era assente e ora è stata aggiunta.
-- Migrazioni applicate a Supabase e registrate in supabase/migrations: 20261126151051_drag_race_user_preferences_shared, 20261126152012_drag_race_statistics_privacy, 20261126152349_drag_race_period_leaderboards_and_session_stats, 20261126153104_drag_race_completed_activity_in_social_feed, 20261126153632_drag_race_history_deletion_and_stats_rebuild, 20261126154000_drag_race_leaderboard_and_activity_indexes.
+- Migrazioni applicate a Supabase e registrate in supabase/migrations: 20261126151051_drag_race_user_preferences_shared, 20261126152012_drag_race_statistics_privacy, 20261126152349_drag_race_period_leaderboards_and_session_stats, 20261126153104_drag_race_completed_activity_in_social_feed, 20261126153632_drag_race_history_deletion_and_stats_rebuild, 20261126154014_drag_race_leaderboard_and_activity_indexes.
 - Verifica strutturale DB: RLS e FORCE RLS attivi su preferenze, statistiche permanenti, statistiche periodiche e attività. La tabella drag_race_activity ha zero policy dirette per scelta deny-by-default; il feed usa RPC SECURITY DEFINER con i controlli indicati. Gli advisor performance hanno mostrato warning preesistenti generali e un FK non indicizzato su drag_race_activity.actor_id, poi coperto da indice insieme agli indici per feed, risultati utente e classifiche.
 - CI GitHub Actions: success sui commit d887ad71b928fd6af75d57763000105edbd585f2, cec796ec88debfa363f711b1e48bc8d2a07f9ed2 e 4a175a3e953f7f762f2c9d2a6728c4a665acfeaa. Il commit fb3b59047909818c295583641cafe156e909ccb9 ha superato lint, TypeScript e build dopo la correzione dell'apostrofo non escapato. I commit successivi di attribuzioni, indici e filtro query sono ancora da verificare con CI al momento di questo aggiornamento.
 - Vercel Production deployment dpl_DpUP21xJqukQ4v9suuX5wZPJXo44, commit d887ad71b928fd6af75d57763000105edbd585f2, stato READY. Questo deployment include la UI di cancellazione cronologia, il feed Drag Race e la correzione delle card Home con le nuove sorgenti immagini. I commit successivi (4a175a3, de9a164, df1b122, 5e8c842) sono già su main ma non risultano ancora inclusi in quel deployment.
 - Non è stato eseguito un collaudo autenticato end-to-end né una verifica visiva diretta delle immagini nel browser. Dopo il deployment cumulativo, controllare che le tre fotografie appaiano sia nelle card Home sia nell'hub Drag Race; testare completamento/interruzione, privacy, classifiche, feed e cancellazione cronologia con un account approvato.
 - Restano fuori da questo gruppo di rilascio: badge/obiettivi e relative notifiche, collaudo funzionale completo, sincronizzazione iniziale del catalogo se non già eseguita, e completamento delle altre modalità ancora aperte (in particolare Season Simulator e Track Record secondo il backlog della macro-categoria).
+
+### Correzioni finali e riallineamento migrazioni (26 novembre 2026)
+
+- Corretto l'ID usato dalla cancellazione di una voce storica: l'API riceve ora il vero session_id, non l'ID del risultato. Anche le righe risultato caricate fuori dalla finestra delle ultime sessioni possono quindi eliminare la sessione proprietaria. Gli elementi sintetici di condivisione statistiche sono esplicitamente non eliminabili e non confondono le sessioni interrotte con le sconfitte.
+- La funzione di visibilità statistiche per modalità usa confronti booleani sicuri invece di cast diretto del JSON: un valore malformato in mode_visibility ricade sull'impostazione generale senza interrompere la lettura del profilo o delle classifiche. Migrazione live e file repository: 20261126154330_drag_race_privacy_safe_mode_overrides.
+- Il feed sociale applica ora i blocchi reciproci anche agli eventi Ranking, oltre agli eventi Drag Race. Migrazione live e file repository: 20261126154521_renqd_social_feed_reciprocal_block_filter.
+- Riallineati i nomi dei file SQL ai versioni effettive registrate da Supabase: 20261126154014 (indici), 20261126154330 (privacy safe override), 20261126154521 (blocchi feed). I vecchi nomi locali non corrispondenti sono stati rimossi.
+- CI GitHub Actions: success sui commit 5cec3b64780037cc836d76f8b01286136a4bd128 e 3392f57aae3337472fd53c95cab2133534ce35f6; il run del commit e7f2942bcc9980669397f7577ee7aa135c3dc860 è in corso. I precedenti run falliti 1dc824d e ef57d sono tentativi intermedi, corretti dal commit 5cec3b6.
+- Supabase migrations: tutte le otto migrazioni Drag Race/Feed elencate nella sezione precedente risultano applicate nel progetto live; il database non contiene ancora sessioni o risultati Drag Race, quindi non è stata necessaria una migrazione dati retroattiva.
+- Produzione Vercel resta sul deployment READY d887ad71b928fd6af75d57763000105edbd585f2. Le correzioni successive sono su main e CI-verificate, ma non ancora pubblicate: la creazione deployment ha restituito il limite giornaliero API HTTP 402 e non è disponibile Vercel CLI nell'ambiente. Non dichiarare aggiornato il sito live fino al successivo deployment READY.
+- Restano da eseguire test funzionali autenticati e verifica visiva browser delle immagini. Nessun dato utente è stato cancellato o modificato durante queste verifiche.
