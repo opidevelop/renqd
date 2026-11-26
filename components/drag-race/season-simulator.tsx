@@ -2,6 +2,7 @@
 import {useMemo,useState} from "react";
 import Link from "next/link";
 import {createClient} from "@/lib/supabase/client";
+import {sortTrackRecordQueens,type TrackRecordPlacementScore} from "@/lib/drag-race/track-record";
 import {ArrowLeft,ArrowRight,Check,Crown,LoaderCircle,Plus,RefreshCw,Save,Shuffle,Trash2,Upload} from "lucide-react";
 
 type Queen={id:string;name:string;aliases:string[];image_url:string|null;image_path?:string|null;franchiseCodes:string[];custom?:boolean};
@@ -18,7 +19,7 @@ type SimEpisode={
  eliminatedIds:string[];untucked:boolean;completed:boolean;
 };
 type SavedSummary={id:string;title:string;created_at:string;statistics:Record<string,unknown>};
-type Props={userId:string;franchises:Franchise[];seasons:SeasonOption[];queens:Queen[];songs:Song[];savedSeasons:SavedSummary[]};
+type Props={userId:string;franchises:Franchise[];seasons:SeasonOption[];queens:Queen[];songs:Song[];savedSeasons:SavedSummary[];scoringRules:TrackRecordPlacementScore[]};
 const CHALLENGES=["Design challenge","Ball","Snatch Game","Acting challenge","Comedy challenge","Roast","Rusical","Girl groups","Improv","Branding challenge","Makeover","Sewing challenge","Advert challenge","Talent show","Interview"];
 const MINI=["Reading challenge","Photo shoot","Mini ball","Dance challenge","Improv rapido","Quiz backstage","Runway sprint"];
 const PLACEMENTS:Placement[]=["WIN","HIGH","SAFE","LOW","BTM2","ELIM"];
@@ -27,7 +28,7 @@ const shuffle=<T,>(items:T[])=>{const out=[...items];for(let i=out.length-1;i>0;
 const pick=<T,>(items:T[])=>items.length?items[Math.floor(Math.random()*items.length)]:undefined;
 const comments=["Una performance precisa, carismatica e memorabile.","Il look racconta una storia, ma l'esecuzione può crescere.","Hai centrato il brief con personalità.","C'è un'idea forte, serve più controllo sul risultato.","La tua presenza scenica ha dominato la stanza.","Un risultato altalenante: alcuni momenti brillano, altri meno."];
 const blankConfig={queenCount:"12",customCount:"12",premiereFormat:"STANDARD",returningFormat:"NONE",seasonFormat:"STANDARD",finaleFormat:"TOP3",finalistCount:"3",episodeCount:"10",doubleShantay:true,doubleSashay:false,challengeRiggory:false,lipsyncRiggory:false,immunity:false,goldenBeaver:false,fameGames:false,chocolateBar:false,chocolateMode:"RANDOM",chocolateQueenId:"",miniMode:"EVERY_EPISODE",judgeFormat:"STANDARD",untucked:true,otherTwists:""};
-export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,savedSeasons}:Props){
+export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,savedSeasons,scoringRules}:Props){
  const db=useMemo(()=>createClient(),[]);
  const [stage,setStage]=useState<"setup"|"cast"|"relationships"|"episodes"|"finale"|"saved">("setup");
  const [config,setConfig]=useState({...blankConfig});
@@ -63,6 +64,8 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
  const [returningUsed,setReturningUsed]=useState(false);
  const [fameScores,setFameScores]=useState<Record<string,number>>({});
  const [chocolateUsed,setChocolateUsed]=useState(false);
+ const [premiereGroupTwo,setPremiereGroupTwo]=useState<string[]>([]);
+ const [premiereSurvivors,setPremiereSurvivors]=useState<string[]>([]);
 
  const pool=useMemo(()=>queens.filter(q=>q.franchiseCodes.some(c=>selectedFranchises.includes(c))),[queens,selectedFranchises]);
  const selectedSeason=seasons.find(s=>s.id===seasonId);
@@ -113,7 +116,8 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
   const mini=config.miniMode==="NONE"||(config.miniMode==="RANDOM"&&Math.random()<0.5)?null:pick(MINI)??null;
   const miniChallengeWinnerId=mini?(pick(live)?.id??null):null;
   const outcome=number===1&&config.premiereFormat==="NO_ELIMINATION"?"NO_ELIMINATION":"ELIMINATION";
-  return{number,title,challenge:pick(CHALLENGES)??CHALLENGES[0],miniChallenge:mini,miniChallengeWinnerId,narrative:"Le Queen entrano nel Werk Room e affrontano una nuova prova. Le alleanze vengono messe alla prova, mentre la passerella cambia gli equilibri della competizione.",judgeFormat:config.judgeFormat,eliminatedId:bottom.find(id=>id!==lipsyncWinner)??bottom[0]??null,placements,comments:episodeComments,challengeWinnerId:challengeWinner??active[0],bottomIds:bottom,songId:song?.id??null,lipsyncWinnerId:lipsyncWinner??bottom[0]??null,immuneId:immunityId,goldenBeaverSaveId:null,outcome,eliminatedIds:[],untucked:Boolean(config.untucked),completed:false};
+  const challenge=number===1&&config.premiereFormat==="RUMIX"?"Talent show":pick(CHALLENGES)??CHALLENGES[0];
+  return{number,title,challenge,miniChallenge:mini,miniChallengeWinnerId,narrative:"Le Queen entrano nel Werk Room e affrontano una nuova prova. Le alleanze vengono messe alla prova, mentre la passerella cambia gli equilibri della competizione.",judgeFormat:config.judgeFormat,eliminatedId:bottom.find(id=>id!==lipsyncWinner)??bottom[0]??null,placements,comments:episodeComments,challengeWinnerId:challengeWinner??active[0],bottomIds:bottom,songId:song?.id??null,lipsyncWinnerId:lipsyncWinner??bottom[0]??null,immuneId:immunityId,goldenBeaverSaveId:null,outcome,eliminatedIds:[],untucked:Boolean(config.untucked),completed:false};
  }
  function updateCurrent<K extends keyof SimEpisode>(key:K,value:SimEpisode[K]){setCurrentEpisode(old=>{if(!old)return old;const next={...old,[key]:value} as SimEpisode;if(key==="lipsyncWinnerId")next.eliminatedId=old.bottomIds.find(id=>id!==String(value))??old.bottomIds[0]??null;if(key==="goldenBeaverSaveId"&&value)next.eliminatedId=old.bottomIds.find(id=>id!==String(value)&&id!==old.lipsyncWinnerId)??old.eliminatedId;return next;});}
  function updatePlacement(id:string,value:Placement){setCurrentEpisode(old=>{if(!old)return old;let bottomIds=[...old.bottomIds];if(value==="BTM2"){bottomIds=[...bottomIds.filter(x=>x!==id),id].slice(-2);}else if(bottomIds.includes(id)){bottomIds=bottomIds.filter(x=>x!==id);const replacement=activeIds.find(x=>x!==id&&!bottomIds.includes(x)&&x!==old.challengeWinnerId);if(replacement)bottomIds.push(replacement);}const challengeWinnerId=value==="WIN"?id:old.challengeWinnerId;const lipsyncWinnerId=bottomIds.includes(old.lipsyncWinnerId??"")?old.lipsyncWinnerId:bottomIds[0]??null;return{...old,placements:{...old.placements,[id]:value},bottomIds,challengeWinnerId,lipsyncWinnerId,eliminatedId:bottomIds.find(x=>x!==lipsyncWinnerId)??bottomIds[0]??null};});}
@@ -133,11 +137,16 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
   setBusy(true);setNotice("");
   const chocolateQueenId=config.chocolateBar&&config.chocolateMode==="RANDOM"?(pick(chosen)?.id??""):config.chocolateQueenId;
   if(chocolateQueenId!==config.chocolateQueenId)setConfig(old=>({...old,chocolateQueenId}));
+  if(config.chocolateBar&&config.chocolateMode==="MANUAL"&&!chosen.some(q=>q.id===chocolateQueenId)){setNotice("La Queen scelta per la Chocolate Bar deve appartenere al cast.");setBusy(false);return;}
   const configSnapshot={...config,chocolateQueenId,queenCount:desired,franchises:selectedFranchises,castMode,sourceSeasonId:castMode==="BY_SEASON"?seasonId:null};
-  const state={stage:"EPISODES",cast:chosen,activeIds:chosen.map(q=>q.id),eliminatedIds:[],episodes:[],relationships,returningUsed:false};
+  const shuffledCast=config.premiereFormat==="SPLIT_2"?shuffle(chosen):chosen;
+  const groupOne=config.premiereFormat==="SPLIT_2"?shuffledCast.slice(0,Math.ceil(shuffledCast.length/2)):shuffledCast;
+  const groupTwo=config.premiereFormat==="SPLIT_2"?shuffledCast.slice(Math.ceil(shuffledCast.length/2)):[];
+  const initialActive=groupOne.map(q=>q.id);
+  const state={stage:"EPISODES",cast:chosen,activeIds:initialActive,premiereGroupTwo:groupTwo.map(q=>q.id),premiereSurvivors:[],eliminatedIds:[],episodes:[],relationships,returningUsed:false};
   const {data,error}=await db.rpc("drag_race_create_session",{p_mode:"SEASON_SIMULATOR",p_config:configSnapshot,p_state:state});
   if(error){setNotice("Impossibile avviare la stagione: "+error.message);setBusy(false);return;}
-  setCast(chosen);setActiveIds(chosen.map(q=>q.id));setEliminatedIds([]);setEpisodes([]);setEpisodeNumber(1);setSessionId(String(data));setReturningUsed(false);setChocolateUsed(false);setFameScores({});setStage("episodes");setCurrentEpisode(null);setBusy(false);
+  setCast(chosen);setActiveIds(initialActive);setPremiereGroupTwo(groupTwo.map(q=>q.id));setPremiereSurvivors([]);setEliminatedIds([]);setEpisodes([]);setEpisodeNumber(1);setSessionId(String(data));setReturningUsed(false);setChocolateUsed(false);setFameScores({});setStage("episodes");setCurrentEpisode(null);setBusy(false);
  }
  function prepareEpisode(){if(!activeIds.length){setNotice("Non ci sono Queen attive.");return;}setCurrentEpisode(generateEpisode(episodeNumber,activeIds));}
  async function completeEpisode(){
@@ -158,11 +167,15 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
    setChocolateUsed(true);
   }
   const episode={...currentEpisode,placements:{...currentEpisode.placements,...Object.fromEntries(removed.map(id=>[id,"ELIM" as Placement]))},outcome:out,eliminatedIds:removed,completed:true};
-  const nextEpisodes=[...episodes,episode];const nextEliminated=[...eliminatedIds,...removed];const nextActive=activeIds.filter(id=>!removed.includes(id));
+  const nextEpisodes=[...episodes,episode];const nextEliminated=[...eliminatedIds,...removed];let nextActive=activeIds.filter(id=>!removed.includes(id));
+  const splitTransition=config.premiereFormat==="SPLIT_2"&&episodeNumber===1;
+  if(splitTransition){setPremiereSurvivors(nextActive);nextActive=premiereGroupTwo;}
+  else if(config.premiereFormat==="SPLIT_2"&&episodeNumber===2){nextActive=[...premiereSurvivors,...nextActive];setPremiereGroupTwo([]);setPremiereSurvivors([]);}
   const nextRelationships=updateRelationshipEvents(episode,removed);
   const nextFame={...fameScores};if(config.fameGames)for(const [id,placement] of Object.entries(episode.placements)){const points=placement==="WIN"?3:placement==="HIGH"?2:placement==="SAFE"?1:placement==="BTM2"?-1:0;nextFame[id]=(nextFame[id]??0)+points;}
   setEpisodes(nextEpisodes);setEliminatedIds(nextEliminated);setActiveIds(nextActive);setRelationships(nextRelationships);setFameScores(nextFame);setCurrentEpisode(null);
   await persistActive(nextEpisodes,nextActive,nextEliminated,nextRelationships);
+  if(splitTransition){setEpisodeNumber(2);return;}
   const finalCount=Math.max(2,Math.min(4,Number(config.finalistCount)||3));
   if(nextActive.length<=finalCount||episodeNumber>=Math.max(4,Math.min(20,Number(config.episodeCount)||10))){
    const ranked=nextActive.map(id=>({id,wins:nextEpisodes.filter(ep=>ep.challengeWinnerId===id).length})).sort((a,b)=>b.wins-a.wins).map(x=>x.id);
@@ -172,16 +185,18 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
  }
  function chooseFinalists(ids:string[]){setFinalists(ids.slice(0,Math.max(2,Math.min(4,Number(config.finalistCount)||3))));}
  function createTrackRecord(){
-  return cast.map(q=>({id:q.id,name:q.name,image_url:q.image_url,results:episodes.map(ep=>({episode:ep.number,placement:ep.placements[q.id]??(ep.eliminatedIds.includes(q.id)?"ELIM":null)})),final_placement:q.id===winnerId?"WINNER":q.id===runnerUpId?"RUNNER_UP":q.id===thirdId?"THIRD":eliminatedIds.includes(q.id)?"ELIMINATED":"FINALIST"}));
+  const base={episodes:episodes.map(ep=>({number:ep.number,title:ep.title,counts_for_ppe:true,mini_challenge:ep.miniChallenge,maxi_challenge:ep.challenge})),queens:cast.map(q=>({id:q.id,name:q.name,image_url:q.image_url,winner:q.id===winnerId,results:episodes.map(ep=>({episode:ep.number,placement:ep.placements[q.id]??(ep.eliminatedIds.includes(q.id)?"ELIM":null)})),ppe_episode_numbers:episodes.map(ep=>ep.number)}))};
+  return sortTrackRecordQueens(base,scoringRules).map(q=>({...q,final_placement:q.id===winnerId?"WINNER":q.id===runnerUpId?"RUNNER_UP":q.id===thirdId?"THIRD":eliminatedIds.includes(q.id)?"ELIMINATED":"FINALIST"}));
  }
- function computeStatistics(){
-  return cast.map(q=>{const results=episodes.map(ep=>ep.placements[q.id]).filter(Boolean);return{queenId:q.id,queenName:q.name,challengeWins:episodes.filter(ep=>ep.challengeWinnerId===q.id).length,lipsyncWins:episodes.filter(ep=>ep.lipsyncWinnerId===q.id).length,bottom2:episodes.filter(ep=>ep.bottomIds.includes(q.id)).length,eliminations:episodes.filter(ep=>ep.eliminatedIds.includes(q.id)).length,placements:results};});
+ function computeStatistics(trackRecord:ReturnType<typeof createTrackRecord>){
+  return cast.map(q=>{const results=episodes.map(ep=>ep.placements[q.id]).filter(Boolean);const track=trackRecord.find(row=>row.id===q.id);return{queenId:q.id,queenName:q.name,challengeWins:episodes.filter(ep=>ep.challengeWinnerId===q.id).length,lipsyncWins:episodes.filter(ep=>ep.lipsyncWinnerId===q.id).length,bottom2:episodes.filter(ep=>ep.bottomIds.includes(q.id)).length,eliminations:episodes.filter(ep=>ep.eliminatedIds.includes(q.id)).length,placements:results,ppe:track?.ppe??null,calculatedRank:track?.calculated_rank??null};});
  }
  async function saveSeason(){
   if(!sessionId||!winnerId){setNotice("Seleziona la vincitrice prima di salvare.");return;}
   setBusy(true);setNotice("");
-  const record={config,franchiseCodes:selectedFranchises,cast,episodes,finale:{finalists,winnerId,runnerUpId,thirdId,format:config.finaleFormat},relationships,trackRecord:createTrackRecord(),fameGames:config.fameGames?fameScores:null,createdAt:new Date().toISOString()};
-  const stats={winnerId,runnerUpId,thirdId,episodes:episodes.length,queenCount:cast.length,queenStatistics:computeStatistics(),fameGamesWinner:config.fameGames?Object.entries(fameScores).sort((a,b)=>b[1]-a[1])[0]?.[0]??null:null};
+  const trackRecord=createTrackRecord();
+  const record={config,franchiseCodes:selectedFranchises,cast,episodes,finale:{finalists,winnerId,runnerUpId,thirdId,format:config.finaleFormat},relationships,trackRecord,fameGames:config.fameGames?fameScores:null,createdAt:new Date().toISOString()};
+  const stats={winnerId,runnerUpId,thirdId,episodes:episodes.length,queenCount:cast.length,queenStatistics:computeStatistics(trackRecord),fameGamesWinner:config.fameGames?Object.entries(fameScores).sort((a,b)=>b[1]-a[1])[0]?.[0]??null:null};
   const seasonTitle=title.trim()||("Drag Race · "+cast.length+" Queen · "+new Date().toLocaleDateString("it-IT"));
   const {data,error}=await db.from("drag_race_saved_seasons").insert({owner_id:userId,title:seasonTitle,season_data:record,statistics:stats}).select("id").single();
   if(error){setNotice("Salvataggio non riuscito: "+error.message);setBusy(false);return;}
@@ -225,7 +240,7 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
    <div className="ss-toggle-grid">
     {([["doubleShantay","Double Shantay"],["doubleSashay","Double Sashay"],["challengeRiggory","Challenge Riggory"],["lipsyncRiggory","Lipsync Riggory"],["immunity","Immunity"],["goldenBeaver","Golden Beaver"],["fameGames","Fame Games"],["chocolateBar","Chocolate Bar"],["untucked","Untucked"]] as const).map(([key,label])=><label key={key}><input type="checkbox" checked={Boolean(config[key])} onChange={e=>setSetting(key,e.target.checked)}/>{label}</label>)}
    </div>
-   {config.chocolateBar&&<div className="ss-grid"><label>Chocolate Bar<select value={config.chocolateMode} onChange={e=>setSetting("chocolateMode",e.target.value)}><option value="RANDOM">Assegnazione casuale</option><option value="MANUAL">Scelgo la Queen</option></select></label>{config.chocolateMode==="MANUAL"&&<label>Queen con Chocolate Bar<select value={config.chocolateQueenId} onChange={e=>setSetting("chocolateQueenId",e.target.value)}><option value="">Seleziona dopo il cast</option>{cast.map(q=><option key={q.id} value={q.id}>{q.name}</option>)}</select></label>}</div>}
+   {config.chocolateBar&&<div className="ss-grid"><label>Chocolate Bar<select value={config.chocolateMode} onChange={e=>setSetting("chocolateMode",e.target.value)}><option value="RANDOM">Assegnazione casuale</option><option value="MANUAL">Scelgo la Queen</option></select></label></div>}
    <label className="ss-full">Altri twist configurabili<textarea value={config.otherTwists} onChange={e=>setSetting("otherTwists",e.target.value)} placeholder="Aggiungi regole o twist personalizzati…"/></label>
    <button className="ss-primary" onClick={()=>setStage("cast")}>Continua al cast <ArrowRight size={16}/></button>
   </section>}
@@ -236,6 +251,7 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
    {castMode==="CUSTOM"&&<><p>Seleziona Queen dal catalogo e aggiungi eventuali Queen custom. Il cast sarà bloccato quando inizierà la stagione.</p><input className="ss-search" value={queenSearch} onChange={e=>setQueenSearch(e.target.value)} placeholder="Cerca Queen o alias…"/><div className="ss-suggestions">{suggestions.map(q=><button key={q.id} onClick={()=>toggleQueen(q.id)}>{selectedIds.includes(q.id)?"✓ ":"＋ "}{q.name}</button>)}</div><div className="ss-custom-form"><input value={customName} onChange={e=>setCustomName(e.target.value)} placeholder="Nome Queen custom"/><input value={customImageUrl} onChange={e=>setCustomImageUrl(e.target.value)} placeholder="URL immagine (facoltativo)"/><label className="ss-upload"><Upload size={15}/> Carica immagine<input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>void addCustomQueen(e.target.files?.[0])}/></label><button disabled={uploading} onClick={()=>void addCustomQueen()}>{uploading?<LoaderCircle size={15}/>:<Plus size={15}/>} Aggiungi Queen</button></div><p>{selectedIds.length}/{desired} selezionate</p></>}
    {castMode==="BY_SEASON"&&<><div className="ss-grid"><label>Franchise<select value={selectedFranchises[0]??""} onChange={e=>{setSelectedFranchises([e.target.value]);setSeasonId("");}}><option value="">Seleziona</option>{franchises.map(f=><option key={f.code} value={f.code}>{f.name}</option>)}</select></label><label>Stagione<select value={seasonId} onChange={e=>setSeasonId(e.target.value)}><option value="">Seleziona stagione</option>{seasons.filter(s=>s.franchise_code===selectedFranchises[0]).map(s=><option key={s.id} value={s.id}>{s.name} · {s.year??"Anno n/d"}</option>)}</select></label></div><p>Il cast importato da una stagione ufficiale non può essere modificato.</p></>}
    <div className="ss-cast-preview">{(castMode==="BY_SEASON"?seasonCast:castMode==="RANDOM"?cast:[...queens.filter(q=>selectedIds.includes(q.id)),...customQueens.filter(q=>selectedIds.includes(q.id))]).map(renderQueen)}</div>
+    {config.chocolateBar&&config.chocolateMode==="MANUAL"&&<label className="ss-full">Queen con Chocolate Bar<select value={config.chocolateQueenId} onChange={e=>setSetting("chocolateQueenId",e.target.value)}><option value="">Seleziona Queen del cast</option>{currentCast.map(q=><option key={q.id} value={q.id}>{q.name}</option>)}</select></label>}
    {castMode==="RANDOM"&&cast.length>0&&<div className="ss-cast-tools"><button onClick={randomizeCastOrder}><Shuffle size={14}/> Randomize ordine</button><button onClick={()=>{const q=pick(cast);if(q)replaceCastQueenRandomly(q.id);}}><RefreshCw size={14}/> Sostituzione casuale</button><label>Sostituisci Queen<select defaultValue="" onChange={e=>{const [oldId,newId]=e.target.value.split("|");if(oldId&&newId)replaceCastQueen(oldId,newId);}}><option value="">Scegli sostituzione</option>{cast.map(q=><optgroup key={q.id} label={"Rimuovi "+q.name}>{pool.filter(p=>!cast.some(c=>c.id===p.id)).map(p=><option key={p.id} value={q.id+"|"+p.id}>{p.name}</option>)}</optgroup>)}</select></label></div>}
    <div className="ss-actions"><button className="ss-secondary" onClick={()=>setStage("setup")}>Indietro</button><button className="ss-primary" onClick={()=>{const chosen=castMode==="BY_SEASON"?seasonCast:castMode==="RANDOM"?cast:[...queens.filter(q=>selectedIds.includes(q.id)),...customQueens.filter(q=>selectedIds.includes(q.id))];if(chosen.length!==desired){setNotice("Seleziona esattamente "+desired+" Queen.");return;}setCast(chosen);setStage("relationships");setNotice("");}}>Continua <ArrowRight size={16}/></button></div>
   </section>}
