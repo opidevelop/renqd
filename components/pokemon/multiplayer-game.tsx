@@ -137,7 +137,11 @@ export function PokemonNameEmAllMultiplayerGame({
     router.refresh();
   },[isFinishing,router,session.id]);
   const processQueuedSubmission=useCallback(async(answer:string,optimisticSpecies:PokemonSpecies)=>{
-    const result=await submitNameEmAllMultiplayerAnswerAction(session.id,answer);
+    let result:Awaited<ReturnType<typeof submitNameEmAllMultiplayerAnswerAction>>;
+    try{result=await submitNameEmAllMultiplayerAnswerAction(session.id,answer);}catch{
+      setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
+      setConfirmed(false);setError("Connessione interrotta: risposta non registrata.");return;
+    }
     const data=result.data??{};
     const refocusInput=()=>window.requestAnimationFrame(()=>inputRef.current?.focus());
     if(!result.ok){
@@ -147,7 +151,7 @@ export function PokemonNameEmAllMultiplayerGame({
     if(typeof data.speciesId==="number"&&["CORRECT","CATALOG_COMPLETE","PLAYER_COMPLETE","ALL_COMPLETED"].includes(String(data.status))){
       setFound(current=>new Set(current).add(Number(data.speciesId)));
       setConfirmed(true);setSelected(null);setHint(null);
-      playPokemonSound("correct",soundEnabled);refocusInput();
+      refocusInput();
     }
     if(data.status==="WRONG"){
       setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
