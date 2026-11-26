@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { playPokemonSound, preparePokemonAudio } from "@/lib/pokemon/sounds";
 import { usePokemonSoundPreference } from "@/components/pokemon/use-pokemon-sound-preference";
 import { Dialog } from "@/components/ui/dialog";
+import { PokemonDiscoveryDialog } from "@/components/pokemon/discovery-dialog";
 import { PokemonCatalog, PokemonSpecies, normalizePokemonName, findExactPokemonMatch, isAmbiguousPokemonName } from "@/lib/pokemon/catalog";
 import { useNameEmAllSubmissionQueue } from "@/components/pokemon/use-name-em-all-submission-queue";
 import { expelNameEmAllParticipantAction, finishNameEmAllMultiplayerAction, heartbeatNameEmAllAction, hintNameEmAllMultiplayerAction, leaveNameEmAllAction, submitNameEmAllMultiplayerAnswerAction } from "@/app/(platform)/pokemon/name-em-all/actions";
@@ -313,10 +314,12 @@ export function PokemonNameEmAllMultiplayerGame({
     window.scrollTo({top:0,behavior:"smooth"});
   },[confirmTerminate,confirmExit]);
   const requestHint=async()=>{
-    if(!selected||!spellingHelp||pending||found.has(selected.id))return;
+    if(!selected||pending||found.has(selected.id))return null;
     const result=await hintNameEmAllMultiplayerAction(session.id,selected.id);
-    if(!result.ok){setError(result.error??"Suggerimento non disponibile.");return;}
-    setHint({nameLength:Number(result.data?.nameLength??0),revealedPrefix:String(result.data?.revealedPrefix??""),hintCount:Number(result.data?.hintCount??0)});
+    if(!result.ok){setError(result.error??"Suggerimento non disponibile.");return null;}
+    const nextHint={nameLength:Number(result.data?.nameLength??0),revealedPrefix:String(result.data?.revealedPrefix??""),hintCount:Number(result.data?.hintCount??0)};
+    setHint(nextHint);
+    return nextHint;
   };
 
   const exit=async()=>{
@@ -434,16 +437,7 @@ export function PokemonNameEmAllMultiplayerGame({
       })}
     </div>
 
-    <Dialog open={Boolean(selected)} onClose={()=>setSelected(null)} overlayClassName="pokemon-nae-detail-backdrop" className="pokemon-nae-detail" ariaLabel={selected?(found.has(selected.id)?"Scheda Pokémon":"Aiuto ortografico"):undefined}>
-      {selected&&<>
-        <header><span className="pokemon-page-eyebrow">{found.has(selected.id)?"SCHEDA POKÉMON":"AIUTO ORTOGRAFICO"}</span><button type="button" onClick={()=>setSelected(null)} aria-label="Chiudi"><X size={18}/></button></header>
-        {found.has(selected.id)?<>
-          <div className="pokemon-nae-detail-hero"><img src={selected.artworkUrl} alt={selected.name}/><div><h2>{selected.name}</h2>{config.showDexNumber===true&&<small>#{String(selected.id).padStart(4,"0")}</small>}<small>Generazione {selected.generation}</small>{config.showType===true&&<p>{selected.types.join(" · ")}</p>}</div></div>
-          <div className="pokemon-nae-detail-forms"><h3>Forme e rappresentazioni</h3>{selected.forms.length===0&&selected.megaForms.length===0&&<p>Nessuna forma alternativa registrata.</p>}{[...selected.forms,...selected.megaForms].map(form=><div key={form.id} className="pokemon-nae-detail-form"><img src={form.spriteUrl} alt="" loading="lazy"/><span>{form.label}</span>{form.isMega&&<small>Mega</small>}</div>)}</div>
-        </>:<div className="pokemon-nae-hint-box pokemon-nae-hint-only"><strong>Aiuto ortografico</strong><p>Usa gli aiuti per ricostruire il nome. La risposta resterà nascosta finché non la scoprirai nella partita.</p>{hint&&<p className="pokemon-nae-hint-reveal" aria-live="polite">{hint.revealedPrefix}{hint.revealedPrefix.length<hint.nameLength?" _".repeat(Math.min(12,hint.nameLength-hint.revealedPrefix.length)):""} <small>{hint.nameLength} lettere</small></p>}<button type="button" className="pokemon-favourite-primary" autoFocus onClick={()=>void requestHint()} disabled={!spellingHelp||pending}><HelpCircle size={15}/> Rivela lettere</button></div>}
-        <button type="button" className="pokemon-favourite-secondary" onClick={()=>setSelected(null)}>Chiudi</button>
-      </>}
-    </Dialog>
+    <PokemonDiscoveryDialog selected={selected} discovered={Boolean(selected&&found.has(selected.id))} spellingHelp={spellingHelp} onClose={()=>setSelected(null)} onRevealLetter={requestHint}/>
 
     <Dialog open={confirmExit} onClose={()=>setConfirmExit(false)} overlayClassName="pokemon-nae-pause-backdrop" className="pokemon-nae-pause-card" role="alertdialog" labelledBy="pokemon-nae-multi-exit">
       <span className="pokemon-page-eyebrow">CONFERMA USCITA</span>
