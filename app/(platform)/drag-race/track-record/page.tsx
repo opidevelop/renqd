@@ -11,5 +11,6 @@ export default async function TrackRecordPage(){
   db.from("profiles").select("role,status").eq("id",user.id).maybeSingle()
  ]);
  const franchiseNames=Object.fromEntries((f.data??[]).map(x=>[x.code,x.name]));
- const canSync=["OWNER","ADMIN","MODERATOR"].includes(String(profile.data?.role))&&profile.data?.status==="APPROVED";\n return <TrackRecordHub userId={user.id} templates={t.data??[]} records={r.data??[]} franchiseNames={franchiseNames} canSync={canSync}/>;
+ const canSync=["OWNER","ADMIN","MODERATOR"].includes(String(profile.data?.role))&&profile.data?.status==="APPROVED";
+ return <TrackRecordHub userId={user.id} templates={t.data??[]} records={r.data??[]} franchiseNames={franchiseNames} canSync={canSync}/>;
 }
