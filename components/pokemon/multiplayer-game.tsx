@@ -252,7 +252,7 @@ export function PokemonNameEmAllMultiplayerGame({
       setRemaining(Number(live.remaining_seconds??0));
       if(live.status==="COMPLETED")router.refresh();
     }
-  },[session.id,shared,currentUserId,initialParticipants,router,pending]);
+  },[session.id,shared,currentUserId,initialParticipants,router,pending,setSession,setDeadline,setRemaining]);
 
   useEffect(()=>{
     let alive=true;
