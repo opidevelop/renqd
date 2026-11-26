@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const VERSION="1.1.1";
+const SOURCE_ID="@tkalejandro/drag-race-mcp";
 const PACKAGE="https://registry.npmjs.org/@tkalejandro/drag-race-mcp/-/drag-race-mcp-1.1.1.tgz";
 const SOURCE="https://github.com/tkalejandro/drag-race-mcp/tree/main/src/data";
 const LABELS:Record<string,[string,string,number]>={
@@ -42,6 +43,105 @@ Deno.serve(async(req:Request)=>{
   await upsert("drag_race_seasons",seasonRows,"id");
   const episodeRows=seasons.flatMap(({episodes})=>(episodes??[]).map(e=>({id:e.id,season_id:e.seasonId,episode_number:e.episodeNumber,title:e.title,lip_sync:e.lipSync??null,source_version:VERSION,raw_data:e,updated_at:now})));
   await upsert("drag_race_episodes",episodeRows,"id");
+
+  // Preserve source facts at Queen/episode granularity. These facts deliberately
+  // remain separate from PPE placements: top/bottom/challenge facts are not
+  // silently translated into WIN/HIGH/SAFE/LOW/BTM2.
+  const queenById=new Map(queens.map(q=>[q.id,q]));
+  const factsRows=seasons.flatMap(({season,episodes})=>{
+   const castIds:string[]=season.castIds??[];
+   return (episodes??[]).flatMap((episode:any)=>{
+    const miniWinners=new Set<string>(episode.miniChallenge?.winnerIds??[]);
+    const maxiWinners=new Set<string>(episode.maxiChallenge?.winnerIds??[]);
+    const topIds=new Set<string>(episode.topIds??[]);
+    const bottomIds=new Set<string>(episode.bottomIds??[]);
+    const lip=episode.lipSync??null;
+    const lipQueens=new Set<string>(lip?.queenIds??[]);
+    const lipWinners=new Set<string>(lip?.winnerIds??[]);
+    const lipEliminated=new Set<string>(lip?.eliminatedIds??[]);
+    return castIds.map(queenId=>{
+     const queen=queenById.get(queenId);
+     const appearance=(queen?.appearances??[]).find((item:any)=>item.seasonId===season.id);
+     const facts={
+      mini_challenge_winner:miniWinners.has(queenId),
+      maxi_challenge_winner:maxiWinners.has(queenId),
+      listed_top:topIds.has(queenId),
+      listed_bottom:bottomIds.has(queenId),
+      lipsync_participant:lipQueens.has(queenId),
+      lipsync_winner:lipWinners.has(queenId),
+      lipsync_eliminated:lipEliminated.has(queenId),
+      eliminated_this_episode:appearance?.eliminatedEpisodeId===episode.id,
+      season_placement:appearance?.placement??null,
+      season_quit:appearance?.quit===true,
+      season_disqualified:appearance?.disqualified===true,
+      season_reentered:appearance?.reentered===true
+     };
+     return {episode_id:episode.id,season_id:season.id,queen_id:queenId,facts,source_id:SOURCE_ID,source_version:VERSION,updated_at:now};
+    });
+   });
+  });
+  await upsert("drag_race_episode_queen_facts",factsRows,"episode_id,queen_id");
+
+  // Generate one official Track Record template per catalog season. Only an
+  // explicit source elimination event is translated to ELIM; every other
+  // placement remains blank until a reliable source or an editor confirms it.
+  const templates=seasons.map(({season,episodes})=>{
+   const episodeList=(episodes??[]).map((episode:any)=>({
+    number:episode.episodeNumber,
+    title:episode.title,
+    counts_for_ppe:!/(grand\\s+)?finale/i.test(episode.title??"")
+   }));
+   const queenList=(season.castIds??[]).map((queenId:string,index:number)=>{
+    const queen=queenById.get(queenId);
+    const appearance=(queen?.appearances??[]).find((item:any)=>item.seasonId===season.id);
+    const results=(episodes??[]).map((episode:any)=>({
+     episode:episode.episodeNumber,
+     placement:appearance?.eliminatedEpisodeId===episode.id?"ELIM":null,
+     facts:{
+      mini_challenge_winner:(episode.miniChallenge?.winnerIds??[]).includes(queenId),
+      maxi_challenge_winner:(episode.maxiChallenge?.winnerIds??[]).includes(queenId),
+      listed_top:(episode.topIds??[]).includes(queenId),
+      listed_bottom:(episode.bottomIds??[]).includes(queenId),
+      lipsync_participant:(episode.lipSync?.queenIds??[]).includes(queenId),
+      lipsync_winner:(episode.lipSync?.winnerIds??[]).includes(queenId),
+      lipsync_eliminated:(episode.lipSync?.eliminatedIds??[]).includes(queenId),
+      eliminated_this_episode:appearance?.eliminatedEpisodeId===episode.id
+     }
+    }));
+    return {
+     id:queenId,
+     name:queen?.name??queenId,
+     rank:appearance?.placement?String(appearance.placement):null,
+     results,
+     ppe_episode_numbers:episodeList.filter(ep=>ep.counts_for_ppe).map(ep=>ep.number),
+     elimination_episode:appearance?.eliminatedEpisodeId
+      ? (episodes??[]).find((ep:any)=>ep.id===appearance.eliminatedEpisodeId)?.episodeNumber??null
+      : null,
+     elimination_tie_order:index+1
+    };
+   });
+   return {
+    id:season.id,
+    franchise_code:season.franchise,
+    season_number:season.seasonNumber,
+    display_title:season.name,
+    year:season.year??null,
+    season_id:season.id,
+    episodes:episodeList,
+    queens:queenList,
+    source_metadata:{
+     source_id:SOURCE_ID,
+     source_version:VERSION,
+     source_url:SOURCE+"/seasons/"+season.id,
+     generated_at:now,
+     placement_completeness:"PARTIAL",
+     placement_note:"Sono precompilati soltanto gli eventi di eliminazione espliciti. Gli altri placement non sono dedotti da challenge, top/bottom o lipsync e restano modificabili."
+    },
+    source_version:SOURCE_ID+"@"+VERSION,
+    updated_at:now
+   };
+  });
+  await upsert("drag_race_track_record_templates",templates,"id");
   const lips=episodeRows.flatMap(e=>{const s=e.lip_sync as any;if(!s?.song||!Array.isArray(s.queenIds)||s.queenIds.length<2)return[];return[{id:e.id,season_id:e.season_id,episode_id:e.id,song_title:s.song,song_artist:null,queen_ids:s.queenIds,winner_ids:s.winnerIds??[],kind:s.kind??null,preview_url:null,apple_music_url:null,metadata_status:"PENDING",is_eligible:false,source_version:VERSION,raw_data:s,updated_at:now}];});
   await upsert("drag_race_lipsyncs",lips,"id");
   const songs=[...new Set(lips.map(x=>x.song_title))],metadata=new Map<string,any>();
@@ -51,6 +151,6 @@ Deno.serve(async(req:Request)=>{
   const eligible=enriched.filter(x=>x.is_eligible).length;
   const {error:se}=await admin.from("drag_race_catalog_sync_state").update({source_version:VERSION,last_synced_at:now,sync_lock_until:null,franchise_count:franchises.length,queen_count:queenRows.length,season_count:seasonRows.length,episode_count:episodeRows.length,lipsync_count:lips.length,eligible_lipsync_count:eligible,updated_at:now}).eq("id",1);
   if(se)throw se;
-  return reply({synced:true,sourceVersion:VERSION,franchises:franchises.length,queens:queenRows.length,seasons:seasonRows.length,episodes:episodeRows.length,lipsyncs:lips.length,eligibleLipsyncs:eligible,lastSyncedAt:now});
+  return reply({synced:true,sourceVersion:VERSION,franchises:franchises.length,queens:queenRows.length,seasons:seasonRows.length,episodes:episodeRows.length,queenEpisodeFacts:factsRows.length,trackRecordTemplates:templates.length,lipsyncs:lips.length,eligibleLipsyncs:eligible,lastSyncedAt:now});
  }catch(e){await admin.from("drag_race_catalog_sync_state").update({sync_lock_until:null,updated_at:new Date().toISOString()}).eq("id",1);console.error("drag-race-catalog-sync",e);return reply({error:"Catalog sync failed",detail:e instanceof Error?e.message:"Unknown error"},502);}
 });
