@@ -60,6 +60,7 @@ export function TrackRecordSocial({recordId,ownerId,userId,canModerate,socialEna
   setLoading(false);
  },[db,recordId]);
  useEffect(()=>{if(!socialEnabled)return;void loadComments();},[loadComments,socialEnabled]);
+ useEffect(()=>{if(!socialEnabled)return;const channel=db.channel("drag-race-track-record-comments-"+recordId).on("postgres_changes",{event:"*",schema:"public",table:"drag_race_track_record_comments",filter:"track_record_id=eq."+recordId},()=>void loadComments()).subscribe();return()=>{void db.removeChannel(channel);};},[db,loadComments,recordId,socialEnabled]);
  useEffect(()=>{if(!socialEnabled||ownerId===userId)return;let active=true;void db.rpc("renqd_drag_race_track_record_report_exists",{p_record_id:recordId}).then(({data,error:rpcError})=>{if(active&&!rpcError)setRecordReported(Boolean(data));});return()=>{active=false;};},[db,recordId,ownerId,socialEnabled,userId]);
 
  const topLevel=useMemo(()=>comments.filter(comment=>comment.parent_comment_id===null),[comments]);
