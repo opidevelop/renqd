@@ -38,8 +38,6 @@ export function Dialog({
   closeOnEscape = true,
 }: DialogProps) {
   const dialogRef = useRef<HTMLElement>(null);
-  const closeRef = useRef(onClose);
-  closeRef.current = onClose;
 
   useEffect(() => {
     if (!open) return;
