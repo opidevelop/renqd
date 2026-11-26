@@ -4,8 +4,9 @@ import Link from "next/link";
 import {useRouter} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {ArrowLeft,ArrowUpRight,Copy,FilePlus,LoaderCircle,Trophy} from "lucide-react";
-type Template={id:string;franchise_code:string;season_number:number;display_title:string;year:number|null;season_id:string|null;episodes:any[];queens:any[];source_metadata?:{placement_completeness?:string;placement_note?:string}};
-type RecordItem={id:string;title:string;season_id:string|null;visibility:string;updated_at:string;record_data:any};
+import type {TrackRecordData,TrackRecordEpisode,TrackRecordQueen} from "@/lib/drag-race/track-record";
+type Template={id:string;franchise_code:string;season_number:number;display_title:string;year:number|null;season_id:string|null;episodes:TrackRecordEpisode[];queens:TrackRecordQueen[];source_metadata?:{placement_completeness?:string;placement_note?:string}};
+type RecordItem={id:string;title:string;season_id:string|null;visibility:string;updated_at:string;record_data:TrackRecordData};
 type Props={userId:string;templates:Template[];records:RecordItem[];franchiseNames:Record<string,string>};
 export function TrackRecordHub({userId,templates,records,franchiseNames}:Props){
  const router=useRouter();const db=createClient();const [busy,setBusy]=useState<string|null>(null);const [notice,setNotice]=useState("");
