@@ -25,11 +25,6 @@ export type TrackRecordData = {
   custom_placements?: Array<{ placement_key: string; label: string; score: number; color: string }>;
   source_metadata?: { source_id?: string; source_version?: string; source_url?: string; generated_at?: string; placement_mode?: "MANUAL" };
 };
-const rankNumber = (value?: string | null) => {
-  if (!value) return Number.MAX_SAFE_INTEGER;
-  const match = value.match(/\d+/);
-  return match ? Number(match[0]) : Number.MAX_SAFE_INTEGER;
-};
 const isElimination = (placement: string | null) => {
   if (!placement) return false;
   const value = placement.toUpperCase();
