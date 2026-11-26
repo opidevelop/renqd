@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { AudioLines, BookOpen, Eye, HelpCircle, LoaderCircle, Type, X } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
-import { PokemonSpecies, POKEMON_TYPE_LABELS } from "@/lib/pokemon/catalog";
+import type { PokemonSpecies } from "@/lib/pokemon/catalog";
+import { POKEMON_TYPE_LABELS } from "@/lib/pokemon/catalog" from "@/lib/pokemon/catalog";
 
 type LetterHint={nameLength:number;revealedPrefix:string;hintCount:number};
 type Props={selected:PokemonSpecies|null;discovered:boolean;spellingHelp:boolean;onClose:()=>void;onRevealLetter:()=>Promise<LetterHint|null>};
@@ -28,7 +29,7 @@ export function PokemonDiscoveryDialog({selected,discovered,spellingHelp,onClose
       .then((data:{flavor_text_entries?:Array<{language:{name:string};flavor_text:string}>})=>{
         const entries=data.flavor_text_entries??[];
         const entry=entries.find(item=>item.language.name==="it")??entries.find(item=>item.language.name==="en");
-        if(alive)setDescription(entry?.flavor_text.replace(/[\\n\\f]+/g," ").replace(/\\s+/g," ").trim()??"Descrizione Pokédex non disponibile.");
+        if(alive)setDescription(entry?.flavor_text.replace(/[\n\f]+/g," ").replace(/\s+/g," ").trim()??"Descrizione Pokédex non disponibile.");
       })
       .catch(()=>{if(alive)setDescriptionError("Non è stato possibile caricare la descrizione Pokédex.");})
       .finally(()=>{if(alive)setDescriptionBusy(false);});
@@ -50,7 +51,7 @@ export function PokemonDiscoveryDialog({selected,discovered,spellingHelp,onClose
         const data=await response.json() as {flavor_text_entries?:Array<{language:{name:string};flavor_text:string}>};
         const entries=data.flavor_text_entries??[];
         const entry=entries.find(item=>item.language.name==="it")??entries.find(item=>item.language.name==="en");
-        setDescription(entry?.flavor_text.replace(/[\\n\\f]+/g," ").replace(/\\s+/g," ").trim()??"Descrizione Pokédex non disponibile.");
+        setDescription(entry?.flavor_text.replace(/[\n\f]+/g," ").replace(/\s+/g," ").trim()??"Descrizione Pokédex non disponibile.");
       }catch{setDescriptionError("Non è stato possibile caricare la descrizione Pokédex.");}
       finally{setDescriptionBusy(false);}
     }
