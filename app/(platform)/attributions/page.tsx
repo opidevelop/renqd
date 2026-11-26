@@ -30,7 +30,9 @@ const sources = [
     license: "MIT License. La licenza completa è conservata in public/licenses/drag-race-mcp-MIT.txt. I metadati musicali e le preview vengono risolti separatamente tramite iTunes Search API; le immagini non sono incluse nel pacchetto.",
     attribution: "Data source: tkalejandro/drag-race-mcp, Copyright (c) 2026 tkalejandro. Renqd conserva l'identificativo e il collegamento alla fonte per i record importati. La copertura può richiedere aggiornamenti e verifica editoriale."
   },
-];\n\nexport default function AttributionsPage() {
+];
+
+export default function AttributionsPage() {
   return <div className="home-app attributions-page">
     <Link href="/home" className="attributions-back"><ArrowLeft size={16}/> Torna alla Home</Link>
     <header className="attributions-heading">
