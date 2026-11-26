@@ -19,8 +19,8 @@ export default async function TrackRecordPage(){
   const recordData=record.record_data as {franchise_code?:string;season_number?:number;year?:number;queens?:Array<{id?:string;name:string;image_url?:string|null;winner?:boolean}>};
   for(const queen of recordData.queens??[])if(queen.winner){
    const catalogQueen=queen.id?queenById.get(queen.id):null;
-   hallOfFame.push({id:record.id+":"+(queen.id??queen.name),queenId:catalogQueen?.id??null,queenName:queen.name,imageUrl:queen.image_url??catalogQueen?.image_url??null,franchiseCode:recordData.franchise_code??"CUSTOM",seasonNumber:recordData.season_number??null,year:recordData.year??null,seasonTitle:record.title,recordId:record.id});
+   hallOfFame.push({id:record.id+":"+(queen.id??queen.name),queenId:catalogQueen?.id??null,queenName:queen.name,imageUrl:queen.image_url??catalogQueen?.image_url??(catalogQueen?"/api/drag-race/queen-image?id="+encodeURIComponent(catalogQueen.id):null),franchiseCode:recordData.franchise_code??"CUSTOM",seasonNumber:recordData.season_number??null,year:recordData.year??null,seasonTitle:record.title,recordId:record.id});
   }
  }
- return <TrackRecordHub userId={user.id} templates={t.data??[]} records={r.data??[]} franchiseNames={franchiseNames} hallOfFame={hallOfFame} catalogQueens={queens.data??[]}/>;
+ return <TrackRecordHub userId={user.id} templates={t.data??[]} records={r.data??[]} franchiseNames={franchiseNames} hallOfFame={hallOfFame} catalogQueens={(queens.data??[]).map(q=>({...q,image_url:q.image_url??("/api/drag-race/queen-image?id="+encodeURIComponent(q.id))}))}/>;
 }

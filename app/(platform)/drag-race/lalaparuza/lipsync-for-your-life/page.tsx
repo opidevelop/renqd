@@ -11,5 +11,5 @@ export default async function LipsyncForYourLifePage(){
  ]);
  const seasons=s.data??[];const codesByQueen=new Map<string,string[]>();
  for(const season of seasons){for(const id of season.cast_ids??[]){const list=codesByQueen.get(id)??[];if(!list.includes(season.franchise_code))list.push(season.franchise_code);codesByQueen.set(id,list);}}
- return <LipsyncForYourLifeGame franchises={f.data??[]} seasons={seasons} queens={(q.data??[]).map(x=>({...x,aliases:x.aliases??[],franchiseCodes:codesByQueen.get(x.id)??[]}))} songs={l.data??[]}/>;
+ return <LipsyncForYourLifeGame franchises={f.data??[]} seasons={seasons} queens={(q.data??[]).map(x=>({...x,aliases:x.aliases??[],image_url:x.image_url??("/api/drag-race/queen-image?id="+encodeURIComponent(x.id)),franchiseCodes:codesByQueen.get(x.id)??[]}))} songs={l.data??[]}/>;
 }

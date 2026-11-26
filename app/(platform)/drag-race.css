@@ -220,3 +220,28 @@ a.drag-race-module-card:hover{transform:translateY(-4px);border-color:#d99abd;bo
 
 .dra-profile-history-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 18px;padding:11px 13px;border:1px solid #f0e2e8;border-radius:12px;background:#fff9fc}.dra-profile-history-tools>span{font-size:9px;color:#8c7180}.dra-profile-history-tools button,.dra-history-delete{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border:1px solid #efd3df;border-radius:9px;background:#fff;color:#a04477;font-size:9px;font-weight:800;cursor:pointer}.dra-profile-history-tools button:disabled,.dra-history-delete:disabled{opacity:.55;cursor:wait}.dra-profile-history-actions .dra-history-delete{border-color:#f0d6d2;color:#b34c43}
 @media(max-width:640px){.dra-profile-history-tools{align-items:flex-start;flex-direction:column}.dra-profile-history-tools button{width:100%}}
+
+/* Franchise selector — visual cards with licensed franchise artwork */
+.drag-franchise-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.drag-franchise-picker-item{position:relative;min-width:0}
+.drag-franchise-option{display:flex;align-items:center;gap:10px;width:100%;min-height:82px;padding:8px 30px 8px 8px;border:1px solid #ead8e3;border-radius:13px;background:#fff;color:#68485d;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}
+.drag-franchise-option:hover{transform:translateY(-2px);border-color:#d58bb4;box-shadow:0 7px 17px rgba(122,43,88,.08)}
+.drag-franchise-option.is-selected{border-color:#b84d87;background:linear-gradient(110deg,#fff4fa,#fff);box-shadow:0 0 0 2px rgba(184,77,135,.11),0 7px 17px rgba(122,43,88,.06)}
+.drag-franchise-cover{display:flex;flex:0 0 58px;align-items:center;justify-content:center;width:58px;height:66px;overflow:hidden;border-radius:8px;background:linear-gradient(145deg,#f7e4ef,#e7d3e4)}
+.drag-franchise-cover img{display:block;width:100%;height:100%;object-fit:cover}
+.drag-franchise-cover-all{flex-direction:column;gap:4px;background:linear-gradient(145deg,#542640,#b44d86);color:#fff}
+.drag-franchise-cover-all small{font-size:6px;font-weight:900;letter-spacing:1px}
+.drag-franchise-option-copy{display:grid;gap:5px;min-width:0}
+.drag-franchise-option-copy strong{display:-webkit-box;overflow:hidden;color:#58384d;font-size:10px;font-weight:900;line-height:1.25;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.drag-franchise-option-copy small{color:#a18798;font-size:8px;font-weight:800;letter-spacing:.7px}
+.drag-franchise-selected-icon{position:absolute;right:9px;top:9px;color:#a04477}
+.drag-franchise-source{position:absolute;right:7px;bottom:7px;display:grid;place-items:center;width:19px;height:19px;border:1px solid #ead8e3;border-radius:50%;background:#fff;color:#a04477;opacity:.82}
+.drag-franchise-source:hover{background:#fff1f7;opacity:1}
+.drag-queen-image-source{display:block;width:100%;height:100%;overflow:hidden;border-radius:inherit}
+.drag-queen-image-source img{display:block;width:100%;height:100%;object-fit:cover}
+.drag-guess-image .drag-queen-image-source,.drag-queen-image .drag-queen-image-source{width:100%;height:100%}
+.drag-slayoff-queen-thumb{width:27px;height:34px;flex:0 0 27px;object-fit:cover;border-radius:5px}
+.drag-bracket-queen-thumb{width:28px;height:36px;flex:0 0 28px;object-fit:cover;border-radius:5px}
+.drag-bracket-pair>div{display:flex;align-items:center;gap:7px}
+@media(max-width:900px){.drag-franchise-picker{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.drag-franchise-picker{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.drag-franchise-option{min-height:76px;gap:7px;padding:6px 24px 6px 6px}.drag-franchise-cover{flex-basis:48px;width:48px;height:60px}.drag-franchise-option-copy strong{font-size:9px}.drag-franchise-option-copy small{font-size:7px}.drag-franchise-source{right:4px;bottom:4px;width:17px;height:17px}}

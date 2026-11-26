@@ -6,10 +6,10 @@ import Link from "next/link";
 import {ArrowUpRight,Crown,RefreshCw,Music2,Trophy,Users,Gamepad2,LoaderCircle} from "lucide-react";
 type Props={canSync:boolean;lastSyncedAt:string|null;sourceVersion:string};
 const modules=[
- {title:"Season Simulator",desc:"Crea il cast, assegna le challenge e vivi una stagione tutta tua.",tags:["CREA","SIMULA"],icon:Users,href:"/drag-race/season-simulator",status:"DISPONIBILE"},
- {title:"Track Record",desc:"Costruisci la tua storia episodio dopo episodio e celebra le vincitrici.",tags:["PPE","HALL OF FAME"],icon:Trophy,href:"/drag-race/track-record",status:"DISPONIBILE"},
- {title:"Guess Them All",desc:"Riconosci le Queen dei franchise selezionati e completa la sfida.",tags:["QUIZ","QUEEN"],icon:Gamepad2,href:"/drag-race/guess-them-all",status:"DISPONIBILE"},
- {title:"Lalaparuza",desc:"Entra nella battaglia: Guess the Lipsync, Slayoff e Lipsync for Your Life.",tags:["MUSICA","BATTAGLIE"],icon:Music2,href:"/drag-race/lalaparuza",status:"DISPONIBILE"}
+ {title:"Season Simulator",desc:"Crea il cast, assegna le challenge e vivi una stagione tutta tua.",tags:["CREA","SIMULA"],icon:Users,href:"/drag-race/season-simulator",status:"GIOCA"},
+ {title:"Track Record",desc:"Costruisci la tua storia episodio dopo episodio e celebra le vincitrici.",tags:["PPE","HALL OF FAME"],icon:Trophy,href:"/drag-race/track-record",status:"GIOCA"},
+ {title:"Guess Them All",desc:"Riconosci le Queen dei franchise selezionati e completa la sfida.",tags:["QUIZ","QUEEN"],icon:Gamepad2,href:"/drag-race/guess-them-all",status:"GIOCA"},
+ {title:"Lalaparuza",desc:"Entra nella battaglia: Guess the Lipsync, Slayoff e Lipsync for Your Life.",tags:["MUSICA","BATTAGLIE"],icon:Music2,href:"/drag-race/lalaparuza",status:"GIOCA"}
 ];
 export function DragRaceHub({canSync,lastSyncedAt,sourceVersion}:Props){
  const [busy,setBusy]=useState(false);const [message,setMessage]=useState("");const supabase=useMemo(()=>createClient(),[]);

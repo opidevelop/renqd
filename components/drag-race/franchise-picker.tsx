@@ -1,0 +1,13 @@
+"use client";
+import {Check,ExternalLink,Globe2} from "lucide-react";
+type Franchise={code:string;name:string};
+type Props={franchises:Franchise[];selected:string[];onChange:(next:string[])=>void;mode?:"multiple"|"single"|"one-or-all"};
+export function FranchisePicker({franchises,selected,onChange,mode="multiple"}:Props){
+ const allSelected=franchises.length>0&&selected.length===franchises.length;
+ const toggle=(code:string)=>{if(mode==="single"||mode==="one-or-all"){onChange([code]);return;}onChange(selected.includes(code)?selected.filter(x=>x!==code):[...selected,code]);};
+ const selectAll=()=>{if(mode==="one-or-all"||!allSelected)onChange(franchises.map(x=>x.code));else onChange([]);};
+ return <div className="drag-franchise-picker" role="group" aria-label="Seleziona i franchise">
+  {mode!=="single"&&<div className="drag-franchise-picker-item"><button type="button" className={"drag-franchise-option drag-franchise-all"+(allSelected?" is-selected":"")} aria-pressed={allSelected} onClick={selectAll}><span className="drag-franchise-cover drag-franchise-cover-all"><Globe2 size={25}/><small>WORLDWIDE</small></span><span className="drag-franchise-option-copy"><strong>{mode==="one-or-all"?"Tutti i franchise":"Seleziona tutti"}</strong><small>{franchises.length} edizioni nel catalogo</small></span>{allSelected&&<Check className="drag-franchise-selected-icon" size={17}/>}</button></div>}
+  {franchises.map(franchise=>{const isSelected=selected.includes(franchise.code),imagePath="/api/drag-race/franchise-image?code="+encodeURIComponent(franchise.code);return <div className="drag-franchise-picker-item" key={franchise.code}><button type="button" className={"drag-franchise-option"+(isSelected?" is-selected":"")} aria-pressed={isSelected} onClick={()=>toggle(franchise.code)}><span className="drag-franchise-cover"><img src={imagePath} alt="" loading="lazy" decoding="async"/></span><span className="drag-franchise-option-copy"><strong>{franchise.name}</strong><small>{franchise.code}</small></span>{isSelected&&<Check className="drag-franchise-selected-icon" size={17}/>}</button><a className="drag-franchise-source" href={imagePath+"&source=1"} target="_blank" rel="noreferrer" aria-label={"Fonte e licenza della copertina di "+franchise.name} title="Fonte e licenza della copertina"><ExternalLink size={11}/></a></div>;})}
+ </div>;
+}
