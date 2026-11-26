@@ -15,6 +15,8 @@ import "./social.css";
 import "./pokemon.css";
 import "./drag-race.css";
 import "./drag-race/game.css";
+import "./drag-race/lalaparuza.css";
+import "./drag-race/slayoff.css";
 import "./admin-visual.css";
 export const dynamic = "force-dynamic";
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
