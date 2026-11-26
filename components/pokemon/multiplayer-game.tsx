@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable react/no-unescaped-entities -- User-facing Italian copy includes natural apostrophes. */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Crown, LoaderCircle, LogOut, PauseCircle, X, UserX, Settings, ChevronDown } from "lucide-react";
