@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -253,7 +253,7 @@ function Game({
   },[sectionIdsKey]);
 
   const normalizedQuery=normalizePokemonName(query);
-  const exactMatch=useMemo(()=>findExactPokemonMatch(species,normalizedQuery),[species,normalizedQuery]);
+  const exactMatch=findExactPokemonMatch(species,normalizedQuery);
   const exactMatchIsAmbiguous=Boolean(exactMatch&&isAmbiguousPokemonName(species,exactMatch,normalizedQuery));
   const percent=species.length?Math.round(found.size/species.length*100):0;
   const completedGenerations=config.generations.filter(generation=>{
