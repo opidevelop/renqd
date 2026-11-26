@@ -214,7 +214,6 @@ function Game({
   const [deleting,setDeleting]=useState(false);
   const [activeSection,setActiveSection]=useState("gen-"+String((session.config.generations as number[]|undefined)?.[0]??1));
   const [selected,setSelected]=useState<PokemonSpecies|null>(null);
-  const [hint,setHint]=useState<{nameLength:number;revealedPrefix:string;hintCount:number}|null>(null);
   const [collapsedGenerations,setCollapsedGenerations]=useState<Set<number>>(new Set());
   const [collapsedSpecialSections,setCollapsedSpecialSections]=useState<Set<string>>(new Set());
   const [isFinishing,setIsFinishing]=useState(false);
@@ -391,7 +390,6 @@ function Game({
     const result=await hintNameEmAllAction(session.id,selected.id);
     if(!result.ok){setMessage(result.error??"Aiuto non disponibile.");return null;}
     const nextHint={nameLength:Number(result.data?.nameLength??0),revealedPrefix:String(result.data?.revealedPrefix??""),hintCount:Number(result.data?.hintCount??0)};
-    setHint(nextHint);
     return nextHint;
   };
   const openSection=(id:string)=>{
@@ -451,7 +449,7 @@ function Game({
               const isFound=found.has(item.id);
               const artwork=form?.spriteUrl??item.spriteUrl;
               const displayName=form ? item.name+" "+form.label : item.name;
-              return <button type="button" key={item.id+"-"+(form?.id??"base")} onClick={()=>{setSelected(item);setHint(null);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")+(recentlyFoundId===item.id?" is-revealing":"")}>
+              return <button type="button" key={item.id+"-"+(form?.id??"base")} onClick={()=>{setSelected(item);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")+(recentlyFoundId===item.id?" is-revealing":"")}>
                 <span className="pokemon-nae-cell-art">{isFound||visual.shadows?<img src={artwork} alt="" loading="lazy" style={{filter:isFound?"none":"brightness(0) saturate(0) opacity(.55)"}}/>:<b className="pokemon-nae-pokeball">◉</b>}</span>
                 {isFound?<strong>{displayName}</strong>:<strong className="is-hidden">???</strong>}
                 {(item.forms.length>0||item.isLegendary||item.isMythical||item.isUltraBeast||item.isParadox)&&<span className="pokemon-nae-cell-indicators">{item.forms.length>0?"◇":""}{item.isLegendary?"★":""}{item.isMythical?"✦":""}{item.isUltraBeast?"◈":""}{item.isParadox?"⌁":""}</span>}
