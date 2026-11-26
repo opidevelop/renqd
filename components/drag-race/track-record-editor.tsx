@@ -15,7 +15,7 @@ type Props={recordId:string;title:string;visibility:"PUBLIC"|"PRIVATE";initialDa
 type PendingRemoval={type:"queen";key:string}|{type:"episode";key:number};
 
 export function TrackRecordEditor({recordId,title,visibility:initialVisibility,initialData,rules,canEdit,catalogQueens,userId,ownerId,canModerateComments,socialEnabled}:Props){
- const db=createClient();const router=useRouter();const exportRef=useRef<HTMLElement|null>(null);
+ const db=createClient();const router=useRouter();const exportRef=useRef<HTMLDivElement|null>(null);
  const [data,setData]=useState(initialData);
  const dataRef=useRef(initialData);
  const saveQueue=useRef<Promise<void>>(Promise.resolve());
