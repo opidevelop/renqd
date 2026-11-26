@@ -2087,3 +2087,13 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Vercel ha restituito il limite API `api-deployments-free-per-day` (HTTP 402, retry dopo 24 ore) per la creazione di un deployment staging. Non modificare impostazioni/billing: il rilascio finale resta in attesa del reset del limite o dell'intervento del proprietario.
 - Il catalogo non è stato popolato e non sono stati eseguiti test E2E autenticati. La build READY non equivale a collaudo runtime.
 - Non dichiarare completata la macro-categoria: restano da implementare Season Simulator, Track Record e Guess Them All, completare tutte le funzionalità trasversali e svolgere test TypeScript/build/ESLint/RLS/regressione e collaudo autenticato desktop/mobile.
+
+
+### Track Record — lettura del workbook e fondazioni PPE (26 novembre 2026)
+
+- Ricevuto e analizzato il workbook Excel «Copia di Drag Race.xlsx»: 90 fogli stagione, 1.037 righe Queen, foglio Punteggi, Hall of Fame e 2026 circle.
+- Il foglio Punteggi contiene 32 righe, corrispondenti a 24 chiavi testuali distinte dopo aver mantenuto separate le varianti con spaziature diverse. Le regole sono state trasferite in `drag_race_track_record_scoring_rules`, insieme ai colori di default ricavati dal workbook.
+- Il PPE viene calcolato come media aritmetica dei punteggi associati ai piazzamenti degli episodi inclusi nel relativo intervallo di calcolo; le celle vuote e i valori non presenti nel foglio Punteggi non contribuiscono. Il Grand Finale è escluso dal PPE. Le stringhe importate conservano la spaziatura originale: il matching non deve trasformare automaticamente valori non riconosciuti in placement validi.
+- Il workbook contiene anche 86 formule PPE manuali che non sono tutte coerenti con la tabella Punteggi; la tabella Punteggi resta la fonte dei punteggi predefiniti per i nuovi calcoli, mentre i valori PPE preesistenti del workbook sono dati storici e non vengono assunti come regola generale.
+- Applicata a Supabase la migrazione `20261126125909_drag_race_track_record_scoring_and_templates`: tabella scoring con RLS e tabella `drag_race_track_record_templates` predisposta per i 90 fogli ufficiali. La migrazione corrispondente è presente su `main`.
+- Import dei 90 template, UI Track Record, modifica/autosave, Hall of Fame, commenti, esportazioni e collaudo restano da implementare. Non dichiarare completato Track Record.
