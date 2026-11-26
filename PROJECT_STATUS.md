@@ -2068,7 +2068,7 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Abilitata e forzata RLS sulle tabelle Drag Race; catalogo in lettura per account approvati; stato sincronizzazione leggibile dagli account approvati; sincronizzazione riservata a OWNER/ADMIN/MODERATOR.
 - Create le RPC `drag_race_claim_catalog_sync`, `drag_race_create_session` e `drag_race_update_session`. Le sessioni sono proprietarie; l'aggiornamento terminale genera il risultato aggregato.
 - Deploy Edge Function `drag-race-catalog-sync` attiva con JWT obbligatorio. Importa il pacchetto MIT `tkalejandro/drag-race-mcp` versione 1.1.1, controlla la completezza del pacchetto, importa franchise/Queen/stagioni/episodi/lipsync e risolve artista/preview tramite iTunes Search API.
-- Il catalogo non è ancora stato sincronizzato: occorre eseguire una volta il comando «Sincronizza catalogo» dall'hub con un account staff. Le immagini Queen non sono incluse nel pacchetto; il fallback visuale resta il placeholder finché non viene integrata una fonte immagini verificata.
+- Il catalogo non è ancora stato sincronizzato: occorre eseguire una volta il comando «Sincronizza catalogo» dall'hub con un account staff. Le immagini Queen non sono incluse nel pacchetto; è stato aggiunto un lookup Commons limitato a immagini CC0/Public Domain con avatar SVG di fallback.
 - Attribuzione e licenza MIT aggiunte in `/attributions` e `public/licenses/drag-race-mcp-MIT.txt`.
 
 ### Integrazione UI e giochi
