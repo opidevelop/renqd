@@ -7,7 +7,7 @@ const modules=[
  {title:"Season Simulator",desc:"Crea una stagione, costruisci il cast e simula ogni episodio.",icon:Users},
  {title:"Track Record",desc:"Consulta e modifica le schede delle stagioni e la Hall of Fame.",icon:Trophy},
  {title:"Guess Them All",desc:"Riconosci tutte le Queen dei franchise selezionati.",icon:Gamepad2},
- {title:"Lalaparuza",desc:"Tre sfide musicali: Guess the Lipsync, Slayoff e Lipsync for Your Life.",icon:Music2}
+ {title:"Guess the Lipsync",desc:"Ascolta la canzone e indovina le due Queen che si sono affrontate.",icon:Music2,href:"/drag-race/lalaparuza/guess-the-lipsync"}
 ];
 export function DragRaceHub({counts,canSync,lastSyncedAt,sourceVersion}:Props){
  const [busy,setBusy]=useState(false);const [message,setMessage]=useState("");
@@ -18,7 +18,7 @@ export function DragRaceHub({counts,canSync,lastSyncedAt,sourceVersion}:Props){
    <div className="drag-race-stats">{[["Franchise",counts.franchises],["Queen",counts.queens],["Stagioni",counts.seasons],["Episodi",counts.episodes],["Lipsync",counts.lipsyncs],["Lipsync pronte",counts.eligible]].map(([label,value])=><div key={label}><strong>{Number(value).toLocaleString("it-IT")}</strong><small>{label}</small></div>)}</div>
    <div className="drag-race-sync-row"><span>Fonte dati v{sourceVersion} · {lastSyncedAt?"Ultima sincronizzazione "+new Date(lastSyncedAt).toLocaleString("it-IT"):"Catalogo non ancora sincronizzato"}</span>{canSync&&<button type="button" onClick={sync} disabled={busy}>{busy?<LoaderCircle className="spin" size={16}/>:<RefreshCw size={16}/>} {busy?"Sincronizzazione…":"Sincronizza catalogo"}</button>}</div>{message&&<p className="drag-race-message" role="status">{message}</p>}
   </section>
-  <section className="drag-race-modules"><div className="drag-race-section-heading"><span className="drag-race-kicker">LE ESPERIENZE</span><h2>La tua scena, <em>le tue regole.</em></h2></div><div className="drag-race-module-grid">{modules.map(({title,desc,icon:Icon})=><article className="drag-race-module-card" key={title}><span className="drag-race-module-icon"><Icon size={22}/></span><div><h3>{title}</h3><p>{desc}</p></div><span className="drag-race-module-status">In implementazione</span></article>)}</div></section>
+  <section className="drag-race-modules"><div className="drag-race-section-heading"><span className="drag-race-kicker">LE ESPERIENZE</span><h2>La tua scena, <em>le tue regole.</em></h2></div><div className="drag-race-module-grid">{modules.map(({title,desc,icon:Icon,...module})=><article className="drag-race-module-card" key={title}><span className="drag-race-module-icon"><Icon size={22}/></span><div><h3>{title}</h3><p>{desc}</p></div>{"href" in module&&typeof module.href==="string"?<Link className="drag-race-module-status is-ready" href={module.href}>Apri <ArrowUpRight size={12}/></Link>:<span className="drag-race-module-status">In implementazione</span>}</article>)}</div></section>
   <div className="drag-race-back"><Link href="/home">← Torna alla Home</Link><span>RENQD · DRAG RACE</span></div>
  </main>;
 }
