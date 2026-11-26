@@ -4,7 +4,7 @@ import Link from "next/link";
 import {Bell,CheckCheck} from "lucide-react";
 import {createClient} from "@/lib/supabase/client";
 type Notice={id:string;actor_id:string|null;notification_type:string;payload:Record<string,unknown>|null;read_at:string|null;created_at:string};
-function noticeTitle(n:Notice){const p=n.payload??{};for(const key of ["title","message","body","text"])if(typeof p[key]==="string"&&p[key])return String(p[key]);return n.notification_type.replaceAll("_"," ").toLocaleLowerCase("it");}
+function noticeTitle(n:Notice){const p=n.payload??{};for(const key of ["title","message","body","text"])if(typeof p[key]==="string"&&p[key])return String(p[key]);const labels:Record<string,string>={DRAG_RACE_TRACK_RECORD_COMMENT:"Nuovo commento alla tua Track Record",DRAG_RACE_TRACK_RECORD_REPLY:"Nuova risposta a un tuo commento Track Record",DRAG_RACE_TRACK_RECORD_COMMENT_LIKE:"A qualcuno piace il tuo commento Track Record"};return labels[n.notification_type]??n.notification_type.replaceAll("_"," ").toLocaleLowerCase("it");}
 export function NotificationMenu({userId}:{userId:string}){
  const [open,setOpen]=useState(false),[items,setItems]=useState<Notice[]>([]),[unread,setUnread]=useState(0),[toast,setToast]=useState<string|null>(null);
  const load=useCallback(async()=>{const db=createClient();const [{data},{count}]=await Promise.all([db.from("user_notifications").select("id,actor_id,notification_type,payload,read_at,created_at").eq("recipient_id",userId).order("created_at",{ascending:false}).limit(4),db.from("user_notifications").select("id",{count:"exact",head:true}).eq("recipient_id",userId).is("read_at",null)]);setItems((data??[]) as Notice[]);setUnread(count??0);},[userId]);
