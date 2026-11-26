@@ -93,3 +93,5 @@
 .drag-track-confirm-remove button{border:0;border-radius:999px;padding:6px 10px;font-size:10px;background:var(--surface-2,rgba(120,110,100,.1));color:var(--foreground,#292522)}
 .drag-track-confirm-remove button:last-child{background:#c45e54;color:#fff}
 @media(max-width:760px){.drag-track-roster-add{grid-template-columns:1fr}.drag-track-custom-queen-inline{grid-template-columns:1fr!important}.drag-track-custom-placement>div{grid-template-columns:1fr 75px 45px auto}.drag-track-confirm-remove{flex-wrap:wrap}}
+
+.drag-track-episode-challenges{display:flex;flex-direction:column;gap:3px;margin-top:6px;text-align:left;white-space:normal}.drag-track-episode-challenges small{display:block;font-size:10px;line-height:1.25;font-weight:500;color:var(--text-secondary,#777)}
