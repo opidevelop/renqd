@@ -11,7 +11,6 @@ import "../(platform)/inbox.css";
 import "../(platform)/social.css";
 import "../(platform)/pokemon.css";
 import "../(platform)/admin-visual.css";
-import "./report-renq.css";
 
 export const dynamic = "force-dynamic";
 
