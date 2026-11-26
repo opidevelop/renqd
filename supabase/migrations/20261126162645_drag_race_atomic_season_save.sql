@@ -51,4 +51,40 @@ begin
     end;
 
     if v_existing_id is not null then
-      sele¶»§q«^
+      select id into v_saved_id
+      from public.drag_race_saved_seasons
+      where id = v_existing_id and owner_id = v_user_id;
+      if v_saved_id is not null then
+        return v_saved_id;
+      end if;
+    end if;
+    raise exception 'Season session is already closed' using errcode = '55000';
+  end if;
+
+  if v_session.status <> 'ACTIVE' then
+    raise exception 'Season session is not active' using errcode = '55000';
+  end if;
+
+  insert into public.drag_race_saved_seasons(owner_id, title, season_data, statistics)
+  values (v_user_id, btrim(p_title), p_season_data, p_statistics)
+  returning id into v_saved_id;
+
+  update public.drag_race_sessions
+  set state = p_state || jsonb_build_object('stage', 'COMPLETED', 'savedSeasonId', v_saved_id::text),
+      status = 'COMPLETED',
+      summary = p_summary || jsonb_build_object('savedSeasonId', v_saved_id::text),
+      completed_at = now(),
+      updated_at = now()
+  where id = p_session_id and user_id = v_user_id;
+
+  return v_saved_id;
+end;
+$$;
+
+revoke all on function public.drag_race_save_season(uuid, text, jsonb, jsonb, jsonb, jsonb) from public, anon;
+grant execute on function public.drag_race_save_season(uuid, text, jsonb, jsonb, jsonb, jsonb) to authenticated;
+
+comment on function public.drag_race_save_season(uuid, text, jsonb, jsonb, jsonb, jsonb) is
+  'Atomically saves a completed Drag Race season and closes its active Season Simulator session.';
+
+commit;

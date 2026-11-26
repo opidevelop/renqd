@@ -36,4 +36,28 @@ values
   (23, 24, 'HIGH      gifted star', 4.00, '#ADD8E6'),
   (24, 25, 'SAFE     gifted star', 3.00, '#F5EBF5'),
   (25, 26, 'HIGH         +         BLOCK', 4.00, '#EA9999'),
-  (26, 27, 'SAFE      ¶»§q«^
+  (26, 27, 'SAFE      +       ELIM', 3.00, '#EA9999'),
+  (27, 28, 'HIGH         +         ELIM', 4.00, '#EA9999'),
+  (28, 29, 'WIN        +         ELIM', 5.00, '#00BFFF'),
+  (29, 30, 'BTM2       +          QUIT', 1.00, '#B22222'),
+  (30, 31, 'SAFE        +          DISQ', 3.00, '#000000'),
+  (31, 32, 'LS WIN', 5.00, '#242476')
+on conflict (source_row) do update
+set id=excluded.id,
+    placement_key=excluded.placement_key,
+    score=excluded.score,
+    color=excluded.color;
+
+alter table public.drag_race_track_record_scoring_swatches enable row level security;
+alter table public.drag_race_track_record_scoring_swatches force row level security;
+revoke all on public.drag_race_track_record_scoring_swatches from anon, authenticated;
+grant select on public.drag_race_track_record_scoring_swatches to authenticated;
+
+drop policy if exists drag_race_track_record_scoring_swatches_approved_read
+  on public.drag_race_track_record_scoring_swatches;
+create policy drag_race_track_record_scoring_swatches_approved_read
+  on public.drag_race_track_record_scoring_swatches
+  for select to authenticated
+  using (private.is_approved_user());
+
+commit;

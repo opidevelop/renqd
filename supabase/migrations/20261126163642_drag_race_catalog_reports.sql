@@ -26,4 +26,54 @@ create index if not exists drag_race_catalog_reports_status_created_idx
 create index if not exists drag_race_catalog_reports_entity_idx
   on public.drag_race_catalog_reports(entity_type, entity_id, created_at desc);
 
-a¶»§q«^
+alter table public.drag_race_catalog_reports enable row level security;
+alter table public.drag_race_catalog_reports force row level security;
+
+revoke all on public.drag_race_catalog_reports from anon, authenticated;
+grant select, insert, update on public.drag_race_catalog_reports to authenticated;
+
+drop policy if exists drag_race_catalog_reports_insert_own on public.drag_race_catalog_reports;
+create policy drag_race_catalog_reports_insert_own
+  on public.drag_race_catalog_reports
+  for insert to authenticated
+  with check (reporter_id = auth.uid() and private.is_approved_user());
+
+drop policy if exists drag_race_catalog_reports_read_own_or_staff on public.drag_race_catalog_reports;
+create policy drag_race_catalog_reports_read_own_or_staff
+  on public.drag_race_catalog_reports
+  for select to authenticated
+  using (
+    reporter_id = auth.uid()
+    or exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid()
+        and p.status = 'APPROVED'
+        and p.role in ('OWNER','ADMIN','MODERATOR')
+    )
+  );
+
+drop policy if exists drag_race_catalog_reports_update_staff on public.drag_race_catalog_reports;
+create policy drag_race_catalog_reports_update_staff
+  on public.drag_race_catalog_reports
+  for update to authenticated
+  using (
+    exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid()
+        and p.status = 'APPROVED'
+        and p.role in ('OWNER','ADMIN','MODERATOR')
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid()
+        and p.status = 'APPROVED'
+        and p.role in ('OWNER','ADMIN','MODERATOR')
+    )
+  );
+
+comment on table public.drag_race_catalog_reports is
+  'Community reports for incorrect Drag Race catalog records (Queens and lipsyncs).';
+
+commit;

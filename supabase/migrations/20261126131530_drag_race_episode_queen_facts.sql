@@ -29,4 +29,6 @@ alter table public.drag_race_track_record_templates
   alter column source_version set default 'drag-race-mcp@1.1.1';
 
 comment on table public.drag_race_episode_queen_facts is
-  'Facts source-derived for each Qu¶»§q«^
+  'Facts source-derived for each Queen and episode. Facts are not automatically converted into Track Record placements unless the source explicitly provides an unambiguous placement.';
+
+commit;
