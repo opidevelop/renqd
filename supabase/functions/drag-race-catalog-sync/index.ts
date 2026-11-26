@@ -90,42 +90,25 @@ Deno.serve(async(req:Request)=>{
   });
   await upsert("drag_race_episode_queen_facts",factsRows,"episode_id,queen_id");
 
-  // Generate one official Track Record template per catalog season. Only an
-  // explicit source elimination event is translated to ELIM; every other
-  // placement remains blank until a reliable source or an editor confirms it.
+  // Track Record templates contain season structure only. Competitive outcomes
+  // (placements, winners, eliminations and challenge/lipsync results) are never copied.
   const templates=seasons.map(({season,episodes})=>{
    const episodeList=(episodes??[]).map((episode:EpisodeSource)=>({
     number:episode.episodeNumber,
     title:episode.title,
-    counts_for_ppe:!/(grand\\s+)?finale/i.test(episode.title??"")
+    counts_for_ppe:!/(grand\\s+)?finale/i.test(episode.title??""),
+    mini_challenge:episode.miniChallenge?.name??null,
+    maxi_challenge:episode.maxiChallenge?.name??null,
+    lip_sync_song:episode.lipSync?.song??null
    }));
    const queenList=(season.castIds??[]).map((queenId:string)=>{
     const queen=queenById.get(queenId);
-    const appearance=(queen?.appearances??[]).find((item:QueenAppearanceSource)=>item.seasonId===season.id);
-    const results=(episodes??[]).map((episode:EpisodeSource)=>({
-     episode:episode.episodeNumber,
-     placement:appearance?.eliminatedEpisodeId===episode.id?"ELIM":null,
-     facts:{
-      mini_challenge_winner:(episode.miniChallenge?.winnerIds??[]).includes(queenId),
-      maxi_challenge_winner:(episode.maxiChallenge?.winnerIds??[]).includes(queenId),
-      listed_top:(episode.topIds??[]).includes(queenId),
-      listed_bottom:(episode.bottomIds??[]).includes(queenId),
-      lipsync_participant:(episode.lipSync?.queenIds??[]).includes(queenId),
-      lipsync_winner:(episode.lipSync?.winnerIds??[]).includes(queenId),
-      lipsync_eliminated:(episode.lipSync?.eliminatedIds??[]).includes(queenId),
-      eliminated_this_episode:appearance?.eliminatedEpisodeId===episode.id
-     }
-    }));
     return {
      id:queenId,
      name:queen?.name??queenId,
-     rank:appearance?.placement?String(appearance.placement):null,
-     winner:(season.winnerIds??[]).includes(queenId),
-     results,
-     ppe_episode_numbers:episodeList.filter(ep=>ep.counts_for_ppe).map(ep=>ep.number),
-     elimination_episode:appearance?.eliminatedEpisodeId
-      ? (episodes??[]).find((ep:EpisodeSource)=>ep.id===appearance.eliminatedEpisodeId)?.episodeNumber??null
-      : null,
+     winner:false,
+     results:episodeList.map(ep=>({episode:ep.number,placement:null})),
+     ppe_episode_numbers:episodeList.filter(ep=>ep.counts_for_ppe).map(ep=>ep.number)
     };
    });
    return {
@@ -142,8 +125,7 @@ Deno.serve(async(req:Request)=>{
      source_version:VERSION,
      source_url:SOURCE+"/seasons/"+season.id,
      generated_at:now,
-     placement_completeness:"PARTIAL",
-     placement_note:"Sono precompilati soltanto gli eventi di eliminazione espliciti. Gli altri placement non sono dedotti da challenge, top/bottom o lipsync e restano modificabili."
+     placement_mode:"MANUAL"
     },
     source_version:SOURCE_ID+"@"+VERSION,
     updated_at:now
