@@ -186,3 +186,7 @@
  .drag-track-table select,.drag-track-winner-toggle,.drag-track-remove-queen,.drag-track-elimination-order{display:none!important}
  .drag-track-footnote{font-size:9px!important}
 }
+
+.drag-track-section-actions .drag-track-search{min-width:210px;max-width:280px;min-height:34px;padding:6px 10px;border:1px solid var(--border,#ddd);border-radius:8px;background:var(--surface,#fff);color:var(--text-primary,#222);font:inherit;font-size:12px}
+@media(max-width:760px){.drag-track-section-actions{display:flex;flex-wrap:wrap;gap:7px}.drag-track-section-actions .drag-track-search{width:100%;max-width:none;order:-1}.drag-track-section-actions select{flex:1;min-width:0}}
+@media print{@page{size:landscape;margin:8mm}.drag-track-stats-grid{grid-template-columns:repeat(6,minmax(0,1fr))}.drag-track-export-capture{width:100%}}
