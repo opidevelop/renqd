@@ -30,6 +30,27 @@ const sources = [
     license: "MIT License. La licenza completa è conservata in public/licenses/drag-race-mcp-MIT.txt. I metadati musicali e le preview vengono risolti separatamente tramite iTunes Search API; le immagini non sono incluse nel pacchetto.",
     attribution: "Data source: tkalejandro/drag-race-mcp, Copyright (c) 2026 tkalejandro. Renqd conserva l'identificativo e il collegamento alla fonte per i record importati. La copertura può richiedere aggiornamenti e verifica editoriale."
   },
+  {
+    name: "Fotografie Drag Race — Trixie Mattel",
+    description: "Ritratto utilizzato nelle card promozionali Pokémon/Drag Race di Renqd.",
+    url: "https://commons.wikimedia.org/wiki/File:Trixie_Mattel_Portrait.jpg",
+    license: "Creative Commons Attribution 2.0 Generic (CC BY 2.0).",
+    attribution: "Foto di Patrick Finnegan, da Flickr (vax-o-matic), 10 settembre 2017. Immagine ritagliata per l'impaginazione.",
+  },
+  {
+    name: "Fotografie Drag Race — Naomi Smalls",
+    description: "Fotografia utilizzata nelle card promozionali Drag Race di Renqd.",
+    url: "https://commons.wikimedia.org/wiki/File:Naomi_Smalls_at_Rupaul's_Dragcon_2017_by_dvsross.jpg",
+    license: "Creative Commons Attribution 2.0 Generic (CC BY 2.0).",
+    attribution: "Foto di DVSROSS, RuPaul's DragCon 2017.",
+  },
+  {
+    name: "Fotografie Drag Race — Monét X Change",
+    description: "Fotografia utilizzata nelle card promozionali Drag Race di Renqd.",
+    url: "https://commons.wikimedia.org/wiki/File:Monét_X_Change_at_Dragcon_by_dvsross.jpg",
+    license: "Creative Commons Attribution 2.0 Generic (CC BY 2.0).",
+    attribution: "Foto di DVSROSS, RuPaul's DragCon 2019.",
+  },
 ];
 
 export default function AttributionsPage() {
