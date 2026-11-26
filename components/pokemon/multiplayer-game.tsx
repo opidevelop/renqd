@@ -6,6 +6,7 @@ import { CheckCircle2, Crown, HelpCircle, LoaderCircle, LogOut, PauseCircle, X, 
 import { createClient } from "@/lib/supabase/client";
 import { playPokemonSound, preparePokemonAudio } from "@/lib/pokemon/sounds";
 import { usePokemonSoundPreference } from "@/components/pokemon/use-pokemon-sound-preference";
+import { Dialog } from "@/components/ui/dialog";
 import { PokemonCatalog, PokemonSpecies, normalizePokemonName, findExactPokemonMatch, isAmbiguousPokemonName } from "@/lib/pokemon/catalog";
 import { useNameEmAllSubmissionQueue } from "@/components/pokemon/use-name-em-all-submission-queue";
 import { expelNameEmAllParticipantAction, finishNameEmAllMultiplayerAction, heartbeatNameEmAllAction, hintNameEmAllMultiplayerAction, leaveNameEmAllAction, submitNameEmAllMultiplayerAnswerAction } from "@/app/(platform)/pokemon/name-em-all/actions";
@@ -432,28 +433,29 @@ export function PokemonNameEmAllMultiplayerGame({
       })}
     </div>
 
-    {selected&&<div className="pokemon-nae-detail-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setSelected(null);}}>
-      <aside className="pokemon-nae-detail" role="dialog" aria-modal="true" aria-label={"Dettaglio "+selected.name}>
+    <Dialog open={Boolean(selected)} onClose={()=>setSelected(null)} overlayClassName="pokemon-nae-detail-backdrop" className="pokemon-nae-detail" ariaLabel={selected?"Dettaglio "+selected.name:undefined}>
+      {selected&&<>
         <header><span className="pokemon-page-eyebrow">{found.has(selected.id)?"SCHEDA POKÉMON":"AIUTO ORTOGRAFICO"}</span><button type="button" onClick={()=>setSelected(null)} aria-label="Chiudi"><X size={18}/></button></header>
         <div className="pokemon-nae-detail-hero">{found.has(selected.id)?<img src={selected.artworkUrl} alt={selected.name}/>:<span className="pokemon-nae-detail-question">?</span>}<div><h2>{found.has(selected.id)?selected.name:"Pokémon da scoprire"}</h2>{config.showDexNumber===true&&<small>#{String(selected.id).padStart(4,"0")}</small>}<small>Generazione {selected.generation}</small>{config.showType===true&&<p>{selected.types.join(" · ")}</p>}</div></div>
-        {found.has(selected.id)?<div className="pokemon-nae-detail-forms"><h3>Forme e rappresentazioni</h3>{selected.forms.length===0&&selected.megaForms.length===0&&<p>Nessuna forma alternativa registrata.</p>}{[...selected.forms,...selected.megaForms].map(form=><div key={form.id} className="pokemon-nae-detail-form"><img src={form.spriteUrl} alt="" loading="lazy"/><span>{form.label}</span>{form.isMega&&<small>Mega</small>}</div>)}</div>:<>{hint&&<p className="pokemon-nae-hint-reveal">{hint.revealedPrefix}{hint.revealedPrefix.length<hint.nameLength?" _".repeat(Math.min(12,hint.nameLength-hint.revealedPrefix.length)):""} <small>{hint.nameLength} lettere</small></p>}<button type="button" className="pokemon-favourite-primary" onClick={()=>void requestHint()} disabled={!spellingHelp||pending}> <HelpCircle size={15}/> Rivela lettere</button></>}
+        {found.has(selected.id)?<div className="pokemon-nae-detail-forms"><h3>Forme e rappresentazioni</h3>{selected.forms.length===0&&selected.megaForms.length===0&&<p>Nessuna forma alternativa registrata.</p>}{[...selected.forms,...selected.megaForms].map(form=><div key={form.id} className="pokemon-nae-detail-form"><img src={form.spriteUrl} alt="" loading="lazy"/><span>{form.label}</span>{form.isMega&&<small>Mega</small>}</div>)}</div>:<>{hint&&<p className="pokemon-nae-hint-reveal">{hint.revealedPrefix}{hint.revealedPrefix.length<hint.nameLength?" _".repeat(Math.min(12,hint.nameLength-hint.revealedPrefix.length)):""} <small>{hint.nameLength} lettere</small></p>}<button type="button" className="pokemon-favourite-primary" autoFocus onClick={()=>void requestHint()} disabled={!spellingHelp||pending}> <HelpCircle size={15}/> Rivela lettere</button></>}
         <button type="button" className="pokemon-favourite-secondary" onClick={()=>setSelected(null)}>Chiudi</button>
-      </aside>
-    </div>}
+      </>}
+    </Dialog>
 
-    {confirmExit&&<div className="pokemon-nae-pause-backdrop" role="presentation"><section className="pokemon-nae-pause-card" role="alertdialog" aria-modal="true" aria-labelledby="pokemon-nae-multi-exit">
+    <Dialog open={confirmExit} onClose={()=>setConfirmExit(false)} overlayClassName="pokemon-nae-pause-backdrop" className="pokemon-nae-pause-card" role="alertdialog" labelledBy="pokemon-nae-multi-exit">
       <span className="pokemon-page-eyebrow">CONFERMA USCITA</span>
       <h2 id="pokemon-nae-multi-exit">Abbandonare la partita?</h2>
       <p>Il tuo risultato attuale verrà salvato nel profilo, uscirai dalla classifica attiva e il tuo contributo resterà nei risultati finali. Potrai rientrare nella stessa sessione finché sarà in corso.</p>
-      <button type="button" className="pokemon-favourite-primary" onClick={()=>void exit()} disabled={isFinishing}>Abbandona e salva</button>
+      <button type="button" className="pokemon-favourite-primary" autoFocus onClick={()=>void exit()} disabled={isFinishing}>Abbandona e salva</button>
       <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmExit(false)}>Continua a giocare</button>
-    </section></div>}
-    {confirmTerminate&&<div className="pokemon-nae-pause-backdrop" role="presentation"><section className="pokemon-nae-pause-card" role="alertdialog" aria-modal="true" aria-labelledby="pokemon-nae-multi-terminate">
+    </Dialog>
+    <Dialog open={confirmTerminate} onClose={()=>setConfirmTerminate(false)} overlayClassName="pokemon-nae-pause-backdrop" className="pokemon-nae-pause-card" role="alertdialog" labelledBy="pokemon-nae-multi-terminate">
       <span className="pokemon-page-eyebrow">AZIONE HOST</span>
       <h2 id="pokemon-nae-multi-terminate">Terminare la partita per tutti?</h2>
       <p>La sessione verrà chiusa per tutti i partecipanti e ciascuno riceverà il proprio risultato, compresi i progressi parziali.</p>
-      <button type="button" className="pokemon-favourite-primary" onClick={()=>void terminateForAll()} disabled={isFinishing}>Termina per tutti</button>
+      <button type="button" className="pokemon-favourite-primary" autoFocus onClick={()=>void terminateForAll()} disabled={isFinishing}>Termina per tutti</button>
       <button type="button" className="pokemon-favourite-secondary" onClick={()=>setConfirmTerminate(false)}>Annulla</button>
-    </section></div>}
+    </Dialog>
+
   </section>;
 }
