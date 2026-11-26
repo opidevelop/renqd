@@ -26,6 +26,7 @@ export default async function TrackRecordPage(){
   if(record.visibility!=="PUBLIC"&&record.owner_id!==user.id)continue;
   const recordData=record.record_data as {franchise_code?:string;season_number?:number;year?:number;queens?:Array<{id?:string;name:string;image_url?:string|null;winner?:boolean}>};
   for(const queen of recordData.queens??[])if(queen.winner){const catalogQueen=queen.id?queenById.get(queen.id):null;hallOfFame.push({id:record.id+":"+(queen.id??queen.name),queenId:catalogQueen?.id??null,queenName:queen.name,imageUrl:queen.image_url??catalogQueen?.image_url??null,franchiseCode:recordData.franchise_code??"CUSTOM",seasonNumber:recordData.season_number??null,year:recordData.year??null,seasonTitle:record.title,isOfficial:false,recordId:record.id});
+  }
  }
  return <TrackRecordHub userId={user.id} templates={t.data??[]} records={r.data??[]} franchiseNames={franchiseNames} canSync={canSync} hallOfFame={hallOfFame}/>;
 }
