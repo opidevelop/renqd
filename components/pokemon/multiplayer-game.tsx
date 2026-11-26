@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { playPokemonSound, preparePokemonAudio } from "@/lib/pokemon/sounds";
 import { usePokemonSoundPreference } from "@/components/pokemon/use-pokemon-sound-preference";
 import { PokemonCatalog, PokemonSpecies, normalizePokemonName, findExactPokemonMatch, isAmbiguousPokemonName } from "@/lib/pokemon/catalog";
+import { useNameEmAllSubmissionQueue } from "@/components/pokemon/use-name-em-all-submission-queue";
 import { expelNameEmAllParticipantAction, finishNameEmAllMultiplayerAction, heartbeatNameEmAllAction, hintNameEmAllMultiplayerAction, leaveNameEmAllAction, submitNameEmAllMultiplayerAnswerAction } from "@/app/(platform)/pokemon/name-em-all/actions";
 import type { NameEmAllParticipant } from "@/components/pokemon/multiplayer-lobby";
 
@@ -39,7 +40,6 @@ export function PokemonNameEmAllMultiplayerGame({
   const [activeSection,setActiveSection]=useState("gen-"+String(Array.isArray(initialSession.config.generations)?initialSession.config.generations[0]??1:1));
   const [query,setQuery]=useState("");
   const [confirmed,setConfirmed]=useState(false);
-  const pendingRef=useRef(false);
   const [collapsedGenerations,setCollapsedGenerations]=useState<Set<number>>(new Set());
   const inputRef=useRef<HTMLInputElement>(null);
   const [selected,setSelected]=useState<PokemonSpecies|null>(null);
@@ -47,7 +47,6 @@ export function PokemonNameEmAllMultiplayerGame({
   const [countdown,setCountdown]=useState(0);
   const [remaining,setRemaining]=useState(initialSession.status==="PAUSED"?(initialSession.remaining_seconds??0):(initialSession.remaining_seconds??initialSession.duration_seconds));
   const [deadline,setDeadline]=useState(initialSession.deadline_at?new Date(initialSession.deadline_at).getTime():0);
-  const [pending,setPending]=useState(false);
   const [isFinishing,setIsFinishing]=useState(false);
   const [playerCompleted,setPlayerCompleted]=useState(Boolean(initialParticipants.find(p=>p.userId===currentUserId)?.completed));
   const [message,setMessage]=useState("");
@@ -137,6 +136,61 @@ export function PokemonNameEmAllMultiplayerGame({
     if(!result.ok){setError(result.error??"Non è stato possibile salvare i risultati.");setIsFinishing(false);return;}
     router.refresh();
   },[isFinishing,router,session.id]);
+  const processQueuedSubmission=useCallback(async(answer:string,optimisticSpecies:PokemonSpecies)=>{
+    const result=await submitNameEmAllMultiplayerAnswerAction(session.id,answer);
+    const data=result.data??{};
+    const refocusInput=()=>window.requestAnimationFrame(()=>inputRef.current?.focus());
+    if(!result.ok){
+      setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
+      setConfirmed(false);setError(result.error??"Risposta non registrata.");refocusInput();return;
+    }
+    if(typeof data.speciesId==="number"&&["CORRECT","CATALOG_COMPLETE","PLAYER_COMPLETE","ALL_COMPLETED"].includes(String(data.status))){
+      setFound(current=>new Set(current).add(Number(data.speciesId)));
+      setConfirmed(true);setSelected(null);setHint(null);
+      playPokemonSound("correct",soundEnabled);refocusInput();
+    }
+    if(data.status==="WRONG"){
+      setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
+      setConfirmed(false);playPokemonSound("incorrect",soundEnabled);setMessage("Non è una risposta valida per questo catalogo.");refocusInput();return;
+    }
+    if(data.status==="ALREADY_FOUND"){
+      if(typeof data.speciesId==="number")setFound(current=>new Set(current).add(Number(data.speciesId)));
+      setQuery("");setConfirmed(false);refocusInput();
+      const discovererId=shared&&typeof data.speciesId==="number"?discoveryById[String(data.speciesId)]:null;
+      const discoverer=discovererId?participants.find(player=>player.userId===discovererId):null;
+      const discovererName=typeof data.discoveredByName==="string"?data.discoveredByName:discoverer?.displayName;
+      setMessage(shared?(discovererName?"Già indovinato da "+discovererName:"Questo Pokémon è già stato scoperto."):"Hai già scoperto questo Pokémon!");return;
+    }
+    if(data.status==="PAUSED"){
+      setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
+      setSession(current=>({...current,status:"PAUSED"}));setMessage("La partita è in pausa.");return;
+    }
+    if(data.status==="TIME_EXPIRED"){
+      setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
+      await finish("TIMER_EXPIRED");return;
+    }
+    if(data.status==="PLAYER_COMPLETE"){
+      setConfirmed(true);playPokemonSound("complete",soundEnabled);setPlayerCompleted(true);setMessage("Hai completato il tuo catalogo. Attendi gli altri Allenatori.");return;
+    }
+    if(data.status==="CATALOG_COMPLETE"){
+      setConfirmed(true);playPokemonSound("complete",soundEnabled);setMessage("Pokédex condiviso completato!");await finish("CATALOG_COMPLETE");return;
+    }
+    if(data.status==="ALL_COMPLETED"){
+      setConfirmed(true);playPokemonSound("complete",soundEnabled);setPlayerCompleted(true);await finish("ALL_COMPLETED");return;
+    }
+    if(data.status==="CORRECT")setMessage("Corretto! "+String(data.name??""));
+    if(data.status==="COUNTDOWN")setMessage("La partita sta per iniziare.");
+    if(data.status==="FINISHED")router.refresh();
+  },[session.id,soundEnabled,shared,discoveryById,participants,finish,router]);
+  const {enqueue:enqueueSubmission,pending,queuedKeysRef}=useNameEmAllSubmissionQueue(processQueuedSubmission);
+  const enqueuePokemonSubmission=useCallback((answer:string,item:PokemonSpecies)=>{
+    if(playerCompleted||session.status!=="ACTIVE"||countdown>0||found.has(item.id)||queuedKeysRef.current.has(item.id))return;
+    if(!enqueueSubmission(answer,item,item.id))return;
+    preparePokemonAudio(soundEnabled);
+    setFound(current=>new Set(current).add(item.id));
+    setQuery("");setConfirmed(true);setMessage("Pokémon scoperto!");
+    playPokemonSound("correct",soundEnabled);
+  },[playerCompleted,session.status,countdown,found,queuedKeysRef,enqueueSubmission,soundEnabled]);
 
   const heartbeat=useCallback(async()=>{
     const result=await heartbeatNameEmAllAction(session.id);
@@ -157,7 +211,13 @@ export function PokemonNameEmAllMultiplayerGame({
     ]);
     const rows=discoveriesResult.data??[];
     const myRows=rows.filter(row=>shared?row.user_id===null:row.user_id===currentUserId);
-    setFound(new Set(myRows.map(row=>Number(row.species_id))));
+    const serverFound=new Set(myRows.map(row=>Number(row.species_id)));
+    setFound(current=>{
+      if(!pending)return serverFound;
+      const merged=new Set(serverFound);
+      current.forEach(id=>merged.add(id));
+      return merged;
+    });
     if(shared)setDiscoveryById(Object.fromEntries(rows.filter(row=>row.user_id===null&&row.discovered_by).map(row=>[String(row.species_id),String(row.discovered_by)])));
     const counts=new Map<string,number>();
     const lastDiscoveryAt=new Map<string,string>();
@@ -186,7 +246,7 @@ export function PokemonNameEmAllMultiplayerGame({
       setRemaining(Number(live.remaining_seconds??0));
       if(live.status==="COMPLETED")router.refresh();
     }
-  },[session.id,shared,currentUserId,initialParticipants,router]);
+  },[session.id,shared,currentUserId,initialParticipants,router,pending]);
 
   useEffect(()=>{
     let alive=true;
@@ -229,53 +289,6 @@ export function PokemonNameEmAllMultiplayerGame({
     }
   },[remaining,countdown,session.status,isFinishing,finish,unlimited]);
 
-  const submit=useCallback(async(answer:string,optimisticSpecies?:PokemonSpecies)=>{
-    if(!answer.trim()||pendingRef.current||playerCompleted||session.status!=="ACTIVE"||countdown>0)return;
-    pendingRef.current=true;
-    setConfirmed(false);
-    preparePokemonAudio(soundEnabled);
-    setPending(true);setError("");setMessage("");
-    if(optimisticSpecies){
-      setFound(current=>new Set(current).add(optimisticSpecies.id));
-      setQuery("");
-      setConfirmed(true);setMessage("Pokémon scoperto!");
-      playPokemonSound("correct",soundEnabled);
-    }
-    const result=await submitNameEmAllMultiplayerAnswerAction(session.id,answer);
-    pendingRef.current=false;
-    setPending(false);
-    const data=result.data??{};
-    const refocusInput=()=>window.requestAnimationFrame(()=>inputRef.current?.focus());
-    if(!result.ok){
-      if(optimisticSpecies)setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
-      setConfirmed(false);setMessage("");setError(result.error??"Risposta non registrata.");refocusInput();return;
-    }
-    if(typeof data.speciesId==="number"&&["CORRECT","CATALOG_COMPLETE","PLAYER_COMPLETE","ALL_COMPLETED"].includes(String(data.status))){
-      setFound(current=>new Set(current).add(Number(data.speciesId)));
-      setQuery("");setConfirmed(true);setSelected(null);setHint(null);
-      if(!optimisticSpecies)playPokemonSound("correct",soundEnabled);
-      refocusInput();
-    }
-    if(data.status==="WRONG"){
-      if(optimisticSpecies)setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
-      setConfirmed(false);playPokemonSound("incorrect",soundEnabled);setMessage("Non è una risposta valida per questo catalogo.");refocusInput();return;
-    }
-    if(data.status==="ALREADY_FOUND"){
-      setQuery("");setConfirmed(false);refocusInput();
-      const discovererId=shared&&typeof data.speciesId==="number"?discoveryById[String(data.speciesId)]:null;
-      const discoverer=discovererId?participants.find(player=>player.userId===discovererId):null;
-      const discovererName=typeof data.discoveredByName==="string"?data.discoveredByName:discoverer?.displayName;
-      setMessage(shared?(discovererName?"Già indovinato da "+discovererName:"Questo Pokémon è già stato scoperto."):"Hai già scoperto questo Pokémon!");return;
-    }
-    if(data.status==="PAUSED"){setSession(current=>({...current,status:"PAUSED"}));setMessage("La partita è in pausa.");return;}
-    if(data.status==="TIME_EXPIRED"){await finish("TIMER_EXPIRED");return;}
-    if(data.status==="PLAYER_COMPLETE"){setConfirmed(true);playPokemonSound("complete",soundEnabled);setPlayerCompleted(true);setMessage("Hai completato il tuo catalogo. Attendi gli altri Allenatori.");return;}
-    if(data.status==="CATALOG_COMPLETE"){setConfirmed(true);playPokemonSound("complete",soundEnabled);setMessage("Pokédex condiviso completato!");await finish("CATALOG_COMPLETE");return;}
-    if(data.status==="ALL_COMPLETED"){setConfirmed(true);playPokemonSound("complete",soundEnabled);setPlayerCompleted(true);await finish("ALL_COMPLETED");return;}
-    if(data.status==="CORRECT"){setMessage("Corretto! "+String(data.name??""));return;}
-    if(data.status==="COUNTDOWN"){setMessage("La partita sta per iniziare.");return;}
-    if(data.status==="FINISHED"){router.refresh();}
-  },[playerCompleted,session.status,countdown,soundEnabled,session.id,shared,discoveryById,participants,finish,router]);
   useEffect(()=>{
     if(!pending&&!query&&session.status==="ACTIVE"&&!playerCompleted&&countdown===0){
       const frame=window.requestAnimationFrame(()=>inputRef.current?.focus());
@@ -379,10 +392,10 @@ export function PokemonNameEmAllMultiplayerGame({
 
     <div className="pokemon-nae-search-wrap">
       <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Non è una risposta valida per questo catalogo."?" is-wrong":"")}>
-        <input ref={inputRef} value={query} onChange={event=>{const value=event.target.value;setQuery(value);setConfirmed(false);setMessage("");const normalized=normalizePokemonName(value);if(normalized&&!pendingRef.current&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){const match=findExactPokemonMatch(species,normalized);if(match&&!isAmbiguousPokemonName(species,match,normalized)){void submit(match.name,match);}}}}
-          onKeyDown={event=>{if(event.key==="Enter"&&exactMatch&&exactMatchIsAmbiguous&&!pendingRef.current&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){event.preventDefault();void submit(exactMatch.name,exactMatch);}}}
+        <input ref={inputRef} value={query} onChange={event=>{const value=event.target.value;setQuery(value);setConfirmed(false);setMessage("");const normalized=normalizePokemonName(value);if(normalized&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){const match=findExactPokemonMatch(species,normalized);if(match&&!isAmbiguousPokemonName(species,match,normalized)){enqueuePokemonSubmission(match.name,match);}}}}
+          onKeyDown={event=>{if(event.key==="Enter"&&exactMatch&&exactMatchIsAmbiguous&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){event.preventDefault();enqueuePokemonSubmission(exactMatch.name,exactMatch);}}}
           placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false}
-          disabled={pending||playerCompleted||session.status!=="ACTIVE"||countdown>0}/>
+          disabled={playerCompleted||session.status!=="ACTIVE"||countdown>0}/>
         {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
         {pending&&<LoaderCircle size={15}/>}
       </label>
