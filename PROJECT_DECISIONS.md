@@ -754,3 +754,18 @@ Questa decisione aggiorna e prevale sulle precedenti formulazioni della specific
 10. Il workbook «Copia di Drag Race.xlsx» non deve essere importato: sono escluse anche le sue 90 stagioni. La scala PPE del foglio `Punteggi` resta invece approvata come scala predefinita.
 
 La struttura della stagione resta precompilata e non richiede che l'utente ricrei manualmente contestant, episodi e challenge quando esistono nel catalogo. La libertà manuale riguarda i risultati competitivi. Questa precisazione riguarda esclusivamente la modalità Track Record e non modifica il Season Simulator o i risultati generati dalle sue simulazioni.
+
+
+## Direzione grafica coordinata Pokémon / Drag Race e shell collezioni (26 novembre 2026)
+
+Decisioni approvate dall'utente durante la revisione visuale:
+
+1. **Home:** i banner hub Pokémon e Drag Race diventano due card affiancate sulla stessa riga desktop, con identiche dimensioni e identico comportamento di hover/movimento. Su schermi piccoli possono impilarsi mantenendo lo stesso trattamento.
+2. **Card Pokémon:** palette blu; protagonisti visivi Glaceon, Leafeon ed Espeon.
+3. **Card Drag Race:** palette rosa e nero; protagoniste visive Trixie Mattel, Naomi Smalls e Monét X Change. Le fotografie devono rispettare la licenza e avere attribuzione verificabile.
+4. **Hub /pokemon e /drag-race:** banner coordinati con le card della home, ridotti agli elementi essenziali: nome, breve descrizione e pochi tag.
+5. **Hub Drag Race:** struttura e gerarchia dei contenuti allineate a /pokemon: una card per modalità, niente pannello di statistiche del catalogo condiviso in evidenza. La sincronizzazione catalogo resta una funzione tecnica necessaria per i dati delle modalità e, se visibile, è relegata in fondo alla pagina in uno strumento richiudibile riservato allo staff.
+6. **Pagine Drag Race:** restyling coerente e trasversale delle modalità, dei profili Queen e della Track Record; rosa come colore guida, maggiore dinamismo, azioni e transizioni, rispettando le preferenze di movimento ridotto del sistema.
+7. **Collezioni profilo:** il dettaglio di una collezione deve mantenere sempre la shell autenticata Renqd, inclusi header superiore, menu laterale e navigazione mobile.
+
+Queste modifiche sono visuali e di navigazione: non autorizzano modifiche alle regole di gioco o ai dati Pokémon esistenti.
