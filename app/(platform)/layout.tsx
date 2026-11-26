@@ -13,6 +13,7 @@ import "./admin-management.css";
 import "./moderation.css";
 import "./social.css";
 import "./pokemon.css";
+import "./drag-race.css";
 import "./admin-visual.css";
 export const dynamic = "force-dynamic";
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {

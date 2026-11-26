@@ -4,9 +4,9 @@ import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
 import { usePathname, useRouter } from "next/navigation";
 import { RenqdWheel } from "@/components/renqd-wheel";
-import { House, Compass, Inbox, Plus, UserRound, FileText, LogOut, Trophy, ChevronDown, ShieldCheck, Gamepad2 } from "lucide-react";
+import { House, Compass, Inbox, Plus, UserRound, FileText, LogOut, Trophy, ChevronDown, ShieldCheck, Gamepad2, Crown } from "lucide-react";
 import { NotificationMenu } from "@/components/notification-menu";
-const nav=[{href:"/home",label:"Home",icon:House},{href:"/explore",label:"Scopri",icon:Compass},{href:"/create",label:"Crea",icon:Plus},{href:"/rankings",label:"Renq",icon:Trophy},{href:"/pokemon",label:"Pokémon",icon:Gamepad2},{href:"/notes",label:"Appunti",icon:FileText},{href:"/inbox",label:"Attività",icon:Inbox},{href:"/profile",label:"Profilo",icon:UserRound}];
+const nav=[{href:"/home",label:"Home",icon:House},{href:"/explore",label:"Scopri",icon:Compass},{href:"/create",label:"Crea",icon:Plus},{href:"/rankings",label:"Renq",icon:Trophy},{href:"/pokemon",label:"Pokémon",icon:Gamepad2},{href:"/drag-race",label:"Drag Race",icon:Crown},{href:"/notes",label:"Appunti",icon:FileText},{href:"/inbox",label:"Attività",icon:Inbox},{href:"/profile",label:"Profilo",icon:UserRound}];
 const mobileNav=[{href:"/home",label:"Home",icon:House},{href:"/explore",label:"Scopri",icon:Compass},{href:"/create",label:"Crea",icon:Plus},{href:"/inbox",label:"Attività",icon:Inbox},{href:"/profile",label:"Profilo",icon:UserRound}];
 export function PlatformShell({children,avatarUrl,avatarPosition={x:50,y:50},avatarZoom=100,displayName,username,role,userId}:{children:React.ReactNode;avatarUrl:string|null;avatarPosition?:{x:number;y:number};avatarZoom?:number;displayName:string;username:string;role:string;userId:string}){
  const pathname=usePathname();const router=useRouter();const [menuOpen,setMenuOpen]=useState(false);const menuRef=useRef<HTMLDivElement>(null);const isStaff=role==="OWNER"||role==="ADMIN"||role==="MODERATOR";const visibleNav=[...nav,...(isStaff?[{href:"/admin",label:"Dashboard",icon:ShieldCheck}]:[])];

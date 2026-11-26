@@ -41,6 +41,11 @@ export default async function PlatformHomePage(){
    <span className="home-pokemon-banner-art" aria-hidden="true"><i/><img className="home-pokemon-mon home-pokemon-mon-back" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/471.png" alt=""/><img className="home-pokemon-mon home-pokemon-mon-mid" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/196.png" alt=""/><img className="home-pokemon-mon home-pokemon-mon-front" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/470.png" alt=""/></span>
    <span className="home-pokemon-banner-arrow"><ArrowUpRight size={20}/></span>
   </Link>
+  <Link href="/drag-race" className="home-drag-race-banner">
+   <span className="home-drag-race-banner-copy"><small>RENQD × DRAG RACE</small><strong>Eleganza. Unicità. Drag.</strong><em>Sei esperienze per celebrare le Queen.</em><span className="home-drag-race-banner-cta">Entra nell’hub <ArrowUpRight size={16}/></span></span>
+   <span className="home-drag-race-banner-art" aria-hidden="true"><i>DR</i><b>DRAG</b><b>RACE</b></span>
+   <span className="home-drag-race-banner-arrow"><ArrowUpRight size={20}/></span>
+  </Link>
   <section className="home-category-section"><div className="section-heading-row"><div><span className="home-create-eyebrow">PARTI DA UNA CATEGORIA</span><h2>Esplora le tue <em>passioni.</em></h2></div></div><div className="home-category-grid">{cats.map(({title,id,detail,tone,icon:Icon})=><Link href={"/create?category="+id} key={id} className={"home-category-card tone-"+tone}><span className="home-category-icon"><Icon size={22}/></span><strong>{title}</strong><small>{detail}</small><span className="category-arrow">↗</span></Link>)}</div></section>
   <footer className="home-attribution-footer"><span>renqd.</span><Link href="/attributions" aria-label="Informazioni sulle attribuzioni" title="Attribuzioni"><span aria-hidden="true">i</span></Link></footer>
  </div>;
