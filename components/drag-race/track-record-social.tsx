@@ -1,15 +1,15 @@
 "use client";
 
-import {useEffect,useMemo,useState} from "react";
+import {useCallback,useEffect,useMemo,useState,type ReactNode} from "react";
 import Link from "next/link";
 import {createClient} from "@/lib/supabase/client";
 import {Dialog} from "@/components/ui/dialog";
-import {Flag,Heart,LoaderCircle,MessageCircle,MoreHorizontal,Pencil,Reply,Send,ShieldCheck,Trash2,X} from "lucide-react";
+import {Flag,Heart,LoaderCircle,MessageCircle,Pencil,Reply,Send,ShieldCheck,Trash2} from "lucide-react";
 
 type CommentRow={id:string;track_record_id:string;author_id:string;parent_comment_id:string|null;body:string;edited_at:string|null;deleted_at:string|null;created_at:string};
 type LikeRow={comment_id:string;user_id:string};
 type PublicProfile={user_id:string;username:string|null;display_name:string|null;avatar_url:string|null};
-type Props={recordId:string;recordTitle:string;ownerId:string;userId:string;canModerate:boolean;socialEnabled:boolean};
+type Props={recordId:string;ownerId:string;userId:string;canModerate:boolean;socialEnabled:boolean};
 
 const reasons=[
  ["INAPPROPRIATE_CONTENT","Contenuto inappropriato"],
@@ -20,8 +20,8 @@ const reasons=[
  ["OTHER","Altro"]
 ] as const;
 
-export function TrackRecordSocial({recordId,recordTitle,ownerId,userId,canModerate,socialEnabled}:Props){
- const db=createClient();
+export function TrackRecordSocial({recordId,ownerId,userId,canModerate,socialEnabled}:Props){
+ const db=useMemo(()=>createClient(),[]);
  const [comments,setComments]=useState<CommentRow[]>([]);
  const [likes,setLikes]=useState<LikeRow[]>([]);
  const [profiles,setProfiles]=useState<Record<string,PublicProfile>>({});
@@ -41,7 +41,7 @@ export function TrackRecordSocial({recordId,recordTitle,ownerId,userId,canModera
  const [reportBusy,setReportBusy]=useState(false);
  const [recordReported,setRecordReported]=useState(false);
 
- async function loadComments(){
+ const loadComments=useCallback(async()=>{
   setLoading(true);setError("");
   const {data,error:loadError}=await db.from("drag_race_track_record_comments").select("id,track_record_id,author_id,parent_comment_id,body,edited_at,deleted_at,created_at").eq("track_record_id",recordId).order("created_at",{ascending:true});
   if(loadError){setError("Non è stato possibile caricare i commenti: "+loadError.message);setLoading(false);return;}
@@ -58,8 +58,8 @@ export function TrackRecordSocial({recordId,recordTitle,ownerId,userId,canModera
    if(!profileResult.error)setProfiles(Object.fromEntries(((profileResult.data??[]) as PublicProfile[]).map(profile=>[profile.user_id,profile])));
   }else{setLikes([]);setProfiles({});}
   setLoading(false);
- }
- useEffect(()=>{if(!socialEnabled){setLoading(false);return;}void loadComments();},[recordId,socialEnabled]);
+ },[db,recordId]);
+ useEffect(()=>{if(!socialEnabled){setLoading(false);return;}void loadComments();},[loadComments,socialEnabled]);
  useEffect(()=>{if(!socialEnabled||ownerId===userId)return;let active=true;void db.rpc("renqd_drag_race_track_record_report_exists",{p_record_id:recordId}).then(({data,error:rpcError})=>{if(active&&!rpcError)setRecordReported(Boolean(data));});return()=>{active=false;};},[db,recordId,ownerId,socialEnabled,userId]);
 
  const topLevel=useMemo(()=>comments.filter(comment=>comment.parent_comment_id===null),[comments]);
@@ -124,7 +124,7 @@ export function TrackRecordSocial({recordId,recordTitle,ownerId,userId,canModera
  }
 
  if(!socialEnabled)return null;
- const renderComment=(comment:CommentRow,isReply=false)=>(
+ function renderComment(comment:CommentRow,isReply=false):ReactNode{return (
   <article className={"drag-track-comment"+(isReply?" is-reply":"")} id={"comment-"+comment.id} key={comment.id}>
    <div className="drag-track-comment-avatar">{profileLabel(comment.author_id).slice(0,1).toUpperCase()}</div>
    <div className="drag-track-comment-main">
@@ -141,7 +141,7 @@ export function TrackRecordSocial({recordId,recordTitle,ownerId,userId,canModera
     {(replyMap.get(comment.id)??[]).map(reply=>renderComment(reply,true))}
    </div>
   </article>
- );
+ );}
 
  return <section className="drag-track-section drag-track-social" id="comments">
   <div className="drag-track-section-head"><div><span>COMMUNITY</span><h2>Commenti</h2><p>{count} {count===1?"commento":"commenti"} sulla Track Record</p></div><MessageCircle size={21}/></div>
