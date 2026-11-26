@@ -7,7 +7,7 @@ export default async function GuessTheLipsyncPage(){
   supabase.from("drag_race_franchises").select("code,name").order("sort_order"),
   supabase.from("drag_race_seasons").select("id,franchise_code,season_number,name").order("year"),
   supabase.from("drag_race_queens").select("id,name,aliases,image_url").range(0,4999),
-  supabase.from("drag_race_lipsyncs").select("id,season_id,song_title,song_artist,queen_ids,preview_url,apple_music_url").eq("is_eligible",true).range(0,4999)
+  supabase.from("drag_race_lipsyncs").select("id,season_id,song_title,song_artist,queen_ids,preview_url,apple_music_url,source_version").eq("is_eligible",true).range(0,4999)
  ]);
  return <GuessTheLipsyncGame franchises={f.data??[]} seasons={s.data??[]} queens={(q.data??[]).map(x=>({...x,aliases:x.aliases??[]}))} lipsyncs={(l.data??[]).filter(x=>x.song_artist&&x.preview_url).map(x=>({...x,song_artist:x.song_artist??"",preview_url:x.preview_url??""}))}/>;
 }

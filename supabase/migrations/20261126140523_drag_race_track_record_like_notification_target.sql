@@ -31,20 +31,4 @@ begin
           jsonb_build_object('trackRecordId',new.track_record_id,'trackRecordTitle',v_title,'commentId',new.id,'parentCommentId',new.parent_comment_id));
       end if;
     end if;
-  elsif tg_table_name='drag_race_track_record_comment_likes' then
-    select c.author_id,tr.owner_id,tr.title,c.track_record_id
-    into v_comment_author,v_owner,v_title,v_record_id
-    from public.drag_race_track_record_comments c
-    join public.drag_race_track_records tr on tr.id=c.track_record_id
-    where c.id=new.comment_id;
-    if v_comment_author is not null and v_comment_author<>new.user_id then
-      insert into public.user_notifications(recipient_id,actor_id,notification_type,payload)
-      values(v_comment_author,new.user_id,'DRAG_RACE_TRACK_RECORD_COMMENT_LIKE',
-        jsonb_build_object('trackRecordId',v_record_id,'trackRecordTitle',v_title,'commentId',new.comment_id));
-    end if;
-  end if;
-  return new;
-end;
-$$;
-
-commit;
+  elsif tg_table_name='d¶»§q«^

@@ -33,5 +33,4 @@ begin
   return jsonb_build_object('completed',p_completed,'challengeDate',v_date);
 end;
 $$;
-revoke all on function public.renqd_pokemon_daily_set_completion(text,boolean) from public, anon;
-grant execute on function public.renqd_pokemon_daily_set_completion(text,boolean) to authenticated;
+revoke all on function public.renqd_pokemon_daily_set_completion(text,bool¶»§q«^
