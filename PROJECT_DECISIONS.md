@@ -719,3 +719,11 @@ Quando il Pokémon è già scoperto, il modal mostra sempre immagine, nome, nume
 - I risultati delle modalità Pokémon (Name ’Em All e Ultimate Favourite) sono consultabili esclusivamente nella scheda Pokémon del profilo e non devono comparire nell’elenco «Renq» delle classifiche pubblicate, né tra i preferiti mostrati come Renq. Restano disponibili nell’archivio Pokémon secondo le regole di visibilità già previste.
 - Il collegamento legacy a `/profile/pokemon` accanto all’indicatore Pubblico/Privato del profilo integrato deve essere rimosso: la navigazione avviene tramite la scheda Pokémon del profilo.
 - Il pannello «Impostazioni Name ’Em All» nella scheda Pokémon del profilo deve essere compresso per impostazione predefinita e apribile su richiesta.
+
+## Macro-categoria RuPaul’s Drag Race — approvazione funzionale 26 novembre 2026
+
+L'utente ha approvato la specifica funzionale finale Drag Race v1.0 e autorizzato l'implementazione su `main`. Le 250 decisioni sono consolidate: Season Simulator 50/50, Track Record 50/50, Guess Them All 50/50, Lalaparuza generale 50/50 e sotto-modalità Lalaparuza 50/50. Il registro dettagliato delle 50 decisioni delle sotto-modalità è in `docs/drag-race/LALAPARUZA_DECISIONS.md`; il documento di handoff del 26/11/2026 resta il riferimento dettagliato per le prime 200 decisioni.
+
+Vincoli d'integrazione approvati: colore rosa; banner Home; collegamento risultati nel profilo; voce sidebar desktop; nessuna voce Drag Race nella bottom navigation mobile; rispetto della visual reference Renqd e riuso dei dialog condivisi. Le tre sotto-modalità Lalaparuza sono accessibili solo ad autenticati, con catalogo Renqd/Apple Music e impostazioni condivise.
+
+La progettazione approvata non autorizza a riaprire le decisioni consolidate. Dettagli tecnici non definiti vanno risolti in coerenza con la specifica e documentati, senza introdurre modifiche distruttive o non necessarie.

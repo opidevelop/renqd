@@ -2059,3 +2059,29 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Il controllo runtime Vercel per errori/fatal negli ultimi 30 minuti non ha restituito log.
 - ESLint non è stato eseguito separatamente in questa sessione: l'ambiente container non ha accesso di rete per clonare/installare il repository e non è disponibile un'azione GitHub Actions dispatch nel connettore. Non dichiarare il lint superato sulla sola base della build Vercel.
 - Test funzionali autenticati e collaudo visuale desktop/mobile non eseguiti: il browser collegato non è disponibile in questa sessione. Verificare con account autenticato la scheda Pokémon, l'espansione delle preferenze e l'assenza dei due tipi di risultato nelle schede Renq e Preferiti, sia nel profilo proprietario sia in quello pubblico.
+
+## 2026-11-26 — Macro-categoria Drag Race (implementazione in corso)
+
+### Fondamenta e catalogo
+- Approvata dall'utente la specifica funzionale finale Drag Race v1.0; autorizzata l'implementazione su `main`.
+- Create le tabelle Supabase `drag_race_franchises`, `drag_race_queens`, `drag_race_seasons`, `drag_race_episodes`, `drag_race_lipsyncs`, `drag_race_catalog_sync_state`, `drag_race_sessions` e `drag_race_results`.
+- Abilitata e forzata RLS sulle tabelle Drag Race; catalogo in lettura per account approvati; stato sincronizzazione leggibile dagli account approvati; sincronizzazione riservata a OWNER/ADMIN/MODERATOR.
+- Create le RPC `drag_race_claim_catalog_sync`, `drag_race_create_session` e `drag_race_update_session`. Le sessioni sono proprietarie; l'aggiornamento terminale genera il risultato aggregato.
+- Deploy Edge Function `drag-race-catalog-sync` attiva con JWT obbligatorio. Importa il pacchetto MIT `tkalejandro/drag-race-mcp` versione 1.1.1, controlla la completezza del pacchetto, importa franchise/Queen/stagioni/episodi/lipsync e risolve artista/preview tramite iTunes Search API.
+- Il catalogo non è ancora stato sincronizzato: occorre eseguire una volta il comando «Sincronizza catalogo» dall'hub con un account staff. Le immagini Queen non sono incluse nel pacchetto; il fallback visuale resta il placeholder finché non viene integrata una fonte immagini verificata.
+- Attribuzione e licenza MIT aggiunte in `/attributions` e `public/licenses/drag-race-mcp-MIT.txt`.
+
+### Integrazione UI e giochi
+- Aggiunta voce Drag Race alla sidebar desktop, senza inserirla nella bottom navigation mobile.
+- Aggiunto banner Drag Race nella Home e hub autenticato `/drag-race` con conteggi catalogo e controllo di sincronizzazione staff.
+- Aggiunta home Lalaparuza `/drag-race/lalaparuza`.
+- Implementato il flusso Guess the Lipsync: configurazione numero personalizzato, franchise multipli, filtro stagioni, estrazione casuale, player preview, autocomplete Queen/alias, reveal, errori per slot, rinuncia, avanzamento automatico e riepilogo con sessione persistita.
+- Implementato Lipsync for Your Life: configurazione franchise/stagioni, Queen ripetibili, canzone casuale, scelta vincitrice, contatori per Queen, Stop con conferma e salvataggio del solo riepilogo.
+- Implementato Slayoff: cast casuale/manuale, drag-and-drop dell'ordine iniziale, preliminari automatici per numeri non bilanciati, tabellone a eliminazione, selezione manuale/casuale dei brani per duello, Randomize dei brani non disputati, drag-and-drop delle assegnazioni, conferma vincitrice, avanzamento e finale per il terzo posto.
+- Le pagine di Season Simulator, Track Record e Guess Them All non sono ancora implementate. Anche classifiche globali, badge/obiettivi, cronologia completa consultabile, condivisione immagine, immagini Queen e gestione dati ufficiali Track Record restano da completare.
+
+### Verifiche e limiti
+- Build Next.js e controllo TypeScript superati sui commit verificati fino a `36ab8786f649ce5b5349e2f23e237cb0f333a457`; le modifiche successive (Slayoff, collegamenti Lalaparuza, attribuzioni e policy visibilità stato catalogo) non hanno ancora una build verificata.
+- Vercel ha restituito il limite API `api-deployments-free-per-day` (HTTP 402, retry dopo 24 ore) per la creazione di un deployment staging. Non modificare impostazioni/billing: il rilascio finale resta in attesa del reset del limite o dell'intervento del proprietario.
+- Il catalogo non è stato popolato e non sono stati eseguiti test E2E autenticati. La build READY non equivale a collaudo runtime.
+- Non dichiarare completata la macro-categoria: restano da implementare Season Simulator, Track Record e Guess Them All, completare tutte le funzionalità trasversali e svolgere test TypeScript/build/ESLint/RLS/regressione e collaudo autenticato desktop/mobile.
