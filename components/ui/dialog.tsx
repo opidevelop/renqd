@@ -111,7 +111,7 @@ export function Dialog({
     <div
       className={overlayClassName}
       onMouseDown={(event) => {
-        if (closeOnBackdrop && event.target === event.currentTarget) closeRef.current();
+        if (closeOnBackdrop && event.target === event.currentTarget) onClose();
       }}
     >
       <section
