@@ -96,7 +96,7 @@ Deno.serve(async(req:Request)=>{
    const episodeList=(episodes??[]).map((episode:EpisodeSource)=>({
     number:episode.episodeNumber,
     title:episode.title,
-    counts_for_ppe:!/(grand\\s+)?finale/i.test(episode.title??""),
+    counts_for_ppe:!/(grand\s+)?finale/i.test(episode.title??""),
     mini_challenge:episode.miniChallenge?.name??null,
     maxi_challenge:episode.maxiChallenge?.name??null,
     lip_sync_song:episode.lipSync?.song??null
