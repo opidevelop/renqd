@@ -44,3 +44,23 @@
 .drag-track-visibility{display:inline-flex;align-items:center;gap:7px;margin-right:12px;font-size:11px}
 .drag-track-visibility label{color:var(--muted,#8b8580)}
 .drag-track-visibility select{border:1px solid var(--line,rgba(120,110,100,.25));border-radius:999px;background:var(--surface,transparent);color:var(--foreground,#292522);padding:5px 9px;font-size:11px}
+
+.drag-track-custom-create{border:1px solid var(--line,rgba(120,110,100,.18));border-radius:16px;padding:14px;background:var(--surface,rgba(255,255,255,.025))}
+.drag-track-custom-create summary{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13px;font-weight:700;list-style:none}
+.drag-track-custom-create summary::-webkit-details-marker{display:none}
+.drag-track-custom-create form{display:flex;flex-direction:column;gap:16px;margin-top:16px}
+.drag-track-custom-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.drag-track-custom-fields label,.drag-track-custom-queen-picker,.drag-track-custom-queen-add{display:flex;flex-direction:column;gap:7px;font-size:11px;font-weight:650}
+.drag-track-custom-fields input,.drag-track-custom-fields select,.drag-track-custom-queen-picker>input,.drag-track-custom-queen-add input{width:100%;min-width:0;border:1px solid var(--line,rgba(120,110,100,.25));border-radius:10px;background:var(--surface-2,rgba(120,110,100,.06));color:var(--foreground,#292522);padding:10px;font-size:12px}
+.drag-track-custom-queen-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-height:190px;overflow:auto;padding:8px;border:1px solid var(--line,rgba(120,110,100,.18));border-radius:12px}
+.drag-track-custom-queen-options label{display:flex;align-items:center;gap:8px;padding:6px;font-size:11px;font-weight:500}
+.drag-track-custom-queen-options input{width:16px;height:16px}
+.drag-track-custom-queen-picker>small{color:var(--muted,#8b8580);font-weight:500}
+.drag-track-custom-queen-add>div{display:grid;grid-template-columns:1fr 1.4fr auto;gap:8px}
+.drag-track-custom-queen-add button,.drag-track-custom-create form>button{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:999px;background:var(--accent,#d97745);color:#fff;padding:10px 14px;font-size:11px;font-weight:700;cursor:pointer}
+.drag-track-custom-queen-add ul{display:flex;flex-wrap:wrap;gap:7px;padding:0;margin:0;list-style:none}
+.drag-track-custom-queen-add li{display:flex;align-items:center;gap:8px;border-radius:999px;padding:5px 9px;background:var(--surface-2,rgba(120,110,100,.1));font-size:10px}
+.drag-track-custom-queen-add li button{border:0;background:transparent;color:var(--accent,#d97745);padding:0;font-size:10px}
+.drag-track-custom-create form>button{align-self:flex-start}
+.drag-track-custom-create button:disabled{opacity:.55;cursor:wait}
+@media(max-width:760px){.drag-track-custom-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.drag-track-custom-queen-options{grid-template-columns:1fr}.drag-track-custom-queen-add>div{grid-template-columns:1fr}}
