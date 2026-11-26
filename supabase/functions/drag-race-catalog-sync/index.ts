@@ -99,7 +99,7 @@ Deno.serve(async(req:Request)=>{
     title:episode.title,
     counts_for_ppe:!/(grand\\s+)?finale/i.test(episode.title??"")
    }));
-   const queenList=(season.castIds??[]).map((queenId:string,index:number)=>{
+   const queenList=(season.castIds??[]).map((queenId:string)=>{
     const queen=queenById.get(queenId);
     const appearance=(queen?.appearances??[]).find((item:QueenAppearanceSource)=>item.seasonId===season.id);
     const results=(episodes??[]).map((episode:EpisodeSource)=>({
@@ -125,7 +125,6 @@ Deno.serve(async(req:Request)=>{
      elimination_episode:appearance?.eliminatedEpisodeId
       ? (episodes??[]).find((ep:EpisodeSource)=>ep.id===appearance.eliminatedEpisodeId)?.episodeNumber??null
       : null,
-     elimination_tie_order:index+1
     };
    });
    return {
