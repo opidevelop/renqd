@@ -6,6 +6,7 @@ import { MessageRequestButton } from "@/components/message-request-button";
 import { UserBlockButton } from "@/components/user-block-button";
 import { PublicProfileTabs } from "@/components/public-profile-tabs";
 import { PokemonProfileArchive } from "@/components/pokemon/profile-archive";
+import { PublicProfileRenqList } from "@/components/public-profile-renq-list";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import { ArrowLeft, ArrowUpRight, BadgeCheck, Folder, Globe2, Trophy } from "lucide-react";
 
@@ -80,11 +81,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
       {visibleCollections.length ? <div className="profile-collection-grid">{visibleCollections.map(collection => <Link href={"/collections/" + collection.slug} key={collection.id} className="profile-collection-card"><div className="profile-collection-art" style={collection.banner_display_url ? { backgroundImage: "linear-gradient(0deg,rgba(16,13,11,.72),rgba(16,13,11,.05)),url(" + collection.banner_display_url + ")" } : undefined}><span><Globe2 size={13}/> PUBBLICA</span><strong>{collection.title}</strong><small>{collection.description}</small></div></Link>)}</div> : <div className="profile-empty-state"><Folder size={23}/><strong>Nessuna collezione pubblica</strong></div>}
     </section>
       </>}
-      renqs={<>
-<section className="profile-renqs-section"><div className="profile-section-heading"><div><span>CLASSIFICHE PUBBLICATE</span><h2>I Renq di {profile.display_name || profile.username}</h2></div><Trophy size={20}/></div>
-      {rankings.length ? <div className="profile-renq-grid">{rankings.map(ranking => { const settings = ranking.settings as Record<string, unknown>; const cover = typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null; return <Link key={ranking.id} href={"/r/" + (ranking.public_slug || ranking.id)} className="profile-renq-card"><div style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.75),rgba(15,12,10,.05)),url(" + cover + ")" } : undefined}><span>{String(ranking.mode).replaceAll("_"," ")}</span><ArrowUpRight size={17}/></div><strong>{ranking.title}</strong></Link>; })}</div> : <div className="profile-empty-state"><Trophy size={23}/><strong>Nessun Renq pubblico disponibile</strong></div>}
-    </section>
-      </>}
+      renqs={<PublicProfileRenqList items={rankings as Array<{id:string;title:string;public_slug:string|null;mode:string;settings:Record<string,unknown>|null}>} displayName={profile.display_name||profile.username}/>} 
       pokemon={<PokemonProfileArchive items={visiblePokemonItems as Array<{id:string;title:string;public_slug:string|null;mode:string;status:string;updated_at:string;settings:Record<string,unknown>|null}>} referenceNow={Date.now()} persistentHighestLevel={null} maestroAchievedAt={null} readOnly/>}
     />
     <div className="profile-public-footer"><BadgeCheck size={15}/> Creato con Renqd</div>
