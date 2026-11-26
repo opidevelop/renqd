@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { Dialog } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { toPng } from "html-to-image";
 import { ArrowDownToLine, Check, LoaderCircle, Plus, Search, Share2, X } from "lucide-react";
