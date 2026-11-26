@@ -155,7 +155,7 @@ Deno.serve(async(req:Request)=>{
  const {data:profile}=await userClient.from("profiles").select("role,status").eq("id",userData.user.id).maybeSingle();
  if(profile?.status!=="APPROVED"||!["OWNER","ADMIN","MODERATOR"].includes(String(profile.role)))return reply({error:"Staff access required"},403);
  const admin=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
- let limit=8;try{const body=await req.json();if(Number.isInteger(body?.limit))limit=Math.max(1,Math.min(12,body.limit));}catch{}
+ let limit=5;try{const body=await req.json();if(Number.isInteger(body?.limit))limit=Math.max(1,Math.min(5,body.limit));}catch{}
  const {data:allTemplates,error:templateError}=await admin.from("drag_race_track_record_templates").select("id,franchise_code,season_number,display_title,episodes,queens,source_metadata").order("franchise_code").order("season_number");
  if(templateError)return reply({error:"Unable to load Track Record templates"},503);
  const templates=(allTemplates??[]) as Template[];
