@@ -2122,16 +2122,16 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - CI GitHub Actions «Code quality» sul commit `1e75f16dcab7ece8b8c9fb64e41c6d41691ccd93` era in corso al momento dell'aggiornamento. Vercel ha continuato a segnalare il limite build giornaliero; non dichiarare verificata la build Production né pubblicata la nuova UI.
 
 
-### Arricchimento placement da Wikipedia — aggiornamento 26 novembre 2026
+### Track Record — modello basato sulla struttura, risultati manuali (26 novembre 2026)
 
-- La Edge Function `drag-race-catalog-sync` è stata ridistribuita come **versione 3 ACTIVE**: elimina il tie-break inventato basato sull'ordine del cast e conserva l'ordinamento di eliminazione soltanto quando la fonte fornisce un'informazione esplicita.
-- Aggiunta e distribuita `drag-race-track-record-wikipedia-sync`, **versione 1 ACTIVE**, con JWT obbligatorio e controllo staff OWNER/ADMIN/MODERATOR.
-- La nuova funzione usa le API ufficiali MediaWiki e l'endpoint REST HTML di Wikipedia in inglese; non effettua richieste a Fandom.
-- Il parser cerca la pagina corrispondente alla stagione, legge la tabella «Contestant progress», gestisce intestazioni con rowspan/colspan, abbina Queen tramite nome e alias e importa soltanto codici PPE riconosciuti.
-- Mapping conservativo: WIN, HIGH, HIGH TEAM, SAFE, LOW, TOP2 ed ELIM sono mappati solo se presenti nella scala PPE. BTM diventa BTM2 soltanto quando esattamente due Queen abbinate risultano BTM nello stesso episodio. I placement esistenti non vengono sovrascritti.
-- La funzione elabora al massimo 5 stagioni per chiamata, registra anche pagine non trovate/tabelle mancanti/Queen non abbinate e conserva URL della revisione, ID revisione, timestamp, attribuzione «Wikipedia contributors» e licenza CC BY-SA 4.0.
-- La pagina Track Record mostra il comando di importazione solo a OWNER, ADMIN e MODERATOR. L'editor mostra la provenienza e l'attribuzione Wikipedia.
-- Il salvataggio automatico dell'editor Track Record è stato serializzato in coda per evitare che modifiche rapide si sovrascrivano a vicenda; l'aggiornamento locale usa sempre l'ultima versione dei dati.
-- Il parser Wikipedia è una prima versione conservativa e non è ancora stato collaudato su un campione reale di stagioni. Non dichiarare i placement completi finché non sarà eseguita la sincronizzazione autenticata e verificata la corrispondenza dei dati.
-- La sincronizzazione iniziale del catalogo e quella Wikipedia richiedono un account staff autenticato; non sono state eseguite in questa sessione. Di conseguenza i template ufficiali sono ancora 0.
-- Il deployment Vercel della UI resta bloccato dal limite giornaliero di build del piano Hobby. Le Edge Function Supabase sono invece ACTIVE.
+- Precisazione funzionale vincolante: Track Record è una funzionalità personale, non un archivio di Track Record ufficiali. L'utente parte dalla struttura di una stagione del catalogo e assegna personalmente tutti i risultati competitivi.
+- Il template generato da `drag-race-catalog-sync` contiene franchise/titolo/numero/anno, contestant, episodi, nomi delle Mini/Maxi Challenge e canzone lipsync quando disponibile. Non contiene placement, rank, vincitrice, eliminazione o fatti competitivi delle Queen.
+- Ogni risultato episodio parte con `placement: null`; ogni Queen parte con `winner: false`. I fatti sorgente conservati in `drag_race_episode_queen_facts` restano separati e non vengono mostrati né usati nella Track Record.
+- La copia di un template azzera in modo difensivo ogni eventuale placement e flag vincitrice legacy. La scheda personale mantiene il collegamento alla stagione catalogo soltanto come riferimento strutturale.
+- L'editor mostra i nomi delle challenge e la canzone lipsync per episodio; l'utente seleziona manualmente i placement, personalizza le regole PPE e contrassegna la vincitrice.
+- La Hall of Fame legge esclusivamente le Queen marcate vincitrici nelle Track Record degli utenti. Non legge più `winner_ids` delle stagioni catalogo.
+- Rimossa dalla UI la funzione di recupero placement da Wikipedia. Il codice della Edge Function `drag-race-track-record-wikipedia-sync` è stato sostituito con una risposta HTTP 410: l'importazione automatica dei placement è ritirata.
+- I 90 fogli stagione del workbook Excel restano esclusi. La scala PPE del foglio `Punteggi` rimane l'unico riferimento adottato dal workbook.
+- Verifica read-only Supabase durante questa sessione: `drag_race_track_record_templates`, `drag_race_track_records`, `drag_race_seasons` e `drag_race_episodes` risultano ancora vuote (0 righe). La sincronizzazione catalogo non è stata ancora eseguita; non sono stati creati o alterati dati utente.
+- Le modifiche applicative e documentali sono state committate direttamente su `main`. TypeScript, ESLint, build, CI e deployment delle Edge Function aggiornate devono ancora essere verificati prima di dichiarare la modifica pronta in produzione.
+
