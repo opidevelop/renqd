@@ -1914,3 +1914,36 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - La cella del Pokémon viene aggiornata e il campo svuotato immediatamente, senza attendere la RPC; la risposta server conferma la scoperta oppure provoca rollback se non valida.
 - Aggiunto un lock sincrono della richiesta per prevenire invii duplicati causati da render/eventi ravvicinati.
 - Da verificare sul deployment: Mew seguito da Mewtwo, in entrambe le modalità multiplayer, oltre a risposte duplicate e rollback in caso di risposta non valida.
+
+
+---
+
+## 2026-11-26 — Name ’Em All: collisioni, coda risposte e correzioni responsive
+
+### Riconoscimento dei nomi ambigui
+- Aggiunto il matching condiviso in `lib/pokemon/catalog.ts`: la corrispondenza esatta e il controllo dei prefissi usano gli alias normalizzati effettivamente presenti nel catalogo attivo.
+- L'eccezione è limitata ai nomi completi che sono anche prefissi di un altro nome valido nel catalogo. Per questi nomi più brevi si richiede Invio; tutti gli altri nomi restano riconosciuti istantaneamente al completamento.
+- Applicato lo stesso criterio a Solo, multiplayer individuale e multiplayer condiviso.
+
+### Coda intelligente e input sempre disponibile
+- Introdotto `components/pokemon/use-name-em-all-submission-queue.ts`, una coda client condivisa che invia le RPC in sequenza e conserva l'ordine di digitazione.
+- In Solo e in entrambe le modalità multiplayer la cella viene aggiornata subito in modo ottimistico e il campo viene svuotato senza attendere la risposta server. Il campo resta utilizzabile anche mentre le registrazioni precedenti sono in corso.
+- La risposta server resta autorevole; gli errori applicativi o di connessione annullano la relativa scoperta provvisoria. La coda continua con gli elementi successivi.
+
+### Correzione persistenza Solo — modalità Illimitata
+- Causa individuata nella RPC `renqd_pokemon_name_em_all_submit_answer`: il controllo della scadenza trattava sempre `deadline_at IS NULL` come tempo scaduto, anche quando `duration_seconds=0` indicava una partita Illimitata.
+- Corretta la condizione: la verifica di `deadline_at` si applica soltanto alle sessioni con durata diversa da zero.
+- Migrazione Supabase applicata: `20261126080249_fix_name_em_all_solo_unlimited_answer_registration`.
+- Migrazione versionata in `supabase/migrations/20261126080249_fix_name_em_all_solo_unlimited_answer_registration.sql`.
+- Verificata la definizione SQL remota e testata la logica del guard: durata zero non scade per deadline NULL; una durata finita senza deadline resta scaduta/non valida.
+
+### Navigazione mobile e lobby
+- La barra mobile contiene sei destinazioni, ma una regola CSS successiva ne impostava cinque colonne. Ripristinate sei colonne e forzata la visibilità dell'icona SVG di «Crea».
+- Il launcher Wheel mobile ora mostra la stessa icona Lucide Dices del desktop; l'emoji è nascosta.
+- Il badge di stato «Pronto» nella lobby è vincolato a una singola riga, senza wrapping o restringimento.
+
+### Build e limiti di verifica
+- Deployment Production Vercel: `dpl_6J2UkdbEsPGrY4jci9TaZVH8dvG4`, commit `d36a2608a5fe7ae3d3ec1f3201e924d0d076cf16`, stato `READY`.
+- La build Next.js/TypeScript è completata. Non equivale ancora a un test end-to-end autenticato: restano da provare in browser Mew → Mewtwo, più risposte rapide consecutive, rollback dopo errore e persistenza dopo refresh nelle tre modalità.
+- Il provider PokeDoku resta esterno e cross-origin. Il contenitore Renqd monta l'iframe sulla route corretta, ma non è stato possibile ispezionare il DOM o gli errori runtime interni al provider; non è stata introdotta una modifica speculativa al gioco esterno.
+- Restano da completare il redesign della pagina `/profile/pokemon`, lo standard condiviso per tutti i modal, la diagnosi browser autenticata di PokeDoku e l'archivio delle decisioni storiche.
