@@ -2020,3 +2020,15 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Il deployment Production del commit applicativo `17be7f4c69398fe2ed74bf0a8a41463c9546b6aa` è risultato `READY`; la build ha completato la compilazione Next.js e TypeScript.
 - Il successivo deployment Production del commit documentale `bd260bc30c5007d21c554ace17fd43f1190c555f` è anch'esso `READY` e gli alias `renqd.app` e `www.renqd.app` risultano associati.
 - Il riepilogo del rilascio resta subordinato al test effettivo del provider Daily Red dentro iframe e al collaudo UI autenticato di Name ’Em All.
+
+
+### Name ’Em All — modal aiuti e scheda Pokémon (26 novembre 2026)
+
+- Introdotto components/pokemon/discovery-dialog.tsx, modal condiviso da Solo e da entrambe le varianti multiplayer.
+- Pokémon non scoperto: cinque controlli indipendenti e cumulabili (lettera progressiva, verso, tipi, descrizione Pokédex e silhouette). Nessuno dei controlli mostra il nome o l'immagine a colori.
+- Pokémon scoperto: immagine ufficiale, nome, numero nazionale, generazione, tipi, descrizione Pokédex e riproduzione del verso.
+- Le descrizioni vengono richieste a PokeAPI (pokemon-species/{id}), privilegiando la lingua italiana e usando l'inglese come fallback. I versi sono riprodotti dal repository pubblico PokeAPI Cries tramite file OGG per ID nazionale.
+- La chiamata server-side per la lettera è stata resa comune al modal: in Solo ritorna i dati aggiornati direttamente al componente; in multiplayer usa l'azione multiplayer corrispondente.
+- Corretto il controllo spellingHelp in Solo: le sessioni storiche prive della proprietà esplicita non disabilitano più il pulsante; viene disabilitato soltanto quando il valore è false.
+- Aggiunti stili dedicati responsive e coerenti con la palette del modal Renqd.
+- Da verificare nel browser autenticato: click lettera in Solo, progressione su più click, caricamento descrizione PokeAPI, riproduzione audio e comportamento mobile. La build Production deve essere controllata prima di considerare pubblicato il gruppo.
