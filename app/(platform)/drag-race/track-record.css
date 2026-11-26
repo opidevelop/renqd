@@ -19,3 +19,24 @@
 .drag-track-winner-toggle.is-winner{color:#d97745;font-weight:700}
 .drag-track-winner-label{display:block;color:#d97745;font-weight:700}
 @media(max-width:680px){.drag-track-hof-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.drag-track-hof-card{padding:9px;gap:8px}.drag-track-hof-image{flex-basis:52px;width:52px;height:52px}}
+
+.drag-queen-profile-head{display:flex;align-items:center;gap:22px;margin:18px 0 24px}
+.drag-queen-profile-head>img{width:150px;height:150px;object-fit:cover;border-radius:24px;background:var(--surface-2,rgba(120,110,100,.12))}
+.drag-queen-profile-head>div{min-width:0}
+.drag-queen-profile-head>div>span{font-size:10px;letter-spacing:.13em;color:var(--muted,#8b8580)}
+.drag-queen-profile-head h1{margin:7px 0;font-size:clamp(28px,5vw,44px)}
+.drag-queen-profile-head p,.drag-queen-profile-head a{font-size:12px;color:var(--muted,#8b8580);margin:5px 0}
+.drag-queen-profile-head a{color:var(--accent,#d97745)}
+.drag-queen-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:18px 0 26px}
+.drag-queen-stats>div{display:flex;flex-direction:column;gap:3px;padding:12px;border-radius:14px;background:var(--surface,rgba(255,255,255,.03));border:1px solid var(--line,rgba(120,110,100,.18))}
+.drag-queen-stats strong{font-size:22px;font-variant-numeric:tabular-nums}
+.drag-queen-stats small{font-size:10px;color:var(--muted,#8b8580)}
+.drag-queen-season-list{display:flex;flex-direction:column;gap:10px}
+.drag-queen-season-list article{padding:14px;border:1px solid var(--line,rgba(120,110,100,.18));border-radius:15px}
+.drag-queen-season-list article>div:first-child{display:flex;flex-direction:column;gap:4px}
+.drag-queen-season-list article strong{font-size:14px}
+.drag-queen-season-list article small{font-size:10px;color:var(--muted,#8b8580)}
+.drag-queen-season-badges,.drag-queen-season-metrics{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.drag-queen-season-badges span,.drag-queen-season-metrics span{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:999px;background:var(--surface-2,rgba(120,110,100,.1));font-size:10px;color:var(--muted,#8b8580)}
+.drag-queen-season-badges .is-winner{color:#d97745;background:rgba(217,119,69,.1);font-weight:700}
+@media(max-width:760px){.drag-queen-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.drag-queen-profile-head{gap:14px}.drag-queen-profile-head>img{width:108px;height:108px;border-radius:18px}}
