@@ -95,3 +95,41 @@
 @media(max-width:760px){.drag-track-roster-add{grid-template-columns:1fr}.drag-track-custom-queen-inline{grid-template-columns:1fr!important}.drag-track-custom-placement>div{grid-template-columns:1fr 75px 45px auto}.drag-track-confirm-remove{flex-wrap:wrap}}
 
 .drag-track-episode-challenges{display:flex;flex-direction:column;gap:3px;margin-top:6px;text-align:left;white-space:normal}.drag-track-episode-challenges small{display:block;font-size:10px;line-height:1.25;font-weight:500;color:var(--text-secondary,#777)}
+
+.drag-track-social{position:relative}
+.drag-track-social .drag-track-section-head p{margin:5px 0 0;color:var(--text-secondary,#777);font-size:12px}
+.drag-track-report-record,.drag-track-report-sent{display:inline-flex;align-items:center;gap:7px;margin:0 0 14px;padding:8px 11px;border:1px solid var(--border,#ddd);border-radius:9px;background:transparent;color:var(--text-secondary,#666);font-size:12px}
+.drag-track-report-record{cursor:pointer}
+.drag-track-report-record:hover{border-color:var(--accent,#d94d8a);color:var(--text-primary,#222)}
+.drag-track-report-sent{color:var(--text-secondary,#777)}
+.drag-track-comment-compose{display:flex;align-items:flex-end;gap:10px;margin:12px 0 22px}
+.drag-track-comment-compose textarea,.drag-track-reply-form textarea,.drag-track-comment-edit textarea{width:100%;min-height:76px;resize:vertical;padding:11px 12px;border:1px solid var(--border,#ddd);border-radius:10px;background:var(--surface,#fff);color:var(--text-primary,#222);font:inherit;font-size:13px}
+.drag-track-comment-compose button,.drag-track-reply-form button,.drag-track-comment-edit button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:8px 12px;border:0;border-radius:9px;background:var(--accent,#d94d8a);color:#fff;font-size:12px;font-weight:650;white-space:nowrap;cursor:pointer}
+.drag-track-comment-compose button:disabled,.drag-track-reply-form button:disabled,.drag-track-comment-edit button:disabled{opacity:.5;cursor:not-allowed}
+.drag-track-comment{display:flex;align-items:flex-start;gap:11px;padding:16px 0;border-top:1px solid var(--border,#e7e7e7)}
+.drag-track-comment.is-reply{padding:12px 0 0;border-top:0}
+.drag-track-comment-avatar{display:flex;flex:0 0 34px;width:34px;height:34px;align-items:center;justify-content:center;border-radius:50%;background:var(--surface-muted,#eee);color:var(--text-primary,#444);font-size:13px;font-weight:700}
+.drag-track-comment-main{min-width:0;flex:1}
+.drag-track-comment-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:12px}
+.drag-track-comment-meta strong{font-weight:700;color:var(--text-primary,#222)}
+.drag-track-comment-meta a{color:inherit;text-decoration:none}
+.drag-track-comment-meta a:hover{text-decoration:underline}
+.drag-track-comment-meta time{font-size:10px;color:var(--text-secondary,#888)}
+.drag-track-comment-body,.drag-track-comment-deleted{margin:7px 0 8px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.55;color:var(--text-primary,#333)}
+.drag-track-comment-deleted{color:var(--text-secondary,#888);font-style:italic}
+.drag-track-comment-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.drag-track-comment-actions button{display:inline-flex;align-items:center;gap:4px;padding:2px 0;border:0;background:transparent;color:var(--text-secondary,#777);font-size:11px;cursor:pointer}
+.drag-track-comment-actions button:disabled{opacity:.4;cursor:not-allowed}
+.drag-track-comment-actions button.is-liked{color:var(--accent,#d94d8a)}
+.drag-track-comment-actions button:hover:not(:disabled){color:var(--text-primary,#222)}
+.drag-track-comment.is-reply .drag-track-comment-avatar{flex-basis:28px;width:28px;height:28px;font-size:11px}
+.drag-track-reply-form{display:flex;align-items:flex-end;gap:8px;margin:12px 0}
+.drag-track-reply-form textarea{min-height:54px}
+.drag-track-comment-edit{margin:8px 0}
+.drag-track-comment-edit textarea{min-height:64px}
+.drag-track-comment-edit>div{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.drag-track-comment-edit button:first-child{background:transparent;color:var(--text-secondary,#777);border:1px solid var(--border,#ddd)}
+.drag-track-social-empty,.drag-track-social-loading{display:flex;align-items:center;gap:8px;padding:16px 0;color:var(--text-secondary,#777);font-size:12px}
+.drag-track-social-error{padding:9px 11px;border-radius:8px;background:rgba(190,55,65,.08);color:#b83b45;font-size:12px}
+.drag-track-social-notice{padding:9px 11px;border-radius:8px;background:rgba(45,145,95,.08);color:#267c50;font-size:12px}
+@media(max-width:600px){.drag-track-comment-compose,.drag-track-reply-form{align-items:stretch;flex-direction:column}.drag-track-comment-compose button,.drag-track-reply-form button{align-self:flex-end}.drag-track-comment-actions{gap:10px}}
