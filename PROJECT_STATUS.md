@@ -1983,3 +1983,12 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Allineato anche Solo al matching diretto nell'evento `onChange`: il nome non ambiguo viene messo in coda nello stesso evento, senza attendere un effetto successivo. Per i nomi ambigui, Invio conferma il nome più breve; se si continua a digitare, il nome completo più lungo viene riconosciuto al completamento.
 - Gestite anche le ripetizioni di un nome già scoperto o già presente nella coda: il campo viene svuotato e mostra il feedback corretto, senza creare richieste duplicate.
 - Deployment Production Vercel verificato READY: `dpl_9r76CYBxxGXdz5WFcCFg5vCCpUgS`, commit `8e67ee0bd7ccfed8d7c54469b7068f641c83ce16`. Build Next.js completata, compilazione riuscita e controllo TypeScript concluso senza errori.
+
+
+### Correzione navigazione mobile — 26 novembre 2026
+- Corretto il componente sorgente `components/platform-shell.tsx`: la barra mobile contiene ora esattamente cinque destinazioni nell'ordine approvato (Home, Scopri, Crea, Attività, Profilo). Rimossa Pokémon dalla sola navigazione inferiore; la pagina e la navigazione desktop restano disponibili.
+- Il controllo «Crea» usa ora un pulsante esplicito collegato a `router.push("/create")`, con stile e target touch dedicati, invece di dipendere dal Link condiviso con le altre voci.
+- Rimosso dal markup Wheel il nodo emoji 🎲. Su mobile viene mostrata l'icona Lucide `Dices` già prevista per desktop; aggiunta una regola responsive finale che prevale sulle vecchie regole CSS duplicate che ripristinavano sei colonne e l'emoji.
+- Deployment Production READY: `dpl_CM3CqHxJ9EGecaSW6t5HDKm32TcW`, commit `d6acc9f3dfe849abb210724ad35fd0b1ccd8a118`.
+- Verificato l'alias Vercel: `renqd.app` ora punta a `dpl_CM3CqHxJ9EGecaSW6t5HDKm32TcW`; anche `www.renqd.app` reindirizza al dominio principale sullo stesso deployment.
+- La verifica automatica della build è superata. Non è stato possibile effettuare un collaudo visuale autenticato nel browser collegato in questa sessione; chiedere un refresh completo sul dispositivo e confermare l'interazione reale del pulsante Crea.
