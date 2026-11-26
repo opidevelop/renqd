@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useMemo,useRef,useState} from "react";
+import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import {createClient} from "@/lib/supabase/client";
 import {ArrowLeft,Search,Lightbulb,PartyPopper,Check} from "lucide-react";
@@ -11,12 +11,13 @@ export function GuessThemAllGame({franchises,queens}:Props){
  const db=useMemo(()=>createClient(),[]),inputRef=useRef<HTMLInputElement>(null),finishLock=useRef(false),finishRef=useRef<(completed:boolean)=>void>(()=>{});
  const [selected,setSelected]=useState(franchises.map(x=>x.code)),[limit,setLimit]=useState("0"),[started,setStarted]=useState(false),[finished,setFinished]=useState(false),[interrupted,setInterrupted]=useState(false);
  const [queue,setQueue]=useState<Queen[]>([]),[found,setFound]=useState<string[]>([]),[errors,setErrors]=useState(0),[hints,setHints]=useState(0),[hintMap,setHintMap]=useState<Record<string,number>>({}),[input,setInput]=useState(""),[elapsed,setElapsed]=useState(0),[notice,setNotice]=useState(""),[showExit,setShowExit]=useState(false);
- const pool=useMemo(()=>queens.filter(q=>q.franchiseCodes.some(code=>selected.includes(code))).sort((a,b)=>(a.franchiseCodes[0]??"").localeCompare(b.franchiseCodes[0]??"")||a.firstSeason-b.firstSeason||a.name.localeCompare(b.name)),[queens,selected]);
+ const franchiseOrder=useMemo(()=>new Map(franchises.map((f,i)=>[f.code,i])),[franchises]);
+ const pool=useMemo(()=>queens.filter(q=>q.franchiseCodes.some(code=>selected.includes(code))).sort((a,b)=>(franchiseOrder.get(a.franchiseCodes[0]??"")??999)-(franchiseOrder.get(b.franchiseCodes[0]??"")??999)||a.firstSeason-b.firstSeason||a.name.localeCompare(b.name)),[queens,selected,franchiseOrder]);
  const suggestions=useMemo(()=>{const value=norm(input);if(!value)return[];return pool.filter(q=>norm(q.name).includes(value)||(q.aliases??[]).some(a=>norm(a).includes(value))).slice(0,8);},[pool,input]);
  const percent=queue.length?Math.round(found.length/queue.length*100):0;
  const time=String(Math.floor(elapsed/60)).padStart(2,"0")+":"+String(elapsed%60).padStart(2,"0");
- function submit(q:Queen){if(!started||found.includes(q.id))return;if(!queue.some(x=>x.id===q.id)){setErrors(v=>v+1);setInput("");inputRef.current?.focus();return;}setFound(old=>old.includes(q.id)?old:[...old,q.id]);setInput("");requestAnimationFrame(()=>inputRef.current?.focus());}
- useEffect(()=>{const value=norm(input);if(!started||value.length<2)return;const exact=pool.filter(q=>norm(q.name)===value||(q.aliases??[]).some(a=>norm(a)===value));if(exact.length===1&&!found.includes(exact[0].id)){const timer=setTimeout(()=>submit(exact[0]),120);return()=>clearTimeout(timer);}},[input,started,pool,found]);
+ const submit=useCallback((q:Queen)=>{if(!started||found.includes(q.id))return;if(!queue.some(x=>x.id===q.id)){setErrors(v=>v+1);setInput("");inputRef.current?.focus();return;}setFound(old=>old.includes(q.id)?old:[...old,q.id]);setInput("");requestAnimationFrame(()=>inputRef.current?.focus());},[started,found,queue]);
+ useEffect(()=>{const value=norm(input);if(!started||value.length<2)return;const exact=pool.filter(q=>norm(q.name)===value||(q.aliases??[]).some(a=>norm(a)===value));if(exact.length===1&&!found.includes(exact[0].id)){const timer=setTimeout(()=>submit(exact[0]),120);return()=>clearTimeout(timer);}},[input,started,pool,found,submit]);
  async function finish(completed:boolean){if(finishLock.current||!started)return;finishLock.current=true;const foundSet=new Set(found),results:Record<string,{guessed:number;total:number}>={ALL:{guessed:found.length,total:queue.length}};for(const code of selected){const group=queue.filter(q=>q.franchiseCodes.includes(code));results[code]={guessed:group.filter(q=>foundSet.has(q.id)).length,total:group.length};}const {error}=await db.rpc("drag_race_record_guess_them_all",{p_franchise_results:results,p_errors:errors,p_hints:hints,p_duration_seconds:elapsed,p_completed:completed});if(error)setNotice("Statistiche non salvate: "+error.message);setInterrupted(!completed);setStarted(false);setFinished(true);}
  finishRef.current=finish;
  useEffect(()=>{if(!started)return;const timer=setInterval(()=>setElapsed(v=>{const next=v+1;if(Number(limit)>0&&next>=Number(limit)*60)setTimeout(()=>finishRef.current(true),0);return next;}),1000);return()=>clearInterval(timer);},[started,limit]);
