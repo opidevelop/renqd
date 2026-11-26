@@ -18,6 +18,11 @@ type DialogProps = {
 };
 
 const focusableSelector = '[autofocus],button:not(:disabled),[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])';
+const openDialogStack: HTMLElement[] = [];
+let bodyLockCount = 0;
+let savedBodyOverflow = "";
+let savedBodyPaddingRight = "";
+let savedScrollY = 0;
 
 export function Dialog({
   open,
@@ -38,40 +43,45 @@ export function Dialog({
 
   useEffect(() => {
     if (!open) return;
+    const node = dialogRef.current;
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const previousOverflow = document.body.style.overflow;
-    const previousPaddingRight = document.body.style.paddingRight;
-    const scrollY = window.scrollY;
-    const scrollbarWidth = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
-
-    document.body.style.overflow = "hidden";
-    if (scrollbarWidth) document.body.style.paddingRight = scrollbarWidth + "px";
+    if (bodyLockCount === 0) {
+      savedBodyOverflow = document.body.style.overflow;
+      savedBodyPaddingRight = document.body.style.paddingRight;
+      savedScrollY = window.scrollY;
+      const scrollbarWidth = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+      document.body.style.overflow = "hidden";
+      if (scrollbarWidth) document.body.style.paddingRight = scrollbarWidth + "px";
+    }
+    bodyLockCount += 1;
+    if (node) openDialogStack.push(node);
 
     const focusInitial = () => {
-      const target = dialogRef.current?.querySelector<HTMLElement>(focusableSelector) ?? dialogRef.current;
+      const target = node?.querySelector<HTMLElement>(focusableSelector) ?? node;
       target?.focus();
     };
     const frame = window.requestAnimationFrame(focusInitial);
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (!node || openDialogStack[openDialogStack.length - 1] !== node) return;
       if (event.key === "Escape" && closeOnEscape) {
         event.preventDefault();
         closeRef.current();
         return;
       }
       if (event.key !== "Tab") return;
-      const nodes = dialogRef.current?.querySelectorAll<HTMLElement>(focusableSelector);
-      if (!nodes?.length) {
+      const nodes = node.querySelectorAll<HTMLElement>(focusableSelector);
+      if (!nodes.length) {
         event.preventDefault();
-        dialogRef.current?.focus();
+        node.focus();
         return;
       }
       const first = nodes[0];
       const last = nodes[nodes.length - 1];
-      if (event.shiftKey && (document.activeElement === first || !dialogRef.current?.contains(document.activeElement))) {
+      if (event.shiftKey && (document.activeElement === first || !node.contains(document.activeElement))) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && (document.activeElement === last || !dialogRef.current?.contains(document.activeElement))) {
+      } else if (!event.shiftKey && (document.activeElement === last || !node.contains(document.activeElement))) {
         event.preventDefault();
         first.focus();
       }
@@ -81,10 +91,19 @@ export function Dialog({
     return () => {
       window.cancelAnimationFrame(frame);
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
-      document.body.style.paddingRight = previousPaddingRight;
-      window.scrollTo({ top: scrollY, behavior: "instant" });
-      previousFocus?.focus();
+      if (node) {
+        const index = openDialogStack.lastIndexOf(node);
+        if (index >= 0) openDialogStack.splice(index, 1);
+      }
+      bodyLockCount = Math.max(0, bodyLockCount - 1);
+      if (bodyLockCount === 0) {
+        document.body.style.overflow = savedBodyOverflow;
+        document.body.style.paddingRight = savedBodyPaddingRight;
+        window.scrollTo({ top: savedScrollY, behavior: "auto" });
+      }
+      const topDialog = openDialogStack[openDialogStack.length - 1];
+      if (!topDialog || (previousFocus && topDialog.contains(previousFocus))) previousFocus?.focus();
+      else topDialog.querySelector<HTMLElement>(focusableSelector)?.focus();
     };
   }, [open, closeOnEscape]);
 
