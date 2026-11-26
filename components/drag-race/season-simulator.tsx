@@ -62,27 +62,25 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
  const [savedId,setSavedId]=useState<string|null>(null);
  const [returningUsed,setReturningUsed]=useState(false);
  const [fameScores,setFameScores]=useState<Record<string,number>>({});
- const [chocolateRevealed,setChocolateRevealed]=useState(false);
- const [chocolateResult,setChocolateResult]=useState<"CHOCOLATE"|"EMPTY"|null>(null);
+ const [chocolateUsed,setChocolateUsed]=useState(false);
 
  const pool=useMemo(()=>queens.filter(q=>q.franchiseCodes.some(c=>selectedFranchises.includes(c))),[queens,selectedFranchises]);
  const customCount=Math.max(4,Math.min(32,Number(config.customCount)||4));
  const desired=config.queenCount==="CUSTOM"?customCount:Number(config.queenCount);
- const selectedSeason=seasons.find(s=>s.id===seasonId);
  const seasonCast=selectedSeason?selectedSeason.cast_ids.map(id=>queens.find(q=>q.id===id)).filter((q):q is Queen=>Boolean(q)):[];
  const suggestions=queenSearch.trim()?pool.filter(q=>q.name.toLowerCase().includes(queenSearch.toLowerCase())||(q.aliases??[]).some(a=>a.toLowerCase().includes(queenSearch.toLowerCase()))).slice(0,12):[];
  const queenMap=useMemo(()=>new Map([...queens,...customQueens].map(q=>[q.id,q])),[queens,customQueens]);
- const currentCast=cast.length?cast:castMode==="BY_SEASON"?seasonCast:customQueens.filter(q=>selectedIds.includes(q.id));
- const finalistsPool=activeIds.map(id=>queenMap.get(id)).filter((q):q is Queen=>Boolean(q));
+ const currentCast=cast.length?cast:castMode==="BY_SEASON"?seasonCast:[...queens.filter(q=>selectedIds.includes(q.id)),...customQueens.filter(q=>selectedIds.includes(q.id))];
  const setSetting=(key:keyof typeof blankConfig,value:string|boolean)=>setConfig(old=>({...old,[key]:value}));
  function toggleFranchise(code:string){setSelectedFranchises(old=>old.includes(code)?old.filter(x=>x!==code):[...old,code]);}
  function toggleQueen(id:string){setSelectedIds(old=>{if(old.includes(id))return old.filter(x=>x!==id);if(old.length>=desired)return old;return[...old,id];});}
  function randomCast(){const list=shuffle(pool).slice(0,desired);setCast(list);setSelectedIds(list.map(q=>q.id));}
  function randomizeCastOrder(){setCast(old=>shuffle(old));}
  function replaceCastQueen(oldId:string,newId:string){const replacement=queenMap.get(newId);if(!replacement||cast.some(q=>q.id===newId))return;setCast(old=>old.map(q=>q.id===oldId?replacement:q));setSelectedIds(old=>old.map(id=>id===oldId?newId:id));}
+ function replaceCastQueenRandomly(oldId:string){const replacement=pick(pool.filter(q=>!cast.some(c=>c.id===q.id)));if(replacement)replaceCastQueen(oldId,replacement.id);}
  async function addCustomQueen(file?:File){
   const name=customName.trim();if(!name){setNotice("Inserisci il nome della Queen custom.");return;}
-  if(currentCast.length>=desired){setNotice("Hai già raggiunto il numero di Queen previsto.");return;}
+  if(selectedIds.length>=desired){setNotice("Hai già raggiunto il numero di Queen previsto.");return;}
   setUploading(true);setNotice("");
   try{
    let imageUrl=customImageUrl.trim()||null;let imagePath:string|null=null;
@@ -129,11 +127,13 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
   if(new Set(chosen.map(q=>q.id)).size!==chosen.length){setNotice("Il cast non può contenere Queen duplicate.");return;}
   if(config.chocolateBar&&config.chocolateMode==="MANUAL"&&!config.chocolateQueenId){setNotice("Scegli la Queen che riceverà la Chocolate Bar.");return;}
   setBusy(true);setNotice("");
-  const configSnapshot={...config,queenCount:desired,franchises:selectedFranchises,castMode,sourceSeasonId:castMode==="BY_SEASON"?seasonId:null};
+  const chocolateQueenId=config.chocolateBar&&config.chocolateMode==="RANDOM"?(pick(chosen)?.id??""):config.chocolateQueenId;
+  if(chocolateQueenId!==config.chocolateQueenId)setConfig(old=>({...old,chocolateQueenId}));
+  const configSnapshot={...config,chocolateQueenId,queenCount:desired,franchises:selectedFranchises,castMode,sourceSeasonId:castMode==="BY_SEASON"?seasonId:null};
   const state={stage:"EPISODES",cast:chosen,activeIds:chosen.map(q=>q.id),eliminatedIds:[],episodes:[],relationships,returningUsed:false};
   const {data,error}=await db.rpc("drag_race_create_session",{p_mode:"SEASON_SIMULATOR",p_config:configSnapshot,p_state:state});
   if(error){setNotice("Impossibile avviare la stagione: "+error.message);setBusy(false);return;}
-  setCast(chosen);setActiveIds(chosen.map(q=>q.id));setEliminatedIds([]);setEpisodes([]);setEpisodeNumber(1);setSessionId(data);setReturningUsed(false);setChocolateRevealed(false);setFameScores({});setStage("episodes");setCurrentEpisode(null);setBusy(false);
+  setCast(chosen);setActiveIds(chosen.map(q=>q.id));setEliminatedIds([]);setEpisodes([]);setEpisodeNumber(1);setSessionId(data);setReturningUsed(false);setChocolateUsed(false);setFameScores({});setStage("episodes");setCurrentEpisode(null);setBusy(false);
  }
  function prepareEpisode(){if(!activeIds.length){setNotice("Non ci sono Queen attive.");return;}setCurrentEpisode(generateEpisode(episodeNumber,activeIds));}
  async function completeEpisode(){
@@ -146,24 +146,25 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
   else if(out==="ELIMINATION"&&loser)removed=[loser];
   if(config.goldenBeaver&&currentEpisode.goldenBeaverSaveId)removed=removed.filter(id=>id!==currentEpisode.goldenBeaverSaveId);
   if(currentEpisode.immuneId)removed=removed.filter(id=>id!==currentEpisode.immuneId);
-  if(config.chocolateBar&&removed.includes(config.chocolateQueenId)&&!chocolateRevealed){
-   setChocolateRevealed(true);
+  if(config.chocolateBar&&removed.includes(config.chocolateQueenId)&&!chocolateUsed){
    const result=config.chocolateMode==="RANDOM"?(Math.random()<0.18?"CHOCOLATE":"EMPTY"):"CHOCOLATE";
-   setChocolateResult(result);
-   if(result==="CHOCOLATE")removed=removed.filter(id=>id!==config.chocolateQueenId);
+   if(result==="CHOCOLATE"){removed=removed.filter(id=>id!==config.chocolateQueenId);setNotice((queenMap.get(config.chocolateQueenId)?.name??"La Queen")+" ha trovato la Chocolate Bar e resta in gara.");}
+   else setNotice("La Chocolate Bar è vuota: eliminazione confermata.");
+   setChocolateUsed(true);
   }
-  const episode={...currentEpisode,outcome:out,eliminatedIds:removed,completed:true};
+  const episode={...currentEpisode,placements:{...currentEpisode.placements,...Object.fromEntries(removed.map(id=>[id,"ELIM" as Placement]))},outcome:out,eliminatedIds:removed,completed:true};
   const nextEpisodes=[...episodes,episode];const nextEliminated=[...eliminatedIds,...removed];const nextActive=activeIds.filter(id=>!removed.includes(id));
   const nextRelationships=updateRelationshipEvents(episode,removed);
   const nextFame={...fameScores};for(const id of removed)nextFame[id]=(nextFame[id]??0)+1;
-  setEpisodes(nextEpisodes);setEliminatedIds(nextEliminated);setActiveIds(nextActive);setRelationships(nextRelationships);setFameScores(nextFame);setCurrentEpisode(null);setChocolateRevealed(false);setChocolateResult(null);
+  setEpisodes(nextEpisodes);setEliminatedIds(nextEliminated);setActiveIds(nextActive);setRelationships(nextRelationships);setFameScores(nextFame);setCurrentEpisode(null);
   await persistActive(nextEpisodes,nextActive,nextEliminated,nextRelationships);
   const finalCount=Math.max(2,Math.min(4,Number(config.finalistCount)||3));
   if(nextActive.length<=finalCount||episodeNumber>=Math.max(4,Math.min(20,Number(config.episodeCount)||10))){
-   setFinalists(nextActive.length?nextActive:cast.slice(0,finalCount).map(q=>q.id));setStage("finale");
+   const ranked=nextActive.map(id=>({id,wins:nextEpisodes.filter(ep=>ep.challengeWinnerId===id).length})).sort((a,b)=>b.wins-a.wins).map(x=>x.id);
+   const chosenFinalists=(ranked.length?ranked:activeIds).slice(0,Math.max(2,Math.min(finalCount,ranked.length||activeIds.length)));
+   const finalOrder=shuffle(chosenFinalists);setFinalists(chosenFinalists);setWinnerId(finalOrder[0]??"");setRunnerUpId(finalOrder[1]??"");setThirdId(finalOrder[2]??"");setStage("finale");
   }else{setEpisodeNumber(n=>n+1);}
  }
- function randomizeBottom(){if(!currentEpisode)return;const ids=shuffle(activeIds).slice(0,2);setCurrentEpisode(old=>old?({...old,bottomIds:ids,placements:{...old.placements,...Object.fromEntries(activeIds.map(id=>[id,ids.includes(id)?"BTM2":old.placements[id]??"SAFE"]))}}):old);}
  function chooseFinalists(ids:string[]){setFinalists(ids.slice(0,Math.max(2,Math.min(4,Number(config.finalistCount)||3))));}
  function createTrackRecord(){
   return cast.map(q=>({id:q.id,name:q.name,image_url:q.image_url,results:episodes.map(ep=>({episode:ep.number,placement:ep.placements[q.id]??(ep.eliminatedIds.includes(q.id)?"ELIM":null)})),final_placement:q.id===winnerId?"WINNER":q.id===runnerUpId?"RUNNER_UP":q.id===thirdId?"THIRD":eliminatedIds.includes(q.id)?"ELIMINATED":"FINALIST"}));
@@ -230,7 +231,7 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
    {castMode==="CUSTOM"&&<><p>Seleziona Queen dal catalogo e aggiungi eventuali Queen custom. Il cast sarà bloccato quando inizierà la stagione.</p><input className="ss-search" value={queenSearch} onChange={e=>setQueenSearch(e.target.value)} placeholder="Cerca Queen o alias…"/><div className="ss-suggestions">{suggestions.map(q=><button key={q.id} onClick={()=>toggleQueen(q.id)}>{selectedIds.includes(q.id)?"✓ ":"＋ "}{q.name}</button>)}</div><div className="ss-custom-form"><input value={customName} onChange={e=>setCustomName(e.target.value)} placeholder="Nome Queen custom"/><input value={customImageUrl} onChange={e=>setCustomImageUrl(e.target.value)} placeholder="URL immagine (facoltativo)"/><label className="ss-upload"><Upload size={15}/> Carica immagine<input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>void addCustomQueen(e.target.files?.[0])}/></label><button disabled={uploading} onClick={()=>void addCustomQueen()}>{uploading?<LoaderCircle size={15}/>:<Plus size={15}/>} Aggiungi Queen</button></div><p>{selectedIds.length}/{desired} selezionate</p></>}
    {castMode==="BY_SEASON"&&<><div className="ss-grid"><label>Franchise<select value={selectedFranchises[0]??""} onChange={e=>{setSelectedFranchises([e.target.value]);setSeasonId("");}}><option value="">Seleziona</option>{franchises.map(f=><option key={f.code} value={f.code}>{f.name}</option>)}</select></label><label>Stagione<select value={seasonId} onChange={e=>setSeasonId(e.target.value)}><option value="">Seleziona stagione</option>{seasons.filter(s=>s.franchise_code===selectedFranchises[0]).map(s=><option key={s.id} value={s.id}>{s.name} · {s.year??"Anno n/d"}</option>)}</select></label></div><p>Il cast importato da una stagione ufficiale non può essere modificato.</p></>}
    <div className="ss-cast-preview">{(castMode==="BY_SEASON"?seasonCast:castMode==="RANDOM"?cast:[...queens.filter(q=>selectedIds.includes(q.id)),...customQueens.filter(q=>selectedIds.includes(q.id))]).map(renderQueen)}</div>
-   {castMode==="RANDOM"&&cast.length>0&&<div className="ss-cast-tools"><button onClick={randomizeCastOrder}><Shuffle size={14}/> Randomize ordine</button><label>Sostituisci Queen<select defaultValue="" onChange={e=>{const [oldId,newId]=e.target.value.split("|");if(oldId&&newId)replaceCastQueen(oldId,newId);}}><option value="">Scegli sostituzione</option>{cast.map(q=><optgroup key={q.id} label={"Rimuovi "+q.name}>{pool.filter(p=>!cast.some(c=>c.id===p.id)).map(p=><option key={p.id} value={q.id+"|"+p.id}>{p.name}</option>)}</optgroup>)}</select></label></div>}
+   {castMode==="RANDOM"&&cast.length>0&&<div className="ss-cast-tools"><button onClick={randomizeCastOrder}><Shuffle size={14}/> Randomize ordine</button><button onClick={()=>{const q=pick(cast);if(q)replaceCastQueenRandomly(q.id);}}><RefreshCw size={14}/> Sostituzione casuale</button><label>Sostituisci Queen<select defaultValue="" onChange={e=>{const [oldId,newId]=e.target.value.split("|");if(oldId&&newId)replaceCastQueen(oldId,newId);}}><option value="">Scegli sostituzione</option>{cast.map(q=><optgroup key={q.id} label={"Rimuovi "+q.name}>{pool.filter(p=>!cast.some(c=>c.id===p.id)).map(p=><option key={p.id} value={q.id+"|"+p.id}>{p.name}</option>)}</optgroup>)}</select></label></div>}
    <div className="ss-actions"><button className="ss-secondary" onClick={()=>setStage("setup")}>Indietro</button><button className="ss-primary" onClick={()=>{const chosen=castMode==="BY_SEASON"?seasonCast:castMode==="RANDOM"?cast:[...queens.filter(q=>selectedIds.includes(q.id)),...customQueens.filter(q=>selectedIds.includes(q.id))];if(chosen.length!==desired){setNotice("Seleziona esattamente "+desired+" Queen.");return;}setCast(chosen);setStage("relationships");setNotice("");}}>Continua <ArrowRight size={16}/></button></div>
   </section>}
   {stage==="relationships"&&<section className="ss-panel">
