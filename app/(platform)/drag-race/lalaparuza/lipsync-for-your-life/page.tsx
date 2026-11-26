@@ -10,6 +10,6 @@ export default async function LipsyncForYourLifePage(){
   db.from("drag_race_lipsyncs").select("id,season_id,song_title,song_artist,preview_url,apple_music_url").range(0,4999)
  ]);
  const seasons=s.data??[];const codesByQueen=new Map<string,string[]>();
- for(const season of seasons){for(const id of (season as any).cast_ids??[]){const list=codesByQueen.get(id)??[];if(!list.includes(season.franchise_code))list.push(season.franchise_code);codesByQueen.set(id,list);}}
+ for(const season of seasons){for(const id of season.cast_ids??[]){const list=codesByQueen.get(id)??[];if(!list.includes(season.franchise_code))list.push(season.franchise_code);codesByQueen.set(id,list);}}
  return <LipsyncForYourLifeGame franchises={f.data??[]} seasons={seasons} queens={(q.data??[]).map(x=>({...x,aliases:x.aliases??[],franchiseCodes:codesByQueen.get(x.id)??[]}))} songs={l.data??[]}/>;
 }
