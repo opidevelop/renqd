@@ -2037,7 +2037,7 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 ### Profilo integrato e layout dei Renq — lavoro in corso (26 novembre 2026)
 
 - Il profilo proprietario ora dispone delle schede Collezioni, Renq e Pokémon. L'archivio Pokémon e le preferenze sono renderizzati nella nuova scheda, senza duplicare la pagina dedicata.
-- La lista dei Renq del profilo proprietario mostra sei elementi per pagina con controlli precedente/successiva.
+- Le liste Renq del profilo proprietario e dei profili pubblici mostrano sei elementi per pagina con controlli precedente/successiva.
 - Il profilo pubblico espone le stesse tre schede; la scheda Pokémon usa l'archivio in sola lettura e filtra i risultati con le regole di visibilità esistenti e la RPC di accesso Name ’Em All.
 - `/profile/pokemon` reindirizza a `/profile?section=pokemon`; il profilo legge il parametro per aprire direttamente la scheda corretta.
 - `/r/[slug]` è ora avvolta nel PlatformShell autenticato, con gli stessi fogli di stile principali, header, sidebar e menu mobile. Il menu evidenzia Renq nelle route `/r/` e `/renq/`.
