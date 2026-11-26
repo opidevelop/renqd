@@ -187,7 +187,7 @@ export function PokemonNameEmAllMultiplayerGame({
     if(data.status==="CORRECT")setMessage("Corretto! "+String(data.name??""));
     if(data.status==="COUNTDOWN")setMessage("La partita sta per iniziare.");
     if(data.status==="FINISHED")router.refresh();
-  },[session.id,soundEnabled,shared,discoveryById,participants,finish,router]);
+  },[session.id,soundEnabled,shared,discoveryById,participants,finish,router,setSelected]);
   const {enqueue:enqueueSubmission,pending,queuedKeysRef}=useNameEmAllSubmissionQueue(processQueuedSubmission);
   const enqueuePokemonSubmission=useCallback((answer:string,item:PokemonSpecies)=>{
     if(playerCompleted||session.status!=="ACTIVE"||countdown>0||found.has(item.id)||queuedKeysRef.current.has(item.id))return;
