@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Dialog } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Heart, LoaderCircle, MessageCircle, Pencil, Reply, Send, ShieldAlert, ShieldBan, Trash2, X } from "lucide-react";
