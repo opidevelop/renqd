@@ -45,7 +45,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const { data: rows } = await supabase.from("rankings").select("id,title,public_slug,mode,settings,completed_at,visibility,status,updated_at").eq("user_id", profile.user_id).eq("status", "COMPLETED").is("deleted_at",null).order("completed_at", { ascending: false });
   const rankings = (rows ?? []).filter(item => {
     const settings=(item.settings as Record<string,unknown>|null)??{};
-    return Boolean(settings.savedAt) && (isOwner || (item.visibility==="LIVE" && settings.access!=="private"));
+    return item.mode!=="POKEMON_ULTIMATE_FAVOURITE" && item.mode!=="POKEMON_NAME_EM_ALL" && Boolean(settings.savedAt) && (isOwner || (item.visibility==="LIVE" && settings.access!=="private"));
   });
   const pokemonRows=(rows??[]).filter(item=>["POKEMON_ULTIMATE_FAVOURITE","POKEMON_NAME_EM_ALL"].includes(item.mode));
   const pokemonItems=await Promise.all(pokemonRows.map(async item=>{

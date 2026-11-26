@@ -2037,3 +2037,14 @@ button.pokemon-favourite-cell:hover{background:var(--pokemon-blue-pale)!importan
 .pokemon-nae-discovery-description p{display:flex;gap:7px;align-items:flex-start;margin:0;color:#6d6054;font-size:11px;line-height:1.65}
 .pokemon-nae-discovery-feedback{color:#9a6840;font-size:10px}
 @media(max-width:420px){.pokemon-nae-discovery-actions{grid-template-columns:1fr}.pokemon-nae-discovery-actions button{min-height:60px}}
+
+
+/* Preferenze Name ’Em All: pannello chiuso per impostazione predefinita. */
+.pokemon-profile-preferences>summary{display:flex;align-items:center;justify-content:space-between;gap:16px;list-style:none;cursor:pointer}
+.pokemon-profile-preferences>summary::-webkit-details-marker{display:none}
+.pokemon-profile-preferences>summary>div{display:grid;gap:4px;min-width:0}
+.pokemon-profile-preferences>summary h2{margin:4px 0;font-size:clamp(18px,3vw,23px);letter-spacing:-.5px;color:#1c3449}
+.pokemon-profile-preferences>summary p{margin:0;color:#7b8c9a;font-size:12px;line-height:1.5}
+.pokemon-profile-preferences>summary>svg{flex:none;color:#4f7d9e;transition:transform .2s ease}
+.pokemon-profile-preferences[open]>summary>svg{transform:rotate(180deg)}
+.pokemon-profile-preferences-content{display:grid;gap:14px;padding-top:18px}

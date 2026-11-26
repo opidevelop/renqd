@@ -712,3 +712,10 @@ Quando il Pokémon è già scoperto, il modal mostra sempre immagine, nome, nume
 4. La lista dei Renq nel profilo è paginata, senza modificare ordinamento o contenuti dei risultati.
 5. La vecchia route `/profile/pokemon` non è più una pagina autonoma e reindirizza a `/profile?section=pokemon`.
 6. Le pagine di dettaglio dei Renq sotto `/r/[slug]` usano lo stesso PlatformShell autenticato, con header, navigazione laterale e menu mobile persistenti; la voce Renq resta attiva anche nei dettagli `/r/` e `/renq/`.
+
+
+## Decisioni approvate il 26 novembre 2026 — profilo Pokémon integrato
+
+- I risultati delle modalità Pokémon (Name ’Em All e Ultimate Favourite) sono consultabili esclusivamente nella scheda Pokémon del profilo e non devono comparire nell’elenco «Renq» delle classifiche pubblicate, né tra i preferiti mostrati come Renq. Restano disponibili nell’archivio Pokémon secondo le regole di visibilità già previste.
+- Il collegamento legacy a `/profile/pokemon` accanto all’indicatore Pubblico/Privato del profilo integrato deve essere rimosso: la navigazione avviene tramite la scheda Pokémon del profilo.
+- Il pannello «Impostazioni Name ’Em All» nella scheda Pokémon del profilo deve essere compresso per impostazione predefinita e apribile su richiesta.

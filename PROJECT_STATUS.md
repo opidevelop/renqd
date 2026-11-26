@@ -2042,3 +2042,11 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - `/profile/pokemon` reindirizza a `/profile?section=pokemon`; il profilo legge il parametro per aprire direttamente la scheda corretta.
 - `/r/[slug]` è ora avvolta nel PlatformShell autenticato, con gli stessi fogli di stile principali, header, sidebar e menu mobile. Il menu evidenzia Renq nelle route `/r/` e `/renq/`.
 - Non è stato avviato alcun deployment manuale. Restano da eseguire build, test UI autenticati desktop/mobile, verifica dei casi di privacy per profili pubblici/privati e test di navigazione/cronologia prima del rilascio.
+
+
+## 2026-11-26 — Rifiniture profilo Pokémon integrato
+
+- Rimosso dal riepilogo profilo il collegamento legacy «Pokémon» accanto al badge Pubblico/Privato; resta la scheda Pokémon come punto di accesso all’archivio.
+- Impostazioni Name ’Em All rese comprimibili con `details/summary`, chiuse per impostazione predefinita e accessibili tramite il riepilogo «Privacy e notifiche».
+- Esclusi `POKEMON_NAME_EM_ALL` e `POKEMON_ULTIMATE_FAVOURITE` dagli elenchi Renq del profilo proprietario e del profilo pubblico e dai preferiti presentati come Renq. I risultati restano caricati nella scheda Pokémon e mantengono le regole di visibilità e accesso già esistenti.
+- Modifiche applicative e documentazione aggiornate su `main`. TypeScript, lint, build e deployment cumulativo da verificare; nessun deployment Production avviato da questa modifica.

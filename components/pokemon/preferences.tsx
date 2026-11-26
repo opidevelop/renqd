@@ -44,8 +44,8 @@ export function PokemonNameEmAllPreferences({
     finally {setBusy(false);}
   }
 
-  return <section className="pokemon-profile-preferences">
-    <header><div><span className="pokemon-page-eyebrow">IMPOSTAZIONI NAME ’EM ALL</span><h2>Privacy e notifiche</h2><p>Le preferenze valgono per le nuove partite; puoi sempre cambiare la visibilità di un singolo risultato.</p></div><Shield size={22}/></header>
+  return <details className="pokemon-profile-preferences">
+    <summary className="pokemon-profile-preferences-summary"><div><span className="pokemon-page-eyebrow">IMPOSTAZIONI NAME ’EM ALL</span><h2>Privacy e notifiche</h2><p>Le preferenze valgono per le nuove partite; puoi sempre cambiare la visibilità di un singolo risultato.</p></div><Shield size={22}/></summary><div className="pokemon-profile-preferences-content">
     <div className="pokemon-preference-row"><div><strong>Visibilità predefinita</strong><small>Decide chi può consultare i risultati delle prossime partite.</small></div>
       <select value={visibility} disabled={busy} onChange={event=>void saveVisibility(event.target.value as "PUBLIC"|"PRIVATE")}><option value="PUBLIC">Pubblica su Renqd</option><option value="PRIVATE">Privata · solo io e i partecipanti</option></select>
     </div>
@@ -56,5 +56,6 @@ export function PokemonNameEmAllPreferences({
     </div>
     {error&&<p className="pokemon-social-feedback is-error" role="alert">{error}</p>}
     {message&&<p className="pokemon-social-feedback" role="status"><Bell size={14}/>{message}</p>}
-  </section>;
+    </div>
+  </details>;
 }
