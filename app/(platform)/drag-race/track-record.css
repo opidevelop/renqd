@@ -64,3 +64,32 @@
 .drag-track-custom-create form>button{align-self:flex-start}
 .drag-track-custom-create button:disabled{opacity:.55;cursor:wait}
 @media(max-width:760px){.drag-track-custom-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.drag-track-custom-queen-options{grid-template-columns:1fr}.drag-track-custom-queen-add>div{grid-template-columns:1fr}}
+
+.drag-track-title-input{width:min(100%,760px);border:0;border-bottom:1px solid var(--line,rgba(120,110,100,.2));background:transparent;color:var(--foreground,#292522);font:inherit;font-weight:800;padding:4px 0;outline:none}
+.drag-track-editor-tools{padding:14px;border:1px solid var(--line,rgba(120,110,100,.18));border-radius:16px}
+.drag-track-roster-add{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.drag-track-roster-add>div{display:flex;flex-direction:column;gap:7px;min-width:0}
+.drag-track-roster-add input,.drag-track-custom-placement input:not([type=color]){width:100%;min-width:0;border:1px solid var(--line,rgba(120,110,100,.25));border-radius:10px;background:var(--surface-2,rgba(120,110,100,.06));color:var(--foreground,#292522);padding:9px 10px;font-size:11px}
+.drag-track-roster-options{display:flex;flex-direction:column;max-height:180px;overflow:auto;border:1px solid var(--line,rgba(120,110,100,.18));border-radius:10px;padding:5px}
+.drag-track-roster-options button{padding:7px 8px;text-align:left;border:0;border-radius:7px;background:transparent;color:var(--foreground,#292522);font-size:11px;cursor:pointer}
+.drag-track-roster-options button:hover{background:var(--surface-2,rgba(120,110,100,.1))}
+.drag-track-roster-options button:disabled{opacity:.45;cursor:default}
+.drag-track-roster-options small{padding:8px;color:var(--muted,#8b8580)}
+.drag-track-custom-queen-inline{display:grid!important;grid-template-columns:1fr 1.4fr auto;gap:7px!important}
+.drag-track-custom-queen-inline button,.drag-track-custom-placement button,.drag-track-add-episode button{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:999px;background:var(--accent,#d97745);color:white;padding:9px 12px;font-size:10px;font-weight:700;cursor:pointer}
+.drag-track-custom-placement{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.drag-track-custom-placement>div{display:grid;grid-template-columns:1fr 100px 55px auto;gap:7px}
+.drag-track-custom-placement input[type=color]{width:45px;height:36px;border:0;background:transparent;padding:0}
+.drag-track-custom-placement>span{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:5px 8px;border-radius:999px;color:#fff;font-size:10px}
+.drag-track-custom-placement>span button{display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;color:inherit;padding:0}
+.drag-track-add-episode{display:flex;justify-content:flex-end;margin:10px 0}
+.drag-track-episode-title{display:block;width:100%;min-width:72px;margin-top:4px;border:1px solid var(--line,rgba(120,110,100,.2));border-radius:6px;background:transparent;color:inherit;padding:4px;font-size:9px}
+.drag-track-episode-ppe{display:flex;align-items:center;gap:4px;margin-top:4px;font-size:9px;color:var(--muted,#8b8580)}
+.drag-track-episode-ppe input{width:12px;height:12px}
+.drag-track-remove-episode,.drag-track-remove-queen{display:inline-flex;align-items:center;gap:3px;border:0;background:transparent;color:var(--muted,#8b8580);font-size:9px;padding:3px;cursor:pointer}
+.drag-track-remove-episode:hover,.drag-track-remove-queen:hover{color:#c45e54}
+.drag-track-confirm-remove{display:flex;align-items:center;gap:10px;margin:10px 0;padding:10px 12px;border:1px solid rgba(196,94,84,.35);border-radius:12px;font-size:11px}
+.drag-track-confirm-remove span{flex:1}
+.drag-track-confirm-remove button{border:0;border-radius:999px;padding:6px 10px;font-size:10px;background:var(--surface-2,rgba(120,110,100,.1));color:var(--foreground,#292522)}
+.drag-track-confirm-remove button:last-child{background:#c45e54;color:#fff}
+@media(max-width:760px){.drag-track-roster-add{grid-template-columns:1fr}.drag-track-custom-queen-inline{grid-template-columns:1fr!important}.drag-track-custom-placement>div{grid-template-columns:1fr 75px 45px auto}.drag-track-confirm-remove{flex-wrap:wrap}}
