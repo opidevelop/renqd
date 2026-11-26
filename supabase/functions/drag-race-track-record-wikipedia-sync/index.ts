@@ -159,7 +159,7 @@ Deno.serve(async(req:Request)=>{
  const {data:allTemplates,error:templateError}=await admin.from("drag_race_track_record_templates").select("id,franchise_code,season_number,display_title,episodes,queens,source_metadata").order("franchise_code").order("season_number");
  if(templateError)return reply({error:"Unable to load Track Record templates"},503);
  const templates=(allTemplates??[]) as Template[];
- const pending=templates.filter(template=>!(template.source_metadata as Record<string,unknown>|undefined)?.wikimedia_attempted_at);
+ const retryBefore=Date.now()-30*24*60*60*1000;\n const pending=templates.filter(template=>{const attempted=Date.parse(String((template.source_metadata as Record<string,unknown>|undefined)?.wikimedia_attempted_at??""));return !Number.isFinite(attempted)||attempted<retryBefore;});
  const batch=pending.slice(0,limit);
  const {data:rules,error:rulesError}=await admin.from("drag_race_track_record_scoring_rules").select("placement_key,label").order("sort_order");
  if(rulesError)return reply({error:"Unable to load PPE scoring rules"},503);
