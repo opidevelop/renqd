@@ -688,3 +688,17 @@ Le seguenti richieste sono nuove rifiniture esplicitamente richieste dall'utente
 3. In tutte le modalità, le specie non scoperte mostrano `???` sotto la Poké Ball o la silhouette, mai la dicitura «Pokémon».
 4. Le sezioni speciali (Mega, Leggendari, Mitici, Ultracreature, Paradosso) devono essere comprimibili/espandibili indipendentemente dalle sezioni generazionali, in Solo, multiplayer individuale e multiplayer condiviso.
 5. I pulsanti dei modal di gioco devono avere contrasto esplicito e uniforme tra testo e sfondo, in particolare i modal di pausa e gli aiuti multiplayer.
+
+
+### Decisione approvata — aiuti e scheda Pokémon in Name ’Em All (26 novembre 2026)
+
+In tutte le varianti di Name ’Em All (Solo, Multiplayer condiviso e Multiplayer individuale), il clic su un Pokémon non ancora scoperto apre un unico modal con cinque aiuti indipendenti e cumulabili:
+1. **Rivela lettera:** ogni attivazione rivela la successiva lettera del nome, in modo progressivo, senza mostrare il nome completo.
+2. **Riproduci verso:** riproduce il verso del Pokémon.
+3. **Tipo:** mostra i tipi del Pokémon.
+4. **Pokédex:** mostra la descrizione Pokédex della specie.
+5. **Silhouette:** mostra la sagoma nera del Pokémon.
+
+Gli aiuti devono essere utilizzabili direttamente nel modal e non devono rivelare automaticamente il nome, l'immagine a colori o altri dati non ancora sbloccati. I progressi degli aiuti restano visibili finché il modal è aperto; la lettera è progressiva secondo la registrazione server già prevista.
+
+Quando il Pokémon è già scoperto, il modal mostra sempre immagine, nome, numero Pokédex nazionale, tipi, descrizione Pokédex e comando per riprodurre il verso. Il modal e i relativi controlli devono essere condivisi e graficamente coerenti in tutte e tre le modalità.
