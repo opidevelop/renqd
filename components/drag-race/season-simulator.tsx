@@ -186,7 +186,7 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
  function chooseFinalists(ids:string[]){setFinalists(ids.slice(0,Math.max(2,Math.min(4,Number(config.finalistCount)||3))));}
  function createTrackRecord(){
   const base={episodes:episodes.map(ep=>({number:ep.number,title:ep.title,counts_for_ppe:true,mini_challenge:ep.miniChallenge,maxi_challenge:ep.challenge})),queens:cast.map(q=>({id:q.id,name:q.name,image_url:q.image_url,winner:q.id===winnerId,results:episodes.map(ep=>({episode:ep.number,placement:ep.placements[q.id]??(ep.eliminatedIds.includes(q.id)?"ELIM":null)})),ppe_episode_numbers:episodes.map(ep=>ep.number)}))};
-  return sortTrackRecordQueens(base,scoringRules).map(q=>({...q,final_placement:q.id===winnerId?"WINNER":q.id===runnerUpId?"RUNNER_UP":q.id===thirdId?"THIRD":eliminatedIds.includes(q.id)?"ELIMINATED":"FINALIST"}));
+  return sortTrackRecordQueens(base,scoringRules).map(q=>{const id=q.id??"";return{...q,id,final_placement:id===winnerId?"WINNER":id===runnerUpId?"RUNNER_UP":id===thirdId?"THIRD":eliminatedIds.includes(id)?"ELIMINATED":"FINALIST"};});
  }
  function computeStatistics(trackRecord:ReturnType<typeof createTrackRecord>){
   return cast.map(q=>{const results=episodes.map(ep=>ep.placements[q.id]).filter(Boolean);const track=trackRecord.find(row=>row.id===q.id);return{queenId:q.id,queenName:q.name,challengeWins:episodes.filter(ep=>ep.challengeWinnerId===q.id).length,lipsyncWins:episodes.filter(ep=>ep.lipsyncWinnerId===q.id).length,bottom2:episodes.filter(ep=>ep.bottomIds.includes(q.id)).length,eliminations:episodes.filter(ep=>ep.eliminatedIds.includes(q.id)).length,placements:results,ppe:track?.ppe??null,calculatedRank:track?.calculated_rank??null};});
