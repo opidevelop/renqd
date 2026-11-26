@@ -10,5 +10,5 @@ export default async function TrackRecordDetailPage({params}:{params:Promise<{id
  ]);
  if(!r.data)notFound();
  const canEdit=r.data.owner_id===user.id;
- return <TrackRecordEditor recordId={r.data.id} title={r.data.title} initialData={r.data.record_data} rules={s.data??[]} canEdit={canEdit}/>;
+ return <TrackRecordEditor recordId={r.data.id} title={r.data.title} visibility={r.data.visibility} initialData={r.data.record_data} rules={s.data??[]} canEdit={canEdit}/>;
 }
