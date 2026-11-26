@@ -12,20 +12,9 @@ const modes = [
 export function PokemonHub({ dokuCompleted, connectionsCompleted, dailyRedCompleted }: { dokuCompleted: boolean; connectionsCompleted: boolean; dailyRedCompleted: boolean }) {
   return (
     <main className="pokemon-hub">
-      <section className="pokemon-hub-hero">
-        <span className="pokemon-page-eyebrow">RENQD × POKÉMON</span>
-        <div className="pokemon-hub-hero-copy">
-          <p className="pokemon-hub-kicker">UN NUOVO MONDO DA ESPLORARE</p>
-          <h1>Il tuo universo<br /><em>Pokémon.</em></h1>
-          <p>Colleziona preferenze, mettiti alla prova e affronta le sfide quotidiane. Tutto nel tuo spazio Renqd.</p>
-        </div>
-        <div className="pokemon-hub-hero-art" aria-hidden="true">
-          <span className="pokemon-hub-art-orbit pokemon-hub-art-orbit-one" />
-          <span className="pokemon-hub-art-orbit pokemon-hub-art-orbit-two" />
-          <img className="pokemon-hub-creature pokemon-hub-creature-one" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/471.png" alt="" />
-          <img className="pokemon-hub-creature pokemon-hub-creature-two" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/470.png" alt="" />
-          <img className="pokemon-hub-creature pokemon-hub-creature-three" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/196.png" alt="" />
-        </div>
+      <section className="world-hub-hero world-hub-pokemon">
+        <div className="world-hub-copy"><span>RENQD × POKÉMON</span><h1>Pokémon,<br/><em>il tuo universo.</em></h1><p>Colleziona preferenze, mettiti alla prova e affronta le sfide quotidiane.</p><div className="world-hub-tags"><i>COLLEZIONA</i><i>GIOCA</i><i>SFIDE QUOTIDIANE</i></div></div>
+        <div className="world-hub-art world-hub-pokemon-art" aria-hidden="true"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/471.png" alt=""/><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/470.png" alt=""/><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/196.png" alt=""/></div>
       </section>
       <section className="pokemon-hub-modes">
         <div className="pokemon-section-heading"><div><span className="pokemon-page-eyebrow">SCEGLI LA TUA ESPERIENZA</span><h2>Le modalità.</h2></div></div>
