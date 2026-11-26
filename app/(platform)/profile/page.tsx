@@ -31,7 +31,7 @@ export default async function ProfilePage() {
   })));
   const pokemonSection = <>
     <PokemonProfileArchive items={(pokemonRankings??[]) as Array<{id:string;title:string;public_slug:string|null;mode:string;status:string;updated_at:string;settings:Record<string,unknown>|null}>}
-      referenceNow={Date.now()} persistentHighestLevel={pokemonPreferences?.highest_level??null} maestroAchievedAt={pokemonPreferences?.maestro_achieved_at??null}/>
+      referenceNow={0} persistentHighestLevel={pokemonPreferences?.highest_level??null} maestroAchievedAt={pokemonPreferences?.maestro_achieved_at??null}/>
     <PokemonNameEmAllPreferences defaultVisibility={(pokemonPreferences?.default_visibility??"PUBLIC") as "PUBLIC"|"PRIVATE"}
       notifyLikes={pokemonPreferences?.notify_likes??true} notifyComments={pokemonPreferences?.notify_comments??true} blockedUsers={blockedUsers}/>
   </>;
