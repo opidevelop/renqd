@@ -64,7 +64,7 @@ export function Dialog({
       if (!node || openDialogStack[openDialogStack.length - 1] !== node) return;
       if (event.key === "Escape" && closeOnEscape) {
         event.preventDefault();
-        closeRef.current();
+        onClose();
         return;
       }
       if (event.key !== "Tab") return;
