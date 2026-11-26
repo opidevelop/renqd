@@ -397,7 +397,6 @@ function Game({
     document.getElementById("nae-"+id)?.scrollIntoView({behavior:"smooth",block:"start"});
   };
   const discoveredName=(id:number)=>found.has(id);
-  const selectedForms=selected?.forms??[];
 
   return (
     <section className="pokemon-nae-game">
