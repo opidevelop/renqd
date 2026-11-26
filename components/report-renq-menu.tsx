@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Flag, MoreHorizontal, LoaderCircle, CheckCircle2 } from "lucide-react";
+import { Dialog } from "@/components/ui/dialog";
 import { createRankingReport } from "@/app/r/[slug]/actions";
 
 const reasons = [
@@ -54,11 +55,11 @@ export default function ReportRenqMenu({ rankingId, alreadyReported }: {
           <Flag size={14}/> Segnala questo Renq
         </button>
       </div>}
-      {dialogOpen && <div className="report-renq-dialog" role="dialog" aria-label="Segnala questo Renq">
+      <Dialog open={dialogOpen} onClose={() => { setDialogOpen(false); setConfirming(false); }} overlayClassName="renqd-report-overlay" className="report-renq-dialog renqd-report-dialog" ariaLabel="Segnala questo Renq">
         <div className="report-renq-dialog-head"><div><span>SEGNALAZIONE</span><strong>Aiutaci a capire cosa non va.</strong></div><button type="button" aria-label="Chiudi" onClick={() => { setDialogOpen(false); setConfirming(false); }}>×</button></div>
         {!confirming ? <>
           <label htmlFor="report-renq-reason">Motivo della segnalazione</label>
-          <select id="report-renq-reason" value={reason} onChange={event => setReason(event.target.value)}>
+          <select id="report-renq-reason" autoFocus value={reason} onChange={event => setReason(event.target.value)}>
             <option value="">Seleziona un motivo</option>
             {reasons.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
@@ -71,7 +72,7 @@ export default function ReportRenqMenu({ rankingId, alreadyReported }: {
           <div className="report-renq-dialog-actions"><button type="button" className="is-quiet" onClick={() => setConfirming(false)}>Indietro</button><button type="button" disabled={pending} onClick={submit}>{pending ? <LoaderCircle size={14} className="report-renq-spin"/> : <Flag size={14}/>} Conferma invio</button></div>
         </>}
         {feedback && !confirming && <div className="report-renq-feedback is-error">{feedback.message}</div>}
-      </div>}
+      </Dialog>
     </>}
     {feedback?.type === "success" && <span className="report-renq-feedback is-success" role="status">{feedback.message}</span>}
   </div>;
