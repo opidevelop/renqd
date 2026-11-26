@@ -10,7 +10,7 @@ type RecordItem={id:string;title:string;season_id:string|null;visibility:string;
 type Props={userId:string;templates:Template[];records:RecordItem[];franchiseNames:Record<string,string>;canSync:boolean};
 export function TrackRecordHub({userId,templates,records,franchiseNames,canSync}:Props){
  const router=useRouter();const db=createClient();const [busy,setBusy]=useState<string|null>(null);const [sourceBusy,setSourceBusy]=useState(false);const [notice,setNotice]=useState("");
- const hasPendingWikipedia=templates.some(t=>!t.source_metadata?.wikimedia_attempted_at);
+ const hasPendingWikipedia=templates.some(t=>{const attempted=Date.parse(t.source_metadata?.wikimedia_attempted_at??"");return !Number.isFinite(attempted)||attempted<Date.now()-30*24*60*60*1000;});
  async function syncWikipedia(){setSourceBusy(true);setNotice("");try{const {data,error}=await db.functions.invoke("drag-race-track-record-wikipedia-sync",{body:{limit:5}});if(error)throw new Error(error.message||"Importazione non riuscita");setNotice("Fonti Wikipedia: "+data.updated+" stagioni aggiornate, "+data.placementsAdded+" placement aggiunti. Non trovate: "+data.notFound+"; senza tabella: "+data.noTable+"; Queen non abbinate: "+data.noMatches+". Ancora da verificare: "+data.remaining+".");router.refresh();}catch(e){setNotice(e instanceof Error?e.message:"Errore durante l’importazione");}finally{setSourceBusy(false);}}
  async function copyTemplate(template:Template){
   setBusy(template.id);setNotice("");
