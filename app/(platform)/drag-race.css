@@ -201,3 +201,5 @@ a.drag-race-module-card:hover{transform:translateY(-4px);border-color:#d99abd;bo
  .drag-game-page>section,.drag-race-page>section{animation:none!important}
  .drag-guess-card,.drag-lalaparuza-card,.drag-track-card,.drag-track-hof-card,.drag-track-record-row,.drag-track-comment,.drag-track-comment-actions button,.drag-track-report-record,.drag-track-export-actions button,.drag-track-winner-toggle{transition:none!important}
 }
+
+.drag-slayoff-tools{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px}.drag-bracket-pair>div[draggable="true"]{cursor:grab;touch-action:none}.drag-bracket-pair>div[draggable="true"]:active{cursor:grabbing}.drag-bracket-pair>div:not([draggable="true"]){cursor:not-allowed}
