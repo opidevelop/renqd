@@ -8,8 +8,8 @@ import { setPokemonDailyCompletionAction } from "@/app/(platform)/pokemon/name-e
 export function DailyPokemonGame({
   title, description, url, completed,
 }: { title: string; description: string; url: string; completed: boolean }) {
-  const provider = title === "Doku" ? "PokeDoku" : "Pokennection";
-  const gameMode = title === "Doku" ? "DOKU" : "CONNECTIONS";
+  const provider = title === "Doku" ? "PokeDoku" : title === "Connections" ? "Pokennection" : "Daily Red";
+  const gameMode = title === "Doku" ? "DOKU" : title === "Connections" ? "CONNECTIONS" : "DAILY_RED";
   const router = useRouter();
   const [isCompleted, setIsCompleted] = useState(completed);
   const [pending, startTransition] = useTransition();
