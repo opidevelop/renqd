@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowUpRight, Gamepad2, Sparkles, Trash2, Trophy } from "lucide-react";
+import { Dialog } from "@/components/ui/dialog";
 
 type ArchiveItem={id:string;title:string;public_slug:string|null;mode:string;status:string;updated_at:string;settings:Record<string,unknown>|null};
 const levelOrder:Record<string,number>={"Principiante":1,"Allenatore":2,"Capopalestra":3,"Superquattro":4,"Campione":5,"Maestro Pokémon":6};
@@ -122,10 +123,12 @@ export function PokemonProfileArchive({items,referenceNow,persistentHighestLevel
       </article>)}</div>
       {!filtered.length&&<p className="pokemon-profile-empty"><Sparkles size={20}/> Nessuna attività corrisponde ai filtri selezionati.</p>}
     </section>
-    {deleteTarget&&<div className="pokemon-nae-pause-backdrop" role="presentation"><section className="pokemon-nae-pause-card" role="alertdialog" aria-modal="true" aria-labelledby="pokemon-delete-results-title">
-      <span className="pokemon-page-eyebrow">CONFERMA ELIMINAZIONE</span>
-      <h2 id="pokemon-delete-results-title">{deleteTarget==="ALL"?"Eliminare tutti i risultati Name ’Em All?":"Eliminare questo risultato?"}</h2>
-      {deleteStep===1?<><p>L’operazione rimuove soltanto la tua copia dal profilo. I risultati degli altri partecipanti restano intatti.</p><div><button type="button" className="pokemon-favourite-secondary" onClick={()=>setDeleteTarget(null)}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>setDeleteStep(2)}>Continua</button></div></>:<><p>Seconda conferma: l’eliminazione è irreversibile per il tuo profilo e non potrai recuperare questo risultato.</p><div><button type="button" className="pokemon-favourite-secondary" onClick={()=>setDeleteTarget(null)}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>void deleteResults()} disabled={busy}>Conferma eliminazione</button></div></>}
-    </section></div>}
+    <Dialog open={Boolean(deleteTarget)} onClose={()=>setDeleteTarget(null)} overlayClassName="pokemon-nae-pause-backdrop" className="pokemon-nae-pause-card" role="alertdialog" labelledBy="pokemon-delete-results-title">
+      {deleteTarget&&<>
+        <span className="pokemon-page-eyebrow">CONFERMA ELIMINAZIONE</span>
+        <h2 id="pokemon-delete-results-title">{deleteTarget==="ALL"?"Eliminare tutti i risultati Name ’Em All?":"Eliminare questo risultato?"}</h2>
+        {deleteStep===1?<><p>L’operazione rimuove soltanto la tua copia dal profilo. I risultati degli altri partecipanti restano intatti.</p><div><button type="button" className="pokemon-favourite-secondary" autoFocus onClick={()=>setDeleteTarget(null)}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>setDeleteStep(2)}>Continua</button></div></>:<><p>Seconda conferma: l’eliminazione è irreversibile per il tuo profilo e non potrai recuperare questo risultato.</p><div><button type="button" className="pokemon-favourite-secondary" autoFocus onClick={()=>setDeleteTarget(null)}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>void deleteResults()} disabled={busy}>Conferma eliminazione</button></div></>}
+      </>}
+    </Dialog>
   </>;
 }
