@@ -107,7 +107,7 @@ export function TrackRecordEditor({recordId,title,visibility:initialVisibility,i
  async function addCatalogQueen(queen:CatalogQueen){
   if(!canEdit||dataRef.current.queens.some(q=>q.id===queen.id))return;
   const results=dataRef.current.episodes.map(ep=>({episode:ep.number,placement:null}));
-  await persistData({...dataRef.current,queens:[...dataRef.current.queens,{id:queen.id,name:queen.name,image_url:queen.image_url,rank:null,winner:false,results}]});
+  await persistData({...dataRef.current,queens:[...dataRef.current.queens,{id:queen.id,name:queen.name,image_url:queen.image_url,winner:false,results}]});
   setQueenSearch("");
  }
  async function addCustomQueen(){
@@ -118,7 +118,7 @@ export function TrackRecordEditor({recordId,title,visibility:initialVisibility,i
    catch{setError("L’immagine deve essere un URL HTTP o HTTPS valido.");return;}
   }
   if(dataRef.current.queens.some(q=>q.name.toLowerCase()===name.toLowerCase())){setError("Esiste già una Queen con questo nome nella scheda.");return;}
-  const queen:TrackRecordQueen={id:"custom-"+crypto.randomUUID(),name,image_url:imageUrl,rank:null,winner:false,results:dataRef.current.episodes.map(ep=>({episode:ep.number,placement:null}))};
+  const queen:TrackRecordQueen={id:"custom-"+crypto.randomUUID(),name,image_url:imageUrl,winner:false,results:dataRef.current.episodes.map(ep=>({episode:ep.number,placement:null}))};
   await persistData({...dataRef.current,queens:[...dataRef.current.queens,queen]});
   setCustomQueenName("");setCustomQueenImage("");
  }
