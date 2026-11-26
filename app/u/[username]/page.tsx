@@ -8,7 +8,7 @@ import { PublicProfileTabs } from "@/components/public-profile-tabs";
 import { PokemonProfileArchive } from "@/components/pokemon/profile-archive";
 import { PublicProfileRenqList } from "@/components/public-profile-renq-list";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
-import { ArrowLeft, ArrowUpRight, BadgeCheck, Folder, Globe2, Trophy } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, BadgeCheck, Folder, Globe2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -82,7 +82,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     </section>
       </>}
       renqs={<PublicProfileRenqList items={rankings as Array<{id:string;title:string;public_slug:string|null;mode:string;settings:Record<string,unknown>|null}>} displayName={profile.display_name||profile.username}/>} 
-      pokemon={<PokemonProfileArchive items={visiblePokemonItems as Array<{id:string;title:string;public_slug:string|null;mode:string;status:string;updated_at:string;settings:Record<string,unknown>|null}>} referenceNow={Date.now()} persistentHighestLevel={null} maestroAchievedAt={null} readOnly/>}
+      pokemon={<PokemonProfileArchive items={visiblePokemonItems as Array<{id:string;title:string;public_slug:string|null;mode:string;status:string;updated_at:string;settings:Record<string,unknown>|null}>} referenceNow={0} persistentHighestLevel={null} maestroAchievedAt={null} readOnly/>}
     />
     <div className="profile-public-footer"><BadgeCheck size={15}/> Creato con Renqd</div>
   </main>;
