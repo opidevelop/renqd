@@ -135,3 +135,69 @@ a.drag-race-module-card:hover{transform:translateY(-4px);border-color:#d99abd;bo
  .world-hub-tags i{padding:5px 6px;font-size:6px}
 }
 @media(prefers-reduced-motion:reduce){.home-feature-card,.home-feature-mon,.home-feature-queen,.world-hub-art img,.drag-race-module-card,.drag-config-card,.drag-result-card,.drag-queen-card,.drag-answer-card,.drag-bracket-match,.drag-chip-list button,.drag-suggestions button,.drag-start-row button,.drag-result-card>button{transition:none!important;animation:none!important}}
+
+/* Detail pages: richer motion, stronger pink identity and clearer actions */
+.pokemon-hub .pokemon-mode-card{border-color:#d6e6f5;background:linear-gradient(145deg,#fff 0%,#f3f9ff 100%);color:#183f67}
+.pokemon-hub .pokemon-mode-card:hover{border-color:#8dbbe4;box-shadow:0 12px 28px rgba(40,103,159,.1)}
+.pokemon-hub .pokemon-mode-icon{border-color:#c9def1;background:#eaf5ff;color:#3177b5}
+.pokemon-hub .pokemon-mode-index{color:#9bbbd8}
+.pokemon-hub .pokemon-mode-status,.pokemon-hub .pokemon-mode-arrow{color:#397fb8}
+.pokemon-hub .pokemon-mode-name,.pokemon-hub .pokemon-mode-daily{background:linear-gradient(145deg,#edf6ff,#fff)}
+.drag-game-page>section,.drag-race-page>section{animation:drag-rise-in .48s both}
+.drag-game-page>section:nth-of-type(2),.drag-race-page>section:nth-of-type(2){animation-delay:.04s}
+.drag-game-page>section:nth-of-type(3),.drag-race-page>section:nth-of-type(3){animation-delay:.08s}
+@keyframes drag-rise-in{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.drag-game-heading h1,.drag-game-top h1{font-weight:900;line-height:1.02}
+.drag-game-heading p{max-width:640px}
+.drag-game-top{padding:14px 0 4px}
+.drag-config-card{padding:clamp(16px,3vw,25px)}
+.drag-config-block h2{letter-spacing:-.25px}
+.drag-number-input,.drag-search-field input,.drag-track-search{transition:border-color .2s,box-shadow .2s}
+.drag-number-input:focus,.drag-search-field input:focus,.drag-track-search:focus{outline:none;border-color:#c76a9d;box-shadow:0 0 0 3px rgba(190,83,139,.12)}
+.drag-chip-list button.is-selected{box-shadow:0 5px 14px rgba(168,63,119,.12)}
+.drag-search-field{border-radius:13px;transition:border-color .2s,box-shadow .2s}
+.drag-suggestions button{border-radius:10px}
+.drag-guess-card{overflow:hidden;border-radius:16px;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+.drag-guess-card:hover{transform:translateY(-3px);border-color:#d58bb4;box-shadow:0 12px 24px rgba(122,43,88,.1)}
+.drag-guess-image{border-radius:12px;background:linear-gradient(135deg,#f8e8f0,#ead8e7)}
+.drag-guess-card button{cursor:pointer;transition:background .18s,border-color .18s,transform .18s}
+.drag-guess-card button:hover{transform:translateY(-1px);border-color:#d58bb4;background:#fff4fa}
+.drag-lalaparuza-grid{gap:14px}
+.drag-lalaparuza-card{position:relative;overflow:hidden;min-height:225px;padding:22px;border-color:#ead8e3;border-radius:19px;background:linear-gradient(145deg,#fff 0%,#fff6fb 100%);box-shadow:0 8px 22px rgba(88,43,69,.04);transition:transform .25s cubic-bezier(.2,.8,.2,1),border-color .25s,box-shadow .25s}
+.drag-lalaparuza-card:after{position:absolute;right:-34px;top:-34px;width:110px;height:110px;border:1px solid #f0d5e4;border-radius:50%;content:"";box-shadow:0 0 0 15px #fbedf455,0 0 0 30px #fbedf422;pointer-events:none}
+.drag-lalaparuza-card:hover{transform:translateY(-5px);border-color:#d58bb4;box-shadow:0 17px 32px rgba(122,43,88,.1)}
+.drag-lalaparuza-card>span{position:relative;z-index:1;width:48px;height:48px;border:1px solid #efd7e5;border-radius:15px;background:#fbedf4}
+.drag-lalaparuza-card h2,.drag-lalaparuza-card p,.drag-lalaparuza-card a,.drag-lalaparuza-card small{position:relative;z-index:1}
+.drag-queen-profile-head{position:relative;overflow:hidden;border-radius:21px;background:linear-gradient(115deg,#fff3f9,#f7e1ed)}
+.drag-queen-profile-head:after{position:absolute;right:-45px;bottom:-95px;width:240px;height:240px;border:1px solid #e9bfd5;border-radius:50%;content:"";box-shadow:0 0 0 22px #f6dfeb66,0 0 0 44px #f6dfeb33;pointer-events:none}
+.drag-queen-stats>div,.drag-queen-season-list,.drag-queen-season-metrics{border-color:#ead8e3}
+.drag-queen-season-badges span{transition:transform .18s ease}
+.drag-queen-season-badges span:hover{transform:translateY(-2px)}
+.drag-track-section{border-radius:18px;background:linear-gradient(145deg,#fff 0%,#fffafd 100%);box-shadow:0 8px 25px rgba(86,43,68,.035)}
+.drag-track-template-grid,.drag-track-hof-grid{gap:13px}
+.drag-track-card,.drag-track-hof-card,.drag-track-record-row{border-radius:15px;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+.drag-track-card:hover,.drag-track-hof-card:hover,.drag-track-record-row:hover{transform:translateY(-3px);border-color:#d58bb4;box-shadow:0 12px 25px rgba(122,43,88,.09)}
+.drag-track-editor-tools input,.drag-track-editor-tools select,.drag-track-episode-title input,.drag-track-custom-fields input,.drag-track-visibility select{border-radius:10px;transition:border-color .2s,box-shadow .2s}
+.drag-track-editor-tools input:focus,.drag-track-editor-tools select:focus,.drag-track-episode-title input:focus,.drag-track-custom-fields input:focus{outline:none;border-color:#c76a9d;box-shadow:0 0 0 3px rgba(190,83,139,.1)}
+.drag-track-social{border-radius:18px;background:linear-gradient(145deg,#fff 0%,#fff9fc 100%)}
+.drag-track-comment{transition:background .18s,border-color .18s}
+.drag-track-comment:hover{background:#fffafd}
+.drag-track-comment-actions button,.drag-track-report-record,.drag-track-export-actions button{transition:transform .18s ease,border-color .18s,background .18s}
+.drag-track-comment-actions button:hover,.drag-track-report-record:hover,.drag-track-export-actions button:hover{transform:translateY(-1px)}
+.drag-track-winner-toggle{transition:transform .18s ease,background .18s,border-color .18s}
+.drag-track-winner-toggle:hover{transform:translateY(-1px)}
+.drag-track-table-wrap{border-radius:15px}
+.drag-track-table thead th{background:#fbedf4}
+.drag-track-table tbody tr{transition:background .16s}
+.drag-track-table tbody tr:hover{background:#fff7fb}
+.drag-race-back a{transition:color .18s}
+.drag-race-back a:hover{color:#7f2d5c}
+@media(max-width:760px){
+ .drag-lalaparuza-grid{grid-template-columns:1fr}
+ .drag-lalaparuza-card{min-height:190px}
+ .drag-game-page>section,.drag-race-page>section{animation-duration:.35s}
+}
+@media(prefers-reduced-motion:reduce){
+ .drag-game-page>section,.drag-race-page>section{animation:none!important}
+ .drag-guess-card,.drag-lalaparuza-card,.drag-track-card,.drag-track-hof-card,.drag-track-record-row,.drag-track-comment,.drag-track-comment-actions button,.drag-track-report-record,.drag-track-export-actions button,.drag-track-winner-toggle{transition:none!important}
+}
