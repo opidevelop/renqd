@@ -42,6 +42,7 @@ export function PokemonNameEmAllMultiplayerGame({
   const [query,setQuery]=useState("");
   const [confirmed,setConfirmed]=useState(false);
   const [collapsedGenerations,setCollapsedGenerations]=useState<Set<number>>(new Set());
+  const [collapsedSpecialSections,setCollapsedSpecialSections]=useState<Set<string>>(new Set());
   const inputRef=useRef<HTMLInputElement>(null);
   const [selected,setSelected]=useState<PokemonSpecies|null>(null);
   const [hint,setHint]=useState<{nameLength:number;revealedPrefix:string;hintCount:number}|null>(null);
@@ -415,8 +416,8 @@ export function PokemonNameEmAllMultiplayerGame({
         const total=isMega?cells.length:section.species.length;
         const count=isMega?section.species.reduce((sum,item)=>sum+(found.has(item.id)?item.megaForms.length:0),0):section.species.filter(item=>found.has(item.id)).length;
         return <section id={"nae-"+section.id} key={section.id} className="pokemon-nae-catalog-section">
-          <header><div><span className="pokemon-page-eyebrow">{section.id.startsWith("gen-")?"CATALOGO PRINCIPALE":"SEZIONE SPECIALE"}</span><h2>{section.label}</h2></div><div className="pokemon-nae-catalog-header-actions"><small>{count}/{total} scoperti</small>{section.id.startsWith("gen-")&&(()=>{const generation=Number(section.id.slice(4));const collapsed=collapsedGenerations.has(generation);return <button type="button" className="pokemon-nae-collapse-toggle" aria-expanded={!collapsed} onClick={()=>setCollapsedGenerations(current=>{const next=new Set(current);if(next.has(generation))next.delete(generation);else next.add(generation);return next;})}><ChevronDown size={14} className={collapsed?"":"is-open"}/><span>{collapsed?"Espandi":"Comprimi"}</span></button>;})()}</div></header>
-          {!section.id.startsWith("gen-")||!collapsedGenerations.has(Number(section.id.slice(4))) ? <div className="pokemon-nae-cell-grid">{cells.map(({item,form})=>{
+          <header><div><span className="pokemon-page-eyebrow">{section.id.startsWith("gen-")?"CATALOGO PRINCIPALE":"SEZIONE SPECIALE"}</span><h2>{section.label}</h2></div><div className="pokemon-nae-catalog-header-actions"><small>{count}/{total} scoperti</small>{section.id.startsWith("gen-")?(()=>{const generation=Number(section.id.slice(4));const collapsed=collapsedGenerations.has(generation);return <button type="button" className="pokemon-nae-collapse-toggle" aria-expanded={!collapsed} onClick={()=>setCollapsedGenerations(current=>{const next=new Set(current);if(next.has(generation))next.delete(generation);else next.add(generation);return next;})}><ChevronDown size={14} className={collapsed?"":"is-open"}/><span>{collapsed?"Espandi":"Comprimi"}</span></button>;})():(()=>{const collapsed=collapsedSpecialSections.has(section.id);return <button type="button" className="pokemon-nae-collapse-toggle" aria-expanded={!collapsed} onClick={()=>setCollapsedSpecialSections(current=>{const next=new Set(current);if(next.has(section.id))next.delete(section.id);else next.add(section.id);return next;})}><ChevronDown size={14} className={collapsed?"":"is-open"}/><span>{collapsed?"Espandi":"Comprimi"}</span></button>;})()}</div></header>
+          {section.id.startsWith("gen-")?!collapsedGenerations.has(Number(section.id.slice(4))):!collapsedSpecialSections.has(section.id) ? <div className="pokemon-nae-cell-grid">{cells.map(({item,form})=>{
             const isFound=found.has(item.id);
             const discovererId=shared?discoveryById[String(item.id)]:null;
             const discoverer=discovererId?participants.find(player=>player.userId===discovererId):null;
@@ -424,7 +425,7 @@ export function PokemonNameEmAllMultiplayerGame({
             const displayName=form?item.name+" "+form.label:item.name;
             return <button key={item.id+"-"+(form?.id??"base")} type="button" disabled={session.status!=="ACTIVE"||countdown>0} onClick={()=>{setSelected(item);setHint(null);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")+(recentlyFoundId===item.id?" is-revealing":"")} aria-label={isFound?displayName:"Pokémon da scoprire"}>
               <span className="pokemon-nae-cell-art">{isFound||visual.shadows?<img src={artwork} alt="" loading="lazy" style={{filter:isFound?"none":"brightness(0) saturate(0) opacity(.55)"}}/>:<b className="pokemon-nae-pokeball">◉</b>}</span>
-              {isFound?<strong>{displayName}</strong>:<strong className="is-hidden">{visual.shadows?"???":"Pokémon"}</strong>}
+              {isFound?<strong>{displayName}</strong>:<strong className="is-hidden">"???"</strong>}
               {(item.forms.length>0||item.isLegendary||item.isMythical||item.isUltraBeast||item.isParadox)&&<span className="pokemon-nae-cell-indicators">{item.forms.length>0?"◇":""}{item.isLegendary?"★":""}{item.isMythical?"✦":""}{item.isUltraBeast?"◈":""}{item.isParadox?"⌁":""}</span>}
               {shared&&isFound&&discoverer&&<span className="pokemon-nae-cell-discoverer" title={"Scoperto da "+discoverer.displayName}>{discoverer.avatarUrl?<img src={discoverer.avatarUrl} alt=""/>:discoverer.displayName.slice(0,1).toUpperCase()}</span>}
             </button>;
@@ -433,11 +434,13 @@ export function PokemonNameEmAllMultiplayerGame({
       })}
     </div>
 
-    <Dialog open={Boolean(selected)} onClose={()=>setSelected(null)} overlayClassName="pokemon-nae-detail-backdrop" className="pokemon-nae-detail" ariaLabel={selected?"Dettaglio "+selected.name:undefined}>
+    <Dialog open={Boolean(selected)} onClose={()=>setSelected(null)} overlayClassName="pokemon-nae-detail-backdrop" className="pokemon-nae-detail" ariaLabel={selected?(found.has(selected.id)?"Scheda Pokémon":"Aiuto ortografico"):undefined}>
       {selected&&<>
         <header><span className="pokemon-page-eyebrow">{found.has(selected.id)?"SCHEDA POKÉMON":"AIUTO ORTOGRAFICO"}</span><button type="button" onClick={()=>setSelected(null)} aria-label="Chiudi"><X size={18}/></button></header>
-        <div className="pokemon-nae-detail-hero">{found.has(selected.id)?<img src={selected.artworkUrl} alt={selected.name}/>:<span className="pokemon-nae-detail-question">?</span>}<div><h2>{found.has(selected.id)?selected.name:"Pokémon da scoprire"}</h2>{config.showDexNumber===true&&<small>#{String(selected.id).padStart(4,"0")}</small>}<small>Generazione {selected.generation}</small>{config.showType===true&&<p>{selected.types.join(" · ")}</p>}</div></div>
-        {found.has(selected.id)?<div className="pokemon-nae-detail-forms"><h3>Forme e rappresentazioni</h3>{selected.forms.length===0&&selected.megaForms.length===0&&<p>Nessuna forma alternativa registrata.</p>}{[...selected.forms,...selected.megaForms].map(form=><div key={form.id} className="pokemon-nae-detail-form"><img src={form.spriteUrl} alt="" loading="lazy"/><span>{form.label}</span>{form.isMega&&<small>Mega</small>}</div>)}</div>:<>{hint&&<p className="pokemon-nae-hint-reveal">{hint.revealedPrefix}{hint.revealedPrefix.length<hint.nameLength?" _".repeat(Math.min(12,hint.nameLength-hint.revealedPrefix.length)):""} <small>{hint.nameLength} lettere</small></p>}<button type="button" className="pokemon-favourite-primary" autoFocus onClick={()=>void requestHint()} disabled={!spellingHelp||pending}> <HelpCircle size={15}/> Rivela lettere</button></>}
+        {found.has(selected.id)?<>
+          <div className="pokemon-nae-detail-hero"><img src={selected.artworkUrl} alt={selected.name}/><div><h2>{selected.name}</h2>{config.showDexNumber===true&&<small>#{String(selected.id).padStart(4,"0")}</small>}<small>Generazione {selected.generation}</small>{config.showType===true&&<p>{selected.types.join(" · ")}</p>}</div></div>
+          <div className="pokemon-nae-detail-forms"><h3>Forme e rappresentazioni</h3>{selected.forms.length===0&&selected.megaForms.length===0&&<p>Nessuna forma alternativa registrata.</p>}{[...selected.forms,...selected.megaForms].map(form=><div key={form.id} className="pokemon-nae-detail-form"><img src={form.spriteUrl} alt="" loading="lazy"/><span>{form.label}</span>{form.isMega&&<small>Mega</small>}</div>)}</div>
+        </>:<div className="pokemon-nae-hint-box pokemon-nae-hint-only"><strong>Aiuto ortografico</strong><p>Usa gli aiuti per ricostruire il nome. La risposta resterà nascosta finché non la scoprirai nella partita.</p>{hint&&<p className="pokemon-nae-hint-reveal" aria-live="polite">{hint.revealedPrefix}{hint.revealedPrefix.length<hint.nameLength?" _".repeat(Math.min(12,hint.nameLength-hint.revealedPrefix.length)):""} <small>{hint.nameLength} lettere</small></p>}<button type="button" className="pokemon-favourite-primary" autoFocus onClick={()=>void requestHint()} disabled={!spellingHelp||pending}><HelpCircle size={15}/> Rivela lettere</button></div>}
         <button type="button" className="pokemon-favourite-secondary" onClick={()=>setSelected(null)}>Chiudi</button>
       </>}
     </Dialog>
