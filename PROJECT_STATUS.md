@@ -2120,3 +2120,18 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - La UI Track Record mostra i fatti sorgente disponibili e avverte che le celle vuote non significano SAFE. La copia personale conserva la provenienza del template. I template ufficiali vengono popolati dalla sincronizzazione del catalogo, non da Excel.
 - Verifica DB dopo migrazione: tabella presente, RLS=true, FORCE RLS=true; 25 regole PPE presenti; template ancora 0 perché la sincronizzazione iniziale del catalogo non è stata eseguita in questa sessione.
 - CI GitHub Actions «Code quality» sul commit `1e75f16dcab7ece8b8c9fb64e41c6d41691ccd93` era in corso al momento dell'aggiornamento. Vercel ha continuato a segnalare il limite build giornaliero; non dichiarare verificata la build Production né pubblicata la nuova UI.
+
+
+### Arricchimento placement da Wikipedia — aggiornamento 26 novembre 2026
+
+- La Edge Function `drag-race-catalog-sync` è stata ridistribuita come **versione 3 ACTIVE**: elimina il tie-break inventato basato sull'ordine del cast e conserva l'ordinamento di eliminazione soltanto quando la fonte fornisce un'informazione esplicita.
+- Aggiunta e distribuita `drag-race-track-record-wikipedia-sync`, **versione 1 ACTIVE**, con JWT obbligatorio e controllo staff OWNER/ADMIN/MODERATOR.
+- La nuova funzione usa le API ufficiali MediaWiki e l'endpoint REST HTML di Wikipedia in inglese; non effettua richieste a Fandom.
+- Il parser cerca la pagina corrispondente alla stagione, legge la tabella «Contestant progress», gestisce intestazioni con rowspan/colspan, abbina Queen tramite nome e alias e importa soltanto codici PPE riconosciuti.
+- Mapping conservativo: WIN, HIGH, HIGH TEAM, SAFE, LOW, TOP2 ed ELIM sono mappati solo se presenti nella scala PPE. BTM diventa BTM2 soltanto quando esattamente due Queen abbinate risultano BTM nello stesso episodio. I placement esistenti non vengono sovrascritti.
+- La funzione elabora al massimo 5 stagioni per chiamata, registra anche pagine non trovate/tabelle mancanti/Queen non abbinate e conserva URL della revisione, ID revisione, timestamp, attribuzione «Wikipedia contributors» e licenza CC BY-SA 4.0.
+- La pagina Track Record mostra il comando di importazione solo a OWNER, ADMIN e MODERATOR. L'editor mostra la provenienza e l'attribuzione Wikipedia.
+- Il salvataggio automatico dell'editor Track Record è stato serializzato in coda per evitare che modifiche rapide si sovrascrivano a vicenda; l'aggiornamento locale usa sempre l'ultima versione dei dati.
+- Il parser Wikipedia è una prima versione conservativa e non è ancora stato collaudato su un campione reale di stagioni. Non dichiarare i placement completi finché non sarà eseguita la sincronizzazione autenticata e verificata la corrispondenza dei dati.
+- La sincronizzazione iniziale del catalogo e quella Wikipedia richiedono un account staff autenticato; non sono state eseguite in questa sessione. Di conseguenza i template ufficiali sono ancora 0.
+- Il deployment Vercel della UI resta bloccato dal limite giornaliero di build del piano Hobby. Le Edge Function Supabase sono invece ACTIVE.
