@@ -1312,3 +1312,8 @@
   .mobile-create-link .mobile-nav-icon{display:grid!important;visibility:visible!important;opacity:1!important}
   .mobile-create-link .mobile-nav-icon svg{display:block!important;visibility:visible!important;opacity:1!important;stroke:currentColor!important;flex:none!important}
 }
+
+
+/* Shared centered report dialog */
+.renqd-report-overlay{position:fixed;inset:0;z-index:220;display:grid;place-items:center;padding:20px;background:rgba(17,29,42,.48);backdrop-filter:blur(8px)}
+.report-renq-dialog.renqd-report-dialog{position:relative;inset:auto;width:min(480px,calc(100vw - 32px));max-height:min(86dvh,760px);overflow:auto;margin:0;padding:22px;border:1px solid #dce5ed;border-radius:20px;background:#fff;box-shadow:0 24px 70px rgba(10,26,42,.24)}
