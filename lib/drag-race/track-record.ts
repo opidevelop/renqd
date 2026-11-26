@@ -25,6 +25,7 @@ export type TrackRecordData = {
   episodes: TrackRecordEpisode[];
   queens: TrackRecordQueen[];
   custom_placements?: Array<{ placement_key: string; label: string; score: number; color: string }>;
+  source_metadata?: { source_id?: string; source_version?: string; source_url?: string; placement_completeness?: string; placement_note?: string };
 };
 const rankNumber = (value?: string | null) => {
   if (!value) return Number.MAX_SAFE_INTEGER;
