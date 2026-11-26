@@ -22,6 +22,7 @@ import {
 } from "@/lib/pokemon/catalog";
 import { getPokemonTypeIconUrl } from "@/lib/pokemon/type-icons";
 import { Dialog } from "@/components/ui/dialog";
+import { PokemonDiscoveryDialog } from "@/components/pokemon/discovery-dialog";
 import { useNameEmAllSubmissionQueue } from "@/components/pokemon/use-name-em-all-submission-queue";
 import {
   createNameEmAllSoloAction, createNameEmAllMultiplayerAction, deleteNameEmAllSoloAction, finishNameEmAllAction, hintNameEmAllAction,
@@ -386,14 +387,12 @@ function Game({
   },[selected]);
 
   const revealHint=async()=>{
-    if(!selected)return;
+    if(!selected)return null;
     const result=await hintNameEmAllAction(session.id,selected.id);
-    if(!result.ok){setMessage(result.error??"Aiuto non disponibile.");return;}
-    setHint({
-      nameLength:Number(result.data?.nameLength??0),
-      revealedPrefix:String(result.data?.revealedPrefix??""),
-      hintCount:Number(result.data?.hintCount??0),
-    });
+    if(!result.ok){setMessage(result.error??"Aiuto non disponibile.");return null;}
+    const nextHint={nameLength:Number(result.data?.nameLength??0),revealedPrefix:String(result.data?.revealedPrefix??""),hintCount:Number(result.data?.hintCount??0)};
+    setHint(nextHint);
+    return nextHint;
   };
   const openSection=(id:string)=>{
     setActiveSection(id);
@@ -462,17 +461,7 @@ function Game({
         </section>)}
       </div>
 
-      <Dialog open={Boolean(selected)} onClose={()=>setSelected(null)} overlayClassName="pokemon-nae-detail-backdrop" className="pokemon-nae-detail" ariaLabel={selected?(discoveredName(selected.id)?"Scheda Pokémon":"Aiuto ortografico"):undefined}>
-        {selected&&<>
-          <header><span className="pokemon-page-eyebrow">{discoveredName(selected.id)?"SCHEDA POKÉMON":"AIUTO ORTOGRAFICO"}</span><button type="button" onClick={()=>setSelected(null)} aria-label="Chiudi"><X size={18}/></button></header>
-          {discoveredName(selected.id)?<>
-            <div className="pokemon-nae-detail-hero"><img src={selected.artworkUrl} alt={selected.name}/><div><h2>{selected.name}</h2>{config.showDexNumber&&<small>#{selected.id.toString().padStart(4,"0")}</small>}<small>Generazione {GENERATION_LABELS[selected.generation-1]}</small>{config.showType&&<p>{selected.types.map(t=>POKEMON_TYPE_LABELS[t]??t).join(" · ")}</p>}</div></div>
-            <div className="pokemon-nae-detail-stats"><span>Scoperto</span><span>{selectedForms.length} forme associate</span></div>
-            {selectedForms.length>0&&<div className="pokemon-nae-forms"><strong>Forme associate</strong><div>{selectedForms.map(form=><div key={form.id}><img src={form.spriteUrl} alt=""/><span>{form.label||form.slug}</span></div>)}</div></div>}
-          </>:<div className="pokemon-nae-hint-box pokemon-nae-hint-only"><strong>Aiuto ortografico</strong><p>Usa gli aiuti per ricostruire il nome. La risposta resterà nascosta finché non la scoprirai nella partita.</p>{hint&&<div className="pokemon-nae-hint-reveal" aria-live="polite"><span>{hint.revealedPrefix}</span><span>{Array.from({length:Math.max(0,hint.nameLength-hint.revealedPrefix.length)},()=> "•").join(" ")}</span></div>}<button type="button" onClick={()=>void revealHint()} disabled={!config.spellingHelp}><HelpCircle size={14}/> Rivela una lettera</button>{!config.spellingHelp&&<small>Gli aiuti ortografici sono disattivati nelle impostazioni della partita.</small>}</div>}
-          <button type="button" className="pokemon-favourite-secondary" onClick={()=>setSelected(null)}>Chiudi scheda</button>
-        </>}
-      </Dialog>
+      <PokemonDiscoveryDialog selected={selected} discovered={Boolean(selected&&found.has(selected.id))} spellingHelp={config.spellingHelp!==false} onClose={()=>setSelected(null)} onRevealLetter={revealHint}/>
 
       <Dialog open={pauseOverlay} onClose={()=>void resume()} overlayClassName="pokemon-nae-pause-backdrop" className="pokemon-nae-pause-card" labelledBy="pokemon-nae-pause-title" closeOnBackdrop={false}>
         <span className="pokemon-page-eyebrow">PARTITA IN PAUSA</span><h2 id="pokemon-nae-pause-title">La partita è in pausa.</h2><p>Il timer è fermo e la griglia non è consultabile. Puoi riprendere, salvare il risultato parziale oppure eliminare questa partita.</p>
