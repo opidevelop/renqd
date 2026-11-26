@@ -309,7 +309,7 @@ export function UltimateFavouriteEditor({
           </div>
           {matrix[getPokemonCellKey(active.row,active.column)] && <button type="button" className="pokemon-picker-remove" onClick={remove}>Rimuovi selezione</button>}
         </>}
-      </Dialog>}
+      </Dialog>
     </main>
   );
 }
