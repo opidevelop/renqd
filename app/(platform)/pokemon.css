@@ -1986,3 +1986,29 @@ button.pokemon-favourite-cell:hover{background:var(--pokemon-blue-pale)!importan
   .pokemon-profile-stats{gap:8px}
   .pokemon-profile-stats article{padding:13px}
 }
+
+
+/* Name 'Em All — explicit, accessible modal button palette and hint-only view. */
+.pokemon-nae-pause-card .pokemon-favourite-primary,
+.pokemon-nae-detail .pokemon-favourite-primary{
+  border:1px solid #a95716!important;background:#c96b18!important;color:#fff!important;
+  box-shadow:0 5px 14px rgba(161,83,22,.18)
+}
+.pokemon-nae-pause-card .pokemon-favourite-secondary,
+.pokemon-nae-detail .pokemon-favourite-secondary{
+  border:1px solid #e2d4c5!important;background:#fffaf5!important;color:#624d3a!important
+}
+.pokemon-nae-pause-card .pokemon-nae-delete-game{
+  border:1px solid #b94d42!important;background:#b94d42!important;color:#fff!important
+}
+.pokemon-nae-pause-card button,
+.pokemon-nae-detail button{font-weight:850;opacity:1}
+.pokemon-nae-pause-card button:disabled,
+.pokemon-nae-detail button:disabled{opacity:.55}
+.pokemon-nae-hint-only{min-height:150px;align-content:center}
+.pokemon-nae-hint-only>p{font-size:10px;line-height:1.7}
+.pokemon-nae-hint-only .pokemon-nae-hint-reveal{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0;color:#a45c27;font-size:18px;font-weight:950;letter-spacing:3px}
+.pokemon-nae-hint-only .pokemon-nae-hint-reveal small{font-size:9px;letter-spacing:0;color:#8c7966}
+.pokemon-nae-hint-only>small{font-size:9px;color:#9a806a}
+.pokemon-nae-multiplayer .pokemon-nae-detail .pokemon-favourite-primary{color:#fff!important;background:#c96b18!important}
+.pokemon-nae-multiplayer .pokemon-nae-detail .pokemon-favourite-secondary{color:#624d3a!important;background:#fffaf5!important}
