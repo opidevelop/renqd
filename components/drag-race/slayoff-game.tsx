@@ -9,6 +9,7 @@ type Song={id:string;song_title:string;song_artist:string|null;preview_url:strin
 type Match={id:string;a:string|null;b:string|null;songId:string|null;winner:string|null};
 type Props={franchises:Franchise[];queens:Queen[];songs:Song[]};
 const shuffle=<T,>(items:T[])=>[...items].sort(()=>Math.random()-.5);
+const pickRandom=<T,>(items:T[])=>items.length?items[Math.floor(Math.random()*items.length)]:undefined;
 export function SlayoffGame({franchises,queens,songs}:Props){
  const db=useMemo(()=>createClient(),[]);
  const [count,setCount]=useState("8");const [custom,setCustom]=useState("12");const [selectedFranchises,setSelectedFranchises]=useState(franchises.map(x=>x.code));
@@ -19,7 +20,7 @@ export function SlayoffGame({franchises,queens,songs}:Props){
  const desired=count==="CUSTOM"?Math.max(4,Math.min(64,Number(custom)||4)):Number(count);
  const suggestions=search.trim()?pool.filter(q=>q.name.toLowerCase().includes(search.toLowerCase())||(q.aliases??[]).some(a=>a.toLowerCase().includes(search.toLowerCase()))).slice(0,8):[];
  const songMap=useMemo(()=>new Map(songs.map(s=>[s.id,s])),[songs]);const queenMap=useMemo(()=>new Map(queens.map(q=>[q.id,q])),[queens]);
- function randomSong(){return songs.length?songs[Math.floor(Math.random()*songs.length)].id:null;}
+ function randomSong(){return pickRandom(songs)?.id??null;}
  function buildMain(ids:string[]){let current=[...ids];const built:Match[][]=[];let round=1;while(current.length>1){const matches:Match[]=[];for(let i=0;i<current.length;i+=2)matches.push({id:"r"+round+"-"+(i/2),a:current[i]??null,b:current[i+1]??null,songId:randomSong(),winner:null});built.push(matches);current=Array.from({length:current.length/2},(_,i)=>"");round++;}return built;}
  async function start(){
   setBusy(true);setNotice("");let participants=manual?ordered.map(q=>q.id):shuffle(pool).slice(0,desired).map(q=>q.id);
