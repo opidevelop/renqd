@@ -702,3 +702,13 @@ In tutte le varianti di Name ’Em All (Solo, Multiplayer condiviso e Multiplaye
 Gli aiuti devono essere utilizzabili direttamente nel modal e non devono rivelare automaticamente il nome, l'immagine a colori o altri dati non ancora sbloccati. I progressi degli aiuti restano visibili finché il modal è aperto; la lettera è progressiva secondo la registrazione server già prevista.
 
 Quando il Pokémon è già scoperto, il modal mostra sempre immagine, nome, numero Pokédex nazionale, tipi, descrizione Pokédex e comando per riprodurre il verso. Il modal e i relativi controlli devono essere condivisi e graficamente coerenti in tutte e tre le modalità.
+
+
+### Profilo integrato e navigazione Renq (26 novembre 2026)
+
+1. Il profilo principale presenta tre schede allo stesso livello: **Collezioni**, **Renq** e **Pokémon**.
+2. La scheda Pokémon integra l'archivio delle attività e le preferenze Pokémon già esistenti, mantenendone le funzionalità; le impostazioni personali e le azioni di eliminazione non vengono esposte nei profili altrui.
+3. I profili pubblici mostrano nella scheda Pokémon esclusivamente attività accessibili secondo le regole di visibilità già approvate e le verifiche di accesso Pokémon già esistenti.
+4. La lista dei Renq nel profilo è paginata, senza modificare ordinamento o contenuti dei risultati.
+5. La vecchia route `/profile/pokemon` non è più una pagina autonoma e reindirizza a `/profile?section=pokemon`.
+6. Le pagine di dettaglio dei Renq sotto `/r/[slug]` usano lo stesso PlatformShell autenticato, con header, navigazione laterale e menu mobile persistenti; la voce Renq resta attiva anche nei dettagli `/r/` e `/renq/`.
