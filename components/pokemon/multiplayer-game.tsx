@@ -152,7 +152,7 @@ export function PokemonNameEmAllMultiplayerGame({
     }
     if(typeof data.speciesId==="number"&&["CORRECT","CATALOG_COMPLETE","PLAYER_COMPLETE","ALL_COMPLETED"].includes(String(data.status))){
       setFound(current=>new Set(current).add(Number(data.speciesId)));
-      setConfirmed(true);setSelected(null);setHint(null);
+      setConfirmed(true);setSelected(null);
       refocusInput();
     }
     if(data.status==="WRONG"){
