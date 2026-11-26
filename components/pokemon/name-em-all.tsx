@@ -434,7 +434,7 @@ function Game({
       <div className="pokemon-nae-search-wrap">
         <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Pokémon non riconosciuto."?" is-wrong":"")}>
           <input ref={inputRef} value={query} onChange={event=>{const value=event.target.value;setQuery(value);setConfirmed(false);setMessage("");const normalized=normalizePokemonName(value);if(!normalized||paused||isFinishing)return;const match=findExactPokemonMatch(species,normalized);if(!match||isAmbiguousPokemonName(species,match,normalized))return;if(found.has(match.id)||queuedKeysRef.current.has(match.id)){setQuery("");setMessage("Hai già scoperto questo Pokémon!");return;}enqueuePokemonSubmission(match.name,match);}}
-            onKeyDown={event=>{if(event.key==="Enter"&&exactMatch&&exactMatchIsAmbiguous&&!paused&&!isFinishing){event.preventDefault();enqueuePokemonSubmission(exactMatch.name,exactMatch);}}}
+            onKeyDown={event=>{if(event.key==="Enter"&&exactMatch&&exactMatchIsAmbiguous&&!paused&&!isFinishing){event.preventDefault();if(found.has(exactMatch.id)||queuedKeysRef.current.has(exactMatch.id)){setQuery("");setMessage("Hai già scoperto questo Pokémon!");return;}enqueuePokemonSubmission(exactMatch.name,exactMatch);}}}
             placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false} disabled={paused||isFinishing}/>
           {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
           {pending&&<LoaderCircle size={15}/>}
