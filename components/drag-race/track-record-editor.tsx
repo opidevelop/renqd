@@ -20,7 +20,7 @@ export function TrackRecordEditor({recordId,title,visibility:initialVisibility,i
  const [error,setError]=useState("");
  const [visibility,setVisibility]=useState(initialVisibility);
  const [visibilitySaving,setVisibilitySaving]=useState(false);
- const [recordTitle,setRecordTitle]=useState(title);
+ const [recordTitle,setRecordTitle]=useState(title);const savedTitle=useRef(title);
  const [titleSaving,setTitleSaving]=useState(false);
  const [pendingRemoval,setPendingRemoval]=useState<PendingRemoval|null>(null);
  const [queenSearch,setQueenSearch]=useState("");
@@ -59,7 +59,7 @@ export function TrackRecordEditor({recordId,title,visibility:initialVisibility,i
  }
  async function updateTitle(){
   const nextTitle=recordTitle.trim();
-  if(!canEdit||!nextTitle||nextTitle===title)return;
+  if(!canEdit||!nextTitle||nextTitle===savedTitle.current)return;
   if(nextTitle.length>120){setError("Il titolo può contenere al massimo 120 caratteri.");setRecordTitle(title);return;}
   setTitleSaving(true);setError("");
   const {error:updateError}=await db.from("drag_race_track_records").update({title:nextTitle,updated_at:new Date().toISOString()}).eq("id",recordId);
