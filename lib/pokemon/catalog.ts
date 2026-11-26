@@ -63,6 +63,35 @@ export function normalizePokemonName(value: string): string {
     .toLocaleLowerCase("en").replace(/[^a-z0-9]+/g, "");
 }
 
+export function getPokemonSpeciesAliases(species: PokemonSpecies): string[] {
+  const aliases = species.normalizedAliases?.length
+    ? species.normalizedAliases
+    : [species.name, species.nameEn, species.slug, ...species.aliases].map(normalizePokemonName);
+  return [...new Set(aliases.map(normalizePokemonName).filter(Boolean))];
+}
+
+export function findExactPokemonMatch(
+  species: PokemonSpecies[],
+  normalizedQuery: string,
+): PokemonSpecies | null {
+  if (!normalizedQuery) return null;
+  return species.find((entry) => getPokemonSpeciesAliases(entry).includes(normalizedQuery)) ?? null;
+}
+
+export function isAmbiguousPokemonName(
+  species: PokemonSpecies[],
+  matchedSpecies: PokemonSpecies,
+  normalizedQuery: string,
+): boolean {
+  if (!normalizedQuery) return false;
+  return species.some((entry) =>
+    entry.id !== matchedSpecies.id &&
+    getPokemonSpeciesAliases(entry).some((alias) =>
+      alias.length > normalizedQuery.length && alias.startsWith(normalizedQuery),
+    ),
+  );
+}
+
 export function getPokemonCellKey(row: number, column: number): string {
   return "r" + (row + 1) + "-c" + (column + 1);
 }
