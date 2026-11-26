@@ -13,3 +13,6 @@ verify_jwt = false
 
 [functions.pokemon-catalog-sync]
 verify_jwt = true
+
+[functions.drag-race-catalog-sync]
+verify_jwt = true
