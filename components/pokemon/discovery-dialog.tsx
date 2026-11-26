@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AudioLines, BookOpen, Eye, HelpCircle, LoaderCircle, Type, X } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
 import type { PokemonSpecies } from "@/lib/pokemon/catalog";
-import { POKEMON_TYPE_LABELS } from "@/lib/pokemon/catalog" from "@/lib/pokemon/catalog";
+import { POKEMON_TYPE_LABELS } from "@/lib/pokemon/catalog";
 
 type LetterHint={nameLength:number;revealedPrefix:string;hintCount:number};
 type Props={selected:PokemonSpecies|null;discovered:boolean;spellingHelp:boolean;onClose:()=>void;onRevealLetter:()=>Promise<LetterHint|null>};
