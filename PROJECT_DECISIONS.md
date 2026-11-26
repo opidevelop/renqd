@@ -737,3 +737,20 @@ La progettazione approvata non autorizza a riaprire le decisioni consolidate. De
 4. I fatti sorgente (challenge winner, top/bottom, lipsync e informazioni di eliminazione) devono essere conservati separatamente dai placement PPE. Non trasformare un fatto in WIN/HIGH/SAFE/LOW/BTM2 senza una corrispondenza esplicita e non ambigua nella fonte.
 5. Un evento di eliminazione può essere precompilato come `ELIM` soltanto quando la fonte strutturata dichiara esplicitamente l'episodio di eliminazione. I placement non disponibili restano vuoti e modificabili.
 6. Non effettuare scraping o accesso automatizzato a Fandom senza autorizzazione scritta di Fandom. L'uso automatico di una fonte esterna deve rispettarne termini, licenza, attribuzione e limiti tecnici.
+
+## Precisazione vincolante — Track Record personale basato sulla struttura del catalogo (26 novembre 2026)
+
+Questa decisione aggiorna e prevale sulle precedenti formulazioni della specifica Track Record che parlavano di «schede ufficiali pre-create/precompilate», sincronizzazione dei placement, eliminazioni precompilate o vincitrici ufficiali (incluse le decisioni Track Record 3, 6 e 41 del handoff e le precedenti regole della pipeline dati).
+
+1. **Track Record non è un archivio di Track Record ufficiali.** È una funzionalità con cui ogni utente crea e gestisce le proprie Track Record.
+2. L'utente può partire dalla struttura di una stagione del catalogo Drag Race: franchise, titolo/numero/anno, contestant, episodi e challenge (Mini Challenge e Maxi Challenge); può essere incluso il titolo della canzone lipsync quando disponibile.
+3. Il catalogo ufficiale/community è usato esclusivamente come fonte di struttura. Non trasferire nella Track Record alcun risultato competitivo ufficiale.
+4. Tutti i placement di ogni episodio devono partire vuoti ed essere selezionati manualmente dall'utente. Questo include ELIM, WIN, HIGH, SAFE, LOW, TOP2, BTM e qualsiasi placement standard o custom.
+5. Non importare nella Track Record ranking finale, vincitrice della stagione, episodio/stato di eliminazione, quit, squalifiche, vincitrici challenge, top/bottom, partecipazioni/vittorie/eliminazioni lipsync o altri fatti competitivi. La vincitrice viene contrassegnata manualmente dall'utente.
+6. I fatti competitivi possono restare nel catalogo o nelle tabelle sorgente per altre funzionalità Drag Race, ma non devono precompilare o essere mostrati come risultati nella Track Record.
+7. I template sono modelli di struttura, non Track Record ufficiali. La copia crea una scheda indipendente dell'utente e deve azzerare difensivamente eventuali placement/winner legacy presenti nel template.
+8. La Hall of Fame Track Record si alimenta esclusivamente dalle vincitrici contrassegnate dagli utenti nelle proprie schede; non deve leggere le vincitrici ufficiali del catalogo.
+9. È ritirata l'importazione automatica dei placement da Wikipedia/MediaWiki o da altre fonti. Le celle vuote non equivalgono a SAFE e non contribuiscono al PPE.
+10. Il workbook «Copia di Drag Race.xlsx» non deve essere importato: sono escluse anche le sue 90 stagioni. La scala PPE del foglio `Punteggi` resta invece approvata come scala predefinita.
+
+La struttura della stagione resta precompilata e non richiede che l'utente ricrei manualmente contestant, episodi e challenge quando esistono nel catalogo. La libertà manuale riguarda i risultati competitivi.
