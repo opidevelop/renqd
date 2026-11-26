@@ -54,14 +54,20 @@ Questi fatti sono conservati separatamente dai placement PPE.
 
 ### Wikipedia / Wikimedia MediaWiki API
 
-Potenziale fonte complementare per le tabelle «Contestant progress» / risultati episodio, tramite API ufficiali MediaWiki. I contenuti testuali Wikipedia sono generalmente CC BY-SA 4.0, ma ogni progetto e pagina va verificato e l'attribuzione deve riportare titolo, autori, fonte e licenza, indicando le modifiche. L'integrazione automatica richiede:
-- ricerca e conferma della pagina corretta per ogni stagione;
-- parser robusto delle tabelle, con test su formati diversi;
-- associazione dei nomi alle Queen tramite ID/alias e revisione dei casi ambigui;
-- conservazione URL, revisione e licenza;
-- nessuna sovrascrittura automatica dei dati verificati manualmente.
+Fonte complementare implementata tramite API ufficiali MediaWiki e REST HTML, limitata a Wikipedia in lingua inglese. I contenuti testuali sono generalmente CC BY-SA 4.0; la UI conserva e mostra titolo, autori (attribuzione collettiva «Wikipedia contributors»), URL alla revisione, identificativo e licenza, indicando anche le trasformazioni effettuate.
 
-**Stato:** ricerca tecnica avviata; parser e sincronizzazione placement non ancora implementati. Non dichiarare completi i placement finché questa integrazione non è verificata.
+**Edge Function:** `drag-race-track-record-wikipedia-sync` (JWT obbligatorio, staff-only), batch massimo 5 stagioni per chiamata. Cerca una pagina con titolo coerente con franchise/stagione, legge la tabella «Contestant progress», espande celle con rowspan/colspan, abbina Queen per nome/alias e normalizza soltanto i codici riconosciuti.
+
+Regole di importazione:
+- WIN, HIGH, HIGH TEAM, SAFE, LOW, TOP2 ed ELIM vengono mappati solo se esiste la relativa chiave PPE;
+- BTM viene convertito in BTM2 soltanto quando esattamente due Queen abbinate risultano BTM nello stesso episodio;
+- codici non riconosciuti, pagine ambigue, tabelle assenti e Queen non abbinate non vengono inventati o forzati;
+- i placement già presenti nel template (per esempio ELIM proveniente dal catalogo) non vengono sovrascritti;
+- ogni tentativo viene registrato con stato, così la UI può procedere a batch senza ripetere le stesse pagine.
+
+La UI Track Record mostra il comando «Recupera placement da Wikipedia» soltanto a OWNER, ADMIN e MODERATOR. Ogni chiamata aggiorna al massimo 5 template e comunica gli esiti. Il parser è una prima versione conservativa: i dati importati devono ancora essere confrontati con un campione reale di stagioni prima di dichiarare completa la copertura dei placement.
+
+**Stato:** Edge Function distribuita ACTIVE v1; collaudo reale su un account staff e sulle pagine recuperate ancora da eseguire.
 
 ### Fandom
 
