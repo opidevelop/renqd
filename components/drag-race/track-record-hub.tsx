@@ -44,7 +44,7 @@ export function TrackRecordHub({userId,templates,records,franchiseNames,hallOfFa
  async function copyTemplate(template:Template){
   setBusy(template.id);setNotice("");
   const episodes=template.episodes.map(ep=>({...ep}));
-  const queens=template.queens.map(queen=>({id:queen.id,name:queen.name,image_url:queen.image_url??null,winner:false,results:episodes.map(ep=>({episode:ep.number,placement:null})),ppe_episode_numbers:episodes.filter(ep=>ep.counts_for_ppe!==false).map(ep=>ep.number)}));
+  const queens=template.queens.map(queen=>{const catalogQueen=catalogQueens.find(item=>item.id===queen.id);return {id:queen.id,name:catalogQueen?.name??queen.name,image_url:catalogQueen?.image_url??queen.image_url??null,winner:false,results:episodes.map(ep=>({episode:ep.number,placement:null})),ppe_episode_numbers:episodes.filter(ep=>ep.counts_for_ppe!==false).map(ep=>ep.number)};});
   const source=template.source_metadata??{};
   const record_data={franchise_code:template.franchise_code,season_number:template.season_number,year:template.year,episodes,queens,source_template_id:template.id,source_metadata:{source_id:source.source_id,source_version:source.source_version,source_url:source.source_url,generated_at:source.generated_at,placement_mode:"MANUAL"},custom_placements:[]};
   const {data,error}=await db.from("drag_race_track_records").insert({owner_id:userId,season_id:template.season_id,title:template.display_title,visibility:"PUBLIC",record_data,is_official:false}).select("id").single();
