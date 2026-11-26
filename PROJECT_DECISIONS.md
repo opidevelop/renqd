@@ -753,4 +753,4 @@ Questa decisione aggiorna e prevale sulle precedenti formulazioni della specific
 9. È ritirata l'importazione automatica dei placement da Wikipedia/MediaWiki o da altre fonti. Le celle vuote non equivalgono a SAFE e non contribuiscono al PPE.
 10. Il workbook «Copia di Drag Race.xlsx» non deve essere importato: sono escluse anche le sue 90 stagioni. La scala PPE del foglio `Punteggi` resta invece approvata come scala predefinita.
 
-La struttura della stagione resta precompilata e non richiede che l'utente ricrei manualmente contestant, episodi e challenge quando esistono nel catalogo. La libertà manuale riguarda i risultati competitivi.
+La struttura della stagione resta precompilata e non richiede che l'utente ricrei manualmente contestant, episodi e challenge quando esistono nel catalogo. La libertà manuale riguarda i risultati competitivi. Questa precisazione riguarda esclusivamente la modalità Track Record e non modifica il Season Simulator o i risultati generati dalle sue simulazioni.
