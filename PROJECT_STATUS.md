@@ -2097,3 +2097,13 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Il workbook contiene anche 86 formule PPE manuali che non sono tutte coerenti con la tabella Punteggi; la tabella Punteggi resta la fonte dei punteggi predefiniti per i nuovi calcoli, mentre i valori PPE preesistenti del workbook sono dati storici e non vengono assunti come regola generale.
 - Applicata a Supabase la migrazione `20261126125909_drag_race_track_record_scoring_and_templates`: tabella scoring con RLS e tabella `drag_race_track_record_templates` predisposta per i 90 fogli ufficiali. La migrazione corrispondente è presente su `main`. Una seconda migrazione riallinea due chiavi che differiscono solo per spaziatura, mantenendo il matching fedele al testo originale.
 - Import dei 90 template, UI Track Record, modifica/autosave, Hall of Fame, commenti, esportazioni e collaudo restano da implementare. Non dichiarare completato Track Record.
+
+
+### Track Record — primo flusso UI (26 novembre 2026)
+
+- Aggiunta la route autenticata `/drag-race/track-record`: archivio dei template ufficiali e schede personali dell'utente. I template possono essere copiati in una scheda proprietaria, senza modificare il modello condiviso.
+- Aggiunta la route `/drag-race/track-record/[id]` con tabella episodi, selettori di placement, PPE calcolato dalle regole DB e autosave dopo ogni modifica. Le schede altrui accessibili in pubblico sono mostrate in sola lettura.
+- Aggiunto il motore condiviso `lib/drag-race/track-record.ts`: calcolo PPE con matching testuale esatto, ordinamento Queen attive per PPE decrescente, sezione eliminate in ordine di eliminazione e posizione ricalcolata.
+- Collegato Track Record dall'hub Drag Race e caricato il foglio di stile responsive.
+- Verifica database: 25 chiavi di scoring distinte presenti; RLS e FORCE RLS attivi sia sulla tabella scoring sia sulla tabella template. I template ufficiali sono ancora 0: il contenuto dei 90 fogli Excel non è stato ancora importato nella tabella.
+- Il commit applicativo più recente è `9e827af865b7e98d01fa7c43628e9c24b18c2da5`. Il check Vercel risulta fallito per il limite giornaliero di build (`build-rate-limit`); non è stato avviato un nuovo deployment. Nessuna build TypeScript/Next.js di questo gruppo è quindi verificata.
