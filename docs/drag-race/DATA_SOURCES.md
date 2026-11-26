@@ -65,7 +65,7 @@ Regole di importazione:
 - i placement già presenti nel template (per esempio ELIM proveniente dal catalogo) non vengono sovrascritti;
 - ogni tentativo viene registrato con stato, così la UI può procedere a batch senza ripetere le stesse pagine.
 
-La UI Track Record mostra il comando «Recupera placement da Wikipedia» soltanto a OWNER, ADMIN e MODERATOR. Ogni chiamata aggiorna al massimo 5 template e comunica gli esiti. Il parser è una prima versione conservativa: i dati importati devono ancora essere confrontati con un campione reale di stagioni prima di dichiarare completa la copertura dei placement.
+La UI Track Record mostra il comando «Recupera placement da Wikipedia» soltanto a OWNER, ADMIN e MODERATOR. Ogni chiamata aggiorna al massimo 5 template e comunica gli esiti. I tentativi non riusciti vengono ripetuti dopo 30 giorni; errori temporanei HTTP non vengono registrati come pagine mancanti. I placement importati da Wikipedia possono essere aggiornati ai successivi tentativi, mentre quelli provenienti dal catalogo restano prioritari. Il parser è coperto da test automatici per intestazioni con rowspan/colspan, alias, codici sconosciuti e alias ambigui. Il parser è una prima versione conservativa: i dati importati devono ancora essere confrontati con un campione reale di stagioni prima di dichiarare completa la copertura dei placement.
 
 **Stato:** Edge Function distribuita ACTIVE v1; collaudo reale su un account staff e sulle pagine recuperate ancora da eseguire.
 
