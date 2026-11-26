@@ -4,7 +4,6 @@ import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import { PlatformShell } from "@/components/platform-shell";
 import { PokemonDailyFrames } from "@/components/pokemon/daily-frames";
 import "../(platform)/platform.css";
-import "../(platform)/renqd-identity.css";
 import "../(platform)/multiplayer.css";
 import "../(platform)/profile-phase5.css";
 import "../(platform)/inbox.css";
