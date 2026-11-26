@@ -672,3 +672,19 @@ Le seguenti richieste sono nuove rifiniture esplicitamente richieste dall'utente
 12. Le decisioni storiche non più attive devono essere trasferite in un archivio separato, mantenendo nel documento attivo soltanto le regole vigenti. L'archivio deve distinguere decisioni superate, duplicate/accorpate e rimosse, indicando la motivazione e l'eventuale decisione sostitutiva.
 
 13. L'eccezione al riconoscimento automatico istantaneo si applica esclusivamente ai nomi completi che costituiscono anche un prefisso normalizzato di almeno un altro nome Pokémon valido nel catalogo attivo. Solo per tali nomi ambigui, la conferma del nome più breve richiede un'azione esplicita (ad esempio Invio o selezione del suggerimento); se l'utente continua a digitare, il nome più lungo viene riconosciuto immediatamente al completamento. Per tutti gli altri Pokémon resta invariato il comportamento già approvato: riconoscimento automatico istantaneo al completamento del nome, senza Invio, suggerimenti obbligatori, debounce o ritardi. La verifica delle collisioni deve essere dinamica sul catalogo e sugli alias effettivamente attivi, non basata su una lista manuale di eccezioni. Questa regola è identica in Solo, multiplayer individuale e multiplayer condiviso.
+
+
+## Decisioni approvate — Daily Red e rifiniture Name ’Em All (26 novembre 2026)
+
+### Daily Red
+1. Aggiungere nell'hub Pokémon una nuova modalità quotidiana denominata **Daily Red**, separata da Doku e Connections.
+2. La modalità riprende il gioco disponibile su `https://daily-red.com/` e lo incorpora tramite iframe, senza ricreare il gioco in Renqd.
+3. Deve essere disponibile anche il collegamento per aprire il gioco esterno in una nuova scheda.
+4. Il suo stato Fatto/Non fatto è indipendente da Doku e Connections e viene conservato nel registro giornaliero Renqd con il codice `DAILY_RED`.
+
+### Name ’Em All — dettagli non scoperti
+1. In Solo, aprire la scheda di un Pokémon non scoperto non deve mostrare nome, artwork o altri dettagli che rivelino la risposta. Deve mostrare esclusivamente gli aiuti ortografici disponibili.
+2. Dopo la scoperta, la scheda Pokémon continua a mostrare nome, artwork, numero/tipo se configurati e forme associate come già previsto.
+3. In tutte le modalità, le specie non scoperte mostrano `???` sotto la Poké Ball o la silhouette, mai la dicitura «Pokémon».
+4. Le sezioni speciali (Mega, Leggendari, Mitici, Ultracreature, Paradosso) devono essere comprimibili/espandibili indipendentemente dalle sezioni generazionali, in Solo, multiplayer individuale e multiplayer condiviso.
+5. I pulsanti dei modal di gioco devono avere contrasto esplicito e uniforme tra testo e sfondo, in particolare i modal di pausa e gli aiuti multiplayer.
