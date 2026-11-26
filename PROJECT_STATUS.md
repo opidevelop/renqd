@@ -2066,7 +2066,8 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Approvata dall'utente la specifica funzionale finale Drag Race v1.0; autorizzata l'implementazione su `main`.
 - Create le tabelle Supabase `drag_race_franchises`, `drag_race_queens`, `drag_race_seasons`, `drag_race_episodes`, `drag_race_lipsyncs`, `drag_race_catalog_sync_state`, `drag_race_sessions` e `drag_race_results`.
 - Abilitata e forzata RLS sulle tabelle Drag Race; catalogo in lettura per account approvati; stato sincronizzazione leggibile dagli account approvati; sincronizzazione riservata a OWNER/ADMIN/MODERATOR.
-- Create le RPC `drag_race_claim_catalog_sync`, `drag_race_create_session` e `drag_race_update_session`. Le sessioni sono proprietarie; l'aggiornamento terminale genera il risultato aggregato.
+- Create le RPC `drag_race_claim_catalog_sync`, `drag_race_create_session`, `drag_race_update_session` e `drag_race_record_guess_them_all`. Le sessioni sono proprietarie; l'aggiornamento terminale genera il risultato aggregato; Guess Them All aggiorna statistiche aggregate senza creare sessioni singole.
+- Create le tabelle `drag_race_track_records` e `drag_race_saved_seasons` con RLS: record modificabili dal proprietario e stagioni salvate in sola lettura dopo l'inserimento.
 - Deploy Edge Function `drag-race-catalog-sync` attiva con JWT obbligatorio. Importa il pacchetto MIT `tkalejandro/drag-race-mcp` versione 1.1.1, controlla la completezza del pacchetto, importa franchise/Queen/stagioni/episodi/lipsync e risolve artista/preview tramite iTunes Search API.
 - Il catalogo non è ancora stato sincronizzato: occorre eseguire una volta il comando «Sincronizza catalogo» dall'hub con un account staff. Le immagini Queen non sono incluse nel pacchetto; è stato aggiunto un lookup Commons limitato a immagini CC0/Public Domain con avatar SVG di fallback.
 - Attribuzione e licenza MIT aggiunte in `/attributions` e `public/licenses/drag-race-mcp-MIT.txt`.
