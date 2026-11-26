@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import {
   GENERATION_LABELS, POKEMON_TYPE_LABELS, POKEMON_TYPES,
-  PokemonCatalog, PokemonSpecies, normalizePokemonName,
+  PokemonCatalog, PokemonSpecies, normalizePokemonName, findExactPokemonMatch, isAmbiguousPokemonName,
 } from "@/lib/pokemon/catalog";
 import { getPokemonTypeIconUrl } from "@/lib/pokemon/type-icons";
 import {
@@ -251,11 +251,9 @@ function Game({
     return()=>observer.disconnect();
   },[sectionIdsKey]);
 
-  const exactMatch=useMemo(()=>{
-    const normalized=normalizePokemonName(query);
-    if(!normalized)return null;
-    return species.find(item=>[item.name,item.nameEn,item.slug,...item.aliases].some(name=>normalizePokemonName(name)===normalized))??null;
-  },[species,query]);
+  const normalizedQuery=normalizePokemonName(query);
+  const exactMatch=useMemo(()=>findExactPokemonMatch(species,normalizedQuery),[species,normalizedQuery]);
+  const exactMatchIsAmbiguous=Boolean(exactMatch&&isAmbiguousPokemonName(species,exactMatch,normalizedQuery));
   const percent=species.length?Math.round(found.size/species.length*100):0;
   const completedGenerations=config.generations.filter(generation=>{
     const generationSpecies=baseSpecies.filter(item=>item.generation===generation);
@@ -351,7 +349,7 @@ function Game({
   },[pending,paused,soundEnabled,session.id,finish]);
   useEffect(()=>{
     const normalized=normalizePokemonName(query);
-    if(!normalized||!exactMatch||pending||paused||isFinishing)return;
+    if(!normalized||!exactMatch||exactMatchIsAmbiguous||pending||paused||isFinishing)return;
     if(autoSubmitRef.current===normalized)return;
     autoSubmitRef.current=normalized;
     if(found.has(exactMatch.id)){
@@ -360,7 +358,7 @@ function Game({
       return;
     }
     void submit(exactMatch.name,exactMatch);
-  },[query,exactMatch,pending,paused,isFinishing,found,submit]);
+  },[query,exactMatch,exactMatchIsAmbiguous,pending,paused,isFinishing,found,submit]);
 
   useEffect(()=>{
     if(!pauseOverlay&&!confirmExit&&!confirmDelete)return;
@@ -446,6 +444,7 @@ function Game({
       <div className="pokemon-nae-search-wrap">
         <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Pokémon non riconosciuto."?" is-wrong":"")}>
           <input ref={inputRef} value={query} onChange={event=>{autoSubmitRef.current="";setQuery(event.target.value);setConfirmed(false);setMessage("");}}
+            onKeyDown={event=>{if(event.key==="Enter"&&exactMatch&&exactMatchIsAmbiguous&&!pending&&!paused&&!isFinishing){event.preventDefault();void submit(exactMatch.name,exactMatch);}}}
             placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false} disabled={paused||isFinishing}/>
           {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
           {pending&&<LoaderCircle size={15}/>}
