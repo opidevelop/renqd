@@ -25,7 +25,7 @@ export type TrackRecordData = {
   episodes: TrackRecordEpisode[];
   queens: TrackRecordQueen[];
   custom_placements?: Array<{ placement_key: string; label: string; score: number; color: string }>;
-  source_metadata?: { source_id?: string; source_version?: string; source_url?: string; placement_completeness?: string; placement_note?: string; wikimedia_status?: string; wikimedia_attempted_at?: string; wikimedia_page_title?: string; wikimedia_source_url?: string; wikimedia_revision_id?: number | null; wikimedia_revision_timestamp?: string | null; wikimedia_license?: string; wikimedia_license_url?: string };
+  source_metadata?: { source_id?: string; source_version?: string; source_url?: string; placement_completeness?: string; placement_note?: string; wikimedia_status?: string; wikimedia_attempted_at?: string; wikimedia_page_title?: string; wikimedia_source_url?: string; wikimedia_revision_id?: number | null; wikimedia_revision_timestamp?: string | null; wikimedia_license?: string; wikimedia_license_url?: string; wikimedia_author?: string; wikimedia_modifications?: string };
 };
 const rankNumber = (value?: string | null) => {
   if (!value) return Number.MAX_SAFE_INTEGER;
