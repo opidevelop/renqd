@@ -24,7 +24,7 @@ export function DragRaceProfileArchive({username,stats,sessions,results,savedSea
   const orphanResults:HistoryItem[]=results.filter(r=>!r.session_id||!sessionIds.has(r.session_id)).map(r=>({id:r.id,mode:r.mode,title:modeLabel(r.mode),status:"COMPLETED",date:r.completed_at,score:r.score,wins:r.wins,losses:r.losses,errors:r.errors,hints:r.hints,duration:r.duration_seconds,accuracy:r.accuracy,summary:object(r.summary),savedSeasonId:null}));
   return [...sessionItems,...orphanResults].sort((a,b)=>new Date(b.date).getTime()-new Date(a.date).getTime());
  },[sessions,results,resultBySession,sessionIds]);
- const aggregateStarted=stats.reduce((sum,x)=>sum+x.games_started,0);const aggregateCompleted=stats.reduce((sum,x)=>sum+x.games_completed,0);const totalGames=history.length+aggregateStarted;const completed=history.filter(x=>x.status==="COMPLETED").length+aggregateCompleted;const totalWins=history.reduce((sum,x)=>sum+x.wins,0);const totalGuessed=stats.reduce((sum,x)=>sum+x.queen_guessed_total,0);
+ const aggregateStats=stats.filter(x=>x.franchise_code==="ALL"||!x.franchise_code);const aggregateStarted=aggregateStats.reduce((sum,x)=>sum+x.games_started,0);const aggregateCompleted=aggregateStats.reduce((sum,x)=>sum+x.games_completed,0);const totalGames=Math.max(history.length,aggregateStarted);const completed=Math.max(history.filter(x=>x.status==="COMPLETED").length,aggregateCompleted);const totalWins=history.reduce((sum,x)=>sum+x.wins,0);const totalGuessed=aggregateStats.filter(x=>x.mode==="GUESS_THEM_ALL").reduce((sum,x)=>sum+x.queen_guessed_total,0);
  const badges=[
   totalGames>0?{name:"First Slay",desc:"Prima partita registrata",icon:Trophy}:null,
   completed>=5?{name:"Regular Player",desc:"5 partite completate",icon:CheckCircle2}:null,
