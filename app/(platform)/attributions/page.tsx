@@ -38,6 +38,20 @@ const sources = [
     attribution: "Foto di Patrick Finnegan (Flickr: vax-o-matic), 10 settembre 2017. Il ritaglio è stato pubblicato su Wikimedia Commons.",
   },
   {
+    name: "Fotografia di riserva Drag Race — Trixie Mattel",
+    description: "Immagine di riserva utilizzata nelle card promozionali Drag Race di Renqd quando il ritratto principale non è disponibile.",
+    url: "https://commons.wikimedia.org/wiki/File:Trixie_Mattel_%2849171875887%29_%28cropped%29.jpg",
+    license: "Creative Commons Attribution 2.0 Generic (CC BY 2.0).",
+    attribution: "Foto di SeeBee2189 (Flickr), 6 settembre 2019. Il ritaglio è pubblicato su Wikimedia Commons.",
+  },
+  {
+    name: "Fotografia di riserva Drag Race — Monét X Change",
+    description: "Immagine di riserva utilizzata nelle card promozionali Drag Race di Renqd quando il ritratto principale non è disponibile.",
+    url: "https://commons.wikimedia.org/wiki/File:Wtw2019_monet_%28cropped%29.jpg",
+    license: "Creative Commons CC0 1.0 Universal (Public Domain Dedication).",
+    attribution: "Foto di Armadillopteryx, Monét X Change durante Werq the World 2019. Immagine rilasciata con dedica CC0 1.0.",
+  },
+  {
     name: "Fotografie Drag Race — Naomi Smalls",
     description: "Fotografia utilizzata nelle card promozionali Drag Race di Renqd.",
     url: "https://commons.wikimedia.org/wiki/File:Naomi_Smalls_at_Rupaul's_Dragcon_2017_by_dvsross.jpg",
