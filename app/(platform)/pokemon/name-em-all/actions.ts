@@ -13,7 +13,7 @@ async function getRpcClient() {
   return { user, client: supabase };
 }
 
-export async function setPokemonDailyCompletionAction(gameMode: "DOKU" | "CONNECTIONS", completed: boolean) {
+export async function setPokemonDailyCompletionAction(gameMode: "DOKU" | "CONNECTIONS" | "DAILY_RED", completed: boolean) {
   const { user, client } = await getRpcClient();
   if (!user || !client) return { ok: false, error: "Devi accedere a Renqd." };
   const { data, error } = await client.rpc("renqd_pokemon_daily_set_completion", {
@@ -21,7 +21,7 @@ export async function setPokemonDailyCompletionAction(gameMode: "DOKU" | "CONNEC
   });
   if (error || !data || typeof data !== "object") return { ok: false, error: error?.message ?? "Stato non aggiornato." };
   revalidatePath("/pokemon");
-  revalidatePath(gameMode === "DOKU" ? "/pokemon/doku" : "/pokemon/connections");
+  revalidatePath(gameMode === "DOKU" ? "/pokemon/doku" : gameMode === "CONNECTIONS" ? "/pokemon/connections" : "/pokemon/daily-red");
   return { ok: true, completed };
 }
 
