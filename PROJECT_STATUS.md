@@ -2032,3 +2032,13 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Corretto il controllo spellingHelp in Solo: le sessioni storiche prive della proprietà esplicita non disabilitano più il pulsante; viene disabilitato soltanto quando il valore è false.
 - Aggiunti stili dedicati responsive e coerenti con la palette del modal Renqd.
 - Da verificare nel browser autenticato: click lettera in Solo, progressione su più click, caricamento descrizione PokeAPI, riproduzione audio e comportamento mobile. La build Production deve essere controllata prima di considerare pubblicato il gruppo.
+
+
+### Profilo integrato e layout dei Renq — lavoro in corso (26 novembre 2026)
+
+- Il profilo proprietario ora dispone delle schede Collezioni, Renq e Pokémon. L'archivio Pokémon e le preferenze sono renderizzati nella nuova scheda, senza duplicare la pagina dedicata.
+- La lista dei Renq del profilo proprietario mostra sei elementi per pagina con controlli precedente/successiva.
+- Il profilo pubblico espone le stesse tre schede; la scheda Pokémon usa l'archivio in sola lettura e filtra i risultati con le regole di visibilità esistenti e la RPC di accesso Name ’Em All.
+- `/profile/pokemon` reindirizza a `/profile?section=pokemon`; il profilo legge il parametro per aprire direttamente la scheda corretta.
+- `/r/[slug]` è ora avvolta nel PlatformShell autenticato, con gli stessi fogli di stile principali, header, sidebar e menu mobile. Il menu evidenzia Renq nelle route `/r/` e `/renq/`.
+- Non è stato avviato alcun deployment manuale. Restano da eseguire build, test UI autenticati desktop/mobile, verifica dei casi di privacy per profili pubblici/privati e test di navigazione/cronologia prima del rilascio.
