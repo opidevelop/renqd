@@ -1947,3 +1947,33 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - La build Next.js/TypeScript è completata. Non equivale ancora a un test end-to-end autenticato: restano da provare in browser Mew → Mewtwo, più risposte rapide consecutive, rollback dopo errore e persistenza dopo refresh nelle tre modalità.
 - Il provider PokeDoku resta esterno e cross-origin. Il contenitore Renqd monta l'iframe sulla route corretta, ma non è stato possibile ispezionare il DOM o gli errori runtime interni al provider; non è stata introdotta una modifica speculativa al gioco esterno.
 - Restano da completare il redesign della pagina `/profile/pokemon`, lo standard condiviso per tutti i modal, la diagnosi browser autenticata di PokeDoku e l'archivio delle decisioni storiche.
+
+
+## 2026-11-26 — Profilo Pokémon, standard condiviso dei modal e archivio decisioni
+
+### Profilo Pokémon
+- Ridisegnata la presentazione di `/profile/pokemon` con hero Trainer Profile, identità Allenatore, scorciatoie alle due modalità e sistema visivo coordinato blu notte/azzurro/avorio con accenti Renqd.
+- Riordinati i blocchi: statistiche e archivio attività prima delle preferenze di privacy/notifica.
+- Non sono state rimosse funzionalità: filtri, ordinamento, partite recenti, lista completa, gestione risultati, preferenze privacy, notifiche e utenti bloccati restano collegati agli stessi dati e azioni.
+
+### Standard condiviso dei modal
+- Creato `components/ui/dialog.tsx`: portal su `document.body`, overlay centrato e adattivo, blocco scroll, focus iniziale, focus trap, Escape, chiusura da backdrop, ripristino focus/scroll e gestione di dialog annidati.
+- `components/confirm-dialog.tsx` ora usa il componente condiviso.
+- Migrati allo standard condiviso i modal individuati in Name ’Em All Solo e multiplayer (scheda Pokémon, pausa, uscita, terminazione), archivio profilo Pokémon, Ultimate Favourite, social dei risultati, liste follower/following e segnalazione Renq.
+- Aggiunti gli stili base globali per i nuovi modal, così i prossimi possono riutilizzare lo stesso componente senza reimplementare gestione focus e scroll.
+- La ricognizione ha coperto i componenti interattivi individuati nel repository; resta una verifica finale delle eventuali superfici secondarie e dei comportamenti in viewport mobile.
+
+### Archivio delle decisioni
+- Creato `PROJECT_DECISIONS_ARCHIVE.md`.
+- Trasferita nell'archivio la prima formulazione dell'animazione di caricamento «Breathing Star + Morphing Star», esplicitamente superata dalla revisione approvata il 24 novembre.
+- Nel registro attivo `PROJECT_DECISIONS.md` resta la sola decisione sostitutiva. Le decisioni precedenti ancora valide non sono state archiviate solo per anzianità.
+
+### PokeDoku — diagnosi
+- Verificato il flusso Renqd: `PokemonDailyFrames` monta l'iframe sulla route `/pokemon/doku`, la mantiene persistente dopo la prima visita e la mostra solo sulla route attiva. La toolbar include già il collegamento al provider originale.
+- L'iframe è cross-origin: dal codice Renqd non è possibile leggere il DOM, lo stato React o gli errori JavaScript interni di PokeDoku. In questa sessione non è disponibile un browser con estensione collegata per ispezionare Console/Network del client.
+- Non è stata modificata la logica del provider né aggiunta una soluzione speculativa. La causa del loader interno infinito resta da verificare in un browser reale; distinguere caricamento documento, inizializzazione JS e storage/cookie di terza parte.
+
+### Verifiche e rilascio
+- Ultimo deployment codice verificato READY: `dpl_4CdF2xb6sAZsu61S9jUNq7qrqJ8t`, commit `5be10a2cc9ca62aa441ee47ac3c051aa2fd2f01f`.
+- Dopo quel deployment sono stati aggiornati soltanto i documenti di progetto e l'archivio decisioni; verificare il deployment associato al commit documentale più recente.
+- Restano necessari test E2E autenticati per coda rapida, collisioni (Mew/Mewtwo), rollback e persistenza dopo refresh in tutte le modalità, oltre al collaudo visivo mobile/desktop dei modal e della pagina profilo.
