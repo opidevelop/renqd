@@ -40,3 +40,7 @@
 .drag-queen-season-badges span,.drag-queen-season-metrics span{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:999px;background:var(--surface-2,rgba(120,110,100,.1));font-size:10px;color:var(--muted,#8b8580)}
 .drag-queen-season-badges .is-winner{color:#d97745;background:rgba(217,119,69,.1);font-weight:700}
 @media(max-width:760px){.drag-queen-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.drag-queen-profile-head{gap:14px}.drag-queen-profile-head>img{width:108px;height:108px;border-radius:18px}}
+
+.drag-track-visibility{display:inline-flex;align-items:center;gap:7px;margin-right:12px;font-size:11px}
+.drag-track-visibility label{color:var(--muted,#8b8580)}
+.drag-track-visibility select{border:1px solid var(--line,rgba(120,110,100,.25));border-radius:999px;background:var(--surface,transparent);color:var(--foreground,#292522);padding:5px 9px;font-size:11px}
