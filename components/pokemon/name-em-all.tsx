@@ -311,7 +311,11 @@ function Game({
   },[deadline,paused,isFinishing,finish,unlimited]);
 
   const processQueuedSubmission=useCallback(async(answer:string,optimisticSpecies:PokemonSpecies)=>{
-    const result=await submitNameEmAllAnswerAction(session.id,answer);
+    let result:Awaited<ReturnType<typeof submitNameEmAllAnswerAction>>;
+    try{result=await submitNameEmAllAnswerAction(session.id,answer);}catch{
+      setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
+      setConfirmed(false);setMessage("Connessione interrotta: risposta non registrata.");return;
+    }
     if(!result.ok){
       setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
       setConfirmed(false);setMessage(result.error??"Risposta non registrata.");return;
