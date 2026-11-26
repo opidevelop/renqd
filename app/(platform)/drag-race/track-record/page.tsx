@@ -11,7 +11,7 @@ export default async function TrackRecordPage(){
   db.from("drag_race_franchises").select("code,name"),
   db.from("profiles").select("role,status").eq("id",user.id).maybeSingle(),
   db.from("drag_race_seasons").select("id,franchise_code,season_number,year,name,winner_ids").order("franchise_code").order("season_number"),
-  db.from("drag_race_queens").select("id,name,image_url").range(0,4999),
+  db.from("drag_race_queens").select("id,name,aliases,image_url").range(0,4999),
   db.from("drag_race_track_records").select("id,owner_id,title,visibility,record_data").is("season_id",null).is("deleted_at",null)
  ]);
  const franchiseNames=Object.fromEntries((f.data??[]).map(x=>[x.code,x.name]));
@@ -28,5 +28,5 @@ export default async function TrackRecordPage(){
   for(const queen of recordData.queens??[])if(queen.winner){const catalogQueen=queen.id?queenById.get(queen.id):null;hallOfFame.push({id:record.id+":"+(queen.id??queen.name),queenId:catalogQueen?.id??null,queenName:queen.name,imageUrl:queen.image_url??catalogQueen?.image_url??null,franchiseCode:recordData.franchise_code??"CUSTOM",seasonNumber:recordData.season_number??null,year:recordData.year??null,seasonTitle:record.title,isOfficial:false,recordId:record.id});
   }
  }
- return <TrackRecordHub userId={user.id} templates={t.data??[]} records={r.data??[]} franchiseNames={franchiseNames} canSync={canSync} hallOfFame={hallOfFame}/>;
+ return <TrackRecordHub userId={user.id} templates={t.data??[]} records={r.data??[]} franchiseNames={franchiseNames} canSync={canSync} hallOfFame={hallOfFame} catalogQueens={queens.data??[]}/>;
 }
