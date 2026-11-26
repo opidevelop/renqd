@@ -143,7 +143,7 @@
 .drag-track-export-actions button:hover{border-color:var(--accent,#d94d8a);color:var(--accent,#d94d8a)}
 .drag-track-export-actions button:disabled{opacity:.5;cursor:not-allowed}
 .drag-track-export-actions button.is-danger{color:#b83b45}
-.drag-track-stats-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:16px 0 10px}
+.drag-track-stats-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin:16px 0 10px}
 .drag-track-stats-grid article{display:flex;flex-direction:column;gap:3px;padding:12px;border:1px solid var(--border,#e4e4e4);border-radius:10px;background:var(--surface,#fff)}
 .drag-track-stats-grid strong{font-size:20px;font-weight:750;color:var(--text-primary,#222);font-variant-numeric:tabular-nums}
 .drag-track-stats-grid span{font-size:10px;color:var(--text-secondary,#777)}
