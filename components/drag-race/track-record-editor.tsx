@@ -86,13 +86,13 @@ export function TrackRecordEditor({recordId,title,visibility:initialVisibility,i
  }
  async function toggleEpisodePpe(episode:number,counts:boolean){
   if(!canEdit)return;
-  const next:TrackRecordData={...dataRef.current,episodes:dataRef.current.episodes.map(ep=>ep.number===episode?{...ep,counts_for_ppe:counts}:ep)};
+  const base=dataRef.current;const next:TrackRecordData={...base,episodes:base.episodes.map(ep=>ep.number===episode?{...ep,counts_for_ppe:counts}:ep),queens:base.queens.map(q=>{const eligible=q.ppe_episode_numbers??base.episodes.filter(ep=>ep.counts_for_ppe!==false).map(ep=>ep.number);return {...q,ppe_episode_numbers:counts?[...new Set([...eligible,episode])]:eligible.filter(number=>number!==episode)};})};
   await persistData(next);
  }
  async function addEpisode(){
   if(!canEdit||dataRef.current.episodes.length>=50)return;
   const number=Math.max(0,...dataRef.current.episodes.map(ep=>ep.number))+1;
-  const next:TrackRecordData={...dataRef.current,episodes:[...dataRef.current.episodes,{number,title:"Episodio "+number,counts_for_ppe:true}],queens:dataRef.current.queens.map(q=>({...q,results:[...q.results,{episode:number,placement:null}]}))};
+  const next:TrackRecordData={...dataRef.current,episodes:[...dataRef.current.episodes,{number,title:"Episodio "+number,counts_for_ppe:true}],queens:dataRef.current.queens.map(q=>({...q,results:[...q.results,{episode:number,placement:null}],ppe_episode_numbers:[...new Set([...(q.ppe_episode_numbers??dataRef.current.episodes.filter(ep=>ep.counts_for_ppe!==false).map(ep=>ep.number)),number])]}))};
   await persistData(next);
  }
  function requestRemoveQueen(key:string){setPendingRemoval({type:"queen",key});}
