@@ -53,7 +53,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     if(!visible)return null;
     if(item.mode==="POKEMON_NAME_EM_ALL"){
       const {data:canView}=await supabase.rpc("renqd_pokemon_name_em_all_can_view",{p_ranking_id:item.id});
-      if(!canView)return null;
+      if(!isOwner&&!canView)return null;
     }
     return item;
   }));
