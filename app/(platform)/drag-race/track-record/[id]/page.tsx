@@ -6,7 +6,8 @@ export default async function TrackRecordDetailPage({params}:{params:Promise<{id
  const {id}=await params;const db=await createClient();const {data:{user}}=await db.auth.getUser();if(!user)return null;
  const [r,s,q]=await Promise.all([
   db.from("drag_race_track_records").select("id,owner_id,title,record_data,visibility").eq("id",id).maybeSingle(),
-  db.from("drag_race_track_record_scoring_rules").select("placement_key,label,score,color,sort_order").order("sort_order")
+  db.from("drag_race_track_record_scoring_rules").select("placement_key,label,score,color,sort_order").order("sort_order"),
+  db.from("drag_race_queens").select("id,name,aliases,image_url").range(0,4999)
  ]);
  if(!r.data)notFound();
  const canEdit=r.data.owner_id===user.id;
