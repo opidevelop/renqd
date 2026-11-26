@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Crown, HelpCircle, LoaderCircle, LogOut, PauseCircle, X, UserX, Settings, ChevronDown } from "lucide-react";
+import { CheckCircle2, Crown, LoaderCircle, LogOut, PauseCircle, X, UserX, Settings, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { playPokemonSound, preparePokemonAudio } from "@/lib/pokemon/sounds";
 import { usePokemonSoundPreference } from "@/components/pokemon/use-pokemon-sound-preference";
@@ -46,7 +46,6 @@ export function PokemonNameEmAllMultiplayerGame({
   const [collapsedSpecialSections,setCollapsedSpecialSections]=useState<Set<string>>(new Set());
   const inputRef=useRef<HTMLInputElement>(null);
   const [selected,setSelected]=useState<PokemonSpecies|null>(null);
-  const [hint,setHint]=useState<{nameLength:number;revealedPrefix:string;hintCount:number}|null>(null);
   const [countdown,setCountdown]=useState(0);
   const [remaining,setRemaining]=useState(initialSession.status==="PAUSED"?(initialSession.remaining_seconds??0):(initialSession.remaining_seconds??initialSession.duration_seconds));
   const [deadline,setDeadline]=useState(initialSession.deadline_at?new Date(initialSession.deadline_at).getTime():0);
@@ -318,7 +317,6 @@ export function PokemonNameEmAllMultiplayerGame({
     const result=await hintNameEmAllMultiplayerAction(session.id,selected.id);
     if(!result.ok){setError(result.error??"Suggerimento non disponibile.");return null;}
     const nextHint={nameLength:Number(result.data?.nameLength??0),revealedPrefix:String(result.data?.revealedPrefix??""),hintCount:Number(result.data?.hintCount??0)};
-    setHint(nextHint);
     return nextHint;
   };
 
@@ -426,7 +424,7 @@ export function PokemonNameEmAllMultiplayerGame({
             const discoverer=discovererId?participants.find(player=>player.userId===discovererId):null;
             const artwork=form?.spriteUrl??item.spriteUrl;
             const displayName=form?item.name+" "+form.label:item.name;
-            return <button key={item.id+"-"+(form?.id??"base")} type="button" disabled={session.status!=="ACTIVE"||countdown>0} onClick={()=>{setSelected(item);setHint(null);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")+(recentlyFoundId===item.id?" is-revealing":"")} aria-label={isFound?displayName:"Pokémon da scoprire"}>
+            return <button key={item.id+"-"+(form?.id??"base")} type="button" disabled={session.status!=="ACTIVE"||countdown>0} onClick={()=>{setSelected(item);}} className={"pokemon-nae-cell"+(isFound?" is-found":"")+(recentlyFoundId===item.id?" is-revealing":"")} aria-label={isFound?displayName:"Pokémon da scoprire"}>
               <span className="pokemon-nae-cell-art">{isFound||visual.shadows?<img src={artwork} alt="" loading="lazy" style={{filter:isFound?"none":"brightness(0) saturate(0) opacity(.55)"}}/>:<b className="pokemon-nae-pokeball">◉</b>}</span>
               {isFound?<strong>{displayName}</strong>:<strong className="is-hidden">???</strong>}
               {(item.forms.length>0||item.isLegendary||item.isMythical||item.isUltraBeast||item.isParadox)&&<span className="pokemon-nae-cell-indicators">{item.forms.length>0?"◇":""}{item.isLegendary?"★":""}{item.isMythical?"✦":""}{item.isUltraBeast?"◈":""}{item.isParadox?"⌁":""}</span>}
