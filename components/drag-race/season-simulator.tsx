@@ -109,7 +109,7 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
   const immunityId=config.immunity?(pick(live)?.id??null):null;
   const title=number===1&&config.premiereFormat==="SPLIT_2"?"Premiere · Parte 1":number===2&&config.premiereFormat==="SPLIT_2"?"Premiere · Parte 2":"Episodio "+number;
   const mini=config.miniMode==="NONE"?null:pick(MINI)??null;
-  return{number,title,challenge:pick(CHALLENGES)??CHALLENGES[0],miniChallenge:mini,narrative:"Le Queen entrano nel Werk Room e affrontano una nuova prova. Le alleanze vengono messe alla prova, mentre la passerella cambia gli equilibri della competizione.",placements,comments:episodeComments,challengeWinnerId:challengeWinner??active[0],bottomIds:bottom,songId:song?.id??null,lipsyncWinnerId:lipsyncWinner??bottom[0]??null,immuneId,goldenBeaverSaveId:null,outcome:"ELIMINATION",eliminatedIds:[],untucked:Boolean(config.untucked),completed:false};
+  return{number,title,challenge:pick(CHALLENGES)??CHALLENGES[0],miniChallenge:mini,narrative:"Le Queen entrano nel Werk Room e affrontano una nuova prova. Le alleanze vengono messe alla prova, mentre la passerella cambia gli equilibri della competizione.",placements,comments:episodeComments,challengeWinnerId:challengeWinner??active[0],bottomIds:bottom,songId:song?.id??null,lipsyncWinnerId:lipsyncWinner??bottom[0]??null,immuneId:immunityId,goldenBeaverSaveId:null,outcome:"ELIMINATION",eliminatedIds:[],untucked:Boolean(config.untucked),completed:false};
  }
  function updateCurrent<K extends keyof SimEpisode>(key:K,value:SimEpisode[K]){setCurrentEpisode(old=>old?({...old,[key]:value}):old);}
  function updatePlacement(id:string,value:Placement){setCurrentEpisode(old=>old?({...old,placements:{...old.placements,[id]:value}}):old);}
