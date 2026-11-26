@@ -2154,5 +2154,5 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Restyling trasversale CSS per giochi, Lalaparuza, Guess Them All, profili Queen e Track Record: card, stati hover/focus, transizioni, animazioni d'ingresso e rispetto di `prefers-reduced-motion`.
 - Foto Queen nelle card Drag Race provenienti da Wikimedia Commons; attribuzioni e licenze CC BY 2.0 aggiunte a `/attributions`.
 - `/collections/[slug]`: il layout ora carica la stessa `PlatformShell` autenticata delle altre pagine, mantenendo header, sidebar e navigazione mobile.
-- Modifiche UI e CSS committate direttamente su `main`. Verifica CI e deployment Vercel da completare; non dichiarare queste modifiche production-ready finché non sono superati i controlli e pubblicate.
+- Modifiche UI e CSS committate direttamente su `main`. GitHub Actions «Code quality» sul commit `2e9e08280472809be8bd6357eff669efc1ec24dd`, run `45839307744`: **success** per parser test, TypeScript, ESLint e build Production. Vercel Production deployment `dpl_GWycFskgS2okpMctUtH99QSFfPt3` sullo stesso commit: **READY**, URL `https://renqd-40s9y41pd-opiteam.vercel.app` (alias Production aggiornati dal deployment).
 
