@@ -1,14 +1,15 @@
 import Link from "next/link";
-import { ArrowUpRight, Check, Circle, Crown, Grid3X3, Puzzle, Sparkles } from "lucide-react";
+import { ArrowUpRight, Check, Circle, Crown, Grid3X3, Puzzle, Sparkles, Swords } from "lucide-react";
 
 const modes = [
   { href: "/pokemon/ultimate-favourite", title: "Ultimate Favourite", subtitle: "La tua matrice Pokémon personale", icon: Crown, status: "CREA LA TUA MATRICE", accent: "favourite" },
   { href: "/pokemon/name-em-all", title: "Name ’Em All", subtitle: "Quanti Pokémon riesci a riconoscere?", icon: Grid3X3, status: "GIOCA IN SOLITARIA O INSIEME", accent: "name" },
   { href: "/pokemon/doku", title: "Doku", subtitle: "La sfida quotidiana originale", icon: Puzzle, status: "SFIDA GIORNALIERA", accent: "daily" },
   { href: "/pokemon/connections", title: "Connections", subtitle: "Trova i collegamenti tra i Pokémon", icon: Sparkles, status: "SFIDA GIORNALIERA", accent: "daily" },
+  { href: "/pokemon/daily-red", title: "Daily Red", subtitle: "Una battaglia Pokémon al giorno contro RED", icon: Swords, status: "SFIDA GIORNALIERA", accent: "daily" },
 ];
 
-export function PokemonHub({ dokuCompleted, connectionsCompleted }: { dokuCompleted: boolean; connectionsCompleted: boolean }) {
+export function PokemonHub({ dokuCompleted, connectionsCompleted, dailyRedCompleted }: { dokuCompleted: boolean; connectionsCompleted: boolean; dailyRedCompleted: boolean }) {
   return (
     <main className="pokemon-hub">
       <section className="pokemon-hub-hero">
@@ -32,8 +33,9 @@ export function PokemonHub({ dokuCompleted, connectionsCompleted }: { dokuComple
           {modes.map(({ href, title, subtitle, icon: Icon, status, accent }, index) => {
             const isDoku = href === "/pokemon/doku";
             const isConnections = href === "/pokemon/connections";
-            const isDaily = isDoku || isConnections;
-            const isComplete = isDoku ? dokuCompleted : isConnections ? connectionsCompleted : false;
+            const isDailyRed = href === "/pokemon/daily-red";
+            const isDaily = isDoku || isConnections || isDailyRed;
+            const isComplete = isDoku ? dokuCompleted : isConnections ? connectionsCompleted : isDailyRed ? dailyRedCompleted : false;
             return (
             <Link className={"pokemon-mode-card pokemon-mode-" + accent} href={href} key={href}>
               <span className="pokemon-mode-index">0{index + 1}</span>
