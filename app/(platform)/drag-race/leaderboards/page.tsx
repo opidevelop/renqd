@@ -14,8 +14,8 @@ function RankingTable({rows,profiles,selfId}:{rows:Entry[];profiles:Map<string,{
 export default async function DragRaceLeaderboardsPage(){
  const db=await createClient();const {data:{user}}=await db.auth.getUser();if(!user)return null;
  const [{data:stats},{data:periodStats}]=await Promise.all([
-  db.from("drag_race_user_stats").select("user_id,mode,franchise_code,games_started,games_completed,games_interrupted,queen_guessed_total,best_result,best_time_seconds,least_errors,least_hints,best_accuracy").order("best_result",{ascending:false}).limit(500),
-  db.from("drag_race_user_period_stats").select("user_id,mode,franchise_code,period_type,period_start,games_started,games_completed,games_interrupted,queen_guessed_total,best_result,best_time_seconds,least_errors,least_hints,best_accuracy").order("period_start",{ascending:false}).limit(1500)
+  db.from("drag_race_user_stats").select("user_id,mode,franchise_code,games_started,games_completed,games_interrupted,queen_guessed_total,best_result,best_time_seconds,least_errors,least_hints,best_accuracy").gt("games_completed",0).order("best_result",{ascending:false}).limit(500),
+  db.from("drag_race_user_period_stats").select("user_id,mode,franchise_code,period_type,period_start,games_started,games_completed,games_interrupted,queen_guessed_total,best_result,best_time_seconds,least_errors,least_hints,best_accuracy").gt("games_completed",0).order("period_start",{ascending:false}).limit(1500)
  ]);
  const allIds=[...new Set([...(stats??[]).map(row=>row.user_id),...(periodStats??[]).map(row=>row.user_id)])];
  const {data:profiles}=allIds.length?await db.from("public_profiles").select("user_id,username,display_name,is_private").in("user_id",allIds):{data:[]};
