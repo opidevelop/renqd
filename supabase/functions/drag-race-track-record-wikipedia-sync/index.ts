@@ -204,9 +204,10 @@ Deno.serve(async(req:Request)=>{
    matched++;
    const results=queen.results.map(result=>{
     const found=source.get(result.episode);if(!found)return result;
-    const placement=result.placement??found.key;
+    const wasImported=result.facts?.wikipedia_imported===true;
+    const placement=(!result.placement||wasImported)?(found.key??result.placement):result.placement;
     if(!result.placement&&found.key)added++;
-    return {...result,placement,facts:{...(result.facts??{}),wikipedia_raw_placement:found.raw}};
+    return {...result,placement,facts:{...(result.facts??{}),wikipedia_raw_placement:found.raw,wikipedia_imported:wasImported||(!result.placement&&Boolean(found.key))}};
    });
    return {...queen,results};
   });
