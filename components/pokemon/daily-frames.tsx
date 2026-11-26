@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const games = [
   { path: "/pokemon/doku", title: "PokeDoku", url: "https://pokedoku.com/" },
   { path: "/pokemon/connections", title: "Pokennection", url: "https://pokennection.com/" },
+  { path: "/pokemon/daily-red", title: "Daily Red", url: "https://daily-red.com/" },
 ];
 
 export function PokemonDailyFrames({ children }: { children: React.ReactNode }) {
