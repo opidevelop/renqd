@@ -2,14 +2,15 @@
 
 import { useState, type ReactNode } from "react";
 
-export function PublicProfileTabs({collections,renqs,pokemon}:{collections:ReactNode;renqs:ReactNode;pokemon:ReactNode}) {
-  const [active,setActive]=useState<"COLLECTIONS"|"RENQ"|"POKEMON">("RENQ");
+export function PublicProfileTabs({collections,renqs,pokemon,dragRace}:{collections:ReactNode;renqs:ReactNode;pokemon:ReactNode;dragRace:ReactNode}) {
+  const [active,setActive]=useState<"COLLECTIONS"|"RENQ"|"POKEMON"|"DRAG_RACE">("RENQ");
   return <>
     <nav className="profile-content-tabs" aria-label="Sezioni del profilo">
       <button type="button" className={active==="COLLECTIONS"?"is-active":""} aria-pressed={active==="COLLECTIONS"} onClick={()=>setActive("COLLECTIONS")}>Collezioni</button>
       <button type="button" className={active==="RENQ"?"is-active":""} aria-pressed={active==="RENQ"} onClick={()=>setActive("RENQ")}>Renq</button>
       <button type="button" className={active==="POKEMON"?"is-active":""} aria-pressed={active==="POKEMON"} onClick={()=>setActive("POKEMON")}>Pokémon</button>
+      <button type="button" className={active==="DRAG_RACE"?"is-active":""} aria-pressed={active==="DRAG_RACE"} onClick={()=>setActive("DRAG_RACE")}>Drag Race</button>
     </nav>
-    {active==="COLLECTIONS"?<>{collections}</>:active==="RENQ"?<>{renqs}</>:<section className="profile-pokemon-integrated"><div className="profile-section-heading"><div><span>IL SUO SPAZIO POKÉMON</span><h2>Pokémon</h2></div></div>{pokemon}</section>}
+    {active==="COLLECTIONS"?<>{collections}</>:active==="RENQ"?<>{renqs}</>:active==="POKEMON"?<section className="profile-pokemon-integrated"><div className="profile-section-heading"><div><span>IL SUO SPAZIO POKÉMON</span><h2>Pokémon</h2></div></div>{pokemon}</section>:<section className="profile-drag-race-integrated">{dragRace}</section>}
   </>;
 }

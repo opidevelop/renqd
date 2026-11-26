@@ -5,6 +5,7 @@ import { ProfileFollowButton } from "@/components/profile-follow-button";
 import { MessageRequestButton } from "@/components/message-request-button";
 import { UserBlockButton } from "@/components/user-block-button";
 import { PublicProfileTabs } from "@/components/public-profile-tabs";
+import { PublicProfileDragRace } from "@/components/public-profile-drag-race";
 import { PokemonProfileArchive } from "@/components/pokemon/profile-archive";
 import { PublicProfileRenqList } from "@/components/public-profile-renq-list";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
@@ -41,6 +42,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     getProfileMediaUrl(supabase, profile.avatar_url),
     getProfileMediaUrl(supabase, profile.banner_url),
   ]);
+  const { data: dragRaceStats } = await supabase.from("drag_race_user_stats").select("mode,franchise_code,games_started,games_completed,games_interrupted,queen_guessed_total,best_result,best_time_seconds,least_errors,least_hints,last_played_at").eq("user_id",profile.user_id).order("last_played_at",{ascending:false});
   const { data: collections } = await supabase.from("profile_collections").select("id,title,slug,description,banner_url,visibility,is_featured").eq("owner_id", profile.user_id).eq("visibility", "PUBLIC").order("is_featured", { ascending: false }).order("sort_order");
   const { data: rows } = await supabase.from("rankings").select("id,title,public_slug,mode,settings,completed_at,visibility,status,updated_at").eq("user_id", profile.user_id).eq("status", "COMPLETED").is("deleted_at",null).order("completed_at", { ascending: false });
   const rankings = (rows ?? []).filter(item => {
@@ -83,6 +85,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
       </>}
       renqs={<PublicProfileRenqList items={rankings as Array<{id:string;title:string;public_slug:string|null;mode:string;settings:Record<string,unknown>|null}>} displayName={profile.display_name||profile.username}/>} 
       pokemon={<PokemonProfileArchive items={visiblePokemonItems as Array<{id:string;title:string;public_slug:string|null;mode:string;status:string;updated_at:string;settings:Record<string,unknown>|null}>} referenceNow={0} persistentHighestLevel={null} maestroAchievedAt={null} readOnly/>}
+      dragRace={<PublicProfileDragRace items={(dragRaceStats??[]) as Parameters<typeof PublicProfileDragRace>[0]["items"]}/>}
     />
     <div className="profile-public-footer"><BadgeCheck size={15}/> Creato con Renqd</div>
   </main>;
