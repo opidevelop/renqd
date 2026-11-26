@@ -3,7 +3,7 @@ import {createClient} from "@/lib/supabase/server";
 import {getAccountAccess} from "@/lib/supabase/authorization";
 import {getProfileMediaUrl} from "@/lib/supabase/profile-media";
 export const dynamic="force-dynamic";
-const allowed=["RANKING_PUBLISHED","RANKING_LIKED","RANKING_COMMENTED"];
+const allowed=["RANKING_PUBLISHED","RANKING_LIKED","RANKING_COMMENTED","DRAG_RACE_COMPLETED"];
 export async function GET(request:Request){
  const supabase=await createClient();const {user,status}=await getAccountAccess(supabase);
  if(!user)return NextResponse.json({error:"Sessione scaduta. Accedi di nuovo."},{status:401});
