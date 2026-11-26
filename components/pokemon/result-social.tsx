@@ -230,20 +230,27 @@ export function PokemonResultSocial({
       <div><button type="button" className={sort==="APPRECIATION"?"is-active":""} onClick={()=>setSort("APPRECIATION")}>Più apprezzati</button><button type="button" className={sort==="RECENT"?"is-active":""} onClick={()=>setSort("RECENT")}>Più recenti</button></div>
     </div>
     <div className="pokemon-result-comments">{roots.map(comment=>commentCard(comment))}{!roots.length&&<p>Ancora nessun commento. Apri tu la conversazione.</p>}</div>
-    {deleteTarget&&<div className="pokemon-nae-pause-backdrop" role="presentation"><section className="pokemon-nae-pause-card" role="alertdialog" aria-modal="true" aria-labelledby="pokemon-comment-delete-title">
-      <h2 id="pokemon-comment-delete-title">Eliminare questo commento?</h2><p>Il commento verrà nascosto. Le risposte collegate resteranno nella conversazione.</p>
-      <div><button type="button" className="pokemon-favourite-secondary" onClick={()=>setDeleteTarget(null)}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>void confirmDelete()} disabled={busy}>Elimina</button></div>
-    </section></div>}
-    {blockTarget&&<div className="pokemon-nae-pause-backdrop" role="presentation"><section className="pokemon-nae-pause-card" role="alertdialog" aria-modal="true" aria-labelledby="pokemon-comment-block-title">
-      <h2 id="pokemon-comment-block-title">Bloccare {blockTarget.displayName}?</h2>
-      <p>Il blocco è reciproco: non potrete vedere i rispettivi profili e contenuti social né interagire. I risultati della partita restano consultabili dai partecipanti.</p>
-      <div><button type="button" className="pokemon-favourite-secondary" onClick={()=>setBlockTarget(null)} disabled={busy}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>void confirmBlock()} disabled={busy}>Conferma blocco</button></div>
-    </section></div>}
-    {reportTarget&&<div className="pokemon-nae-pause-backdrop" role="presentation"><section className="pokemon-nae-pause-card" role="dialog" aria-modal="true" aria-labelledby="pokemon-comment-report-title">
-      <h2 id="pokemon-comment-report-title">Segnala il commento</h2><p>La segnalazione sarà inviata all’Owner senza nascondere automaticamente il contenuto.</p>
-      <select value={reportReason} onChange={event=>setReportReason(event.target.value)}><option value="INAPPROPRIATE_CONTENT">Contenuto inappropriato</option><option value="SPAM">Spam</option><option value="HARASSMENT">Molestie</option><option value="COPYRIGHT">Copyright</option><option value="FALSE_INFORMATION">Informazioni false</option><option value="OTHER">Altro</option></select>
-      <textarea value={reportDetails} maxLength={2000} placeholder="Dettagli facoltativi" onChange={event=>setReportDetails(event.target.value)}/>
-      <div><button type="button" className="pokemon-favourite-secondary" onClick={()=>setReportTarget(null)}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>void submitReport()} disabled={busy}>Invia segnalazione</button></div>
-    </section></div>}
+    <Dialog open={Boolean(deleteTarget)} onClose={()=>setDeleteTarget(null)} overlayClassName="pokemon-nae-pause-backdrop" className="pokemon-nae-pause-card" role="alertdialog" labelledBy="pokemon-comment-delete-title">
+      {deleteTarget&&<>
+        <h2 id="pokemon-comment-delete-title">Eliminare questo commento?</h2><p>Il commento verrà nascosto. Le risposte collegate resteranno nella conversazione.</p>
+        <div><button type="button" className="pokemon-favourite-secondary" autoFocus onClick={()=>setDeleteTarget(null)}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>void confirmDelete()} disabled={busy}>Elimina</button></div>
+      </>}
+    </Dialog>
+    <Dialog open={Boolean(blockTarget)} onClose={()=>setBlockTarget(null)} overlayClassName="pokemon-nae-pause-backdrop" className="pokemon-nae-pause-card" role="alertdialog" labelledBy="pokemon-comment-block-title">
+      {blockTarget&&<>
+        <h2 id="pokemon-comment-block-title">Bloccare {blockTarget.displayName}?</h2>
+        <p>Il blocco è reciproco: non potrete vedere i rispettivi profili e contenuti social né interagire. I risultati della partita restano consultabili dai partecipanti.</p>
+        <div><button type="button" className="pokemon-favourite-secondary" autoFocus onClick={()=>setBlockTarget(null)} disabled={busy}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>void confirmBlock()} disabled={busy}>Conferma blocco</button></div>
+      </>}
+    </Dialog>
+    <Dialog open={Boolean(reportTarget)} onClose={()=>setReportTarget(null)} overlayClassName="pokemon-nae-pause-backdrop" className="pokemon-nae-pause-card" labelledBy="pokemon-comment-report-title">
+      {reportTarget&&<>
+        <h2 id="pokemon-comment-report-title">Segnala il commento</h2><p>La segnalazione sarà inviata all’Owner senza nascondere automaticamente il contenuto.</p>
+        <select autoFocus value={reportReason} onChange={event=>setReportReason(event.target.value)}><option value="INAPPROPRIATE_CONTENT">Contenuto inappropriato</option><option value="SPAM">Spam</option><option value="HARASSMENT">Molestie</option><option value="COPYRIGHT">Copyright</option><option value="FALSE_INFORMATION">Informazioni false</option><option value="OTHER">Altro</option></select>
+        <textarea value={reportDetails} maxLength={2000} placeholder="Dettagli facoltativi" onChange={event=>setReportDetails(event.target.value)}/>
+        <div><button type="button" className="pokemon-favourite-secondary" onClick={()=>setReportTarget(null)}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>void submitReport()} disabled={busy}>Invia segnalazione</button></div>
+      </>}
+    </Dialog>
+
   </section>;
 }
