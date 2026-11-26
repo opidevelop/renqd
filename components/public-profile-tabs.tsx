@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 
 export function PublicProfileTabs({collections,renqs,pokemon,dragRace}:{collections:ReactNode;renqs:ReactNode;pokemon:ReactNode;dragRace:ReactNode}) {
-  const [active,setActive]=useState<"COLLECTIONS"|"RENQ"|"POKEMON"|"DRAG_RACE">("RENQ");
+  const searchParams=useSearchParams();
+  const [active,setActive]=useState<"COLLECTIONS"|"RENQ"|"POKEMON"|"DRAG_RACE">(()=>searchParams.get("section")==="drag-race"?"DRAG_RACE":searchParams.get("section")==="pokemon"?"POKEMON":"RENQ");
   return <>
     <nav className="profile-content-tabs" aria-label="Sezioni del profilo">
       <button type="button" className={active==="COLLECTIONS"?"is-active":""} aria-pressed={active==="COLLECTIONS"} onClick={()=>setActive("COLLECTIONS")}>Collezioni</button>
