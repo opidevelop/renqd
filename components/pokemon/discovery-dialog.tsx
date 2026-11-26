@@ -7,23 +7,26 @@ import type { PokemonSpecies } from "@/lib/pokemon/catalog";
 import { POKEMON_TYPE_LABELS } from "@/lib/pokemon/catalog";
 
 type LetterHint={nameLength:number;revealedPrefix:string;hintCount:number};
-type Props={selected:PokemonSpecies|null;discovered:boolean;spellingHelp:boolean;onClose:()=>void;onRevealLetter:()=>Promise<LetterHint|null>};
+type Props={selected:PokemonSpecies;discovered:boolean;spellingHelp:boolean;onClose:()=>void;onRevealLetter:()=>Promise<LetterHint|null>};
 
-export function PokemonDiscoveryDialog({selected,discovered,spellingHelp,onClose,onRevealLetter}:Props){
+export function PokemonDiscoveryDialog(props: Omit<Props, "selected"> & { selected: PokemonSpecies | null }) {
+  if (!props.selected) return null;
+  return <PokemonDiscoveryDialogContent key={props.selected.id + "-" + String(props.discovered)} {...props} selected={props.selected} />;
+}
+
+function PokemonDiscoveryDialogContent({selected,discovered,spellingHelp,onClose,onRevealLetter}:Props){
   const [hint,setHint]=useState<LetterHint|null>(null);
   const [hintBusy,setHintBusy]=useState(false);
   const [revealed,setRevealed]=useState<Set<string>>(new Set());
   const [description,setDescription]=useState("");
-  const [descriptionBusy,setDescriptionBusy]=useState(false);
+  const [descriptionBusy,setDescriptionBusy]=useState(discovered);
   const [descriptionError,setDescriptionError]=useState("");
   const [audioBusy,setAudioBusy]=useState(false);
   const [audioMessage,setAudioMessage]=useState("");
 
   useEffect(()=>{
-    setHint(null);setHintBusy(false);setRevealed(new Set());setDescription("");setDescriptionError("");setDescriptionBusy(false);setAudioMessage("");
-    if(!selected||!discovered)return;
+    if(!discovered)return;
     let alive=true;
-    setDescriptionBusy(true);
     fetch("https://pokeapi.co/api/v2/pokemon-species/"+selected.id+"/")
       .then(response=>{if(!response.ok)throw new Error();return response.json();})
       .then((data:{flavor_text_entries?:Array<{language:{name:string};flavor_text:string}>})=>{
@@ -67,7 +70,6 @@ export function PokemonDiscoveryDialog({selected,discovered,spellingHelp,onClose
       await audio.play();
     }catch{setAudioBusy(false);setAudioMessage("Impossibile riprodurre il verso.");}
   };
-  if(!selected)return null;
   const isRevealed=(key:string)=>revealed.has(key);
   return <Dialog open={Boolean(selected)} onClose={onClose} overlayClassName="pokemon-nae-detail-backdrop" className="pokemon-nae-detail pokemon-nae-discovery-dialog" ariaLabel={discovered?"Scheda Pokémon":"Aiuti Pokémon"}>
     <header><span className="pokemon-page-eyebrow">{discovered?"SCHEDA POKÉMON":"AIUTI DISPONIBILI"}</span><button type="button" onClick={onClose} aria-label="Chiudi"><X size={18}/></button></header>
