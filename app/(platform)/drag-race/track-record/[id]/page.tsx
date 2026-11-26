@@ -13,7 +13,7 @@ export default async function TrackRecordDetailPage({params}:{params:Promise<{id
  if(!r.data)notFound();
  const canEdit=r.data.owner_id===user.id;
  const ownerProfile=await db.from("public_profiles").select("is_private").eq("user_id",r.data.owner_id).maybeSingle();
- const socialEnabled=r.data.visibility==="PUBLIC"&&!ownerProfile.data?.is_private;
+ const socialEnabled=r.data.visibility==="PUBLIC"&&Boolean(ownerProfile.data&&!ownerProfile.data.is_private);
  const canModerateComments=canEdit||(["OWNER","ADMIN","MODERATOR"].includes(String(userProfile.data?.role))&&userProfile.data?.status==="APPROVED");
- return <TrackRecordEditor recordId={r.data.id} title={r.data.title} visibility={r.data.visibility} initialData={r.data.record_data} rules={s.data??[]} canEdit={canEdit} catalogQueens={q.data??[]} userId={user.id} canModerateComments={canModerateComments} socialEnabled={socialEnabled}/>
+ return <TrackRecordEditor recordId={r.data.id} title={r.data.title} visibility={r.data.visibility} initialData={r.data.record_data} rules={s.data??[]} canEdit={canEdit} catalogQueens={q.data??[]} userId={user.id} ownerId={r.data.owner_id} canModerateComments={canModerateComments} socialEnabled={socialEnabled}/>
 }
