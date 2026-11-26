@@ -15,7 +15,7 @@ export function useNameEmAllSubmissionQueue<T>(
   const queuedKeysRef = useRef<Set<number>>(new Set());
   const processingRef = useRef(false);
   const processRef = useRef(processSubmission);
-  processRef.current = processSubmission;
+  useEffect(() => { processRef.current = processSubmission; }, [processSubmission]);
   const [pending, setPending] = useState(false);
 
   const enqueue = useCallback((answer: string, value: T, key: number) => {
