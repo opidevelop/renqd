@@ -32,7 +32,7 @@ function artwork(item:ArchiveItem){
 }
 function romeDate(value:string){const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Rome",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(value));const get=(type:string)=>parts.find(part=>part.type===type)?.value??"00";return get("year")+"-"+get("month")+"-"+get("day");}
 
-export function PokemonProfileArchive({items,referenceNow,persistentHighestLevel,maestroAchievedAt}:{items:ArchiveItem[];referenceNow:number;persistentHighestLevel:string|null;maestroAchievedAt:string|null}) {
+export function PokemonProfileArchive({items,referenceNow,persistentHighestLevel,maestroAchievedAt,readOnly=false}:{items:ArchiveItem[];referenceNow:number;persistentHighestLevel:string|null;maestroAchievedAt:string|null;readOnly?:boolean}) {
   const [mode,setMode]=useState<"ALL"|"POKEMON_NAME_EM_ALL"|"POKEMON_ULTIMATE_FAVOURITE">("ALL");
   const [playMode,setPlayMode]=useState<"ALL"|"SOLO"|"MULTIPLAYER">("ALL");
   const [startDate,setStartDate]=useState("");
@@ -95,7 +95,7 @@ export function PokemonProfileArchive({items,referenceNow,persistentHighestLevel
     </section>
     <section className="pokemon-profile-archive">
       <div className="pokemon-profile-archive-heading"><div><span className="pokemon-page-eyebrow">IL TUO POKÉDEX PERSONALE</span><h2>Partite e attività</h2><p>Apri ogni risultato per consultare statistiche, Pokédex e classifica.</p></div>
-        <button type="button" className="pokemon-favourite-secondary" onClick={()=>{setDeleteTarget("ALL");setDeleteStep(1);}} disabled={!completed.some(item=>item.mode==="POKEMON_NAME_EM_ALL")}><Trash2 size={14}/> Elimina tutti i risultati Name ’Em All</button>
+        {!readOnly&&<button type="button" className="pokemon-favourite-secondary" onClick={()=>{setDeleteTarget("ALL");setDeleteStep(1);}} disabled={!completed.some(item=>item.mode==="POKEMON_NAME_EM_ALL")}><Trash2 size={14}/> Elimina tutti i risultati Name ’Em All</button>}
       </div>
       {error&&<p className="pokemon-social-feedback is-error" role="alert">{error}</p>}
       {message&&<p className="pokemon-social-feedback" role="status">{message}</p>}
@@ -119,16 +119,16 @@ export function PokemonProfileArchive({items,referenceNow,persistentHighestLevel
         <span className="pokemon-profile-list-art">{artwork(item)?<img src={artwork(item)??undefined} alt="" loading="lazy"/>:item.mode==="POKEMON_NAME_EM_ALL"?<Trophy size={20}/>:<Gamepad2 size={20}/>}</span>
         <div><small>{item.mode==="POKEMON_NAME_EM_ALL"?"NAME ’EM ALL":"ULTIMATE FAVOURITE"} · {new Date(item.updated_at).toLocaleDateString("it-IT")}</small><strong>{item.mode==="POKEMON_NAME_EM_ALL"?level(item)||"Risultato salvato":"Ultimate Favourite"}</strong><p>{item.mode==="POKEMON_NAME_EM_ALL"?score(item)+" Pokémon · "+Number(snapshot(item).completion??0)+"% completamento":"La tua matrice Pokémon personale"}</p></div>
         <Link href={"/r/"+(item.public_slug??item.id)} aria-label="Apri risultato"><ArrowUpRight size={17}/></Link>
-        {item.mode==="POKEMON_NAME_EM_ALL"&&<button type="button" onClick={()=>{setDeleteTarget(item.id);setDeleteStep(1);}} aria-label="Elimina risultato"><Trash2 size={16}/></button>}
+        {!readOnly&&item.mode==="POKEMON_NAME_EM_ALL"&&<button type="button" onClick={()=>{setDeleteTarget(item.id);setDeleteStep(1);}} aria-label="Elimina risultato"><Trash2 size={16}/></button>}
       </article>)}</div>
       {!filtered.length&&<p className="pokemon-profile-empty"><Sparkles size={20}/> Nessuna attività corrisponde ai filtri selezionati.</p>}
     </section>
-    <Dialog open={Boolean(deleteTarget)} onClose={()=>setDeleteTarget(null)} overlayClassName="pokemon-nae-pause-backdrop" className="pokemon-nae-pause-card" role="alertdialog" labelledBy="pokemon-delete-results-title">
+    {!readOnly&&<Dialog open={Boolean(deleteTarget)} onClose={()=>setDeleteTarget(null)} overlayClassName="pokemon-nae-pause-backdrop" className="pokemon-nae-pause-card" role="alertdialog" labelledBy="pokemon-delete-results-title">
       {deleteTarget&&<>
         <span className="pokemon-page-eyebrow">CONFERMA ELIMINAZIONE</span>
         <h2 id="pokemon-delete-results-title">{deleteTarget==="ALL"?"Eliminare tutti i risultati Name ’Em All?":"Eliminare questo risultato?"}</h2>
         {deleteStep===1?<><p>L’operazione rimuove soltanto la tua copia dal profilo. I risultati degli altri partecipanti restano intatti.</p><div><button type="button" className="pokemon-favourite-secondary" autoFocus onClick={()=>setDeleteTarget(null)}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>setDeleteStep(2)}>Continua</button></div></>:<><p>Seconda conferma: l’eliminazione è irreversibile per il tuo profilo e non potrai recuperare questo risultato.</p><div><button type="button" className="pokemon-favourite-secondary" autoFocus onClick={()=>setDeleteTarget(null)}>Annulla</button><button type="button" className="pokemon-favourite-primary" onClick={()=>void deleteResults()} disabled={busy}>Conferma eliminazione</button></div></>}
       </>}
-    </Dialog>
+    </Dialog>}
   </>;
 }
