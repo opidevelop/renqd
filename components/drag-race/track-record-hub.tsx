@@ -32,7 +32,7 @@ export function TrackRecordHub({userId,templates,records,franchiseNames,hallOfFa
   const catalogSelected=catalogQueens.filter(q=>selectedQueenIds.includes(q.id));
   const roster=[...catalogSelected.map(q=>({id:q.id,name:q.name,image_url:q.image_url??null,rank:null,winner:false,results:Array.from({length:episodeCount},(_,i)=>({episode:i+1,placement:null}))})),...customQueenList.map(q=>({id:q.id,name:q.name,image_url:q.image_url,rank:null,winner:false,results:Array.from({length:episodeCount},(_,i)=>({episode:i+1,placement:null}))}))];
   if(roster.length<2){setNotice("Aggiungi almeno due Queen alla stagione.");return;}
-  const record_data={franchise_code:customFranchise,season_number:seasonNumber,year,episodes:Array.from({length:episodeCount},(_,i)=>({number:i+1,title:"Episodio "+(i+1),counts_for_ppe:true})),queens:roster,custom_placements:[],source_metadata:{source_id:"user-custom",source_version:"1",placement_completeness:"MANUAL"}};
+  const record_data={franchise_code:customFranchise,season_number:seasonNumber,year,episodes:Array.from({length:episodeCount},(_,i)=>({number:i+1,title:"Episodio "+(i+1),counts_for_ppe:true})),queens:roster,custom_placements:[],source_metadata:{source_id:"user-custom",source_version:"1",placement_mode:"MANUAL"}};
   setCreatingCustom(true);setNotice("");
   const {data,error}=await db.from("drag_race_track_records").insert({owner_id:userId,season_id:null,title,visibility:"PUBLIC",record_data,is_official:false}).select("id").single();
   if(error){setNotice("Non è stato possibile creare la stagione: "+error.message);setCreatingCustom(false);return;}
