@@ -19,16 +19,16 @@ const normalize=(value:string)=>value.normalize("NFKD").replace(/[\u0300-\u036f]
 type ParsedPlacement={queenId:string;episode:number;raw:string;code:string};
 function candidates(template:Template){
  const n=template.season_number;
- const specific:Record<string,string>={
-  US:`RuPaul's Drag Race season ${n}`,
-  AS:`RuPaul's Drag Race All Stars season ${n}`,
-  UK:`RuPaul's Drag Race UK series ${n}`,
-  UKVTW:`RuPaul's Drag Race UK vs the World series ${n}`,
-  DU:`RuPaul's Drag Race Down Under season ${n}`,
-  CA:`Canada's Drag Race season ${n}`
+ const specific:Record<string,string[]>={
+  US:[`RuPaul's Drag Race season ${n}`],
+  AS:[`RuPaul's Drag Race All Stars season ${n}`],
+  UK:[`RuPaul's Drag Race UK series ${n}`,`RuPaul's Drag Race UK season ${n}`],
+  UKVTW:[`RuPaul's Drag Race UK vs the World series ${n}`,`RuPaul's Drag Race UK vs the World season ${n}`],
+  DU:[`RuPaul's Drag Race Down Under season ${n}`,`RuPaul's Drag Race Down Under series ${n}`],
+  CA:[`Canada's Drag Race season ${n}`]
  };
- const name=template.display_title.replace(/\bSeason\b/i,"season");
- return [...new Set([specific[template.franchise_code],name].filter((x):x is string=>Boolean(x)))];
+ const name=template.display_title.replace(/\\bSeason\\b/i,"season");
+ return [...new Set([...(specific[template.franchise_code]??[]),name])];
 }
 async function searchPage(candidate:string):Promise<WikiSearchItem|null>{
  const url=new URL(WIKI_API);
