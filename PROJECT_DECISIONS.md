@@ -524,12 +524,8 @@ L'utente autorizza a effettuare direttamente i push necessari sul solo branch ma
 - Queste modifiche non autorizzano interventi a schema Supabase, migrazioni, ruoli, permessi o servizi esterni.
 
 
-### Decisione approvata il 24 novembre 2026 — animazione stellina di caricamento
-- La schermata di caricamento mostra **soltanto la stellina**, senza wordmark, logo R, serpentina, didascalie o altri elementi decorativi.
-- Movimento approvato: combinazione **Breathing Star + Morphing Star**. La stellina respira con una variazione lenta e contenuta di scala, una lieve rotazione e un alone morbido; contemporaneamente la sagoma si trasforma in modo fluido tra una stella più appuntita e una più morbida, mantenendo riconoscibile il simbolo originale.
-- Il movimento deve essere elegante, discreto e premium, non un rimbalzo. Rispettare `prefers-reduced-motion` mostrando la stellina statica.
-- Conservare il fondo chiaro/avorio della schermata e non modificare il comportamento o la durata della transizione di pagina.
-
+### Nota di archivio — animazione stellina di caricamento
+La prima proposta «Breathing Star + Morphing Star» è stata superata dalla revisione approvata il 24 novembre 2026. La formulazione storica completa è conservata in `PROJECT_DECISIONS_ARCHIVE.md`; fa fede esclusivamente la decisione sostitutiva riportata subito sotto.
 
 ### Decisione approvata il 24 novembre 2026 — animazione della stellina di caricamento (revisione)
 La precedente combinazione «Breathing Star + Morphing Star» è superata dalla correzione approvata dall'utente:
