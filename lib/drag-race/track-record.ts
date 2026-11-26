@@ -6,7 +6,8 @@ export type TrackRecordPlacementScore = {
   sort_order: number;
 };
 export type TrackRecordEpisode = { number: number; title: string; counts_for_ppe?: boolean };
-export type TrackRecordResult = { episode: number; placement: string | null };
+export type TrackRecordEpisodeFacts = { mini_challenge_winner?: boolean; maxi_challenge_winner?: boolean; listed_top?: boolean; listed_bottom?: boolean; lipsync_participant?: boolean; lipsync_winner?: boolean; lipsync_eliminated?: boolean; eliminated_this_episode?: boolean };
+export type TrackRecordResult = { episode: number; placement: string | null; facts?: TrackRecordEpisodeFacts };
 export type TrackRecordQueen = {
   id?: string;
   name: string;
