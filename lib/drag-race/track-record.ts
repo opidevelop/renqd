@@ -39,20 +39,33 @@ export function calculateTrackRecordPPE(queen: TrackRecordQueen, episodes: Track
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
 }
 export function sortTrackRecordQueens(data: TrackRecordData, rules: TrackRecordPlacementScore[]) {
-  const custom = data.custom_placements ?? [];
+  const scoreMap = new Map<string, number>();
+  for (const rule of rules) scoreMap.set(rule.placement_key, Number(rule.score));
+  for (const rule of data.custom_placements ?? []) scoreMap.set(rule.placement_key, Number(rule.score));
   const rows = data.queens.map(queen => {
-    const elimination = queen.results.find(result => isElimination(result.placement))?.episode ?? null;
-    const ppe = calculateTrackRecordPPE(queen, data.episodes, rules, custom);
-    return { ...queen, ppe, elimination_episode: elimination, eliminated: elimination !== null };
+    const eliminationResult = queen.results
+      .filter(result => isElimination(result.placement))
+      .sort((a, b) => a.episode - b.episode)[0];
+    const elimination = eliminationResult?.episode ?? null;
+    const eliminationPlacementScore = eliminationResult?.placement ? scoreMap.get(eliminationResult.placement) ?? Number.NEGATIVE_INFINITY : Number.NEGATIVE_INFINITY;
+    const bestPlacementScore = queen.results.reduce((best, result) => {
+      if (!result.placement) return best;
+      return Math.max(best, scoreMap.get(result.placement) ?? Number.NEGATIVE_INFINITY);
+    }, Number.NEGATIVE_INFINITY);
+    const ppe = calculateTrackRecordPPE(queen, data.episodes, rules, data.custom_placements);
+    return { ...queen, ppe, elimination_episode: elimination, eliminated: elimination !== null, best_placement_score: bestPlacementScore, elimination_placement_score: eliminationPlacementScore };
   });
   rows.sort((a, b) => {
     if (a.eliminated !== b.eliminated) return a.eliminated ? 1 : -1;
     if (!a.eliminated) {
       const score = (b.ppe ?? -1) - (a.ppe ?? -1);
       if (Math.abs(score) > 0.000001) return score;
+      const bestPlacement = b.best_placement_score - a.best_placement_score;
+      if (Math.abs(bestPlacement) > 0.000001) return bestPlacement;
       return a.name.localeCompare(b.name);
     }
     return (a.elimination_episode ?? 9999) - (b.elimination_episode ?? 9999)
+      || (b.elimination_placement_score - a.elimination_placement_score)
       || (a.elimination_tie_order ?? 9999) - (b.elimination_tie_order ?? 9999)
       || a.name.localeCompare(b.name);
   });
