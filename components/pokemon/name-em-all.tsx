@@ -21,6 +21,7 @@ import {
   PokemonCatalog, PokemonSpecies, normalizePokemonName, findExactPokemonMatch, isAmbiguousPokemonName,
 } from "@/lib/pokemon/catalog";
 import { getPokemonTypeIconUrl } from "@/lib/pokemon/type-icons";
+import { useNameEmAllSubmissionQueue } from "@/components/pokemon/use-name-em-all-submission-queue";
 import {
   createNameEmAllSoloAction, createNameEmAllMultiplayerAction, deleteNameEmAllSoloAction, finishNameEmAllAction, hintNameEmAllAction,
   pauseNameEmAllAction, resumeNameEmAllAction, submitNameEmAllAnswerAction, setNameEmAllResultVisibilityAction,
@@ -202,7 +203,6 @@ function Game({
   const [recentlyFoundId,setRecentlyFoundId]=useState<number|null>(null);
   const [generationCelebration,setGenerationCelebration]=useState<number|null>(null);
   const [message,setMessage]=useState("");
-  const [pending,setPending]=useState(false);
   const [deadline,setDeadline]=useState(session.deadline_at?new Date(session.deadline_at).getTime():0);
   const [remaining,setRemaining]=useState(()=>session.deadline_at?Math.max(0,Math.ceil((new Date(session.deadline_at).getTime()-Date.now())/1000)):(session.status==="PAUSED"?(session.remaining_seconds??0):(session.remaining_seconds??session.duration_seconds)));
   const [paused,setPaused]=useState(session.status==="PAUSED");
@@ -310,55 +310,51 @@ function Game({
     return()=>window.clearTimeout(id);
   },[deadline,paused,isFinishing,finish,unlimited]);
 
-  const submit=useCallback(async(answer:string,optimisticSpecies?:PokemonSpecies)=>{
-    if(!answer.trim()||pending||paused)return;
-    preparePokemonAudio(soundEnabled);
-    setPending(true);setConfirmed(false);setMessage("");
-    if(optimisticSpecies){
-      setFound(current=>new Set(current).add(optimisticSpecies.id));
-      setQuery("");setConfirmed(true);setMessage("Pokémon scoperto!");
-      playPokemonSound("correct",soundEnabled);
-    }
+  const processQueuedSubmission=useCallback(async(answer:string,optimisticSpecies:PokemonSpecies)=>{
     const result=await submitNameEmAllAnswerAction(session.id,answer);
-    setPending(false);
     if(!result.ok){
-      if(optimisticSpecies)setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
+      setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
       setConfirmed(false);setMessage(result.error??"Risposta non registrata.");return;
     }
     const data=result.data??{};
-    const refocusInput=()=>window.requestAnimationFrame(()=>inputRef.current?.focus());
     if(data.status==="CORRECT"&&typeof data.speciesId==="number"){
       setFound(current=>new Set(current).add(data.speciesId as number));
-      setQuery("");setConfirmed(true);setMessage("Pokémon scoperto!");
-      if(!optimisticSpecies)playPokemonSound("correct",soundEnabled);
-      refocusInput();
+      setConfirmed(true);setMessage("Pokémon scoperto!");
       if(data.completed===true){playPokemonSound("complete",soundEnabled);void finish("CATALOG_COMPLETE");}
     }else if(data.status==="ALREADY_FOUND"){
-      setQuery("");setMessage("Hai già scoperto questo Pokémon!");refocusInput();
+      setFound(current=>new Set(current).add(optimisticSpecies.id));
+      setConfirmed(false);setMessage("Hai già scoperto questo Pokémon!");
     }else if(data.status==="INCORRECT"){
-      if(optimisticSpecies)setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
-      setConfirmed(false);playPokemonSound("incorrect",soundEnabled);
-      setMessage("Pokémon non riconosciuto.");
+      setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
+      setConfirmed(false);playPokemonSound("incorrect",soundEnabled);setMessage("Pokémon non riconosciuto.");
     }else if(data.status==="TIME_EXPIRED"){
-      if(optimisticSpecies)setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
+      setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
       setConfirmed(false);setMessage("Tempo scaduto.");void finish("TIMER_EXPIRED");
     }else if(data.status==="PAUSED"){
-      if(optimisticSpecies)setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
+      setFound(current=>{const next=new Set(current);next.delete(optimisticSpecies.id);return next;});
       setConfirmed(false);setMessage("La partita è in pausa.");
     }
-  },[pending,paused,soundEnabled,session.id,finish]);
+  },[session.id,soundEnabled,finish]);
+  const {enqueue:enqueueSubmission,pending,queuedKeysRef}=useNameEmAllSubmissionQueue(processQueuedSubmission);
+  const enqueuePokemonSubmission=useCallback((answer:string,item:PokemonSpecies)=>{
+    if(paused||isFinishing||found.has(item.id)||queuedKeysRef.current.has(item.id))return;
+    if(!enqueueSubmission(answer,item,item.id))return;
+    preparePokemonAudio(soundEnabled);
+    setFound(current=>new Set(current).add(item.id));
+    setQuery("");setConfirmed(true);setMessage("Pokémon scoperto!");
+    playPokemonSound("correct",soundEnabled);
+  },[paused,isFinishing,found,queuedKeysRef,enqueueSubmission,soundEnabled]);
   useEffect(()=>{
     const normalized=normalizePokemonName(query);
-    if(!normalized||!exactMatch||exactMatchIsAmbiguous||pending||paused||isFinishing)return;
+    if(!normalized||!exactMatch||exactMatchIsAmbiguous||paused||isFinishing)return;
     if(autoSubmitRef.current===normalized)return;
     autoSubmitRef.current=normalized;
-    if(found.has(exactMatch.id)){
-      setQuery("");
-      setMessage("Hai già scoperto questo Pokémon!");
+    if(found.has(exactMatch.id)||queuedKeysRef.current.has(exactMatch.id)){
+      setQuery("");setMessage("Hai già scoperto questo Pokémon!");
       return;
     }
-    void submit(exactMatch.name,exactMatch);
-  },[query,exactMatch,exactMatchIsAmbiguous,pending,paused,isFinishing,found,submit]);
+    enqueuePokemonSubmission(exactMatch.name,exactMatch);
+  },[query,exactMatch,exactMatchIsAmbiguous,paused,isFinishing,found,queuedKeysRef,enqueuePokemonSubmission]);
 
   useEffect(()=>{
     if(!pauseOverlay&&!confirmExit&&!confirmDelete)return;
@@ -444,7 +440,7 @@ function Game({
       <div className="pokemon-nae-search-wrap">
         <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Pokémon non riconosciuto."?" is-wrong":"")}>
           <input ref={inputRef} value={query} onChange={event=>{autoSubmitRef.current="";setQuery(event.target.value);setConfirmed(false);setMessage("");}}
-            onKeyDown={event=>{if(event.key==="Enter"&&exactMatch&&exactMatchIsAmbiguous&&!pending&&!paused&&!isFinishing){event.preventDefault();void submit(exactMatch.name,exactMatch);}}}
+            onKeyDown={event=>{if(event.key==="Enter"&&exactMatch&&exactMatchIsAmbiguous&&!pending&&!paused&&!isFinishing){event.preventDefault();enqueuePokemonSubmission(exactMatch.name,exactMatch);}}}
             placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false} disabled={paused||isFinishing}/>
           {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
           {pending&&<LoaderCircle size={15}/>}
