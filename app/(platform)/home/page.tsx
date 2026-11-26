@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import {HomeResumeActions} from "@/components/home-resume-actions";
+import {BrandQueenImage} from "@/components/drag-race/brand-queen-image";
 import {DRAG_RACE_BRAND_IMAGES} from "@/lib/drag-race/brand-art";
 import {createClient} from "@/lib/supabase/server";
 import {Music2,Gamepad2,Clapperboard,BookOpen,Trophy,Sparkles,Plus,ArrowUpRight,Clock3,Users} from "lucide-react";
@@ -45,7 +45,7 @@ export default async function PlatformHomePage(){
    </Link>
    <Link href="/drag-race" className="home-feature-card home-feature-drag">
     <span className="home-feature-copy"><small>RENQD × DRAG RACE</small><strong>Own your<br/><em>spotlight.</em></strong><span>Trixie · Naomi · Monét</span><b>Entra nel Werk Room <ArrowUpRight size={16}/></b></span>
-    <span className="home-feature-art home-feature-drag-art" aria-hidden="true"><img className="home-feature-queen home-feature-queen-one" src={DRAG_RACE_BRAND_IMAGES.trixie} alt="" referrerPolicy="no-referrer" decoding="async" onError={event=>{const image=event.currentTarget;if(image.dataset.fallbackUsed)return;image.dataset.fallbackUsed="true";image.src=DRAG_RACE_BRAND_IMAGES.trixieFallback;}}/><img className="home-feature-queen home-feature-queen-two" src={DRAG_RACE_BRAND_IMAGES.naomi} alt="" referrerPolicy="no-referrer" decoding="async"/><img className="home-feature-queen home-feature-queen-three" src={DRAG_RACE_BRAND_IMAGES.monet} alt="" referrerPolicy="no-referrer" decoding="async" onError={event=>{const image=event.currentTarget;if(image.dataset.fallbackUsed)return;image.dataset.fallbackUsed="true";image.src=DRAG_RACE_BRAND_IMAGES.monetFallback;}}/></span>
+    <span className="home-feature-art home-feature-drag-art" aria-hidden="true"><BrandQueenImage className="home-feature-queen home-feature-queen-one" src={DRAG_RACE_BRAND_IMAGES.trixie} fallbackSrc={DRAG_RACE_BRAND_IMAGES.trixieFallback}/><img className="home-feature-queen home-feature-queen-two" src={DRAG_RACE_BRAND_IMAGES.naomi} alt="" referrerPolicy="no-referrer" decoding="async"/><BrandQueenImage className="home-feature-queen home-feature-queen-three" src={DRAG_RACE_BRAND_IMAGES.monet} fallbackSrc={DRAG_RACE_BRAND_IMAGES.monetFallback}/></span>
     <span className="home-feature-arrow"><ArrowUpRight size={19}/></span>
    </Link>
   </section>
