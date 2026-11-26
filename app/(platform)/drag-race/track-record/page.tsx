@@ -7,7 +7,8 @@ export default async function TrackRecordPage(){
  const [t,r,f,profile]=await Promise.all([
   db.from("drag_race_track_record_templates").select("id,franchise_code,season_number,display_title,year,season_id,episodes,queens,source_metadata").order("franchise_code").order("season_number"),
   db.from("drag_race_track_records").select("id,title,season_id,visibility,updated_at,record_data").eq("owner_id",user.id).is("deleted_at",null).order("updated_at",{ascending:false}),
-  db.from("drag_race_franchises").select("code,name")
+  db.from("drag_race_franchises").select("code,name"),
+  db.from("profiles").select("role,status").eq("id",user.id).maybeSingle()
  ]);
  const franchiseNames=Object.fromEntries((f.data??[]).map(x=>[x.code,x.name]));
  const canSync=["OWNER","ADMIN","MODERATOR"].includes(String(profile.data?.role))&&profile.data?.status==="APPROVED";\n return <TrackRecordHub userId={user.id} templates={t.data??[]} records={r.data??[]} franchiseNames={franchiseNames} canSync={canSync}/>;
