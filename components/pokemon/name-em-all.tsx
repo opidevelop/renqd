@@ -214,7 +214,6 @@ function Game({
   const [activeSection,setActiveSection]=useState("gen-"+String((session.config.generations as number[]|undefined)?.[0]??1));
   const [selected,setSelected]=useState<PokemonSpecies|null>(null);
   const [hint,setHint]=useState<{nameLength:number;revealedPrefix:string;hintCount:number}|null>(null);
-  const autoSubmitRef=useRef("");
   const [collapsedGenerations,setCollapsedGenerations]=useState<Set<number>>(new Set());
   const [isFinishing,setIsFinishing]=useState(false);
   const inputRef=useRef<HTMLInputElement>(null);
@@ -349,17 +348,7 @@ function Game({
     setQuery("");setConfirmed(true);setMessage("Pokémon scoperto!");
     playPokemonSound("correct",soundEnabled);
   },[paused,isFinishing,found,queuedKeysRef,enqueueSubmission,soundEnabled]);
-  useEffect(()=>{
-    const normalized=normalizePokemonName(query);
-    if(!normalized||!exactMatch||exactMatchIsAmbiguous||paused||isFinishing)return;
-    if(autoSubmitRef.current===normalized)return;
-    autoSubmitRef.current=normalized;
-    if(found.has(exactMatch.id)||queuedKeysRef.current.has(exactMatch.id)){
-      setQuery("");setMessage("Hai già scoperto questo Pokémon!");
-      return;
-    }
-    enqueuePokemonSubmission(exactMatch.name,exactMatch);
-  },[query,exactMatch,exactMatchIsAmbiguous,paused,isFinishing,found,queuedKeysRef,enqueuePokemonSubmission]);
+
 
   useEffect(()=>{
     if(!pauseOverlay&&!confirmExit&&!confirmDelete)return;
@@ -444,7 +433,7 @@ function Game({
       </nav>
       <div className="pokemon-nae-search-wrap">
         <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Pokémon non riconosciuto."?" is-wrong":"")}>
-          <input ref={inputRef} value={query} onChange={event=>{autoSubmitRef.current="";setQuery(event.target.value);setConfirmed(false);setMessage("");}}
+          <input ref={inputRef} value={query} onChange={event=>{const value=event.target.value;setQuery(value);setConfirmed(false);setMessage("");const normalized=normalizePokemonName(value);if(!normalized||paused||isFinishing)return;const match=findExactPokemonMatch(species,normalized);if(!match||isAmbiguousPokemonName(species,match,normalized))return;if(found.has(match.id)||queuedKeysRef.current.has(match.id)){setQuery("");setMessage("Hai già scoperto questo Pokémon!");return;}enqueuePokemonSubmission(match.name,match);}}
             onKeyDown={event=>{if(event.key==="Enter"&&exactMatch&&exactMatchIsAmbiguous&&!paused&&!isFinishing){event.preventDefault();enqueuePokemonSubmission(exactMatch.name,exactMatch);}}}
             placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false} disabled={paused||isFinishing}/>
           {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
