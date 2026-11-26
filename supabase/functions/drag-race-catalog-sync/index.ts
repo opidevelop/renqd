@@ -120,6 +120,7 @@ Deno.serve(async(req:Request)=>{
      id:queenId,
      name:queen?.name??queenId,
      rank:appearance?.placement?String(appearance.placement):null,
+     winner:(season.winnerIds??[]).includes(queenId),
      results,
      ppe_episode_numbers:episodeList.filter(ep=>ep.counts_for_ppe).map(ep=>ep.number),
      elimination_episode:appearance?.eliminatedEpisodeId
