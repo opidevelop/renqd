@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { ProfileDashboard } from "@/components/profile-dashboard";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
+import { PokemonProfileArchive } from "@/components/pokemon/profile-archive";
+import { PokemonNameEmAllPreferences } from "@/components/pokemon/preferences";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,23 @@ export default async function ProfilePage() {
     profile = created;
   }
   if (!profile) return <div className="profile-page"><h1>Profilo non disponibile</h1><p>Riprova tra qualche istante.</p></div>;
+  const [{ data: pokemonRankings }, { data: pokemonPreferences }, { data: blockedRows }] = await Promise.all([
+    supabase.from("rankings").select("id,title,public_slug,mode,status,updated_at,settings")
+      .eq("user_id",user.id).in("mode",["POKEMON_ULTIMATE_FAVOURITE","POKEMON_NAME_EM_ALL"])
+      .is("deleted_at",null).order("updated_at",{ascending:false}).limit(500),
+    supabase.from("pokemon_name_em_all_preferences").select("default_visibility,notify_likes,notify_comments,highest_level,maestro_achieved_at").eq("user_id",user.id).maybeSingle(),
+    supabase.rpc("renqd_list_blocked_users"),
+  ]);
+  const blockedUsers = await Promise.all((blockedRows??[]).map(async (row:{user_id:string;username:string;display_name:string;avatar_url:string|null})=>({
+    userId:row.user_id,username:row.username,displayName:row.display_name||row.username,
+    avatarUrl:await getProfileMediaUrl(supabase,row.avatar_url),
+  })));
+  const pokemonSection = <>
+    <PokemonProfileArchive items={(pokemonRankings??[]) as Array<{id:string;title:string;public_slug:string|null;mode:string;status:string;updated_at:string;settings:Record<string,unknown>|null}>}
+      referenceNow={Date.now()} persistentHighestLevel={pokemonPreferences?.highest_level??null} maestroAchievedAt={pokemonPreferences?.maestro_achieved_at??null}/>
+    <PokemonNameEmAllPreferences defaultVisibility={(pokemonPreferences?.default_visibility??"PUBLIC") as "PUBLIC"|"PRIVATE"}
+      notifyLikes={pokemonPreferences?.notify_likes??true} notifyComments={pokemonPreferences?.notify_comments??true} blockedUsers={blockedUsers}/>
+  </>;
   const profileForUi = {
     ...profile,
     avatar_display_url: await getProfileMediaUrl(supabase, profile.avatar_url),
@@ -71,6 +90,6 @@ export default async function ProfilePage() {
   const followerProfiles = mapFollowEntries((followerRelations ?? []).map(row => row.follower_id));
   const followingProfiles = mapFollowEntries((followingRelations ?? []).map(row => row.followed_id));
   return <div className="profile-page">
-    <ProfileDashboard profile={profileForUi} collections={enrichedCollections} rankings={rankings} favorites={favorites} followerCount={followerCount ?? 0} followingCount={followingCount ?? 0} followerProfiles={followerProfiles} followingProfiles={followingProfiles} likeCount={likeCount ?? 0}/>
+    <ProfileDashboard profile={profileForUi} collections={enrichedCollections} rankings={rankings} favorites={favorites} followerCount={followerCount ?? 0} followingCount={followingCount ?? 0} followerProfiles={followerProfiles} followingProfiles={followingProfiles} likeCount={likeCount ?? 0} pokemonSection={pokemonSection}/>
   </div>;
 }
