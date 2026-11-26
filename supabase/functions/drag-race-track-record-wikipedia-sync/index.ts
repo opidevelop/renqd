@@ -124,7 +124,7 @@ async function searchPage(candidate:string):Promise<WikiSearchItem|null>{
  url.searchParams.set("srsearch",candidate);url.searchParams.set("srnamespace","0");
  url.searchParams.set("srlimit","8");url.searchParams.set("format","json");url.searchParams.set("formatversion","2");
  const response=await fetch(url,{headers:{"User-Agent":WIKI_AGENT},signal:AbortSignal.timeout(10000)});
- if(!response.ok)return null;
+ if(!response.ok)throw new Error("Wikipedia search HTTP "+response.status);
  const data=await response.json() as WikiSearchResponse;
  const results=data.query?.search??[];
  return results.find(item=>normalize(item.title)===normalize(candidate))??null;
@@ -135,14 +135,14 @@ async function pageRevision(title:string){
  url.searchParams.set("rvprop","ids|timestamp");url.searchParams.set("titles",title);
  url.searchParams.set("format","json");url.searchParams.set("formatversion","2");
  const response=await fetch(url,{headers:{"User-Agent":WIKI_AGENT},signal:AbortSignal.timeout(10000)});
- if(!response.ok)return null;
+ if(!response.ok){if(response.status===404)return null;throw new Error("Wikipedia revision HTTP "+response.status);}
  const data=await response.json() as WikiRevisionResponse;
  return data.query?.pages?.[0]?.revisions?.[0]??null;
 }
 async function fetchPageHtml(title:string){
  const path=encodeURIComponent(title.replace(/ /g,"_"));
  const response=await fetch("https://en.wikipedia.org/api/rest_v1/page/html/"+path,{headers:{"User-Agent":WIKI_AGENT},signal:AbortSignal.timeout(12000)});
- return response.ok?await response.text():null;
+ if(response.status===404)return null;if(!response.ok)throw new Error("Wikipedia page HTTP "+response.status);return await response.text();
 }
 Deno.serve(async(req:Request)=>{
  if(req.method!=="POST")return reply({error:"Method not allowed"},405);
