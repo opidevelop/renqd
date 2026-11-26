@@ -1992,3 +1992,25 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Deployment Production READY: `dpl_CM3CqHxJ9EGecaSW6t5HDKm32TcW`, commit `d6acc9f3dfe849abb210724ad35fd0b1ccd8a118`.
 - Verificato l'alias Vercel: `renqd.app` ora punta a `dpl_CM3CqHxJ9EGecaSW6t5HDKm32TcW`; anche `www.renqd.app` reindirizza al dominio principale sullo stesso deployment.
 - La verifica automatica della build è superata. Non è stato possibile effettuare un collaudo visuale autenticato nel browser collegato in questa sessione; chiedere un refresh completo sul dispositivo e confermare l'interazione reale del pulsante Crea.
+
+
+## Daily Red e rifiniture Name ’Em All — 26 novembre 2026
+
+### Daily Red
+- Aggiunta la card «Daily Red» nell'hub Pokémon con icona dedicata e descrizione della sfida quotidiana.
+- Aggiunta la route autenticata `/pokemon/daily-red`, riutilizzando il layout e il componente delle sfide quotidiane.
+- Aggiunto l'iframe persistente su `https://daily-red.com/` al contenitore condiviso di Doku/Connections; resta disponibile il link esterno in nuova scheda.
+- Aggiunto il codice `DAILY_RED` al registro `pokemon_daily_completions`, al controllo RPC e all'azione server. La migrazione `20261126095000_pokemon_daily_red_completion.sql` è stata applicata al progetto Supabase live.
+- Verifica SQL live: constraint `pokemon_daily_completions_game_mode_check` ammette DOKU, CONNECTIONS e DAILY_RED; la RPC aggiornata mantiene il controllo `private.is_approved_user()` e la data Europe/Rome.
+
+### Name ’Em All
+- Solo: la scheda di una specie non scoperta non mostra più nome, artwork, numero, tipo o forme. Mostra esclusivamente il pannello di aiuto ortografico e il pulsante per rivelare progressivamente le lettere. Le schede delle specie scoperte mantengono i dettagli precedenti.
+- In Solo, multiplayer individuale e condiviso, le celle non scoperte mostrano «???» al posto di «Pokémon».
+- Aggiunto lo stato di compressione indipendente alle sezioni speciali, oltre alle generazioni, in tutte le tre modalità.
+- Aggiunte regole CSS esplicite per garantire contrasto testo/sfondo nei pulsanti dei modal di aiuto e pausa.
+
+### Verifiche e limiti
+- Modifiche applicative e migrazione sono su `main`; deployment Production associato al commit `17be7f4c69398fe2ed74bf0a8a41463c9546b6aa` avviato, build in corso al momento dell'aggiornamento.
+- La compilazione TypeScript è stata avviata dopo la compilazione Next.js; attendere lo stato finale del deployment prima di dichiarare il rilascio completato.
+- L'incorporamento Daily Red è stato configurato con iframe e fallback esterno; non è ancora stato possibile effettuare una prova runtime autenticata per confermare che il provider consenta l'embed e che il gioco funzioni correttamente dentro Renqd.
+- Restano da collaudare nel browser: aiuti Solo (lettera per lettera senza spoiler), modal multiplayer, compressione di tutte le sezioni speciali, pulsanti pausa e Daily Red su desktop/mobile.
