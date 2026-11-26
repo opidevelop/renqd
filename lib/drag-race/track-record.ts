@@ -28,7 +28,7 @@ export type TrackRecordData = {
 const isElimination = (placement: string | null) => {
   if (!placement) return false;
   const value = placement.toUpperCase();
-  return value.includes("ELIM") || value.includes("QUIT") || value.includes("DISQ") || value.includes("OUT") || value === "DEPT";
+  return value.includes("ELIM") || value.includes("QUIT") || value.includes("DISQ") || value === "DEPT";
 };
 export function calculateTrackRecordPPE(queen: TrackRecordQueen, episodes: TrackRecordEpisode[], rules: TrackRecordPlacementScore[], custom: TrackRecordData["custom_placements"] = []) {
   const scoreMap = new Map<string, number>();
