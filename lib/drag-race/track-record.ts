@@ -5,18 +5,15 @@ export type TrackRecordPlacementScore = {
   color: string;
   sort_order: number;
 };
-export type TrackRecordEpisode = { number: number; title: string; counts_for_ppe?: boolean };
-export type TrackRecordEpisodeFacts = { mini_challenge_winner?: boolean; maxi_challenge_winner?: boolean; listed_top?: boolean; listed_bottom?: boolean; lipsync_participant?: boolean; lipsync_winner?: boolean; lipsync_eliminated?: boolean; eliminated_this_episode?: boolean };
-export type TrackRecordResult = { episode: number; placement: string | null; facts?: TrackRecordEpisodeFacts };
+export type TrackRecordEpisode = { number: number; title: string; counts_for_ppe?: boolean; mini_challenge?: string | null; maxi_challenge?: string | null; lip_sync_song?: string | null };
+export type TrackRecordResult = { episode: number; placement: string | null };
 export type TrackRecordQueen = {
   id?: string;
   name: string;
   image_url?: string | null;
-  rank?: string | null;
   winner?: boolean;
   results: TrackRecordResult[];
   ppe_episode_numbers?: number[];
-  elimination_episode?: number | null;
   elimination_tie_order?: number | null;
 };
 export type TrackRecordData = {
@@ -26,7 +23,7 @@ export type TrackRecordData = {
   episodes: TrackRecordEpisode[];
   queens: TrackRecordQueen[];
   custom_placements?: Array<{ placement_key: string; label: string; score: number; color: string }>;
-  source_metadata?: { source_id?: string; source_version?: string; source_url?: string; placement_completeness?: string; placement_note?: string; wikimedia_status?: string; wikimedia_attempted_at?: string; wikimedia_page_title?: string; wikimedia_source_url?: string; wikimedia_revision_id?: number | null; wikimedia_revision_timestamp?: string | null; wikimedia_license?: string; wikimedia_license_url?: string; wikimedia_author?: string; wikimedia_modifications?: string };
+  source_metadata?: { source_id?: string; source_version?: string; source_url?: string; generated_at?: string; placement_mode?: "MANUAL" };
 };
 const rankNumber = (value?: string | null) => {
   if (!value) return Number.MAX_SAFE_INTEGER;
@@ -49,7 +46,7 @@ export function calculateTrackRecordPPE(queen: TrackRecordQueen, episodes: Track
 export function sortTrackRecordQueens(data: TrackRecordData, rules: TrackRecordPlacementScore[]) {
   const custom = data.custom_placements ?? [];
   const rows = data.queens.map(queen => {
-    const elimination = queen.elimination_episode ?? queen.results.find(result => isElimination(result.placement))?.episode ?? null;
+    const elimination = queen.results.find(result => isElimination(result.placement))?.episode ?? null;
     const ppe = calculateTrackRecordPPE(queen, data.episodes, rules, custom);
     return { ...queen, ppe, elimination_episode: elimination, eliminated: elimination !== null };
   });
@@ -58,10 +55,10 @@ export function sortTrackRecordQueens(data: TrackRecordData, rules: TrackRecordP
     if (!a.eliminated) {
       const score = (b.ppe ?? -1) - (a.ppe ?? -1);
       if (Math.abs(score) > 0.000001) return score;
-      return rankNumber(a.rank) - rankNumber(b.rank) || a.name.localeCompare(b.name);
+      return a.name.localeCompare(b.name);
     }
     return (a.elimination_episode ?? 9999) - (b.elimination_episode ?? 9999)
-      || (a.elimination_tie_order ?? rankNumber(a.rank)) - (b.elimination_tie_order ?? rankNumber(b.rank))
+      || (a.elimination_tie_order ?? 9999) - (b.elimination_tie_order ?? 9999)
       || a.name.localeCompare(b.name);
   });
   return rows.map((queen, index) => ({ ...queen, calculated_rank: index + 1 }));
