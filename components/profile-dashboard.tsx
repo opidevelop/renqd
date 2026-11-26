@@ -60,9 +60,9 @@ type Renq = { id: string; title: string; public_slug: string; mode: string; sett
 type CollectionSearchResult = { id: string; title: string; coverImage: string | null; rows: { title: string; image_url?: string | null; rank_position?: number | null }[] };
 type FollowProfile = { userId: string; username: string | null; displayName: string; avatarUrl: string | null };
 
-export function ProfileDashboard({ profile: initialProfile, collections: initialCollections, rankings, favorites, followerCount, followingCount, followerProfiles, followingProfiles, likeCount, pokemonSection }: {
+export function ProfileDashboard({ profile: initialProfile, collections: initialCollections, rankings, favorites, followerCount, followingCount, followerProfiles, followingProfiles, likeCount, pokemonSection, dragRaceSection }: {
   profile: PublicProfile; collections: Collection[]; rankings: Renq[]; favorites: Renq[];
-  followerCount: number; followingCount: number; followerProfiles: FollowProfile[]; followingProfiles: FollowProfile[]; likeCount: number; pokemonSection: ReactNode;
+  followerCount: number; followingCount: number; followerProfiles: FollowProfile[]; followingProfiles: FollowProfile[]; likeCount: number; pokemonSection: ReactNode; dragRaceSection: ReactNode;
 }) {
   const router=useRouter();
   const searchParams=useSearchParams();
@@ -93,7 +93,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   const [collectionSelections, setCollectionSelections] = useState<Record<string,string[]>>({});
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [activeProfileTab,setActiveProfileTab]=useState<"COLLECTIONS"|"RENQ"|"POKEMON">(() => searchParams.get("section")==="pokemon"?"POKEMON":"RENQ");
+  const [activeProfileTab,setActiveProfileTab]=useState<"COLLECTIONS"|"RENQ"|"POKEMON"|"DRAG_RACE">(() => searchParams.get("section")==="pokemon"?"POKEMON":searchParams.get("section")==="drag-race"?"DRAG_RACE":"RENQ");
   const [renqPage,setRenqPage]=useState(1);
   const renqPageSize=6;
   const renqPageCount=Math.max(1,Math.ceil(rankings.length/renqPageSize));
@@ -317,6 +317,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       <button type="button" className={activeProfileTab==="COLLECTIONS"?"is-active":""} aria-pressed={activeProfileTab==="COLLECTIONS"} onClick={()=>setActiveProfileTab("COLLECTIONS")}>Collezioni</button>
       <button type="button" className={activeProfileTab==="RENQ"?"is-active":""} aria-pressed={activeProfileTab==="RENQ"} onClick={()=>setActiveProfileTab("RENQ")}>Renq</button>
       <button type="button" className={activeProfileTab==="POKEMON"?"is-active":""} aria-pressed={activeProfileTab==="POKEMON"} onClick={()=>setActiveProfileTab("POKEMON")}>Pokémon</button>
+      <button type="button" className={activeProfileTab==="DRAG_RACE"?"is-active":""} aria-pressed={activeProfileTab==="DRAG_RACE"} onClick={()=>setActiveProfileTab("DRAG_RACE")}>Drag Race</button>
       <Link href="/drag-race/track-record" className="profile-tab-link">Track Record <ArrowUpRight size={13}/></Link>
     </nav>
 

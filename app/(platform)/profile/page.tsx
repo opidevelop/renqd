@@ -3,6 +3,7 @@ import { ProfileDashboard } from "@/components/profile-dashboard";
 import { getProfileMediaUrl } from "@/lib/supabase/profile-media";
 import { PokemonProfileArchive } from "@/components/pokemon/profile-archive";
 import { PokemonNameEmAllPreferences } from "@/components/pokemon/preferences";
+import { DragRaceProfileArchive } from "@/components/drag-race/profile-archive";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,12 @@ export default async function ProfilePage() {
     supabase.from("pokemon_name_em_all_preferences").select("default_visibility,notify_likes,notify_comments,highest_level,maestro_achieved_at").eq("user_id",user.id).maybeSingle(),
     supabase.rpc("renqd_list_blocked_users"),
   ]);
+  const [{data:dragRaceStats},{data:dragRaceSessions},{data:dragRaceResults},{data:dragRaceSavedSeasons}] = await Promise.all([
+    supabase.from("drag_race_user_stats").select("*").eq("user_id",user.id).order("last_played_at",{ascending:false}),
+    supabase.from("drag_race_sessions").select("id,mode,status,config,state,summary,created_at,completed_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(100),
+    supabase.from("drag_race_results").select("id,session_id,mode,score,wins,losses,errors,hints,duration_seconds,accuracy,summary,completed_at").eq("user_id",user.id).order("completed_at",{ascending:false}).limit(100),
+    supabase.from("drag_race_saved_seasons").select("id,title,created_at,statistics").eq("owner_id",user.id).order("created_at",{ascending:false}).limit(100),
+  ]);
   const blockedUsers = await Promise.all((blockedRows??[]).map(async (row:{user_id:string;username:string;display_name:string;avatar_url:string|null})=>({
     userId:row.user_id,username:row.username,displayName:row.display_name||row.username,
     avatarUrl:await getProfileMediaUrl(supabase,row.avatar_url),
@@ -35,6 +42,11 @@ export default async function ProfilePage() {
     <PokemonNameEmAllPreferences defaultVisibility={(pokemonPreferences?.default_visibility??"PUBLIC") as "PUBLIC"|"PRIVATE"}
       notifyLikes={pokemonPreferences?.notify_likes??true} notifyComments={pokemonPreferences?.notify_comments??true} blockedUsers={blockedUsers}/>
   </>;
+  const dragRaceSection = <DragRaceProfileArchive username={profile.username}
+    stats={(dragRaceStats??[]) as Parameters<typeof DragRaceProfileArchive>[0]["stats"]}
+    sessions={(dragRaceSessions??[]) as Parameters<typeof DragRaceProfileArchive>[0]["sessions"]}
+    results={(dragRaceResults??[]) as Parameters<typeof DragRaceProfileArchive>[0]["results"]}
+    savedSeasons={(dragRaceSavedSeasons??[]) as Parameters<typeof DragRaceProfileArchive>[0]["savedSeasons"]}/>;
   const profileForUi = {
     ...profile,
     avatar_display_url: await getProfileMediaUrl(supabase, profile.avatar_url),
@@ -90,6 +102,6 @@ export default async function ProfilePage() {
   const followerProfiles = mapFollowEntries((followerRelations ?? []).map(row => row.follower_id));
   const followingProfiles = mapFollowEntries((followingRelations ?? []).map(row => row.followed_id));
   return <div className="profile-page">
-    <ProfileDashboard profile={profileForUi} collections={enrichedCollections} rankings={rankings} favorites={favorites} followerCount={followerCount ?? 0} followingCount={followingCount ?? 0} followerProfiles={followerProfiles} followingProfiles={followingProfiles} likeCount={likeCount ?? 0} pokemonSection={pokemonSection}/>
+    <ProfileDashboard profile={profileForUi} collections={enrichedCollections} rankings={rankings} favorites={favorites} followerCount={followerCount ?? 0} followingCount={followingCount ?? 0} followerProfiles={followerProfiles} followingProfiles={followingProfiles} likeCount={likeCount ?? 0} pokemonSection={pokemonSection} dragRaceSection={dragRaceSection}/>
   </div>;
 }
