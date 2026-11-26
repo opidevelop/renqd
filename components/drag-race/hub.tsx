@@ -7,7 +7,7 @@ type Props={counts:{franchises:number;queens:number;seasons:number;episodes:numb
 const modules=[
  {title:"Season Simulator",desc:"Crea una stagione, costruisci il cast e simula ogni episodio.",icon:Users},
  {title:"Track Record",desc:"Consulta e modifica le schede delle stagioni e la Hall of Fame.",icon:Trophy},
- {title:"Guess Them All",desc:"Riconosci tutte le Queen dei franchise selezionati.",icon:Gamepad2},
+ {title:"Guess Them All",desc:"Riconosci tutte le Queen dei franchise selezionati.",icon:Gamepad2,href:"/drag-race/guess-them-all"},
  {title:"Lalaparuza",desc:"Tre sfide musicali: Guess the Lipsync, Slayoff e Lipsync for Your Life.",icon:Music2,href:"/drag-race/lalaparuza"}
 ];
 export function DragRaceHub({counts,canSync,lastSyncedAt,sourceVersion}:Props){
