@@ -1,5 +1,5 @@
 "use client";
-import {useState} from "react";
+import {useState,type FormEvent} from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {useRouter} from "next/navigation";
@@ -28,7 +28,7 @@ export function TrackRecordHub({userId,templates,records,franchiseNames,canSync,
   if(customQueenList.some(q=>q.name.toLowerCase()===name.toLowerCase())){setNotice("Questa Queen custom è già stata aggiunta.");return;}
   setCustomQueenList(current=>[...current,{id:"custom-"+crypto.randomUUID(),name,image_url:imageUrl}]);setCustomQueenName("");setCustomQueenImage("");setNotice("");
  }
- async function createCustomSeason(event:React.FormEvent<HTMLFormElement>){
+ async function createCustomSeason(event:FormEvent<HTMLFormElement>){
   event.preventDefault();if(creatingCustom)return;
   const title=customTitle.trim(),seasonNumber=Number(customSeasonNumber),episodeCount=Number(customEpisodeCount),year=customYear.trim()?Number(customYear):null;
   if(!title||title.length>120||!Number.isInteger(seasonNumber)||seasonNumber<1||!Number.isInteger(episodeCount)||episodeCount<1||episodeCount>50||(year!==null&&(!Number.isInteger(year)||year<1950||year>2100))){setNotice("Controlla titolo, numero stagione, anno ed episodi.");return;}
