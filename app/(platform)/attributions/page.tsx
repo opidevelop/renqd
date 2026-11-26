@@ -23,9 +23,14 @@ const sources = [
     license: "Dati e immagini sono soggetti ai termini e alle condizioni di TMDB.",
     attribution: "This product uses the TMDB API but is not endorsed or certified by TMDB.",
   },
-];
-
-export default function AttributionsPage() {
+  {
+    name: "Drag Race MCP — tkalejandro",
+    description: "Catalogo strutturato community-driven utilizzato come base per franchise, Queen, stagioni, episodi e lipsync. Versione integrata: 1.1.1 (dati pubblicati nell'agosto 2026).",
+    url: "https://github.com/tkalejandro/drag-race-mcp",
+    license: "MIT License. La licenza completa è conservata in public/licenses/drag-race-mcp-MIT.txt. I metadati musicali e le preview vengono risolti separatamente tramite iTunes Search API; le immagini non sono incluse nel pacchetto.",
+    attribution: "Data source: tkalejandro/drag-race-mcp, Copyright (c) 2026 tkalejandro. Renqd conserva l'identificativo e il collegamento alla fonte per i record importati. La copertura può richiedere aggiornamenti e verifica editoriale."
+  },
+];\n\nexport default function AttributionsPage() {
   return <div className="home-app attributions-page">
     <Link href="/home" className="attributions-back"><ArrowLeft size={16}/> Torna alla Home</Link>
     <header className="attributions-heading">
