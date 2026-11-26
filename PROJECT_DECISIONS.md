@@ -727,3 +727,13 @@ L'utente ha approvato la specifica funzionale finale Drag Race v1.0 e autorizzat
 Vincoli d'integrazione approvati: colore rosa; banner Home; collegamento risultati nel profilo; voce sidebar desktop; nessuna voce Drag Race nella bottom navigation mobile; rispetto della visual reference Renqd e riuso dei dialog condivisi. Le tre sotto-modalità Lalaparuza sono accessibili solo ad autenticati, con catalogo Renqd/Apple Music e impostazioni condivise.
 
 La progettazione approvata non autorizza a riaprire le decisioni consolidate. Dettagli tecnici non definiti vanno risolti in coerenza con la specifica e documentati, senza introdurre modifiche distruttive o non necessarie.
+
+
+## Decisioni approvate il 26 novembre 2026 — fonti dati Drag Race e Track Record
+
+1. Il workbook «Copia di Drag Race.xlsx» è esclusivamente un esempio di Track Record popolato e non costituisce una fonte di dati del catalogo. Non importare dal workbook Queen, cast, stagioni, episodi, placement, eliminazioni, vincitrici o lipsync.
+2. La scala PPE del foglio `Punteggi` è confermata come valida e resta la scala predefinita di scoring in Renqd.
+3. I template ufficiali Track Record devono essere generati automaticamente dai dati stagione/episodio/Queen del catalogo Drag Race sincronizzato. I template non devono essere ricavati dai fogli stagione del workbook.
+4. I fatti sorgente (challenge winner, top/bottom, lipsync e informazioni di eliminazione) devono essere conservati separatamente dai placement PPE. Non trasformare un fatto in WIN/HIGH/SAFE/LOW/BTM2 senza una corrispondenza esplicita e non ambigua nella fonte.
+5. Un evento di eliminazione può essere precompilato come `ELIM` soltanto quando la fonte strutturata dichiara esplicitamente l'episodio di eliminazione. I placement non disponibili restano vuoti e modificabili.
+6. Non effettuare scraping o accesso automatizzato a Fandom senza autorizzazione scritta di Fandom. L'uso automatico di una fonte esterna deve rispettarne termini, licenza, attribuzione e limiti tecnici.
