@@ -18,7 +18,7 @@ export async function GET(request:Request){
   const response=await fetch(url,{headers:{"User-Agent":"Renqd/1.0"},next:{revalidate:604800}});
   if(response.ok){
    const payload=await response.json() as {query?:{pages?:Record<string,CommonsPage>}};const pages=Object.values(payload.query?.pages??{});
-   const allowed=pages.map(p=>p.imageinfo?.[0]).filter(Boolean).filter(info=>{
+   const allowed=pages.flatMap(p=>p.imageinfo??[]).filter(info=>{
     const license=String(info.extmetadata?.LicenseShortName?.value??"").toLowerCase();
     return license.startsWith("cc0")||license.includes("public domain");
    }).sort((a,b)=>Number(Boolean(b.thumburl))-Number(Boolean(a.thumburl)));
