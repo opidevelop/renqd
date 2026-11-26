@@ -769,3 +769,10 @@ Decisioni approvate dall'utente durante la revisione visuale:
 7. **Collezioni profilo:** il dettaglio di una collezione deve mantenere sempre la shell autenticata Renqd, inclusi header superiore, menu laterale e navigazione mobile.
 
 Queste modifiche sono visuali e di navigazione: non autorizzano modifiche alle regole di gioco o ai dati Pokémon esistenti.
+
+
+## Decisione UX aggiuntiva — selezione Drag Race (26 novembre 2026)
+
+1. La selezione dei franchise deve presentare card visuali con copertina/logo del franchise affiancata al nome; la card deve rendere immediatamente riconoscibile l'edizione selezionabile.
+2. Le liste di selezione delle Queen e le anteprime del cast devono mostrare il ritratto accanto al nome. Le immagini esterne devono provenire da fonti con licenza compatibile e attribuzione consultabile; quando non esiste una fotografia riutilizzabile, usare un fallback grafico coerente anziché un'immagine non autorizzata.
+3. Il CTA delle card delle modalità Drag Race deve essere **«Gioca»**, non «Disponibile».

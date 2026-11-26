@@ -2223,3 +2223,11 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - **Track Record E2E:** da eseguire dopo sincronizzazione catalogo, con template reali e più account; la regola resta personale/manuale e non deve importare risultati ufficiali.
 - **Lalaparuza:** verificare E2E tutte le modalità dopo il catalogo; restano da completare badge/notifiche e verifiche finali di privacy, condivisione e storico.
 - **Release:** nessun commit/push/deploy in questo ciclo. Prima del rilascio: test desktop/mobile E2E, audit RLS/database, aggiornamento documentazione e singolo deploy Production cumulativo.
+
+
+## Aggiornamento UX Drag Race — immagini e CTA (26 novembre 2026)
+
+- Il selettore franchise usa card con artwork/logo e collegamento alla fonte/licenza; la ricerca immagini Commons considera solo licenze riutilizzabili (CC0, pubblico dominio, CC BY, CC BY-SA e GFDL) e prevede un fallback brandizzato.
+- Le immagini Queen vengono risolte da Wikimedia Commons con fallback; i selettori e le anteprime del cast devono mostrarle accanto al nome. Le fotografie non disponibili con licenza compatibile restano rappresentate da un fallback, senza ricorrere a immagini non autorizzate.
+- Il CTA delle modalità Drag Race è «Gioca».
+- Il catalogo sorgente Drag Race non contiene fotografie Queen: l'arricchimento visuale è separato dai dati biografici e dai risultati competitivi.
