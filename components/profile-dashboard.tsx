@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -64,6 +65,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   followerCount: number; followingCount: number; followerProfiles: FollowProfile[]; followingProfiles: FollowProfile[]; likeCount: number; pokemonSection: ReactNode;
 }) {
   const router=useRouter();
+  const searchParams=useSearchParams();
 
   const { confirm, dialog } = useConfirmDialog();
   const [profile, setProfile] = useState(initialProfile);
@@ -91,8 +93,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   const [collectionSelections, setCollectionSelections] = useState<Record<string,string[]>>({});
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [activeProfileTab,setActiveProfileTab]=useState<"COLLECTIONS"|"RENQ"|"POKEMON">("RENQ");
-  useEffect(()=>{if(new URLSearchParams(window.location.search).get("section")==="pokemon")setActiveProfileTab("POKEMON");},[]);
+  const [activeProfileTab,setActiveProfileTab]=useState<"COLLECTIONS"|"RENQ"|"POKEMON">(() => searchParams.get("section")==="pokemon"?"POKEMON":"RENQ");
   const [renqPage,setRenqPage]=useState(1);
   const renqPageSize=6;
   const renqPageCount=Math.max(1,Math.ceil(rankings.length/renqPageSize));
