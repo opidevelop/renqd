@@ -93,6 +93,7 @@ with check (
         and parent.track_record_id=drag_race_track_record_comments.track_record_id
         and parent.parent_comment_id is null
         and parent.deleted_at is null
+        and not private.is_user_blocked_with(parent.author_id)
     )
   )
 );
@@ -132,6 +133,7 @@ with check (
     where c.id=comment_id
       and c.deleted_at is null
       and c.author_id<>user_id
+      and not private.is_user_blocked_with(c.author_id)
       and private.can_social_drag_race_track_record(c.track_record_id)
   )
 );
@@ -294,7 +296,7 @@ begin
   if v_details is not null and char_length(v_details)>1000 then raise exception 'Dettagli troppo lunghi' using errcode='22023'; end if;
   select owner_id,visibility into v_owner,v_visibility from public.drag_race_track_records
   where id=p_record_id and deleted_at is null and hidden_at is null for share;
-  if not found or v_visibility<>'PUBLIC' or not private.can_view_drag_race_track_record(p_record_id) then raise exception 'Scheda non segnalabile' using errcode='22023'; end if;
+  if not found or v_visibility<>'PUBLIC' or not private.can_social_drag_race_track_record(p_record_id) then raise exception 'Scheda non segnalabile' using errcode='22023'; end if;
   if v_owner=v_user then raise exception 'Non puoi segnalare una tua scheda' using errcode='42501'; end if;
   insert into public.content_reports(reporter_id,target_type,target_id,reason,details,status)
   values(v_user,'DRAG_RACE_TRACK_RECORD',p_record_id,v_reason,v_details,'OPEN') returning id into v_report;
@@ -321,7 +323,7 @@ begin
   if v_details is not null and char_length(v_details)>1000 then raise exception 'Dettagli troppo lunghi' using errcode='22023'; end if;
   select * into v_comment from public.drag_race_track_record_comments
   where id=p_comment_id and deleted_at is null;
-  if not found or v_comment.author_id=v_user or not private.can_social_drag_race_track_record(v_comment.track_record_id) then raise exception 'Commento non segnalabile' using errcode='42501'; end if;
+  if not found or v_comment.author_id=v_user or not private.can_social_drag_race_track_record(v_comment.track_record_id) or private.is_user_blocked_with(v_comment.author_id) then raise exception 'Commento non segnalabile' using errcode='42501'; end if;
   insert into public.content_reports(reporter_id,target_type,target_id,reason,details,status)
   values(v_user,'DRAG_RACE_TRACK_RECORD_COMMENT',p_comment_id,v_reason,v_details,'OPEN') returning id into v_report;
   return v_report;
