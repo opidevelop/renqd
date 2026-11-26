@@ -2144,3 +2144,15 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Dopo il deploy UI, un account staff dovrà sincronizzare il catalogo per generare i template di struttura. Il collaudo E2E di commenti/like/report richiede una Track Record reale e utenti autenticati; non è ancora stato eseguito.
 - Backlog successivo: collaudo E2E con catalogo e utenti; confronto multi-stagione/leaderboard Track Record (esplicitamente futuro); completamento delle altre modalità Drag Race ancora aperte, in particolare Season Simulator e funzioni di sessione/risultati.
 
+
+### Revisione visuale Pokémon / Drag Race e shell collezioni (26 novembre 2026)
+
+- Home: due card hub affiancate desktop, con movimento/hover condiviso e impilamento responsive; Pokémon blu con Glaceon, Leafeon, Espeon; Drag Race rosa/nero con Trixie Mattel, Naomi Smalls, Monét X Change.
+- /pokemon: hero coordinato con home, blu, descrizione breve e tag; modalità Pokémon in palette blu.
+- /drag-race: hero minimale coordinato; modalità presentate come card sul modello di /pokemon; rimosso il pannello con metriche del catalogo condiviso.
+- Sincronizzazione catalogo mantenuta perché necessaria a popolare i dati consumati dalle modalità; per OWNER/ADMIN/MODERATOR è disponibile in fondo alla pagina in un pannello richiudibile. Non è mostrata come contenuto principale.
+- Restyling trasversale CSS per giochi, Lalaparuza, Guess Them All, profili Queen e Track Record: card, stati hover/focus, transizioni, animazioni d'ingresso e rispetto di `prefers-reduced-motion`.
+- Foto Queen nelle card Drag Race provenienti da Wikimedia Commons; attribuzioni e licenze CC BY 2.0 aggiunte a `/attributions`.
+- `/collections/[slug]`: il layout ora carica la stessa `PlatformShell` autenticata delle altre pagine, mantenendo header, sidebar e navigazione mobile.
+- Modifiche UI e CSS committate direttamente su `main`. Verifica CI e deployment Vercel da completare; non dichiarare queste modifiche production-ready finché non sono superati i controlli e pubblicate.
+
