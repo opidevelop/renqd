@@ -1,5 +1,6 @@
 "use client";
-import {useState} from "react";
+import {useMemo,useState} from "react";
+import {createClient} from "@/lib/supabase/client";
 import Link from "next/link";
 import {ArrowUpRight,Crown,RefreshCw,Music2,Trophy,Users,Gamepad2,LoaderCircle} from "lucide-react";
 type Props={counts:{franchises:number;queens:number;seasons:number;episodes:number;lipsyncs:number;eligible:number};canSync:boolean;lastSyncedAt:string|null;sourceVersion:string};
@@ -10,8 +11,8 @@ const modules=[
  {title:"Lalaparuza",desc:"Tre sfide musicali: Guess the Lipsync, Slayoff e Lipsync for Your Life.",icon:Music2,href:"/drag-race/lalaparuza"}
 ];
 export function DragRaceHub({counts,canSync,lastSyncedAt,sourceVersion}:Props){
- const [busy,setBusy]=useState(false);const [message,setMessage]=useState("");
- async function sync(){setBusy(true);setMessage("");try{const r=await fetch("/api/drag-race/catalog/sync",{method:"POST"});const data=await r.json();if(!r.ok)throw new Error(data.error||"Sincronizzazione non riuscita");setMessage(data.synced?("Catalogo aggiornato: "+data.queens+" Queen, "+data.seasons+" stagioni, "+data.lipsyncs+" lipsync."): "Catalogo già aggiornato o sincronizzazione in corso.");if(data.synced)window.location.reload();}catch(e){setMessage(e instanceof Error?e.message:"Errore di sincronizzazione");}finally{setBusy(false);}}
+ const [busy,setBusy]=useState(false);const [message,setMessage]=useState("");const supabase=useMemo(()=>createClient(),[]);
+ async function sync(){setBusy(true);setMessage("");try{const {data,error}=await supabase.functions.invoke("drag-race-catalog-sync",{body:{force:true}});if(error)throw new Error(error.message||"Sincronizzazione non riuscita");setMessage(data.synced?("Catalogo aggiornato: "+data.queens+" Queen, "+data.seasons+" stagioni, "+data.lipsyncs+" lipsync."): "Catalogo già aggiornato o sincronizzazione in corso.");if(data.synced)window.location.reload();}catch(e){setMessage(e instanceof Error?e.message:"Errore di sincronizzazione");}finally{setBusy(false);}}
  return <main className="drag-race-page">
   <section className="drag-race-hero"><div className="drag-race-hero-copy"><span>RENQD ORIGINAL · MACRO-CATEGORIA</span><h1>RuPaul’s <em>Drag Race.</em></h1><p>Il mondo delle Queen, delle stagioni iconiche e delle lipsync battle. Crea, ricorda e mettiti alla prova.</p><div className="drag-race-hero-meta"><span><Crown size={15}/> 24 franchise previsti</span><span><Music2 size={15}/> Lipsync &amp; musica</span></div></div><div className="drag-race-hero-mark" aria-hidden="true"><b>DR</b><span>THE<br/>ART OF<br/>DRAG</span></div></section>
   <section className="drag-race-catalog"><div><span className="drag-race-kicker">CATALOGO CONDIVISO</span><h2>Un universo di <em>Queen.</em></h2><p>Dati strutturati con provenienza verificabile. Le lipsync senza metadati musicali completi restano fuori dalle estrazioni che richiedono una preview.</p></div>

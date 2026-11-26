@@ -18,7 +18,7 @@ export async function GET(request:Request){
    const payload=await response.json();const pages=Object.values(payload.query?.pages??{}) as any[];
    const allowed=pages.map(p=>p.imageinfo?.[0]).filter(Boolean).filter(info=>{
     const license=String(info.extmetadata?.LicenseShortName?.value??"").toLowerCase();
-    return license.includes("cc by-sa")||license.includes("cc by")||license==="cc0"||license.includes("public domain");
+    return license.startsWith("cc0")||license.includes("public domain");
    }).sort((a,b)=>Number(Boolean(b.thumburl))-Number(Boolean(a.thumburl)));
    const image=allowed.find(x=>x.thumburl)?.thumburl??allowed.find(x=>x.url)?.url;
    if(image)return NextResponse.redirect(image,{headers});
