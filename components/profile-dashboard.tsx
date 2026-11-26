@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -58,9 +59,9 @@ type Renq = { id: string; title: string; public_slug: string; mode: string; sett
 type CollectionSearchResult = { id: string; title: string; coverImage: string | null; rows: { title: string; image_url?: string | null; rank_position?: number | null }[] };
 type FollowProfile = { userId: string; username: string | null; displayName: string; avatarUrl: string | null };
 
-export function ProfileDashboard({ profile: initialProfile, collections: initialCollections, rankings, favorites, followerCount, followingCount, followerProfiles, followingProfiles, likeCount }: {
+export function ProfileDashboard({ profile: initialProfile, collections: initialCollections, rankings, favorites, followerCount, followingCount, followerProfiles, followingProfiles, likeCount, pokemonSection }: {
   profile: PublicProfile; collections: Collection[]; rankings: Renq[]; favorites: Renq[];
-  followerCount: number; followingCount: number; followerProfiles: FollowProfile[]; followingProfiles: FollowProfile[]; likeCount: number;
+  followerCount: number; followingCount: number; followerProfiles: FollowProfile[]; followingProfiles: FollowProfile[]; likeCount: number; pokemonSection: ReactNode;
 }) {
   const router=useRouter();
   const { confirm, dialog } = useConfirmDialog();
@@ -89,6 +90,11 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   const [collectionSelections, setCollectionSelections] = useState<Record<string,string[]>>({});
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [activeProfileTab,setActiveProfileTab]=useState<"RENQ"|"POKEMON">("RENQ");
+  const [renqPage,setRenqPage]=useState(1);
+  const renqPageSize=6;
+  const renqPageCount=Math.max(1,Math.ceil(rankings.length/renqPageSize));
+  const pagedRankings=rankings.slice((renqPage-1)*renqPageSize,renqPage*renqPageSize);
 
   useEffect(() => {
     if (!profileEditorOpen) return;
@@ -304,6 +310,11 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       {badges.length > 0 && <div className="profile-badges-section"><div className="profile-badges-heading"><span>TRAGUARDI</span><strong>I tuoi badge</strong></div><div className="profile-badge-list">{badges.map(badge => <span key={badge}><BadgeCheck size={15}/>{badge}</span>)}</div></div>}
     </section>
 
+    <nav className="profile-content-tabs" aria-label="Sezioni del profilo">
+      <button type="button" className={activeProfileTab==="RENQ"?"is-active":""} aria-pressed={activeProfileTab==="RENQ"} onClick={()=>setActiveProfileTab("RENQ")}>Renq</button>
+      <button type="button" className={activeProfileTab==="POKEMON"?"is-active":""} aria-pressed={activeProfileTab==="POKEMON"} onClick={()=>setActiveProfileTab("POKEMON")}>Pokémon</button>
+    </nav>
+
     {profileEditorOpen && <section id="profile-editor-panel" className="profile-editor-panel">
       <div className="profile-section-heading"><div><span>PERSONALIZZAZIONE</span><h2>Il tuo profilo</h2></div><Sparkles size={20}/></div>
       <div className="profile-image-editors">
@@ -337,6 +348,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       <div className="profile-editor-actions"><button type="button" className="profile-save-button" onClick={() => void saveProfile()} disabled={savingProfile}><Save size={16}/>{savingProfile ? "Salvataggio…" : "Salva profilo"}</button><button type="button" className="profile-privacy-button" onClick={() => void togglePrivacy()}>{profile.is_private ? <Globe2 size={15}/> : <LockKeyhole size={15}/>} {profile.is_private ? "Rendi pubblico" : "Rendi privato"}</button></div>
     </section>}
 
+    {activeProfileTab==="RENQ" ? <>
     <section className="profile-collections-section">
       <div className="profile-section-heading"><div><span>LA TUA LIBRERIA</span><h2>Le tue collezioni</h2><p>Crea cartelle con un banner personalizzato e raccogli i tuoi Renq.</p></div><button type="button" className="profile-add-collection" aria-label={collectionFormOpen ? "Chiudi creazione collezione" : "Crea una collezione"} onClick={() => { setCollectionFormOpen(value => !value); setCollectionSearchTarget(collectionFormOpen ? null : "new"); setCollectionSearchQuery(""); }}><FolderPlus size={20}/></button></div>
       {collections.length ? <div className="profile-collection-grid">{collections.map(collection => { const cover = collection.banner_display_url || firstCollectionCover(collection); return <article className={"profile-collection-card" + (collection.is_featured ? " is-featured" : "")} key={collection.id}>
@@ -355,12 +367,13 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
 
     <section className="profile-renqs-section">
       <div className="profile-section-heading"><div><span>LE TUE CLASSIFICHE</span><h2>I miei Renq</h2><p>Tutti i Renq completati, anche quelli non inseriti in una collezione.</p></div><Trophy size={21}/></div>
-      {rankings.length ? <div className="profile-renq-grid">{rankings.map(ranking => {
+      {rankings.length ? <div className="profile-renq-grid">{pagedRankings.map(ranking => {
         const settings = ranking.settings ?? {};
         const cover = typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null;
         return <Link key={ranking.id} href={(ranking.mode === "POKEMON_ULTIMATE_FAVOURITE" || ranking.mode === "POKEMON_NAME_EM_ALL") ? "/r/" + (ranking.public_slug || ranking.id) : "/renq/" + (ranking.public_slug || ranking.id)} className="profile-renq-card"><div style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.75),rgba(15,12,10,.05)),url(" + cover + ")" } : undefined}><span>{profileModeLabels[String(ranking.mode)]??"Renq"}</span><ArrowUpRight size={17}/></div><strong>{ranking.title}</strong></Link>;
-      })}</div> : <div className="profile-empty-state"><Trophy size={24}/><strong>Il tuo primo Renq ti aspetta</strong><p>Quando completi una classifica, la ritroverai qui.</p><Link href="/create">Crea un Renq <ArrowUpRight size={15}/></Link></div>}
+      })}</div><div className="profile-pagination"><span>{(renqPage-1)*renqPageSize+1}–{Math.min(renqPage*renqPageSize,rankings.length)} di {rankings.length}</span><div><button type="button" disabled={renqPage===1} onClick={()=>setRenqPage(value=>Math.max(1,value-1))}>Precedente</button><strong>{renqPage} / {renqPageCount}</strong><button type="button" disabled={renqPage===renqPageCount} onClick={()=>setRenqPage(value=>Math.min(renqPageCount,value+1))}>Successiva</button></div></div> : <div className="profile-empty-state"><Trophy size={24}/><strong>Il tuo primo Renq ti aspetta</strong><p>Quando completi una classifica, la ritroverai qui.</p><Link href="/create">Crea un Renq <ArrowUpRight size={15}/></Link></div>}
     </section>
+    </> : <section className="profile-pokemon-integrated"><div className="profile-section-heading"><div><span>IL TUO SPAZIO POKÉMON</span><h2>Pokémon</h2><p>Traguardi, partite e preferenze della tua esperienza Pokémon.</p></div></div>{pokemonSection}</section>}
     <div className="profile-social-meta"><ProfileFollowLists showFollowing={false} followerCount={followerCount} followingCount={followingCount} followers={followerProfiles} following={followingProfiles}/><span><Heart size={14}/> {likeCount} apprezzamenti ricevuti</span><Link href={"/u/" + profile.username}>Apri il profilo pubblico <ArrowUpRight size={14}/></Link></div>
     {(message || error) && <p className={"profile-feedback" + (error ? " is-error" : "")} role="status">{error || message}</p>}
     {dialog}
