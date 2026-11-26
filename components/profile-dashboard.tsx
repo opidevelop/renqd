@@ -317,6 +317,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       <button type="button" className={activeProfileTab==="COLLECTIONS"?"is-active":""} aria-pressed={activeProfileTab==="COLLECTIONS"} onClick={()=>setActiveProfileTab("COLLECTIONS")}>Collezioni</button>
       <button type="button" className={activeProfileTab==="RENQ"?"is-active":""} aria-pressed={activeProfileTab==="RENQ"} onClick={()=>setActiveProfileTab("RENQ")}>Renq</button>
       <button type="button" className={activeProfileTab==="POKEMON"?"is-active":""} aria-pressed={activeProfileTab==="POKEMON"} onClick={()=>setActiveProfileTab("POKEMON")}>Pokémon</button>
+      <Link href="/drag-race/track-record" className="profile-tab-link">Track Record <ArrowUpRight size={13}/></Link>
     </nav>
 
     {profileEditorOpen && <section id="profile-editor-panel" className="profile-editor-panel">
