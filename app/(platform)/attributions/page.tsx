@@ -33,9 +33,9 @@ const sources = [
   {
     name: "Fotografie Drag Race — Trixie Mattel",
     description: "Ritratto utilizzato nelle card promozionali Pokémon/Drag Race di Renqd.",
-    url: "https://commons.wikimedia.org/wiki/File:Trixie_Mattel_Portrait.jpg",
+    url: "https://commons.wikimedia.org/wiki/File:Trixie_Mattel_(49171875887)_(cropped).jpg",
     license: "Creative Commons Attribution 2.0 Generic (CC BY 2.0).",
-    attribution: "Foto di Patrick Finnegan, da Flickr (vax-o-matic), 10 settembre 2017. Immagine ritagliata per l'impaginazione.",
+    attribution: "Foto di SeeBee2189, da Flickr, 6 settembre 2019. File già ritagliato su Wikimedia Commons.",
   },
   {
     name: "Fotografie Drag Race — Naomi Smalls",
