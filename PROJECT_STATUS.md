@@ -2014,3 +2014,9 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - La compilazione TypeScript è stata avviata dopo la compilazione Next.js; attendere lo stato finale del deployment prima di dichiarare il rilascio completato.
 - L'incorporamento Daily Red è stato configurato con iframe e fallback esterno; non è ancora stato possibile effettuare una prova runtime autenticata per confermare che il provider consenta l'embed e che il gioco funzioni correttamente dentro Renqd.
 - Restano da collaudare nel browser: aiuti Solo (lettera per lettera senza spoiler), modal multiplayer, compressione di tutte le sezioni speciali, pulsanti pausa e Daily Red su desktop/mobile.
+
+
+### Stato rilascio — aggiornamento 26 novembre 2026
+- Il deployment Production del commit applicativo `17be7f4c69398fe2ed74bf0a8a41463c9546b6aa` è risultato `READY`; la build ha completato la compilazione Next.js e TypeScript.
+- Il successivo deployment Production del commit documentale `bd260bc30c5007d21c554ace17fd43f1190c555f` è anch'esso `READY` e gli alias `renqd.app` e `www.renqd.app` risultano associati.
+- Il riepilogo del rilascio resta subordinato al test effettivo del provider Daily Red dentro iframe e al collaudo UI autenticato di Name ’Em All.
