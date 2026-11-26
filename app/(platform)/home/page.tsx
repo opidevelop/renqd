@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import {HomeResumeActions} from "@/components/home-resume-actions";
+import {DRAG_RACE_BRAND_IMAGES} from "@/lib/drag-race/brand-art";
 import {createClient} from "@/lib/supabase/server";
 import {Music2,Gamepad2,Clapperboard,BookOpen,Trophy,Sparkles,Plus,ArrowUpRight,Clock3,Users} from "lucide-react";
 const cats=[{title:"Musica",id:"music",detail:"Album, artisti e canzoni",tone:"music",icon:Music2},{title:"Videogiochi",id:"games",detail:"Giochi, saghe e personaggi",tone:"games",icon:Gamepad2},{title:"Film e serie",id:"film",detail:"Film, serie e franchise",tone:"film",icon:Clapperboard},{title:"Libri",id:"books",detail:"Autori, romanzi e saghe",tone:"books",icon:BookOpen},{title:"Sport",id:"sport",detail:"Atleti, squadre e competizioni",tone:"sport",icon:Trophy},{title:"Lista personalizzata",id:"custom",detail:"Crea una lista senza limiti",tone:"custom",icon:Sparkles}];
@@ -44,7 +45,7 @@ export default async function PlatformHomePage(){
    </Link>
    <Link href="/drag-race" className="home-feature-card home-feature-drag">
     <span className="home-feature-copy"><small>RENQD × DRAG RACE</small><strong>Own your<br/><em>spotlight.</em></strong><span>Trixie · Naomi · Monét</span><b>Entra nel Werk Room <ArrowUpRight size={16}/></b></span>
-    <span className="home-feature-art home-feature-drag-art" aria-hidden="true"><img className="home-feature-queen home-feature-queen-one" src="https://commons.wikimedia.org/wiki/Special:FilePath/Trixie_Mattel_(49171875887)_(cropped).jpg?width=512" alt=""/><img className="home-feature-queen home-feature-queen-two" src="https://commons.wikimedia.org/wiki/Special:FilePath/Naomi_Smalls_at_Rupaul%27s_Dragcon_2017_by_dvsross.jpg?width=512" alt=""/><img className="home-feature-queen home-feature-queen-three" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Mon%C3%A9t_X_Change_at_Dragcon_by_dvsross.jpg/512px-Mon%C3%A9t_X_Change_at_Dragcon_by_dvsross.jpg" alt=""/></span>
+    <span className="home-feature-art home-feature-drag-art" aria-hidden="true"><img className="home-feature-queen home-feature-queen-one" src={DRAG_RACE_BRAND_IMAGES.trixie} alt="" referrerPolicy="no-referrer" decoding="async"/><img className="home-feature-queen home-feature-queen-two" src={DRAG_RACE_BRAND_IMAGES.naomi} alt="" referrerPolicy="no-referrer" decoding="async"/><img className="home-feature-queen home-feature-queen-three" src={DRAG_RACE_BRAND_IMAGES.monet} alt="" referrerPolicy="no-referrer" decoding="async"/></span>
     <span className="home-feature-arrow"><ArrowUpRight size={19}/></span>
    </Link>
   </section>

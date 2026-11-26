@@ -1,6 +1,7 @@
 "use client";
 import {useMemo,useState} from "react";
 import {createClient} from "@/lib/supabase/client";
+import {DRAG_RACE_BRAND_IMAGES} from "@/lib/drag-race/brand-art";
 import Link from "next/link";
 import {ArrowUpRight,Crown,RefreshCw,Music2,Trophy,Users,Gamepad2,LoaderCircle} from "lucide-react";
 type Props={canSync:boolean;lastSyncedAt:string|null;sourceVersion:string};
@@ -16,7 +17,7 @@ export function DragRaceHub({canSync,lastSyncedAt,sourceVersion}:Props){
  return <main className="drag-race-page">
   <section className="world-hub-hero world-hub-drag">
    <div className="world-hub-copy"><span>RENQD × DRAG RACE</span><h1>Drag Race,<br/><em>the art of drag.</em></h1><p>La tua scena, le tue Queen, le tue regole. Crea, gioca e riscrivi ogni stagione.</p><div className="world-hub-tags"><i>QUEEN</i><i>LIPSYNC</i><i>CREATIVITÀ</i></div></div>
-   <div className="world-hub-art world-hub-drag-art" aria-hidden="true"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Trixie_Mattel_(49171875887)_(cropped).jpg?width=512" alt=""/><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Naomi_Smalls_at_Rupaul%27s_Dragcon_2017_by_dvsross.jpg?width=512" alt=""/><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Mon%C3%A9t_X_Change_at_Dragcon_by_dvsross.jpg/512px-Mon%C3%A9t_X_Change_at_Dragcon_by_dvsross.jpg" alt=""/></div>
+   <div className="world-hub-art world-hub-drag-art" aria-hidden="true"><img src={DRAG_RACE_BRAND_IMAGES.trixie} alt="" referrerPolicy="no-referrer" decoding="async"/><img src={DRAG_RACE_BRAND_IMAGES.naomi} alt="" referrerPolicy="no-referrer" decoding="async"/><img src={DRAG_RACE_BRAND_IMAGES.monet} alt="" referrerPolicy="no-referrer" decoding="async"/></div>
   </section>
   <section className="drag-race-modules"><div className="drag-race-section-heading"><span className="drag-race-kicker">SCEGLI LA TUA ESPERIENZA</span><h2>Entra in <em>scena.</em></h2></div><div className="drag-race-module-grid">{modules.map(({title,desc,tags,icon:Icon,href,status},index)=>{const card=<><span className="drag-race-module-index">0{index+1}</span><span className="drag-race-module-icon"><Icon size={22}/></span><span className="drag-race-module-copy"><strong>{title}</strong><small>{desc}</small><span className="drag-race-module-tags">{tags.map(tag=><i key={tag}>{tag}</i>)}</span></span><span className={"drag-race-module-status"+(href?" is-ready":"")}>{status}<ArrowUpRight size={14}/></span></>;return href?<Link className="drag-race-module-card" key={title} href={href}>{card}</Link>:<article className="drag-race-module-card is-coming" key={title} aria-label={title+" in arrivo"}>{card}</article>;})}</div></section>
   {canSync&&<details className="drag-race-staff-tools"><summary>Strumenti catalogo <span>Staff · v{sourceVersion} · {lastSyncedAt?"Ultima sincronizzazione "+new Date(lastSyncedAt).toLocaleString("it-IT"):"Non ancora sincronizzato"}</span></summary><div><p>La sincronizzazione aggiorna i dati condivisi necessari alle modalità Drag Race. Non mostra il catalogo nella navigazione principale.</p><button type="button" onClick={sync} disabled={busy}>{busy?<LoaderCircle className="spin" size={15}/>:<RefreshCw size={15}/>} {busy?"Sincronizzazione…":"Sincronizza catalogo"}</button>{message&&<small role="status">{message}</small>}</div></details>}
