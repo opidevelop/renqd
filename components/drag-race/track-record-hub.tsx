@@ -11,7 +11,7 @@ export function TrackRecordHub({userId,templates,records,franchiseNames}:Props){
  const router=useRouter();const db=createClient();const [busy,setBusy]=useState<string|null>(null);const [notice,setNotice]=useState("");
  async function copyTemplate(template:Template){
   setBusy(template.id);setNotice("");
-  const record_data={franchise_code:template.franchise_code,season_number:template.season_number,year:template.year,episodes:template.episodes,queens:template.queens,source_template_id:template.id,custom_placements:[]};
+  const record_data={franchise_code:template.franchise_code,season_number:template.season_number,year:template.year,episodes:template.episodes,queens:template.queens,source_template_id:template.id,source_metadata:template.source_metadata??{},custom_placements:[]};
   const {data,error}=await db.from("drag_race_track_records").insert({owner_id:userId,season_id:template.season_id,title:template.display_title,visibility:"PUBLIC",record_data,is_official:false}).select("id").single();
   if(error){setNotice("Non è stato possibile creare la scheda: "+error.message);setBusy(null);return;}
   router.push("/drag-race/track-record/"+data.id);
