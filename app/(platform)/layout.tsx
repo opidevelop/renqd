@@ -19,6 +19,7 @@ import "./drag-race/lalaparuza.css";
 import "./drag-race/slayoff.css";
 import "./drag-race/guess-them-all.css";
 import "./drag-race/track-record.css";
+import "./drag-race/season-simulator.css";
 import "./admin-visual.css";
 export const dynamic = "force-dynamic";
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
