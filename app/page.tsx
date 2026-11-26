@@ -58,7 +58,7 @@ export default async function HomePage() {
 
       <section className="landing-features">
         <article><span className="landing-feature-icon"><ListOrdered size={21}/></span><small>01 · CREA</small><h3>Il tuo punto di vista.</h3><p>Parti da una categoria o costruisci una lista personalizzata. Ogni classifica racconta qualcosa di te.</p></article>
-        <article><span className="landing-feature-icon"><Users size={21}/></span><small>02 · CONFRONTA</small><h3>Le idee si incontrano.</h3><p>Coinvolgi amici e community, mettete a confronto gusti diversi e scoprite dove siete d'accordo.</p></article>
+        <article><span className="landing-feature-icon"><Users size={21}/></span><small>02 · CONFRONTA</small><h3>Le idee si incontrano.</h3><p>Coinvolgi amici e community, mettete a confronto gusti diversi e scoprite dove siete d&apos;accordo.</p></article>
         <article><span className="landing-feature-icon"><Share2 size={21}/></span><small>03 · CONDIVIDI</small><h3>Fai spazio alle scoperte.</h3><p>Conserva i tuoi Renq e condividi le classifiche che meritano una conversazione.</p></article>
       </section>
 
