@@ -15,7 +15,8 @@ type QueenSource={id:string;name:string;aliases?:string[];origin?:Record<string,
 type SeasonSource={id:string;franchise:string;seasonNumber:number;year:number;name:string;episodeCount:number;castIds:string[];winnerIds?:string[];runnerUpIds?:string[]};
 type SeasonPack={season?:SeasonSource;episodes?:EpisodeSource[]};
 type ItunesMatch={artist:string;preview:string|null;url:string|null};
-const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json"}});
+const corsHeaders={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"POST, OPTIONS","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type"};
+const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...corsHeaders,"content-type":"application/json"}});
 const field=(b:Uint8Array,s:number,n:number)=>new TextDecoder().decode(b.slice(s,s+n)).replace(/\0.*$/s,"").trim();
 function tarFiles(b:Uint8Array){const out:{path:string;data:Uint8Array}[]=[];let o=0;while(o+512<=b.length){const h=b.slice(o,o+512);if(h.every(x=>x===0))break;const name=field(h,0,100),prefix=field(h,345,155),path=prefix?prefix+"/"+name:name,size=parseInt(field(h,124,12)||"0",8),type=String.fromCharCode(h[156]||48),start=o+512,end=start+size;if((type==="0"||type==="\0"||type==="7")&&end<=b.length&&path.endsWith(".json"))out.push({path,data:b.slice(start,end)});o=start+Math.ceil(size/512)*512;}return out;}
 const norm=(s:string)=>s.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"");
@@ -23,6 +24,7 @@ async function itunes(song:string):Promise<ItunesMatch|null>{try{const p=new URL
 let admin:ReturnType<typeof createClient>|null=null;
 async function upsert(table:string,rows:Record<string,unknown>[],key:string){if(!admin)throw new Error("Database client unavailable");for(let i=0;i<rows.length;i+=100){const {error}=await admin.from(table).upsert(rows.slice(i,i+100),{onConflict:key});if(error)throw error;}}
 Deno.serve(async(req:Request)=>{
+ if(req.method==="OPTIONS")return new Response("ok",{status:200,headers:corsHeaders});
  if(req.method!=="POST")return reply({error:"Method not allowed"},405);
  const url=Deno.env.get("SUPABASE_URL"),anon=Deno.env.get("SUPABASE_ANON_KEY")??Deno.env.get("SUPABASE_PUBLISHABLE_KEY"),service=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
  if(!url||!anon||!service)return reply({error:"Server configuration unavailable"},500);
