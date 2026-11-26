@@ -5,7 +5,7 @@ import {useRouter} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {ArrowLeft,ArrowUpRight,Copy,FilePlus,LoaderCircle,Trophy,RefreshCw} from "lucide-react";
 import type {TrackRecordData,TrackRecordEpisode,TrackRecordQueen} from "@/lib/drag-race/track-record";
-type Template={id:string;franchise_code:string;season_number:number;display_title:string;year:number|null;season_id:string|null;episodes:TrackRecordEpisode[];queens:TrackRecordQueen[];source_metadata?:{placement_completeness?:string;placement_note?:string;wikimedia_status?:string;wikimedia_attempted_at?:string}};
+type Template={id:string;franchise_code:string;season_number:number;display_title:string;year:number|null;season_id:string|null;episodes:TrackRecordEpisode[];queens:TrackRecordQueen[];source_metadata?:{placement_completeness?:string;placement_note?:string;wikimedia_status?:string;wikimedia_attempted_at?:string;wikimedia_page_title?:string;wikimedia_source_url?:string;wikimedia_license?:string}};
 type RecordItem={id:string;title:string;season_id:string|null;visibility:string;updated_at:string;record_data:TrackRecordData};
 type Props={userId:string;templates:Template[];records:RecordItem[];franchiseNames:Record<string,string>;canSync:boolean};
 export function TrackRecordHub({userId,templates,records,franchiseNames,canSync}:Props){
