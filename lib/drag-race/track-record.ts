@@ -13,6 +13,7 @@ export type TrackRecordQueen = {
   name: string;
   image_url?: string | null;
   rank?: string | null;
+  winner?: boolean;
   results: TrackRecordResult[];
   ppe_episode_numbers?: number[];
   elimination_episode?: number | null;
