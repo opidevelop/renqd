@@ -17,7 +17,7 @@ export default async function PokemonHubPage() {
   const { data: { user } } = await supabase.auth.getUser();
   const { data } = user ? await supabase.from("pokemon_daily_completions")
     .select("game_mode").eq("user_id", user.id).eq("challenge_date", romeDate())
-    .in("game_mode", ["DOKU", "CONNECTIONS"]) : { data: [] };
+    .in("game_mode", ["DOKU", "CONNECTIONS", "DAILY_RED"]) : { data: [] };
   const completed = new Set((data ?? []).map((row) => row.game_mode));
-  return <PokemonHub dokuCompleted={completed.has("DOKU")} connectionsCompleted={completed.has("CONNECTIONS")} />;
+  return <PokemonHub dokuCompleted={completed.has("DOKU")} connectionsCompleted={completed.has("CONNECTIONS")} dailyRedCompleted={completed.has("DAILY_RED")} />;
 }
