@@ -161,7 +161,7 @@ Deno.serve(async(req:Request)=>{
  const templates=(allTemplates??[]) as Template[];
  const pending=templates.filter(template=>!(template.source_metadata as Record<string,unknown>|undefined)?.wikimedia_attempted_at);
  const batch=pending.slice(0,limit);
- const {data:rules,error:rulesError}=await admin.from("drag_race_track_record_scoring_rules").select("placement_key,label");
+ const {data:rules,error:rulesError}=await admin.from("drag_race_track_record_scoring_rules").select("placement_key,label").order("sort_order");
  if(rulesError)return reply({error:"Unable to load PPE scoring rules"},503);
  const keyByLabel=new Map<string,string>();
  for(const rule of rules??[]){const key=normalize(String(rule.label??"").toUpperCase());if(key&&!keyByLabel.has(key))keyByLabel.set(key,rule.placement_key);}
@@ -217,8 +217,8 @@ Deno.serve(async(req:Request)=>{
    continue;
   }
   placementsAdded+=added;
-  const sourceUrl="https://en.wikipedia.org/wiki/"+encodeURIComponent(page.title.replace(/ /g,"_"));
-  const metadata={...previous,wikimedia_status:"IMPORTED",wikimedia_attempted_at:attemptedAt,wikimedia_page_title:page.title,wikimedia_source_url:sourceUrl,wikimedia_revision_id:revision?.revid??null,wikimedia_revision_timestamp:revision?.timestamp??null,wikimedia_license:"CC BY-SA 4.0",wikimedia_license_url:"https://creativecommons.org/licenses/by-sa/4.0/"};
+  const sourceUrl=revision?.revid?("https://en.wikipedia.org/w/index.php?title="+encodeURIComponent(page.title)+"&oldid="+revision.revid):("https://en.wikipedia.org/wiki/"+encodeURIComponent(page.title.replace(/ /g,"_")));
+  const metadata={...previous,wikimedia_status:"IMPORTED",wikimedia_attempted_at:attemptedAt,wikimedia_page_title:page.title,wikimedia_source_url:sourceUrl,wikimedia_revision_id:revision?.revid??null,wikimedia_revision_timestamp:revision?.timestamp??null,wikimedia_author:"Wikipedia contributors",wikimedia_modifications:"Placement labels were normalized to Renqd PPE keys. BTM was converted to BTM2 only when exactly two matched contestants were marked BTM in the episode.",wikimedia_license:"CC BY-SA 4.0",wikimedia_license_url:"https://creativecommons.org/licenses/by-sa/4.0/"};
   const {error}=await admin.from("drag_race_track_record_templates").update({queens,source_metadata:metadata,updated_at:attemptedAt}).eq("id",template.id);
   if(error)console.error("Track Record Wikipedia template update",template.id,error);else updated++;
  }
