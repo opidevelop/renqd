@@ -2122,16 +2122,19 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - CI GitHub Actions «Code quality» sul commit `1e75f16dcab7ece8b8c9fb64e41c6d41691ccd93` era in corso al momento dell'aggiornamento. Vercel ha continuato a segnalare il limite build giornaliero; non dichiarare verificata la build Production né pubblicata la nuova UI.
 
 
-### Track Record — modello basato sulla struttura, risultati manuali (26 novembre 2026)
+### Track Record — struttura dal catalogo, risultati manuali e social (26 novembre 2026)
 
 - Precisazione funzionale vincolante: Track Record è una funzionalità personale, non un archivio di Track Record ufficiali. L'utente parte dalla struttura di una stagione del catalogo e assegna personalmente tutti i risultati competitivi.
-- Il template generato da `drag-race-catalog-sync` contiene franchise/titolo/numero/anno, contestant, episodi, nomi delle Mini/Maxi Challenge e canzone lipsync quando disponibile. Non contiene placement, rank, vincitrice, eliminazione o fatti competitivi delle Queen.
-- Ogni risultato episodio parte con `placement: null`; ogni Queen parte con `winner: false`. I fatti sorgente conservati in `drag_race_episode_queen_facts` restano separati e non vengono mostrati né usati nella Track Record.
-- La copia di un template azzera in modo difensivo ogni eventuale placement e flag vincitrice legacy. La scheda personale mantiene il collegamento alla stagione catalogo soltanto come riferimento strutturale.
-- L'editor mostra i nomi delle challenge e la canzone lipsync per episodio; l'utente seleziona manualmente i placement, personalizza le regole PPE e contrassegna la vincitrice.
-- La Hall of Fame legge esclusivamente le Queen marcate vincitrici nelle Track Record degli utenti. Non legge più `winner_ids` delle stagioni catalogo.
-- Rimossa dalla UI la funzione di recupero placement da Wikipedia. Il codice della Edge Function `drag-race-track-record-wikipedia-sync` è stato sostituito con una risposta HTTP 410: l'importazione automatica dei placement è ritirata.
-- I 90 fogli stagione del workbook Excel restano esclusi. La scala PPE del foglio `Punteggi` rimane l'unico riferimento adottato dal workbook.
-- Verifica read-only Supabase durante questa sessione: `drag_race_track_record_templates`, `drag_race_track_records`, `drag_race_seasons` e `drag_race_episodes` risultano ancora vuote (0 righe). La sincronizzazione catalogo non è stata ancora eseguita; non sono stati creati o alterati dati utente.
-- Le modifiche applicative e documentali sono state committate direttamente su `main`. TypeScript, ESLint, build, CI e deployment delle Edge Function aggiornate devono ancora essere verificati prima di dichiarare la modifica pronta in produzione.
+- `drag-race-catalog-sync` genera template con franchise/titolo/numero/anno, contestant, episodi, nomi delle Mini/Maxi Challenge e canzone lipsync quando disponibile. Nessun placement, rank, vincitrice, eliminazione o fatto competitivo viene copiato nei template. Ogni cella parte da `placement: null`, ogni Queen da `winner: false`.
+- La copia personale azzera difensivamente ogni eventuale placement/winner legacy. L'editor mostra la struttura challenge e consente di selezionare manualmente placement, vincitrice e regole PPE. Le celle vuote non equivalgono a SAFE.
+- La Hall of Fame si alimenta esclusivamente dalle Queen contrassegnate manualmente come vincitrici nelle Track Record degli utenti; non legge `winner_ids` del catalogo.
+- Rimossa dalla UI la funzione di recupero placement Wikipedia. La Edge Function `drag-race-track-record-wikipedia-sync` risponde HTTP 410. La Edge Function `drag-race-catalog-sync` è stata ridistribuita come **versione 5 ACTIVE**; l'importer Wikipedia è **versione 6 ACTIVE** (endpoint dismesso).
+- Aggiunta UI social Track Record: commenti e risposte a un livello, modifica/eliminazione del proprio commento, like, moderazione owner/staff, segnalazioni di schede/commenti, aggiornamento realtime dei commenti e notifiche dedicate nell'Inbox e nel menu notifiche.
+- La notifica like ora include anche `trackRecordId`, così l'Inbox apre la Track Record corretta.
+- Migrazione `20261126170000_drag_race_track_record_hidden_read_policy.sql` applicata: le policy RLS impediscono la lettura ordinaria delle schede nascoste anche da parte del proprietario; la policy pubblica usa `private.can_view_drag_race_track_record`.
+- Migrazione `20261126171000_drag_race_track_record_like_notification_target.sql` applicata: le notifiche like includono il riferimento alla Track Record.
+- Verifica Supabase: 25 regole PPE presenti; template, Track Record, stagioni e episodi sono ancora a 0 righe perché la sincronizzazione catalogo non è stata eseguita. Nessun dato utente è stato importato o alterato.
+- GitHub Actions «Code quality» sul commit `b2b7294740e0fe70ead3e281e333989e2a779b55`, run `45835684446`: **success** per parser test, TypeScript, ESLint e build Production.
+- Le Edge Function Supabase aggiornate sono ACTIVE. La pubblicazione UI su Vercel non è riuscita: l'API ha restituito HTTP 402 `api-deployments-free-per-day` (limite giornaliero, retry indicato dopo 24 ore). Non è disponibile un Vercel CLI locale per il fallback; non sono state modificate impostazioni o billing. L'ultima Production Vercel resta sul commit `c0b817f5161e7ebac1d1f662dfb35295cf4f510e`, quindi la nuova UI non è ancora pubblicata.
+- Il catalogo deve essere sincronizzato con un account staff dopo il deploy UI; soltanto allora saranno generati i template di struttura. Il collaudo E2E di commenti/like/report richiede una Track Record reale e utenti autenticati; non è ancora stato eseguito.
 
