@@ -1330,3 +1330,41 @@
   .renqd-wheel-desktop-icon{display:block!important;visibility:visible!important;opacity:1!important;flex:none!important}
   .renqd-wheel-mobile-emoji{display:none!important}
 }
+
+
+/* Paired Pokémon and Drag Race feature banners: shared geometry, different palettes. */
+.home-feature-hubs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:28px 0 36px}
+.home-feature-card{position:relative;display:flex;min-width:0;min-height:264px;overflow:hidden;isolation:isolate;border:1px solid transparent;border-radius:22px;text-decoration:none;transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s,border-color .2s}
+.home-feature-card:hover{transform:translateY(-4px);box-shadow:0 18px 42px rgba(30,20,35,.14)}
+.home-feature-pokemon{border-color:#d8e8f3;background:linear-gradient(115deg,#e9f4fb 0%,#f6fbff 57%,#e5f0fa 100%);color:#294b67}
+.home-feature-drag{border-color:#4c2b42;background:linear-gradient(115deg,#251521 0%,#382036 58%,#211521 100%);color:#fff1f8}
+.home-feature-copy{position:relative;z-index:4;display:flex;width:57%;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;padding:25px 10px 25px 25px}
+.home-feature-copy>small{font-size:8px;font-weight:900;letter-spacing:1.4px;opacity:.72}
+.home-feature-copy>strong{font-size:clamp(23px,2.25vw,31px);line-height:.98;letter-spacing:-1.3px;font-weight:850}
+.home-feature-copy>strong em{font-style:normal;color:#6b9bc1}
+.home-feature-drag .home-feature-copy>strong em{color:#ff8fc5}
+.home-feature-copy>span{font-size:9px;line-height:1.4;letter-spacing:.1px;opacity:.78}
+.home-feature-copy>b{display:inline-flex;align-items:center;gap:6px;margin-top:3px;font-size:9px;font-weight:850}
+.home-feature-art{position:absolute;z-index:1;top:0;right:0;bottom:0;width:51%;overflow:hidden;pointer-events:none}
+.home-feature-queen,.home-feature-mon{position:absolute;bottom:-3%;display:block;max-width:none}
+.home-feature-queen{width:39%;height:89%;object-fit:cover;object-position:top center;border:2px solid rgba(255,255,255,.5);border-bottom:0;border-radius:48% 48% 0 0;box-shadow:0 0 24px rgba(255,105,180,.18);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.home-feature-queen-one{left:0;z-index:1;transform:rotate(-7deg)}
+.home-feature-queen-two{left:29%;z-index:3;width:43%;height:100%}
+.home-feature-queen-three{right:0;z-index:2;transform:rotate(7deg)}
+.home-feature-mon{width:39%;height:88%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 12px 12px rgba(30,80,120,.15));transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.home-feature-mon-one{left:0;z-index:1}
+.home-feature-mon-two{left:29%;z-index:3;width:43%;height:100%}
+.home-feature-mon-three{right:0;z-index:2}
+.home-feature-pokemon:hover .home-feature-mon-one{transform:translate(-4px,-7px) rotate(-5deg)}
+.home-feature-pokemon:hover .home-feature-mon-two{transform:translateY(-9px) scale(1.05)}
+.home-feature-pokemon:hover .home-feature-mon-three{transform:translate(4px,-7px) rotate(5deg)}
+.home-feature-drag:hover .home-feature-queen-one{transform:translate(-4px,-6px) rotate(-9deg)}
+.home-feature-drag:hover .home-feature-queen-two{transform:translateY(-8px) scale(1.04)}
+.home-feature-drag:hover .home-feature-queen-three{transform:translate(4px,-6px) rotate(9deg)}
+.home-feature-arrow{position:absolute;z-index:5;top:14px;right:14px;display:grid;width:32px;height:32px;place-items:center;border:1px solid rgba(255,255,255,.28);border-radius:50%;background:rgba(255,255,255,.18);color:inherit;backdrop-filter:blur(8px)}
+.home-feature-pokemon .home-feature-arrow{border-color:#cbdce8;background:rgba(255,255,255,.6)}
+.platform-frame[data-theme=dark] .home-feature-pokemon{border-color:#334d63;background:linear-gradient(115deg,#1d3446,#253e53 60%,#1c3040);color:#e7f3fc}
+.platform-frame[data-theme=dark] .home-feature-drag{border-color:#69425e;background:linear-gradient(115deg,#211421,#40253b 58%,#241725)}
+@media(max-width:900px){.home-feature-hubs{grid-template-columns:1fr;gap:13px}.home-feature-card{min-height:250px}.home-feature-copy>strong{font-size:clamp(26px,4vw,34px)}}
+@media(max-width:680px){.home-feature-hubs{gap:11px;margin:23px 0 29px}.home-feature-card{min-height:218px;border-radius:18px}.home-feature-copy{width:58%;gap:8px;padding:20px 6px 20px 18px}.home-feature-copy>small{font-size:7px}.home-feature-copy>strong{font-size:clamp(22px,6.4vw,29px);letter-spacing:-1px}.home-feature-copy>span{font-size:8px}.home-feature-copy>b{font-size:8px}.home-feature-art{width:49%}.home-feature-queen{height:84%;width:40%}.home-feature-queen-two{height:95%;width:44%}.home-feature-mon{height:83%;width:40%}.home-feature-mon-two{height:94%;width:44%}.home-feature-arrow{top:10px;right:10px;width:28px;height:28px}}
+@media(prefers-reduced-motion:reduce){.home-feature-card,.home-feature-queen,.home-feature-mon{transition:none!important}.home-feature-card:hover{transform:none}.home-feature-pokemon:hover .home-feature-mon-one,.home-feature-pokemon:hover .home-feature-mon-two,.home-feature-pokemon:hover .home-feature-mon-three,.home-feature-drag:hover .home-feature-queen-one,.home-feature-drag:hover .home-feature-queen-two,.home-feature-drag:hover .home-feature-queen-three{transform:none}}
