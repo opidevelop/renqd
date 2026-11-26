@@ -397,8 +397,8 @@ export function PokemonNameEmAllMultiplayerGame({
 
     <div className="pokemon-nae-search-wrap">
       <label className={"pokemon-nae-search"+(confirmed?" is-correct":message==="Non è una risposta valida per questo catalogo."?" is-wrong":"")}>
-        <input ref={inputRef} value={query} onChange={event=>{const value=event.target.value;setQuery(value);setConfirmed(false);setMessage("");const normalized=normalizePokemonName(value);if(normalized&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){const match=findExactPokemonMatch(species,normalized);if(match&&!isAmbiguousPokemonName(species,match,normalized)){enqueuePokemonSubmission(match.name,match);}}}}
-          onKeyDown={event=>{if(event.key==="Enter"&&exactMatch&&exactMatchIsAmbiguous&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){event.preventDefault();enqueuePokemonSubmission(exactMatch.name,exactMatch);}}}
+        <input ref={inputRef} value={query} onChange={event=>{const value=event.target.value;setQuery(value);setConfirmed(false);setMessage("");const normalized=normalizePokemonName(value);if(normalized&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){const match=findExactPokemonMatch(species,normalized);if(match&&!isAmbiguousPokemonName(species,match,normalized)){if(found.has(match.id)||queuedKeysRef.current.has(match.id)){setQuery("");setMessage("Hai già scoperto questo Pokémon!");return;}enqueuePokemonSubmission(match.name,match);}}}}
+          onKeyDown={event=>{if(event.key==="Enter"&&exactMatch&&exactMatchIsAmbiguous&&!playerCompleted&&session.status==="ACTIVE"&&countdown===0){event.preventDefault();if(found.has(exactMatch.id)||queuedKeysRef.current.has(exactMatch.id)){setQuery("");setMessage("Hai già scoperto questo Pokémon!");return;}enqueuePokemonSubmission(exactMatch.name,exactMatch);}}}
           placeholder="Scrivi il nome di un Pokémon…" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false}
           disabled={playerCompleted||session.status!=="ACTIVE"||countdown>0}/>
         {confirmed&&<CheckCircle2 size={15} className="pokemon-nae-search-confirmed"/>}
