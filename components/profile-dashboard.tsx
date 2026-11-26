@@ -91,7 +91,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
   const [collectionSelections, setCollectionSelections] = useState<Record<string,string[]>>({});
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [activeProfileTab,setActiveProfileTab]=useState<"RENQ"|"POKEMON">("RENQ");
+  const [activeProfileTab,setActiveProfileTab]=useState<"COLLECTIONS"|"RENQ"|"POKEMON">("RENQ");
   useEffect(()=>{if(searchParams.get("section")==="pokemon")setActiveProfileTab("POKEMON");},[searchParams]);
   const [renqPage,setRenqPage]=useState(1);
   const renqPageSize=6;
@@ -313,6 +313,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
     </section>
 
     <nav className="profile-content-tabs" aria-label="Sezioni del profilo">
+      <button type="button" className={activeProfileTab==="COLLECTIONS"?"is-active":""} aria-pressed={activeProfileTab==="COLLECTIONS"} onClick={()=>setActiveProfileTab("COLLECTIONS")}>Collezioni</button>
       <button type="button" className={activeProfileTab==="RENQ"?"is-active":""} aria-pressed={activeProfileTab==="RENQ"} onClick={()=>setActiveProfileTab("RENQ")}>Renq</button>
       <button type="button" className={activeProfileTab==="POKEMON"?"is-active":""} aria-pressed={activeProfileTab==="POKEMON"} onClick={()=>setActiveProfileTab("POKEMON")}>Pokémon</button>
     </nav>
@@ -350,7 +351,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
       <div className="profile-editor-actions"><button type="button" className="profile-save-button" onClick={() => void saveProfile()} disabled={savingProfile}><Save size={16}/>{savingProfile ? "Salvataggio…" : "Salva profilo"}</button><button type="button" className="profile-privacy-button" onClick={() => void togglePrivacy()}>{profile.is_private ? <Globe2 size={15}/> : <LockKeyhole size={15}/>} {profile.is_private ? "Rendi pubblico" : "Rendi privato"}</button></div>
     </section>}
 
-    {activeProfileTab==="RENQ" ? <>
+    {activeProfileTab==="COLLECTIONS" ? <>
     <section className="profile-collections-section">
       <div className="profile-section-heading"><div><span>LA TUA LIBRERIA</span><h2>Le tue collezioni</h2><p>Crea cartelle con un banner personalizzato e raccogli i tuoi Renq.</p></div><button type="button" className="profile-add-collection" aria-label={collectionFormOpen ? "Chiudi creazione collezione" : "Crea una collezione"} onClick={() => { setCollectionFormOpen(value => !value); setCollectionSearchTarget(collectionFormOpen ? null : "new"); setCollectionSearchQuery(""); }}><FolderPlus size={20}/></button></div>
       {collections.length ? <div className="profile-collection-grid">{collections.map(collection => { const cover = collection.banner_display_url || firstCollectionCover(collection); return <article className={"profile-collection-card" + (collection.is_featured ? " is-featured" : "")} key={collection.id}>
@@ -364,6 +365,7 @@ export function ProfileDashboard({ profile: initialProfile, collections: initial
         <button type="submit" className="profile-save-button" disabled={creatingCollection || !collectionTitle.trim()}><FolderPlus size={16}/>{creatingCollection ? "Creazione…" : "Crea collezione"}</button>
       </form>}
     </section>
+    </> : activeProfileTab==="RENQ" ? <>
 
     {favorites.length > 0 && <section className="profile-renqs-section"><div className="profile-section-heading"><div><span>RACCOLTA PERSONALE</span><h2>I miei preferiti</h2><p>I Renq degli altri utenti che hai apprezzato.</p></div><Heart size={20}/></div><div className="profile-renq-grid">{favorites.map(ranking => { const settings = ranking.settings ?? {}; const cover = typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : null; return <Link key={ranking.id} href={"/r/" + (ranking.public_slug || ranking.id)} className="profile-renq-card"><div style={cover ? { backgroundImage: "linear-gradient(0deg,rgba(15,12,10,.75),rgba(15,12,10,.05)),url(" + cover + ")" } : undefined}><span>{profileModeLabels[String(ranking.mode)]??"Renq"}</span><ArrowUpRight size={17}/></div><strong>{ranking.title}</strong></Link>; })}</div></section>}
 
