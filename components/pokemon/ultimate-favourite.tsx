@@ -292,26 +292,24 @@ export function UltimateFavouriteEditor({
         </div>
       </div>
       {status && <p className="pokemon-favourite-status" role="status">{status}</p>}
-      {active && (
-        <div className="pokemon-picker-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setActive(null); }}>
-          <section className="pokemon-picker" role="dialog" aria-modal="true" aria-labelledby="pokemon-picker-title">
-            <header><div><span className="pokemon-page-eyebrow">SELEZIONE POKÉMON</span><h2 id="pokemon-picker-title">{labelForCell(active.row,active.column)}</h2></div>
-              <button type="button" onClick={() => setActive(null)} aria-label="Chiudi"><X size={18}/></button></header>
-            <label className="pokemon-picker-search"><Search size={16}/><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cerca in italiano o inglese…"/></label>
-            <div className="pokemon-picker-grid">
-              {candidates.map((candidate) => {
-                const name = candidate.species.name + (candidate.form?.label ? " " + candidate.form.label : "");
-                return <button type="button" className="pokemon-picker-card" key={candidate.species.id + "-" + (candidate.form?.id ?? "base")} onClick={() => choose(candidate)}>
-                  <span className="pokemon-picker-silhouette"><PokemonImage candidate={candidate} size={76}/></span>
-                  <span className="pokemon-picker-card-copy"><strong>{name}</strong><small>#{candidate.species.id.toString().padStart(4,"0")} <i/> Gen. {GENERATION_LABELS[candidate.species.generation-1]}</small></span>
-                </button>;
-              })}
-              {!candidates.length && <p>Nessun Pokémon già selezionato in questa categoria. Scegli prima i preferiti nelle generazioni.</p>}
-            </div>
-            {matrix[getPokemonCellKey(active.row,active.column)] && <button type="button" className="pokemon-picker-remove" onClick={remove}>Rimuovi selezione</button>}
-          </section>
-        </div>
-      )}
+      <Dialog open={Boolean(active)} onClose={()=>setActive(null)} overlayClassName="pokemon-picker-backdrop" className="pokemon-picker" labelledBy="pokemon-picker-title">
+        {active&&<>
+          <header><div><span className="pokemon-page-eyebrow">SELEZIONE POKÉMON</span><h2 id="pokemon-picker-title">{labelForCell(active.row,active.column)}</h2></div>
+            <button type="button" onClick={() => setActive(null)} aria-label="Chiudi"><X size={18}/></button></header>
+          <label className="pokemon-picker-search"><Search size={16}/><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cerca in italiano o inglese…"/></label>
+          <div className="pokemon-picker-grid">
+            {candidates.map((candidate) => {
+              const name = candidate.species.name + (candidate.form?.label ? " " + candidate.form.label : "");
+              return <button type="button" className="pokemon-picker-card" key={candidate.species.id + "-" + (candidate.form?.id ?? "base")} onClick={() => choose(candidate)}>
+                <span className="pokemon-picker-silhouette"><PokemonImage candidate={candidate} size={76}/></span>
+                <span className="pokemon-picker-card-copy"><strong>{name}</strong><small>#{candidate.species.id.toString().padStart(4,"0")} <i/> Gen. {GENERATION_LABELS[candidate.species.generation-1]}</small></span>
+              </button>;
+            })}
+            {!candidates.length && <p>Nessun Pokémon già selezionato in questa categoria. Scegli prima i preferiti nelle generazioni.</p>}
+          </div>
+          {matrix[getPokemonCellKey(active.row,active.column)] && <button type="button" className="pokemon-picker-remove" onClick={remove}>Rimuovi selezione</button>}
+        </>}
+      </Dialog>}
     </main>
   );
 }
