@@ -8,7 +8,7 @@ type Episode={number:number;title:string;challenge:string;narrative:string;place
 export default async function SavedSeasonDetailPage({params}:{params:Promise<{id:string}>}){
  const {id}=await params;const db=await createClient();const {data:{user}}=await db.auth.getUser();if(!user)return null;
  const {data:row}=await db.from("drag_race_saved_seasons").select("id,title,created_at,season_data,statistics").eq("id",id).eq("owner_id",user.id).maybeSingle();if(!row)notFound();
- const data=row.season_data as {cast?:Queen[];episodes?:Episode[];finale?:{winnerId?:string;runnerUpId?:string;thirdId?:string;finalists?:string[];format?:string};trackRecord?:Array<{id:string;name:string;final_placement:string;results:Array<{episode:number;placement:string|null}>}>};
+ const data=row.season_data as {cast?:Queen[];episodes?:Episode[];finale?:{winnerId?:string;runnerUpId?:string;thirdId?:string;finalists?:string[];format?:string};trackRecord?:Array<{id:string;name:string;final_placement:string;ppe:number|null;calculated_rank:number;results:Array<{episode:number;placement:string|null}>}>};
  const cast=data.cast??[];const queenMap=new Map(cast.map(q=>[q.id,q]));
  const images=new Map<string,string>();for(const q of cast)if(q.image_path){const {data:signed}=await db.storage.from("profile-media").createSignedUrl(q.image_path,60*60);if(signed?.signedUrl)images.set(q.id,signed.signedUrl);}
  const stats=row.statistics as {queenCount?:number;episodes?:number;queenStatistics?:Array<{queenId:string;queenName:string;challengeWins:number;lipsyncWins:number;bottom2:number;eliminations:number}>};
