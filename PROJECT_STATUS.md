@@ -2247,4 +2247,5 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Slayoff usa il componente immagini Queen con fallback e collegamento alla fonte, invece di un'immagine diretta non attribuita.
 - Il sincronizzatore Supabase `drag-race-catalog-sync` è alla versione 8 e integra la fonte Wikipedia descritta in `docs/drag-race/DATA_SOURCES.md`. I record già presenti vengono riconciliati e le preview Apple/iTunes verificate sono conservate.
 - Il pulsante staff dell'hub mostra il numero di lipsync riconciliati e il numero di stagioni con sezione Wikipedia. La sincronizzazione non viene considerata eseguita finché non è stata lanciata da un account staff.
+- La ricerca preview Apple/iTunes per i record Wikipedia usa titolo e artista e accetta solo corrispondenze esatte dopo normalizzazione; gli abbinamenti ambigui restano non eleggibili. Prima della prima sincronizzazione con la nuova fonte, il database aveva 13/800 lipsync con preview: il dato va rivalutato dopo l'azione staff.
 - Verifiche locali: `npm run drag-race:wikipedia-parser:verify`, `npx tsc --noEmit`, `npx eslint --quiet`, `npm run build` e `git diff --check` superati.

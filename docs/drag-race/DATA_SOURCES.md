@@ -31,7 +31,7 @@ La sincronizzazione catalogo interroga la MediaWiki API pubblica di Wikipedia pe
 
 - La copertura è verificata dinamicamente a ogni sincronizzazione: il 27 novembre 2026, 71 delle 82 stagioni presenti nel catalogo esponevano una sezione `Lip syncs`; le altre 11 restano coperte dal pacchetto strutturato.
 - I record Wikipedia vengono riconciliati con quelli già presenti tramite stagione, episodio, titolo normalizzato e coppia Queen; non vengono creati duplicati quando la corrispondenza esiste.
-- Le preview Apple/iTunes già verificate vengono conservate. Per nuovi brani, artista e preview sono associati soltanto quando i metadati sono compatibili; in caso di dubbio il brano resta non eleggibile.
+- Le preview Apple/iTunes già verificate vengono conservate. Per i record Wikipedia, la ricerca Apple/iTunes usa titolo e artista e accetta soltanto corrispondenze esatte dopo normalizzazione; i risultati ambigui restano non eleggibili con stato `AMBIGUOUS`.
 - Le righe senza coppia esattamente doppia, episodio riconosciuto o titolo/artista identificabili vengono ignorate e non alterano il catalogo.
 - Wikipedia è la fonte dinamica primaria per le coppie; il pacchetto community resta fallback per le pagine mancanti o prive di una sezione utilizzabile.
 - Non viene effettuato scraping automatizzato di Fandom.
