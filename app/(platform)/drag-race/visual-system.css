@@ -225,3 +225,231 @@
 @keyframes drag-bracket-enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 @keyframes drag-bracket-advance{0%{transform:scale(1);box-shadow:0 0 0 rgba(240,68,160,0)}45%{transform:scale(1.04);box-shadow:0 0 0 5px rgba(240,68,160,.16)}100%{transform:scale(1);box-shadow:0 0 0 rgba(240,68,160,0)}}
 @media(max-width:520px){.drag-active-queen-pair{gap:8px}.drag-active-queen-card{padding:8px}.drag-active-queen-card span{font-size:12px}}
+
+
+/* RENQD DRAG RACE — definitive light TV-platform redesign.
+   The 27 Nov visual references in this conversation supersede every older project theme. */
+:root {
+  --renqd-dr-bg: #f7f8fc;
+  --renqd-dr-surface: #ffffff;
+  --renqd-dr-surface-soft: #f5f3ff;
+  --renqd-dr-ink: #151b31;
+  --renqd-dr-muted: #78819a;
+  --renqd-dr-line: #e7eaf2;
+  --renqd-dr-pink: #ed168b;
+  --renqd-dr-purple: #6e43df;
+  --renqd-dr-blue: #3027c8;
+  --renqd-dr-gold: #f5c95c;
+  --renqd-dr-shadow: 0 14px 38px rgba(28, 35, 70, .075);
+}
+.drag-race-page,.drag-game-page,.ss-page {
+  --dr-ink: var(--renqd-dr-ink);
+  --dr-muted: var(--renqd-dr-muted);
+  --dr-plum: #30204f;
+  --dr-berry: var(--renqd-dr-pink);
+  --dr-pink: var(--renqd-dr-pink);
+  --dr-blush: #fff1f8;
+  --dr-line: var(--renqd-dr-line);
+  --dr-gold: var(--renqd-dr-gold);
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  padding: clamp(18px, 2.8vw, 34px);
+  color: var(--renqd-dr-ink) !important;
+  background:
+    radial-gradient(ellipse at 92% 0%, rgba(231,221,255,.62), transparent 31%),
+    radial-gradient(ellipse at 0% 38%, rgba(255,229,242,.45), transparent 26%),
+    linear-gradient(180deg,#fff 0%,#fbfbff 56%,#f7f8fc 100%) !important;
+  border: 1px solid #edf0f6 !important;
+  border-radius: 26px;
+  box-shadow: 0 12px 42px rgba(30,35,72,.055) !important;
+}
+.drag-race-page :is(h1,h2,h3,h4,strong,label,legend),
+.drag-game-page :is(h1,h2,h3,h4,strong,label,legend),
+.ss-page :is(h1,h2,h3,h4,strong,label,legend) { color: var(--renqd-dr-ink); }
+.drag-race-page :is(p,small,.muted),
+.drag-game-page :is(p,small,.muted),
+.ss-page :is(p,small,.muted) { color: var(--renqd-dr-muted); }
+.drag-race-page a,.drag-game-page a,.ss-page a { color: var(--renqd-dr-purple); }
+.drag-race-page button,.drag-game-page button,.ss-page button,
+.drag-race-page input,.drag-game-page input,.ss-page input,
+.drag-race-page select,.drag-game-page select,.ss-page select,
+.drag-race-page textarea,.drag-game-page textarea,.ss-page textarea {
+  font: inherit;
+}
+.drag-race-hero {
+  overflow: hidden;
+  min-height: 230px;
+  padding: clamp(24px,4vw,48px);
+  border: 1px solid #eee7f7 !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(circle at 85% 8%,rgba(232,210,255,.88),transparent 31%),
+    radial-gradient(circle at 100% 100%,rgba(255,218,237,.82),transparent 38%),
+    linear-gradient(112deg,#fff 0%,#fffaff 53%,#f5f0ff 100%) !important;
+  box-shadow: var(--renqd-dr-shadow) !important;
+}
+.drag-race-hero:after { border-color:#eadcf7; box-shadow:0 0 0 18px rgba(221,203,247,.18),0 0 0 38px rgba(221,203,247,.10); }
+.drag-race-kicker,.drag-game-heading>span,.drag-game-top>div>span,.ss-step-label {
+  color:var(--renqd-dr-purple) !important; font-size:10px; font-weight:850; letter-spacing:1.7px;
+}
+.drag-race-hero h1,.drag-game-heading h1,.drag-game-top h1,.ss-heading h1 {
+  color:var(--renqd-dr-ink) !important; font-size:clamp(32px,4vw,52px); letter-spacing:-1.8px; line-height:1.04;
+}
+.drag-race-hero h1 em,.drag-game-heading h1 em,.drag-game-top h1 em { color:var(--renqd-dr-pink) !important; }
+.drag-race-module-card,.drag-lalaparuza-card,.drag-config-card,.drag-answer-card,
+.drag-result-card,.ss-panel,.ss-finish-card,.drag-track-section,
+.dra-leaderboard-group,.dra-profile-subsection,.dra-profile-badges,
+.drag-current-song,.drag-active-duel,.drag-bracket>section,.drag-bracket-match {
+  color:var(--renqd-dr-ink) !important;
+  border:1px solid var(--renqd-dr-line) !important;
+  border-radius:22px !important;
+  background:var(--renqd-dr-surface) !important;
+  box-shadow:0 9px 28px rgba(28,35,70,.055) !important;
+}
+.drag-race-module-card,.drag-lalaparuza-card {
+  min-height:220px; padding:22px; transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+}
+.drag-race-module-card:hover,.drag-lalaparuza-card:hover {
+  transform:translateY(-4px); border-color:#e7b8dc !important; box-shadow:0 18px 38px rgba(102,63,158,.12) !important;
+}
+.drag-race-module-icon,.drag-lalaparuza-card>span {
+  border:1px solid #f2d9ee !important; border-radius:18px;
+  background:linear-gradient(145deg,#fff0f8,#f0eaff) !important; color:var(--renqd-dr-pink) !important;
+}
+.drag-race-module-name,.drag-race-module-copy h2,.drag-race-section-heading h2,
+.drag-lalaparuza-card h2,.drag-config-block h2,.drag-track-section-head h2 {
+  color:#30204f !important; letter-spacing:-.45px;
+}
+.drag-race-module-copy small,.drag-race-module-tags,.drag-race-module-status { color:var(--renqd-dr-muted) !important; }
+.drag-race-module-status.is-ready { background:#f0eaff !important; color:#6741ca !important; }
+.drag-config-card,.drag-answer-card,.drag-result-card,.ss-panel,.ss-finish-card,.drag-track-section {
+  padding:clamp(18px,2.6vw,28px);
+}
+.drag-number-input,.drag-search-field,.drag-search-field input,.drag-track-search,
+.ss-search input,.ss-custom-form input,.ss-custom-form select,.ss-episode-title input,
+.drag-guess-filters select {
+  min-height:44px; border:1px solid #e2e6f0 !important; border-radius:13px !important;
+  background:#fff !important; color:var(--renqd-dr-ink) !important;
+  box-shadow:inset 0 1px 2px rgba(20,30,60,.025);
+}
+.drag-number-input:focus,.drag-search-field input:focus,.drag-track-search:focus,
+.ss-search input:focus,.ss-custom-form input:focus,.ss-custom-form select:focus,
+.ss-episode-title input:focus,.drag-guess-filters select:focus {
+  outline:0; border-color:#9b7bea !important; box-shadow:0 0 0 4px rgba(110,67,223,.12) !important;
+}
+.drag-search-field input::placeholder,.ss-search input::placeholder { color:#a4abc0 !important; }
+.drag-answer-card-sticky {
+  background:rgba(255,255,255,.94) !important; border:1px solid #e9e5f4 !important;
+  box-shadow:0 12px 30px rgba(30,35,72,.10) !important; backdrop-filter:blur(18px);
+}
+.drag-guess-grid { gap:14px; }
+.drag-guess-card,.drag-queen-card,.drag-track-card,.drag-track-hof-card,.drag-track-record-row {
+  color:var(--renqd-dr-ink) !important; border:1px solid #e6e9f1 !important;
+  border-radius:18px !important; background:#fff !important;
+  box-shadow:0 7px 22px rgba(28,35,70,.055) !important;
+}
+.drag-guess-card:hover,.drag-queen-card-clickable:hover,.drag-track-card:hover,
+.drag-track-hof-card:hover,.drag-track-record-row:hover {
+  transform:translateY(-3px); border-color:#d9c5f5 !important;
+  box-shadow:0 15px 32px rgba(80,55,140,.11) !important;
+}
+.drag-guess-card strong,.drag-queen-card strong,.drag-guess-profile-link { color:#30204f !important; }
+.drag-guess-profile-link small,.drag-guess-appearances strong { color:var(--renqd-dr-purple) !important; }
+.drag-guess-image,.drag-queen-image,.drag-season-poster-fallback {
+  background:linear-gradient(145deg,#f2eaff,#ffeaf4) !important; color:#744bd1 !important;
+}
+.drag-guess-card.is-found,.drag-queen-card.is-found {
+  border-color:#a9d9c0 !important; background:#f3fbf6 !important;
+}
+.drag-guess-card button,.drag-confirm-modal button,.drag-chip-list button,
+.drag-suggestions button,.drag-skip,.drag-bracket-match select,.drag-bracket-pair>div,
+.ss-secondary {
+  border:1px solid #e4e6f0 !important; border-radius:12px !important;
+  background:#f8f8fc !important; color:#40365f !important;
+}
+.drag-chip-list button.is-selected,.drag-suggestions button:hover,
+.drag-franchise-option.is-selected {
+  border-color:#a78be8 !important; background:#f3edff !important; color:#6541c8 !important;
+}
+.drag-franchise-option {
+  border:1px solid #e8eaf2 !important; border-radius:18px !important;
+  background:#fff !important; color:var(--renqd-dr-ink) !important;
+}
+.drag-franchise-option-copy strong { color:var(--renqd-dr-ink) !important; }
+.drag-franchise-option small,.drag-franchise-source { color:var(--renqd-dr-muted) !important; }
+.drag-franchise-cover { border:1px solid #eee5f8 !important; box-shadow:0 8px 20px rgba(28,35,70,.10) !important; }
+.drag-current-song,.drag-active-duel,.drag-bracket>section,.drag-bracket-match {
+  border-color:#e7e9f1 !important; background:#fff !important;
+}
+.drag-current-song h2,.drag-active-duel h2,.drag-active-duel h2 em,
+.drag-bracket>section h2 { color:#30204f !important; }
+.drag-current-song p,.drag-active-duel p,.drag-bracket-match small { color:var(--renqd-dr-muted) !important; }
+.drag-bracket-match.is-active,.drag-active-duel {
+  border-color:#e8b4d8 !important; box-shadow:0 0 0 3px rgba(237,22,139,.07),0 14px 32px rgba(80,55,140,.08) !important;
+}
+.drag-bracket-pair>div.is-found { background:#effaf3 !important; color:#237b50 !important; }
+.drag-start-row { border-color:#ececf4 !important; color:var(--renqd-dr-muted) !important; }
+.drag-start-row button,.drag-result-card>button,.ss-primary,.ss-actions button:first-child,
+.drag-active-queen-card strong,.drag-match-actions button:first-child {
+  border:0 !important; border-radius:14px !important; color:#fff !important;
+  background:linear-gradient(110deg,#ed168b,#8a43dc) !important;
+  box-shadow:0 8px 20px rgba(204,40,150,.20) !important;
+}
+.drag-match-actions button:not(:first-child) {
+  border:1px solid #e7dff4 !important; border-radius:14px !important;
+  background:#f5f0ff !important; color:#6741ca !important;
+}
+.drag-game-progress { background:#ececf5 !important; }
+.drag-game-progress span { background:linear-gradient(90deg,#ed168b,#8a43dc,#4f70e8) !important; }
+.drag-game-count,.drag-game-count small { color:var(--renqd-dr-purple) !important; }
+.drag-notice,.ss-notice,.dra-profile-notice {
+  border:1px solid #f3d5e7 !important; border-radius:13px !important;
+  background:#fff2f8 !important; color:#a33a77 !important;
+}
+.drag-result-stats>div,.drag-race-stats>div,.dra-profile-stats>div {
+  border:1px solid #ececf4 !important; border-radius:16px !important; background:#f8f8fc !important;
+}
+.drag-result-stats strong,.drag-race-stats strong,.dra-profile-stats strong,.dra-leaderboard-rank {
+  color:var(--renqd-dr-pink) !important;
+}
+.drag-result-stats small,.drag-race-stats small { color:var(--renqd-dr-muted) !important; }
+.drag-modal-backdrop { background:rgba(25,22,45,.34) !important; backdrop-filter:blur(12px); }
+.drag-confirm-modal { border:1px solid #ebe7f3 !important; border-radius:24px !important; background:#fff !important; color:var(--renqd-dr-ink) !important; box-shadow:0 24px 70px rgba(22,20,48,.2) !important; }
+.drag-confirm-modal h2 { color:var(--renqd-dr-ink) !important; }
+.drag-confirm-modal p { color:var(--renqd-dr-muted) !important; }
+.dra-profile-game-details { border:1px solid #e8eaf2 !important; border-radius:15px !important; background:#f8f8fc !important; }
+.dra-profile-game-details summary,.dra-profile-game-details section strong { color:#30204f !important; }
+.dra-profile-game-details section p { color:var(--renqd-dr-muted) !important; }
+.drag-guess-filters label,.drag-guess-season-group>header small,
+.drag-guess-appearances span { color:var(--renqd-dr-muted) !important; }
+.drag-guess-season-group>header { border-color:#e9eaf2 !important; }
+.drag-guess-season-group>header h2 { color:#30204f !important; }
+.drag-guess-season-group>header span { color:var(--renqd-dr-purple) !important; }
+.drag-track-table-wrap { border:1px solid #e7e9f1 !important; border-radius:18px !important; background:#fff !important; }
+.drag-track-table thead th { background:#f3efff !important; color:#493775 !important; }
+.drag-track-mobile-cards>article { border:1px solid #e7e9f1 !important; border-radius:16px !important; background:#fff !important; }
+.drag-track-card-content h3 { color:#30204f !important; }
+.drag-track-card-content p,.drag-track-card-content .drag-track-template-status { color:var(--renqd-dr-muted) !important; }
+.drag-season-poster,.drag-season-poster-fallback { border:1px solid #e8eaf2 !important; background:linear-gradient(145deg,#e9e0ff,#ffe4f1) !important; }
+.ss-mode-tabs { border-radius:15px !important; background:#f3efff !important; }
+.ss-mode-tabs button[aria-pressed="true"],.ss-mode-tabs button.is-active { border-radius:12px; background:#6741ca !important; color:#fff !important; }
+.ss-saved-card,.ss-cast-preview,.ss-finish-card { border:1px solid #e7e9f1 !important; border-radius:18px !important; background:#fff !important; }
+.drag-slayoff-queen-thumb { background:#f4eafa !important; }
+.drag-race-page :focus-visible,.drag-game-page :focus-visible,.ss-page :focus-visible {
+  outline:3px solid rgba(110,67,223,.28) !important; outline-offset:3px;
+}
+@media(max-width:760px) {
+  .drag-race-page,.drag-game-page,.ss-page { padding:14px !important; border-radius:20px !important; }
+  .drag-race-hero { min-height:0; padding:22px; border-radius:22px !important; }
+  .drag-config-card,.drag-answer-card,.drag-result-card,.ss-panel,.drag-track-section { padding:15px !important; }
+  .drag-guess-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+}
+@media(max-width:420px) {
+  .drag-race-page,.drag-game-page,.ss-page { padding:10px !important; }
+  .drag-guess-grid { grid-template-columns:1fr 1fr; }
+  .drag-guess-card { padding:8px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .drag-race-page *, .drag-game-page *, .ss-page * { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; }
+}
