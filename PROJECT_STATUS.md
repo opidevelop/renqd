@@ -2301,3 +2301,15 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - La navigazione Lalaparuza è stata rifinita in una colonna verticale di card alte e interamente cliccabili.
 - CI: i commit `153c81b`, `2c9d320` e `55f3e64` hanno superato TypeScript/ESLint/build. I controlli sui commit successivi che includono la risoluzione dei dati Queen nel profilo e l'ultimo layout verticale sono ancora in esecuzione; verificarli prima di chiudere il blocco.
 - Nessun deployment Production eseguito e nessun test browser autenticato eseguito.
+
+
+## Aggiornamento Lalaparuza — brani unici, coppie multiple e risultati (27 novembre 2026)
+
+- Guess the Lipsync raggruppa i record per titolo/artista normalizzati e mantiene tutte le coppie Queen distinte del brano negli episodi/stagioni selezionati. La prima risposta può essere una qualunque Queen presente in una coppia; la seconda è limitata al partner della stessa coppia. La rinuncia mostra tutte le coppie associate al brano.
+- La query Guess the Lipsync include i record con artista e coppia esatta anche quando la preview manca; un prompt entra nell'estrazione soltanto se almeno un record del gruppo ha una preview verificata. Se un brano è ripetuto e una delle sue righe ha la preview, le altre coppie dello stesso brano restano comunque valide.
+- Lipsync for Your Life e Slayoff deduplicano i brani per titolo/artista, evitando estrazioni sovrappesate da ripetizioni dello stesso brano in episodi diversi.
+- Lipsync for Your Life: le card Queen sono interamente cliccabili; il pulsante è «Shantay»; aggiunti «Double Shantay» (entrambe vincono) e «Double Sashay» (nessuna vincitrice, entrambe registrano una sconfitta). Le decisioni sono registrate nel riepilogo sessione.
+- Slayoff: aggiunti filtri stagione per i brani, deduplicazione, salvataggio di modifiche/randomizzazione dei brani e card Queen fotografiche per il duello attivo. Il tabellone riceve animazioni di ingresso/avanzamento e mantiene il riepilogo delle due semifinaliste al terzo posto condiviso.
+- Il catalogo live verificato prima della nuova sincronizzazione contiene 845 record lipsync, circa 802 combinazioni titolo-artista e 17 preview. Edge Function `drag-race-catalog-sync` versione 10 attiva; la nuova ricerca Apple/iTunes USA deve ancora essere eseguita da un account staff per misurare l'aumento reale delle preview.
+- CI: i commit `81f61d3`, `4fff2f1` e `94ca28d` hanno superato TypeScript/ESLint/build. I controlli per gli ultimi interventi su Lipsync for Your Life, Slayoff e documentazione sono in esecuzione.
+- Nessun deployment Production eseguito.
