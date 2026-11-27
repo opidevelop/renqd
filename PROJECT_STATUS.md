@@ -2281,3 +2281,23 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - GitHub Actions ha superato TypeScript, ESLint e build per i commit `e1938ea`, `8828eab` e `4fb4e9e`. I primi tentativi `bba383d`, `7418482` e `ab76eb7` avevano rilevato un errore JSX nella mappa delle card Lalaparuza, corretto nel commit `4fb4e9e`.
 - I controlli automatici sui commit della nuova migrazione e del flusso atomico sono ancora in esecuzione; verificarne l'esito prima di dichiarare completato il blocco.
 - Nessun deployment Production eseguito. Non è stato eseguito un test browser autenticato; il catalogo e i nuovi flussi richiedono ancora collaudo end-to-end.
+
+
+## Aggiornamento Guess Them All — cronologia, raggruppamento e integrità statistiche (27 novembre 2026)
+
+- Il catalogo passato al gioco ora include stagioni, franchise e partecipazioni Queen. La schermata di gioco offre filtri di navigazione per franchise e stagione e raggruppa le card per prima partecipazione pertinente, mantenendo una sola card per Queen. Le Queen indovinate mostrano foto, franchise e partecipazioni/placement originali disponibili nel catalogo.
+- La ricerca resta sticky. La card nascosta è selezionabile con mouse o tastiera; soltanto dopo la selezione compare l'azione «Rivela una lettera».
+- Il payload della cronologia è stato ridotto per restare nei limiti JSON delle RPC: lo stato conserva gli ID della queue e delle Queen indovinate, mentre il profilo risolve nomi e placement dal catalogo. Il riepilogo conserva percentuale, errori, aiuti, durata, risultati per franchise e numero di lettere rivelate per Queen.
+- La finalizzazione è stata corretta dopo l'ispezione della funzione `drag_race_create_session`: questa registra già `games_started`. La finalizzazione usa `drag_race_update_session` per stato/risultato e contatori completata/interrotta; una RPC interna separata aggiunge esclusivamente i totali Queen indovinate, evitando il doppio conteggio.
+- La RPC interna `drag_race_add_guess_them_all_queen_counts` non è eseguibile da `authenticated` né da `anon`; viene invocata soltanto dalla finalizzazione server-side. La RPC pubblica di finalizzazione è eseguibile da `authenticated` e non da `anon`.
+- La ricostruzione statistiche dopo cancellazione singola considera anche percentuale, tempo, errori, aiuti e Queen indovinate per le sessioni Guess Them All completate o interrotte.
+- Migrazioni live e file locali allineati:
+  - `20261127095553_drag_race_guess_them_all_history_integrity`
+  - `20261127100015_drag_race_history_stats_rebuild_accuracy`
+  - `20261127100129_drag_race_guess_them_all_stats_session_counters`
+  - `20261127100247_drag_race_guess_them_all_internal_stats_guard`
+- Test SQL transazionale con rollback superato: creazione sessione, finalizzazione completata, risultato, statistiche aggregate, statistiche settimanali, cancellazione singola e ricostruzione; nessun dato di prova persistente. Verifica successiva: 0 sessioni, 0 risultati e 0 righe statistiche Guess Them All residue.
+- La cronologia nel profilo mostra Queen indovinate e mancanti con partecipazioni/placement, riepilogo per franchise e aiuti utilizzati.
+- La navigazione Lalaparuza è stata rifinita in una colonna verticale di card alte e interamente cliccabili.
+- CI: i commit `153c81b`, `2c9d320` e `55f3e64` hanno superato TypeScript/ESLint/build. I controlli sui commit successivi che includono la risoluzione dei dati Queen nel profilo e l'ultimo layout verticale sono ancora in esecuzione; verificarli prima di chiudere il blocco.
+- Nessun deployment Production eseguito e nessun test browser autenticato eseguito.
