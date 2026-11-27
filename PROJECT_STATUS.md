@@ -2249,3 +2249,12 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Il pulsante staff dell'hub mostra il numero di lipsync riconciliati e il numero di stagioni con sezione Wikipedia. La sincronizzazione non viene considerata eseguita finché non è stata lanciata da un account staff.
 - La ricerca preview Apple/iTunes per i record Wikipedia usa titolo e artista e accetta solo corrispondenze esatte dopo normalizzazione; gli abbinamenti ambigui restano non eleggibili. Prima della prima sincronizzazione con la nuova fonte, il database aveva 13/800 lipsync con preview: il dato va rivalutato dopo l'azione staff.
 - Verifiche locali: `npm run drag-race:wikipedia-parser:verify`, `npx tsc --noEmit`, `npx eslint --quiet`, `npm run build` e `git diff --check` superati.
+
+
+## Chiarimento per il completamento Drag Race — 27 novembre 2026
+
+- L'utente ha risolto il conflitto relativo a Guess Them All: **va mantenuta la cronologia completa delle partite**, non soltanto gli aggregati statistici. L'implementazione deve conservare i dettagli delle sessioni consultabili nello storico.
+- L'utente ha confermato che Season Simulator e Badge/obiettivi/notifiche saranno controllati in un secondo momento: restano fuori dal completamento corrente e non devono essere modificati sulla base di regole inventate.
+- Tutte le altre richieste Drag Race restano obbligatorie e devono essere portate a termine.
+- Direzione grafica approvata: Camp & Colourful minimal/Apple-like, ispirazione app TV Time e Muvy, senza copiarne l'interfaccia; resta vincolante la reference visiva canonica Renqd.
+- Stato di questa registrazione: decisioni chiarite e documentate. Non equivale a implementazione o verifica funzionale delle attività mancanti.
