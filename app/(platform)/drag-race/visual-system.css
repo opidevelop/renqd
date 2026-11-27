@@ -199,3 +199,15 @@
 .drag-queen-season-main{display:flex;flex-direction:column;gap:4px;min-width:0}
 .drag-queen-season-badges,.drag-queen-season-metrics{grid-column:2;margin-top:0}
 @media(max-width:560px){.drag-track-card{grid-template-columns:92px minmax(0,1fr);gap:12px}.drag-track-card .drag-season-poster,.drag-track-card .drag-season-poster-fallback{max-width:92px}.drag-queen-season-list article{grid-template-columns:64px minmax(0,1fr)}.drag-queen-season-list .drag-season-poster,.drag-queen-season-list .drag-season-poster-fallback{width:64px;max-width:64px}}
+
+
+.drag-queen-card-clickable{cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.drag-queen-card-clickable:hover{transform:translateY(-3px);border-color:rgba(240,68,160,.6);box-shadow:0 14px 30px rgba(0,0,0,.25)}
+.drag-queen-card-clickable:focus-visible{outline:3px solid rgba(255,112,189,.55);outline-offset:3px}
+.drag-double-outcomes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.drag-double-outcomes button{min-height:48px;padding:10px 14px;border:1px solid rgba(255,255,255,.13);border-radius:14px;background:linear-gradient(145deg,#33203d,#24172d);color:#fff2fa;font-weight:800;cursor:pointer}
+.drag-double-outcomes button:first-child{border-color:rgba(240,68,160,.35);background:linear-gradient(110deg,#702a5b,#a43b82)}
+.drag-double-outcomes button:disabled{opacity:.45;cursor:default}
+.drag-lipsync-outcome{margin:8px 0 14px;padding:14px;border:1px solid rgba(240,68,160,.3);border-radius:14px;background:rgba(240,68,160,.12);color:#ff9bd0;text-align:center;font-size:19px;font-weight:900;animation:drag-lipsync-reveal .35s ease both}
+@keyframes drag-lipsync-reveal{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:520px){.drag-double-outcomes{grid-template-columns:1fr}}
