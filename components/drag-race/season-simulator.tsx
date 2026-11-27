@@ -94,7 +94,7 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
    return{id,ppe,wins};
   }).sort((a,b)=>format==="POINTS"?(b.ppe-a.ppe)||(b.wins-a.wins):(b.wins-a.wins)||(b.ppe-a.ppe)).map(row=>row.id);
  }
- 
+
  function toggleQueen(id:string){setSelectedIds(old=>{if(old.includes(id))return old.filter(x=>x!==id);if(old.length>=desired)return old;return[...old,id];});}
  function randomCast(){const list=shuffle(pool).slice(0,desired);setCast(list);setSelectedIds(list.map(q=>q.id));}
  function randomizeCastOrder(){setCast(old=>shuffle(old));}

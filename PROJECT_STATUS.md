@@ -2231,3 +2231,10 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Le immagini Queen vengono risolte da Wikimedia Commons con fallback; i selettori e le anteprime del cast devono mostrarle accanto al nome. Le fotografie non disponibili con licenza compatibile restano rappresentate da un fallback, senza ricorrere a immagini non autorizzate.
 - Il CTA delle modalità Drag Race è «Gioca».
 - Il catalogo sorgente Drag Race non contiene fotografie Queen: l'arricchimento visuale è separato dai dati biografici e dai risultati competitivi.
+
+
+## Precisazioni Lalaparuza — 27 novembre 2026
+
+- Guess the Lipsync limita il secondo suggerimento alla Queen partner della coppia corrente; il filtro ammette solo lipsync con esattamente due Queen.
+- Guess the Lipsync, Lipsync for Your Life e Slayoff mostrano «Cambia canzone» quando la preview iTunes manca o genera un errore. Il cambio mantiene invariata la coppia Queen o il duello e seleziona un brano alternativo con preview disponibile.
+- La richiesta di usare una Wiki come fonte dinamica è registrata. In questo rilascio resta attiva la sincronizzazione automatica del catalogo strutturato già integrato; non è stato sostituito con parsing live Wikipedia, perché le pagine non garantiscono copertura uniforme per tutti i franchise e non va introdotto uno scraping Fandom senza autorizzazione. Non dichiarare completata la sostituzione della fonte finché non è disponibile una fonte Wiki verificabile per tutte le stagioni supportate.

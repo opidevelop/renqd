@@ -27,7 +27,7 @@ Approvate dall'utente il 26 novembre 2026. Le scelte qui riportate sono vincolan
 | 22 | Randomize rimescola tutte le posizioni del tabellone. |
 | 23 | Riordino Queen tramite drag-and-drop sul tabellone. |
 | 24 | Modifiche durante il torneo solo per turni non disputati. |
-| 25 | Catalogo manuale canzoni completo, con filtri franchise e stagione. |
+| 25 | Brani recuperati dalla fonte Wiki, senza catalogo manuale mantenuto in Renqd; filtri franchise e stagione. |
 | 26 | Randomize canzoni solo per duelli non disputati. |
 | 27 | Riordino manuale canzoni tramite drag-and-drop nell'elenco duelli. |
 | 28 | Tabellone completo sempre visibile. |
@@ -60,3 +60,12 @@ Approvate dall'utente il 26 novembre 2026. Le scelte qui riportate sono vincolan
 - Lipsync for Your Life: la cronologia conserva il riepilogo, non il dettaglio completo dei singoli duelli.
 - Per tutte le modalità Lalaparuza, solo le partite completate contribuiscono alle classifiche; le interrotte restano nella cronologia.
 - Il catalogo deve conservare provenienza e identificatori stabili. Le preview mancanti non devono essere presentate come riproducibili.
+
+
+## Decisioni aggiuntive approvate il 27 novembre 2026
+
+| # | Decisione |
+|---:|---|
+| 51 | I lipsync e le coppie Queen devono provenire dinamicamente dalla Wiki, evitando un catalogo manuale di canzoni e coppie in Renqd. La fonte automatica deve rispettare i limiti di accesso e copertura; non usare scraping Fandom non autorizzato. |
+| 52 | Nel gioco di riconoscimento l'ordine delle due risposte è libero; dopo la prima Queen, la seconda risposta deve essere l'altra Queen della stessa coppia originale. |
+| 53 | Se la preview iTunes manca o non è riproducibile, l'utente può richiedere una canzone alternativa. Vale per Guess the Lipsync, Lipsync for Your Life e Slayoff. |

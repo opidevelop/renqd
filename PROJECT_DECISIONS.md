@@ -776,3 +776,10 @@ Queste modifiche sono visuali e di navigazione: non autorizzano modifiche alle r
 1. La selezione dei franchise deve presentare card visuali con copertina/logo del franchise affiancata al nome; la card deve rendere immediatamente riconoscibile l'edizione selezionabile.
 2. Le liste di selezione delle Queen e le anteprime del cast devono mostrare il ritratto accanto al nome. Le immagini esterne devono provenire da fonti con licenza compatibile e attribuzione consultabile; quando non esiste una fotografia riutilizzabile, usare un fallback grafico coerente anziché un'immagine non autorizzata.
 3. Il CTA delle card delle modalità Drag Race deve essere **«Gioca»**, non «Disponibile».
+
+
+### Precisazioni Lalaparuza approvate il 27 novembre 2026
+
+1. I lipsync e le coppie Queen devono essere recuperati dinamicamente dalla Wiki, senza mantenere in Renqd un catalogo manuale di canzoni e coppie. La fonte automatica deve rispettare i limiti di accesso e copertura; non usare scraping Fandom senza autorizzazione scritta. Questa decisione aggiorna la precedente scelta del catalogo manuale per Slayoff.
+2. In Guess the Lipsync l'ordine delle due risposte è libero; dopo la prima Queen, la seconda deve essere l'altra Queen della stessa coppia originale.
+3. Se la preview iTunes è assente o non riproducibile, l'utente può richiedere una canzone alternativa. Il comportamento vale per Guess the Lipsync, Lipsync for Your Life e Slayoff.
