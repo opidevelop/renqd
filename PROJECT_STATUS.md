@@ -2321,3 +2321,7 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Aggiunto il trigger `drag_race_user_stats_best_result_default`, che normalizza a 0 il risultato migliore quando una sessione interrotta non ha un punteggio completato. Non altera i risultati completati.
 - Migrazione Supabase e file locale allineati: `20261127101426_drag_race_interrupted_session_best_result_default`.
 - Test SQL transazionale con rollback ripetuto e superato: avvio sessione, finalizzazione ABANDONED, contatori avviata/interrotta, Queen indovinate, assenza di riga risultato completato e cancellazione/ricalcolo storico. Nessun dato di prova persistente.
+
+
+- Guess Them All salva inoltre lo stato attivo ogni 15 secondi tramite `drag_race_update_session`: queue, Queen trovate, errori, aiuti e tempo. Se la scheda viene chiusa senza passare dal pulsante di uscita, la sessione resta consultabile come In corso con l'ultimo stato sincronizzato; la finalizzazione esplicita la chiude come COMPLETED o ABANDONED.
+- Test SQL transazionale con rollback superato anche per autosave ACTIVE → finalizzazione ABANDONED → statistiche interrotte → cancellazione e ricostruzione. Nessun dato di prova persistente.
