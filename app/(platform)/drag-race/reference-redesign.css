@@ -1,0 +1,133 @@
+
+/* =========================================================
+   DRAG RACE — COMPLETE REFERENCE REDESIGN
+   Full component-level visual language: Pop Collectible,
+   entertainment-catalog browsing, editorial portraits.
+   ========================================================= */
+.drag-race-page,.drag-game-page,.ss-page,.dra-profile-archive,.dra-leaderboards{
+  --dr-bg:#f7f4f8;--dr-surface:#fff;--dr-surface-2:#f1eaf4;--dr-ink:#211827;
+  --dr-muted:#756b7c;--dr-pink:#f05aa8;--dr-pink-deep:#c92d83;--dr-violet:#7750c8;
+  --dr-lilac:#c9b4f1;--dr-line:#e8dfed;--dr-shadow:0 18px 48px rgba(54,31,69,.10);
+  color:var(--dr-ink);font-family:inherit;
+}
+.drag-race-page{max-width:1240px;gap:34px;padding:clamp(12px,2.4vw,28px) 0 48px}
+.drag-race-page a,.drag-game-page a{text-decoration:none}
+.drag-race-pop-hero{
+  min-height:clamp(330px,42vw,510px)!important;display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(280px,.95fr)!important;
+  align-items:center!important;gap:20px!important;padding:clamp(24px,5vw,64px)!important;
+  border:0!important;border-radius:34px!important;overflow:hidden!important;
+  background:radial-gradient(ellipse at 80% 15%,rgba(255,255,255,.92),transparent 38%),
+    linear-gradient(125deg,#f9d9ec 0%,#e9dafa 52%,#d6c9f5 100%)!important;
+  box-shadow:0 24px 70px rgba(108,63,135,.16)!important;color:#281b31!important;
+}
+.drag-race-pop-hero:before{content:"";position:absolute;inset:14px;border:1px solid rgba(255,255,255,.7);border-radius:25px;pointer-events:none}
+.drag-race-pop-hero-copy{position:relative;z-index:3;max-width:590px!important}
+.drag-race-pop-overline{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #ffffffa8;border-radius:999px;background:#ffffff75;color:#753d83!important;font-size:10px!important;font-weight:900;letter-spacing:1.6px}
+.drag-race-pop-hero h1{margin:22px 0 12px!important;font-size:clamp(54px,8vw,100px)!important;line-height:.82!important;letter-spacing:-.075em!important;font-weight:950!important;color:#2b1d34!important}
+.drag-race-pop-hero h1 em{color:#c02d83!important;font-style:normal!important}
+.drag-race-pop-hero p{max-width:430px;margin:18px 0!important;color:#5d4966!important;font-size:clamp(13px,1.5vw,16px)!important;line-height:1.7!important}
+.drag-race-pop-tags{display:flex;gap:7px;flex-wrap:wrap}
+.drag-race-pop-tags i{padding:7px 11px;border:1px solid #fff9;border-radius:999px;background:#fff7;color:#633c70;font-size:9px;font-style:normal;font-weight:900;letter-spacing:1px}
+.drag-race-pop-edition{display:flex;align-items:center;gap:7px;margin-top:22px;color:#8d3d85;font-size:9px;font-weight:950;letter-spacing:1.7px}
+.drag-race-pop-portraits{position:relative!important;display:block!important;min-height:340px!important;width:100%;height:100%;max-width:500px;margin:auto}
+.drag-race-pop-portrait{position:absolute!important;width:43%!important;height:75%!important;overflow:hidden;border:5px solid #fff;border-radius:24px!important;background:#fff;box-shadow:0 24px 50px #4b286b38!important}
+.drag-race-pop-portrait img{width:100%;height:100%;object-fit:cover;object-position:top center}
+.drag-race-pop-portrait span{position:absolute;left:9px;right:9px;bottom:9px;padding:8px 6px;border-radius:9px;background:#fffE;color:#4a2b56;font-size:8px;font-weight:950;letter-spacing:1.2px;text-align:center}
+.drag-race-pop-portrait-one{left:1%;top:14%;transform:rotate(-10deg)}
+.drag-race-pop-portrait-two{left:29%;top:4%;z-index:2;transform:rotate(2deg)}
+.drag-race-pop-portrait-three{right:0;top:17%;transform:rotate(10deg)}
+.drag-race-pop-hero-orbit{color:#fff8!important;font-size:clamp(150px,24vw,280px)!important;font-weight:1000!important}
+.drag-race-pop-spark{color:#fff!important;text-shadow:0 4px 16px #a54d9b66}
+.drag-race-section-heading{display:grid;gap:7px}
+.drag-race-section-heading h2{margin:0!important;font-size:clamp(27px,4vw,42px)!important;letter-spacing:-.055em!important;color:#291d31!important}
+.drag-race-section-heading h2 em{color:#c12d85!important}
+.drag-race-section-heading p{margin:0;color:#817487;font-size:12px}
+.drag-race-kicker{color:#c02d83!important;font-size:9px!important;letter-spacing:1.8px!important}
+.drag-race-pop-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:15px!important}
+.drag-race-pop-card{position:relative;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:0!important;min-height:390px!important;padding:15px!important;overflow:hidden;border:1px solid #e9deef!important;border-radius:25px!important;background:linear-gradient(160deg,#fff 0%,#fbf7fd 100%)!important;box-shadow:0 12px 32px rgba(49,27,65,.07)!important;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease!important}
+.drag-race-pop-card:hover{transform:translateY(-7px)!important;border-color:#d4b3e8!important;box-shadow:0 22px 44px rgba(91,48,116,.15)!important}
+.drag-race-pop-card-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2}
+.drag-race-pop-card-edition{color:#a28aa9;font-size:8px;font-weight:950;letter-spacing:1.3px}
+.drag-race-pop-card-number{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#f4eaf7;color:#9463a7;font-size:9px;font-weight:900}
+.drag-race-pop-card-art{position:relative;display:grid;place-items:center;flex:1;min-height:185px;margin:12px 0 13px;border-radius:18px;background:radial-gradient(circle at 50% 45%,#fff 0%,#f6e9f6 55%,#eadcf1 100%);color:#9c63b6}
+.drag-race-pop-card[data-tone="rose"] .drag-race-pop-card-art{background:radial-gradient(circle,#fff 0%,#ffe5f1 58%,#f6cde2 100%);color:#d64b96}
+.drag-race-pop-card[data-tone="violet"] .drag-race-pop-card-art{background:radial-gradient(circle,#fff 0%,#eee6ff 58%,#d9c9f7 100%);color:#8057c7}
+.drag-race-pop-card[data-tone="lilac"] .drag-race-pop-card-art{background:radial-gradient(circle,#fff 0%,#f1eaff 58%,#e1d5fa 100%);color:#9471cb}
+.drag-race-pop-card[data-tone="plum"] .drag-race-pop-card-art{background:radial-gradient(circle,#fff 0%,#f8e4f3 58%,#eac9e7 100%);color:#a34b93}
+.drag-race-pop-card-art>svg{width:66px!important;height:66px!important;filter:drop-shadow(0 8px 12px #56345b24)}
+.drag-race-pop-card-halo{position:absolute;width:130px;height:130px;border:1px solid currentColor;border-radius:50%;opacity:.18;box-shadow:0 0 0 15px #fff5,0 0 0 30px #fff3}
+.drag-race-pop-card-star{position:absolute;right:18%;top:17%;font-size:28px}
+.drag-race-pop-card-copy{display:grid!important;gap:7px!important}
+.drag-race-pop-card-eyebrow{color:#a08aa5;font-size:8px;font-weight:950;letter-spacing:1.5px}
+.drag-race-pop-card-copy>strong{color:#2d2034;font-size:clamp(18px,1.8vw,23px);font-weight:950;letter-spacing:-.7px}
+.drag-race-pop-card-copy>small{min-height:42px;color:#82758a;font-size:10px;line-height:1.55}
+.drag-race-pop-card-tags{display:flex;gap:5px;flex-wrap:wrap}
+.drag-race-pop-card-tags i{padding:5px 7px;border-radius:6px;background:#f3edf6;color:#8e719b;font-size:7px;font-style:normal;font-weight:950;letter-spacing:.8px}
+.drag-race-pop-card-status{display:flex!important;align-items:center;justify-content:space-between;margin-top:13px;padding:11px 12px!important;border-radius:12px!important;background:#2b2034!important;color:#fff!important;font-size:10px!important;font-weight:900!important}
+.drag-race-pop-card-shine{position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,#fff8 48%,transparent 65%);transform:translateX(-120%);transition:transform .65s ease;pointer-events:none}
+.drag-race-pop-card:hover .drag-race-pop-card-shine{transform:translateX(120%)}
+.drag-race-pop-shortcuts{display:flex;gap:10px;flex-wrap:wrap}
+.drag-race-pop-shortcuts a{display:flex;align-items:center;gap:9px;padding:13px 16px;border:1px solid var(--dr-line);border-radius:14px;background:#fff;color:#49344f;font-size:11px;font-weight:850}
+.drag-race-staff-tools{border:1px solid var(--dr-line)!important;border-radius:16px!important;background:#fff!important}
+.drag-race-staff-tools summary{padding:16px 18px!important;color:#48334f!important;font-weight:850}
+.drag-race-staff-tools summary span{color:#9a8b9e!important}
+.drag-race-staff-tools>div{padding:0 18px 18px!important}
+.drag-franchise-picker{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))!important;gap:11px!important}
+.drag-franchise-picker-item{position:relative;min-width:0}
+.drag-franchise-option{display:grid!important;grid-template-columns:68px minmax(0,1fr) 18px!important;align-items:center!important;gap:10px!important;width:100%;height:100%;min-height:92px;padding:9px!important;border:1px solid #e8dfed!important;border-radius:16px!important;background:#fff!important;text-align:left!important;box-shadow:0 5px 16px #33203e08!important}
+.drag-franchise-option.is-selected{border-color:#d65ba4!important;background:linear-gradient(135deg,#fff,#fff4fa)!important;box-shadow:0 0 0 2px #edb1d4!important}
+.drag-franchise-cover{display:block!important;width:68px!important;height:72px!important;overflow:hidden;border-radius:10px!important;background:#eee5f1!important}
+.drag-franchise-cover img{width:100%;height:100%;object-fit:cover}
+.drag-franchise-cover-all{display:grid!important;place-items:center;align-content:center;gap:4px;color:#9a5eb4}
+.drag-franchise-cover-all small{font-size:7px;font-weight:950;letter-spacing:1px}
+.drag-franchise-option-copy{display:grid;gap:5px;min-width:0}
+.drag-franchise-option-copy strong{color:#302237;font-size:11px;font-weight:900;line-height:1.25}
+.drag-franchise-option-copy small{color:#96879b;font-size:9px}
+.drag-franchise-selected-icon{color:#ce3d91}
+.drag-franchise-source{position:absolute;right:7px;bottom:6px;color:#a99bad}
+.drag-race-hero,.drag-race-module-card,.drag-lalaparuza-card,.drag-config-card,.drag-answer-card,.drag-result-card,.ss-panel,.ss-finish-card,.drag-track-section,.dra-leaderboard-group,.dra-profile-subsection,.dra-profile-badges{border-color:var(--dr-line)!important;border-radius:22px!important;box-shadow:0 12px 34px rgba(49,27,65,.065)!important}
+.drag-game-page{max-width:1180px;margin:auto;padding:18px 0 50px;gap:22px}
+.drag-game-heading h1,.drag-game-top h1{font-size:clamp(32px,5vw,52px)!important;letter-spacing:-.06em!important;color:#2a1d32!important}
+.drag-game-heading>span,.drag-game-top>div>span{color:#c02d83!important}
+.drag-config-card,.drag-answer-card,.drag-result-card,.ss-panel,.ss-finish-card,.drag-track-section{background:#fff!important;padding:clamp(16px,2.5vw,26px)!important}
+.drag-config-block h2,.drag-track-section-head h2,.ss-panel h2{color:#34233e!important;font-size:19px!important;letter-spacing:-.5px}
+.drag-number-input,.drag-search-field input,.drag-track-search,.ss-search input,.ss-custom-form input,.ss-custom-form select,.ss-episode-title input{border-color:#e5d9ea!important;border-radius:13px!important;background:#fff!important;color:#2d2035!important;min-height:44px}
+.drag-answer-card-sticky{top:76px!important;border:1px solid #e5c9df!important;border-radius:17px!important;background:#ffffffed!important;box-shadow:0 12px 34px #3920441a!important;backdrop-filter:blur(18px)}
+.drag-guess-grid{gap:14px!important}
+.drag-guess-card{border:1px solid #e7ddeb!important;border-radius:20px!important;background:#fff!important;box-shadow:0 8px 22px #34203e0b!important}
+.drag-guess-card.is-found{border-color:#8ecda9!important;background:#f2fbf5!important}
+.drag-guess-profile-link{color:#783c87!important}
+.drag-race-page button,.drag-game-page button,.ss-page button,.dra-profile-archive button,.dra-leaderboards button{border-radius:12px}
+.drag-race-page button:focus-visible,.drag-game-page button:focus-visible,.ss-page button:focus-visible,.drag-race-page a:focus-visible,.drag-game-page a:focus-visible,.ss-page a:focus-visible{outline:3px solid #e77ab9!important;outline-offset:3px}
+.drag-race-back a{color:#9d568d!important;font-size:11px;font-weight:800}
+.drag-track-section{overflow:hidden}
+.drag-track-table,.drag-track-record-table{border-radius:16px;overflow:hidden}
+.drag-track-table th,.drag-track-record-table th{background:#f4edf7!important;color:#684d72!important}
+.drag-track-table td,.drag-track-record-table td{border-color:#eee7f0!important}
+.dra-leaderboard-group,.dra-profile-subsection,.dra-profile-badges{background:#fff!important}
+@media(max-width:1050px){.drag-race-pop-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.drag-race-pop-card{min-height:360px!important}}
+@media(max-width:700px){
+ .drag-race-page{gap:24px;padding:8px 0 32px}
+ .drag-race-pop-hero{grid-template-columns:1fr!important;min-height:unset!important;padding:26px 22px 18px!important;border-radius:25px!important}
+ .drag-race-pop-hero-copy{max-width:none}
+ .drag-race-pop-hero h1{font-size:clamp(52px,15vw,78px)!important;margin-top:18px!important}
+ .drag-race-pop-portraits{min-height:245px!important;max-width:360px}
+ .drag-race-pop-portrait{height:84%!important;width:39%!important;border-width:4px!important;border-radius:17px!important}
+ .drag-race-pop-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+ .drag-race-pop-card{min-height:300px!important;padding:10px!important;border-radius:18px!important}
+ .drag-race-pop-card-art{min-height:125px!important;margin:8px 0 10px!important}
+ .drag-race-pop-card-art>svg{width:48px!important;height:48px!important}
+ .drag-race-pop-card-copy>strong{font-size:17px}
+ .drag-race-pop-card-copy>small{font-size:9px;min-height:0}
+ .drag-race-pop-card-status{padding:9px!important;margin-top:10px!important}
+ .drag-franchise-picker{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ .drag-franchise-option{grid-template-columns:54px minmax(0,1fr) 14px!important;min-height:76px!important;padding:7px!important;gap:7px!important}
+ .drag-franchise-cover{width:54px!important;height:60px!important}
+ .drag-franchise-option-copy strong{font-size:10px}
+ .drag-franchise-option-copy small{font-size:8px}
+ .drag-game-page{padding:8px 0 32px}
+ .drag-answer-card-sticky{top:65px!important}
+}
+@media(max-width:380px){.drag-race-pop-card{min-height:280px!important}.drag-race-pop-card-copy>strong{font-size:15px}.drag-race-pop-card-tags{display:none}}
+@media(prefers-reduced-motion:reduce){.drag-race-pop-card,.drag-race-pop-card-shine,.drag-race-page button,.drag-game-page button{transition:none!important;animation:none!important}}
