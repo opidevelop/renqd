@@ -165,3 +165,22 @@
 .drag-guess-card[role="button"]{cursor:pointer}
 .drag-guess-card.is-active{border-color:#f044a0;box-shadow:0 0 0 2px rgba(240,68,160,.18),0 12px 26px rgba(0,0,0,.24)}
 .drag-guess-card[role="button"]:focus-visible{outline:3px solid rgba(255,112,189,.55);outline-offset:3px}
+
+
+.drag-guess-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.drag-guess-filters label{display:grid;gap:5px;color:#c9b7cf;font-size:10px;font-weight:750}
+.drag-guess-filters select{width:100%;min-width:0;height:38px;padding:0 10px;border:1px solid rgba(255,255,255,.13);border-radius:10px;background:#17111e;color:#fff5fb;font:inherit;font-size:11px}
+.drag-guess-groups{display:grid;gap:18px}
+.drag-guess-season-group{display:grid;gap:10px;min-width:0}
+.drag-guess-season-group>header{display:flex;align-items:end;justify-content:space-between;gap:12px;padding:0 2px 8px;border-bottom:1px solid rgba(255,255,255,.10)}
+.drag-guess-season-group>header span{color:#ff83c5;font-size:9px;font-weight:800;letter-spacing:.3px}
+.drag-guess-season-group>header h2{margin:4px 0 0;color:#fff5fb;font-size:17px;letter-spacing:-.3px}
+.drag-guess-season-group>header small{color:#b9a9c0;font-size:10px;white-space:nowrap}
+.drag-guess-appearances{display:grid;gap:4px;min-width:0;grid-column:2}
+.drag-guess-appearances strong{color:#ff9bd0;font-size:9px;line-height:1.4}
+.drag-guess-appearances span{color:#c3b4c9;font-size:9px;line-height:1.5;overflow-wrap:anywhere}
+.drag-guess-card.is-found{grid-template-columns:64px minmax(0,1fr);align-items:start}
+.drag-guess-card.is-found .drag-guess-image{grid-row:span 2;width:64px;height:76px}
+.drag-guess-card.is-found .drag-guess-profile-link{min-width:0}
+.drag-guess-card.is-found>svg{position:absolute;right:10px;top:10px}
+@media(max-width:600px){.drag-guess-filters{grid-template-columns:1fr}.drag-guess-card.is-found{grid-template-columns:54px minmax(0,1fr)}.drag-guess-card.is-found .drag-guess-image{width:54px;height:66px}}
