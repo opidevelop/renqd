@@ -783,3 +783,13 @@ Queste modifiche sono visuali e di navigazione: non autorizzano modifiche alle r
 1. I lipsync e le coppie Queen devono essere recuperati dinamicamente dalla Wiki, senza mantenere in Renqd un catalogo manuale di canzoni e coppie. La fonte automatica deve rispettare i limiti di accesso e copertura; non usare scraping Fandom senza autorizzazione scritta. Questa decisione aggiorna la precedente scelta del catalogo manuale per Slayoff.
 2. In Guess the Lipsync l'ordine delle due risposte è libero; dopo la prima Queen, la seconda deve essere l'altra Queen della stessa coppia originale.
 3. Se la preview iTunes è assente o non riproducibile, l'utente può richiedere una canzone alternativa. Il comportamento vale per Guess the Lipsync, Lipsync for Your Life e Slayoff.
+
+
+## Decisioni approvate — completamento Drag Race e cronologia Guess Them All (27 novembre 2026)
+
+1. Per Guess Them All prevale il requisito di **conservare la cronologia completa delle partite**. Non è sufficiente mantenere soltanto statistiche aggregate: ogni partita deve poter essere consultata nella cronologia con i dettagli previsti dal flusso di gioco. Prima dell'implementazione verificare schema e codice esistenti, riutilizzando o estendendo le strutture presenti senza duplicare sessioni o statistiche.
+2. Il completamento della sezione Drag Race comprende tutte le richieste funzionali e grafiche già formulate dall'utente, incluse le modalità di gioco, il catalogo, le immagini, le statistiche, la cronologia, il database, le segnalazioni, la sicurezza, i test e la documentazione.
+3. Season Simulator è temporaneamente escluso dagli interventi di completamento: l'utente ne controllerà successivamente la specifica. Non inventare o modificare le regole mancanti.
+4. Badge, obiettivi e relative notifiche sono temporaneamente esclusi: l'utente fornirà successivamente le indicazioni. Non inventare soglie, premi o comportamenti.
+5. Tutto il resto del perimetro Drag Race deve essere completato; le sole eccezioni temporanee sono i punti 3 e 4 di questa sezione.
+6. La direzione grafica approvata per Drag Race è Camp & Colourful in versione minimal e Apple-like, con ispirazione di navigazione/catalogo da app di intrattenimento come TV Time e Muvy. Usare colori pop e immagini editoriali con superfici pulite, card ordinate, tipografia leggibile e coerenza con la reference canonica Renqd. I riferimenti esterni sono ispirazione, non da copiare letteralmente.
