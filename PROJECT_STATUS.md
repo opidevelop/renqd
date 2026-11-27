@@ -2313,3 +2313,11 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Il catalogo live verificato prima della nuova sincronizzazione contiene 845 record lipsync, circa 802 combinazioni titolo-artista e 17 preview. Edge Function `drag-race-catalog-sync` versione 10 attiva; la nuova ricerca Apple/iTunes USA deve ancora essere eseguita da un account staff per misurare l'aumento reale delle preview.
 - CI: i commit `81f61d3`, `4fff2f1` e `94ca28d` hanno superato TypeScript/ESLint/build. I controlli per gli ultimi interventi su Lipsync for Your Life, Slayoff e documentazione sono in esecuzione.
 - Nessun deployment Production eseguito.
+
+
+## Hardening delle partite interrotte — 27 novembre 2026
+
+- Il test transazionale della finalizzazione ABANDONED ha individuato un vincolo preesistente in `drag_race_update_session`: per il primo risultato interrotto di un franchise veniva tentato l'inserimento di `best_result = NULL`, incompatibile con il vincolo NOT NULL di `drag_race_user_stats`.
+- Aggiunto il trigger `drag_race_user_stats_best_result_default`, che normalizza a 0 il risultato migliore quando una sessione interrotta non ha un punteggio completato. Non altera i risultati completati.
+- Migrazione Supabase e file locale allineati: `20261127101426_drag_race_interrupted_session_best_result_default`.
+- Test SQL transazionale con rollback ripetuto e superato: avvio sessione, finalizzazione ABANDONED, contatori avviata/interrotta, Queen indovinate, assenza di riga risultato completato e cancellazione/ricalcolo storico. Nessun dato di prova persistente.
