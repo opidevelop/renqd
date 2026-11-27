@@ -1,0 +1,18 @@
+"use client";
+import {useState} from "react";
+import {Settings2,Check,LoaderCircle} from "lucide-react";
+import {useDragRacePreferences} from "@/lib/drag-race/use-preferences";
+export function DragRacePreferencesPanel(){
+ const {preferences,update,loaded,saving}=useDragRacePreferences();const [message,setMessage]=useState("");
+ const modes=[["GUESS_THEM_ALL","Guess Them All"],["GUESS_THE_LIPSYNC","Guess the Lipsync"],["LIPSYNC_FOR_YOUR_LIFE","Lipsync for Your Life"],["SLAYOFF","Slayoff"],["SEASON_SIMULATOR","Season Simulator"],["TRACK_RECORD","Track Record"]];
+ function setModeVisibility(mode:string,value:string){const next={...preferences.mode_visibility};if(value==="inherit")delete next[mode];else next[mode]=value==="public";void change({mode_visibility:next});}
+ async function change(patch:Parameters<typeof update>[0]){setMessage("");try{await update(patch);setMessage("Preferenze salvate.");}catch(e){setMessage(e instanceof Error?e.message:"Salvataggio non riuscito.");}}
+ return <details className="drag-shared-preferences"><summary><Settings2 size={17}/> Impostazioni condivise <span>Valgono per le modalità Drag Race</span></summary><div className="drag-shared-preferences-grid">
+  <label><span><strong>Animazioni</strong><small>Transizioni e movimenti nelle schermate di gioco</small></span><input type="checkbox" checked={preferences.animations_enabled} disabled={!loaded||saving} onChange={e=>void change({animations_enabled:e.target.checked})}/></label>
+  <label><span><strong>Audio player</strong><small>Attiva o silenzia le anteprime musicali</small></span><input type="checkbox" checked={preferences.sounds_enabled} disabled={!loaded||saving} onChange={e=>void change({sounds_enabled:e.target.checked})}/></label>
+  <label><span><strong>Riproduzione automatica</strong><small>Avvia la preview quando cambia la canzone</small></span><input type="checkbox" checked={preferences.player_autoplay} disabled={!loaded||saving} onChange={e=>void change({player_autoplay:e.target.checked})}/></label>
+  <label className="drag-preference-volume"><span><strong>Volume player</strong><small>{Math.round(preferences.player_volume*100)}%</small></span><input type="range" min="0" max="1" step="0.05" value={preferences.player_volume} disabled={!loaded||saving} onChange={e=>void change({player_volume:Number(e.target.value)})}/></label>
+  <label><span><strong>Statistiche pubbliche</strong><small>Mostra le tue statistiche nei profili pubblici e nelle classifiche</small></span><input type="checkbox" checked={preferences.statistics_public} disabled={!loaded||saving} onChange={e=>void change({statistics_public:e.target.checked})}/></label>
+  <div className="drag-preference-privacy"><strong>Visibilità per modalità</strong><small>Puoi ereditare la scelta generale oppure impostare un&apos;eccezione.</small>{modes.map(([mode,label])=><label key={mode}><span>{label}</span><select value={preferences.mode_visibility[mode]===undefined?"inherit":preferences.mode_visibility[mode]?"public":"private"} disabled={!loaded||saving} onChange={e=>setModeVisibility(mode,e.target.value)}><option value="inherit">Come impostazione generale</option><option value="public">Pubblica</option><option value="private">Privata</option></select></label>)}</div>
+ </div>{message&&<small className="drag-preferences-message" role="status">{saving?<LoaderCircle size={13}/>:<Check size={13}/>} {message}</small>}{!loaded&&<small>Caricamento preferenze…</small>}</details>;
+}

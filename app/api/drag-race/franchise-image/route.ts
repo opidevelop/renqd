@@ -1,0 +1,37 @@
+import {NextResponse} from "next/server";
+import {createClient} from "@/lib/supabase/server";
+export const runtime="nodejs";
+type CommonsImageInfo={url?:string;thumburl?:string;descriptionurl?:string;thumbwidth?:number;thumbheight?:number;extmetadata?:{LicenseShortName?:{value?:string};ImageDescription?:{value?:string}}};
+type CommonsPage={title?:string;imageinfo?:CommonsImageInfo[]};
+type Candidate={title:string;info:CommonsImageInfo};
+const headers={"Cache-Control":"private, max-age=3600, s-maxage=604800, stale-while-revalidate=86400"};
+const escapeXml=(value:string)=>value.replace(/[<>&"']/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&apos;"}[c]??c));
+const norm=(value:string)=>value.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"");
+const stripHtml=(value:string)=>value.replace(/<[^>]*>/g," ").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/\s+/g," ").trim();
+function allowedLicense(value:string){const license=value.toLowerCase();if(/non.?commercial|no derivatives|\bnd\b|\bnc\b|fair use|all rights reserved/.test(license))return false;return license.startsWith("cc0")||license.includes("public domain")||/^cc by(?:-sa)?\b/.test(license)||license.startsWith("gfdl");}
+async function commonsCandidates(params:URLSearchParams):Promise<Candidate[]>{try{const response=await fetch("https://commons.wikimedia.org/w/api.php?"+params.toString(),{headers:{"User-Agent":"Renqd/1.0 (https://renqd.app)"},next:{revalidate:604800},signal:AbortSignal.timeout(10000)});if(!response.ok)return[];const payload=await response.json() as {query?:{pages?:Record<string,CommonsPage>}};return Object.values(payload.query?.pages??{}).flatMap(page=>(page.imageinfo??[]).map(info=>({title:page.title??"",info})));}catch{return[];}}
+function chooseImage(candidates:Candidate[],name:string,categoryMatch=false){const target=norm(name);const ranked=candidates.map(candidate=>{const {title,info}=candidate,license=info.extmetadata?.LicenseShortName?.value??"",description=stripHtml(info.extmetadata?.ImageDescription?.value??"");if(!allowedLicense(license)||!(info.thumburl||info.url))return{candidate,score:-1};const titleMatch=norm(title).includes(target),descriptionMatch=norm(description).includes(target);if(!titleMatch&&!descriptionMatch)return{candidate,score:-1};const portraitRatio=info.thumbwidth&&info.thumbheight?info.thumbheight/info.thumbwidth:0;const score=(titleMatch?6:0)+(descriptionMatch?3:0)+(/poster|key art|promotional/i.test(title+" "+description)?5:0)+(/logo/i.test(title)?1:0)+(portraitRatio>=1.05?3:0)-(portraitRatio>0&&portraitRatio<.85?2:0);return{candidate,score};}).filter(x=>x.score>=0).sort((a,b)=>b.score-a.score);const best=ranked[0]?.candidate;if(!best)return null;return{imageUrl:best.info.thumburl??best.info.url??null,sourceUrl:best.info.descriptionurl??null};}
+async function findImage(name:string){
+ const categoryNames=["Category:"+name+" posters","Category:"+name+" promotional images","Category:"+name];
+ for(const categoryName of categoryNames){
+  const category=new URLSearchParams({action:"query",generator:"categorymembers",gcmtitle:categoryName,gcmtype:"file",gcmlimit:"50",prop:"imageinfo",iiprop:"url|extmetadata",iiurlwidth:"640",format:"json"});
+  const match=chooseImage(await commonsCandidates(category),name,true);if(match?.imageUrl)return match;
+ }
+ for(const query of ['filetype:bitmap "'+name+'" drag race poster','filetype:bitmap "'+name+'" drag race','filetype:bitmap "'+name+'" logo']){
+  const search=new URLSearchParams({action:"query",generator:"search",gsrsearch:query,gsrnamespace:"6",gsrlimit:"30",prop:"imageinfo",iiprop:"url|extmetadata",iiurlwidth:"640",format:"json"});
+  const match=chooseImage(await commonsCandidates(search),name,false);if(match?.imageUrl)return match;
+ }
+ return null;
+}
+function fallback(code:string,name:string){
+ const initials=code.replace(/[^A-Z0-9]/g,"").slice(0,4);
+ return `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="840" viewBox="0 0 640 840"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#211326"/><stop offset=".55" stop-color="#87376f"/><stop offset="1" stop-color="#ef4ca5"/></linearGradient></defs><rect width="640" height="840" rx="30" fill="url(#g)"/><circle cx="540" cy="120" r="220" fill="#fff" opacity=".08"/><circle cx="70" cy="780" r="210" fill="#fff" opacity=".08"/><text x="48" y="255" font-family="Arial,sans-serif" font-size="118" font-weight="900" fill="#fff" opacity=".96">${escapeXml(initials)}</text><text x="52" y="355" font-family="Arial,sans-serif" font-size="30" font-weight="800" fill="#fff">${escapeXml(name.slice(0,38))}</text><path d="M52 430h536" stroke="#fff" opacity=".38" stroke-width="2"/><text x="54" y="510" font-family="Arial,sans-serif" font-size="17" letter-spacing="5" fill="#ffe4f1">RENQD × DRAG RACE</text><text x="54" y="760" font-family="Arial,sans-serif" font-size="13" letter-spacing="4" fill="#ffe4f1">THE HERSTORY CONTINUES</text></svg>`;
+}
+export async function GET(request:Request){
+ const db=await createClient(),{data:{user}}=await db.auth.getUser();if(!user)return new NextResponse("Unauthorized",{status:401});
+ const {data:profile}=await db.from("profiles").select("status").eq("id",user.id).maybeSingle();if(profile?.status!=="APPROVED")return new NextResponse("Forbidden",{status:403});
+ const params=new URL(request.url).searchParams,code=params.get("code"),source=params.get("source")==="1";if(!code||code.length>20)return new NextResponse("Bad request",{status:400});
+ const {data:franchise}=await db.from("drag_race_franchises").select("name").eq("code",code).maybeSingle();if(!franchise)return new NextResponse("Not found",{status:404});
+ const image=await findImage(franchise.name);if(source)return NextResponse.redirect(image?.sourceUrl??("https://commons.wikimedia.org/w/index.php?search="+encodeURIComponent(franchise.name+" logo")),{headers});if(image?.imageUrl)return NextResponse.redirect(image.imageUrl,{headers});
+ return new NextResponse(fallback(code,franchise.name),{status:200,headers:{...headers,"Content-Type":"image/svg+xml; charset=utf-8"}});
+}

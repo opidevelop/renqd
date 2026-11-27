@@ -1,0 +1,40 @@
+.drag-guess-topline{display:flex;justify-content:space-between;color:#927d8c;font-size:10px}.drag-guess-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:9px}.drag-guess-card{display:grid;justify-items:center;gap:8px;min-height:165px;padding:11px;border:1px solid #ecdee6;border-radius:13px;background:#fff;text-align:center}.drag-guess-card.is-found{border-color:#8bc59c;background:#f2faf4}.drag-guess-image{display:grid;place-items:center;width:100%;aspect-ratio:1;overflow:hidden;border-radius:10px;background:linear-gradient(135deg,#f8e8f0,#eee3ec);color:#a03d72;font-size:28px;font-weight:900}.drag-guess-image img{width:100%;height:100%;object-fit:cover}.drag-guess-card strong{color:#513b49;font-size:10px;line-height:1.4;overflow-wrap:anywhere}.drag-guess-card button{display:flex;align-items:center;gap:4px;padding:6px 9px;border:1px solid #eadde5;border-radius:999px;background:#fff;color:#a03d72;font-size:9px}.drag-guess-card>svg{color:#299454}.drag-missing-list{display:grid;gap:6px;width:100%;max-height:220px;overflow:auto;padding:12px;border-radius:12px;background:#fcf5f9;text-align:left}.drag-missing-list strong{color:#a03d72;font-size:10px}.drag-missing-list span{color:#6f5968;font-size:10px}@media(max-width:500px){.drag-guess-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.drag-guess-topline{flex-direction:column;gap:4px}}
+
+/* Pop Collectible — Guess Them All */
+.drag-race-pop-guess{--pop-ink:#392640;--pop-plum:#8d59b5;--pop-rose:#d86da9;gap:22px}
+.drag-race-pop-guess .drag-back{width:max-content;padding:8px 11px;border:1px solid #ead7ef;border-radius:9px;background:#fffaff;color:#875594;font-size:10px;font-weight:850}
+.drag-race-pop-guess .drag-game-heading{position:relative;overflow:hidden;padding:clamp(25px,4vw,42px);border:1px solid #e8d3f0;border-radius:23px;background:radial-gradient(circle at 88% 20%,rgba(255,255,255,.9),transparent 23%),linear-gradient(115deg,#fff0f7,#f4e8ff 58%,#e9dcff);box-shadow:0 16px 42px rgba(111,68,134,.08)}
+.drag-race-pop-guess .drag-game-heading:after{position:absolute;right:-45px;bottom:-130px;width:300px;height:300px;border:1px solid #d9b9e9;border-radius:50%;content:"";box-shadow:0 0 0 24px rgba(239,216,248,.48),0 0 0 48px rgba(239,216,248,.25);pointer-events:none}
+.drag-race-pop-guess .drag-game-heading>span{position:relative;z-index:1;color:#a45b9e;font-size:8px;font-weight:950;letter-spacing:1.7px}
+.drag-race-pop-guess .drag-game-heading h1{position:relative;z-index:1;margin:13px 0 9px;color:#392640;font-size:clamp(42px,6vw,68px);font-weight:1000;letter-spacing:-3px;line-height:.95}
+.drag-race-pop-guess .drag-game-heading h1 em{color:#a45bd2;font-style:normal;text-shadow:2px 2px 0 #f6c9e2}
+.drag-race-pop-guess .drag-game-heading p{position:relative;z-index:1;max-width:560px;color:#806c88;font-size:11px;line-height:1.7}
+.drag-race-pop-guess .drag-config-card{position:relative;overflow:hidden;padding:clamp(17px,3vw,25px);border:1px solid #ead8f0;border-radius:20px;background:linear-gradient(145deg,#fff,#fff9fd 70%,#f8f1ff);box-shadow:0 10px 26px rgba(103,64,124,.055)}
+.drag-race-pop-guess .drag-config-block h2{color:#4b3452;font-size:12px;font-weight:950;letter-spacing:.3px}
+.drag-race-pop-guess .drag-number-input{border-color:#e7d5ed;border-radius:9px;background:#fff;color:#654a70}
+.drag-race-pop-guess .drag-start-row{padding-top:16px;border-top:1px solid #f0e4f2}
+.drag-race-pop-guess .drag-start-row>span{color:#8e7895;font-size:10px;font-weight:800}
+.drag-race-pop-guess .drag-start-row button{min-height:40px;padding:0 18px;border:0;border-radius:9px;background:linear-gradient(110deg,#d86da9,#9564d1);color:#fff;font-size:10px;font-weight:950;box-shadow:0 7px 17px rgba(177,91,166,.2)}
+.drag-race-pop-guess .drag-game-top{padding:13px 15px;border:1px solid #ead8f0;border-radius:13px;background:#fffaff}
+.drag-race-pop-guess .drag-game-top,.drag-race-pop-guess .drag-game-top strong{color:#61486a}
+.drag-race-pop-guess .drag-game-progress{overflow:hidden;border-radius:99px;background:#f0e4f2}
+.drag-race-pop-guess .drag-game-progress>span{border-radius:99px;background:linear-gradient(90deg,#e477b1,#9870dc)}
+.drag-race-pop-guess .drag-guess-grid{gap:11px}
+.drag-race-pop-guess .drag-guess-card{position:relative;min-height:180px;border:1px solid #ead9ef;border-radius:15px;background:linear-gradient(145deg,#fff,#fff8fd);box-shadow:0 5px 14px rgba(103,64,124,.045);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.drag-race-pop-guess .drag-guess-card[role="button"]{cursor:pointer}
+.drag-race-pop-guess .drag-guess-card[role="button"]:hover,.drag-race-pop-guess .drag-guess-card.is-active{transform:translateY(-2px);border-color:#c99bdf;box-shadow:0 9px 20px rgba(103,64,124,.1)}
+.drag-race-pop-guess .drag-guess-image{border-radius:11px;background:linear-gradient(145deg,#fbeaf4,#eee3ff);color:#a45ca8}
+.drag-race-pop-guess .drag-guess-card.is-found{border-color:#d5b1e5;background:linear-gradient(145deg,#fff,#fff3fa)}
+.drag-race-pop-guess .drag-guess-card strong{color:#4b3452;font-size:10px}
+.drag-race-pop-guess .drag-guess-card button{border-color:#e6d4ed;color:#9157a3}
+.drag-race-pop-guess .drag-guess-profile-link{display:grid;gap:3px;color:#513b59;text-decoration:none}
+.drag-race-pop-guess .drag-guess-profile-link small{color:#a16aa9;font-size:8px}
+.drag-race-pop-guess .drag-guess-appearances{color:#8d7a94}
+.drag-race-pop-guess .drag-missing-list{border:1px solid #ead8f0;background:#fff8fd}
+.drag-race-pop-guess .drag-missing-list strong{color:#a45b9e}
+.drag-race-pop-guess .drag-result-card{border:1px solid #ead8f0;border-radius:22px;background:linear-gradient(145deg,#fff,#f8efff);box-shadow:0 16px 40px rgba(103,64,124,.08)}
+.drag-race-pop-guess .drag-result-card>svg{color:#b25ba7}
+.drag-race-pop-guess .drag-result-card h1{color:#432c4a}
+.drag-race-pop-guess .drag-result-stats>div{border-color:#ead8f0;background:#fff}
+.drag-race-pop-guess .drag-result-stats strong{color:#9157a3}
+@media(max-width:600px){.drag-race-pop-guess .drag-game-heading{padding:24px 20px}.drag-race-pop-guess .drag-game-heading h1{font-size:clamp(38px,11vw,52px);letter-spacing:-2px}.drag-race-pop-guess .drag-guess-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.drag-race-pop-guess .drag-guess-card{min-height:155px;padding:9px}.drag-race-pop-guess .drag-start-row{align-items:stretch;flex-direction:column}.drag-race-pop-guess .drag-start-row button{width:100%}}

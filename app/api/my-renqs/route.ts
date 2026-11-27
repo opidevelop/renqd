@@ -1,0 +1,51 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { getAccountAccess } from "@/lib/supabase/authorization";
+
+export const dynamic = "force-dynamic";
+
+export async function GET(request: Request) {
+  const supabase = await createClient();
+  const { user, status } = await getAccountAccess(supabase);
+  if (!user) return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
+  if (status !== "APPROVED") return NextResponse.json({ error: "Account non ancora abilitato." }, { status: 403 });
+  const params = new URL(request.url).searchParams;
+  const query = (params.get("q") ?? "").trim().slice(0, 100);
+  const category = params.get("category") ?? "";
+  const mode = params.get("mode") ?? "";
+  const trash = params.get("trash") === "1";
+  let requestQuery = supabase.from("rankings").select("id,public_slug,title,mode,status,settings,created_at,started_at,completed_at,deleted_at").eq("user_id", user.id).in("status", ["COMPLETED","DRAFT"]);
+  requestQuery = trash ? requestQuery.not("deleted_at", "is", null) : requestQuery.is("deleted_at", null);
+  if (query) requestQuery = requestQuery.ilike("title", "%" + query.replace(/[%_]/g, "\\$&") + "%");
+  if (category) requestQuery = requestQuery.filter("settings->>category", "eq", category);
+  if (mode) requestQuery = requestQuery.eq("mode", mode);
+  const { data, error } = await requestQuery.order("completed_at", { ascending: false }).limit(100);
+  if (error) return NextResponse.json({ error: "Non è stato possibile cercare i Renq." }, { status: 500 });
+  const saved = (data ?? []).filter(item => trash || Boolean((item.settings as Record<string, unknown> | null)?.savedAt));
+  const items = await Promise.all(saved.map(async ranking => {
+    const settings = (ranking.settings ?? {}) as Record<string, unknown>;
+    const snapshot = (settings.savedSnapshot ?? {}) as { items?: { title: string; image_url?: string | null; rank_position?: number | null }[] };
+    const result = (settings.resultSnapshot ?? {}) as Record<string, unknown>;
+    const matrix = (settings.matrix ?? {}) as Record<string, unknown>;
+    const rows = snapshot.items ?? (
+      ranking.mode === "POKEMON_NAME_EM_ALL" ? [
+        { title: String(result.foundCount ?? result.score ?? 0) + " Pokémon trovati" },
+        { title: String(result.accuracy ?? 0) + "% precisione" },
+        { title: String(result.level ?? "Risultato") },
+      ] : ranking.mode === "POKEMON_ULTIMATE_FAVOURITE" ? [
+        { title: Object.keys(matrix).length + " celle compilate" },
+      ] : []
+    );
+    const coverPath = typeof settings.coverImagePath === "string" ? settings.coverImagePath : null;
+    const { data: signed } = coverPath ? await supabase.storage.from("renq-covers").createSignedUrl(coverPath, 60 * 60 * 24 * 7) : { data: null };
+    return {
+      id: ranking.id, public_slug: ranking.public_slug, title: ranking.title, mode: ranking.mode, deleted_at: ranking.deleted_at,
+      elapsedSeconds: ranking.mode === "SPEED_RENQ" && ranking.started_at && ranking.completed_at ? Math.max(0, Math.round((new Date(ranking.completed_at).getTime() - new Date(ranking.started_at).getTime()) / 1000)) : null,
+      created_at: ranking.created_at,
+      rows, category: String(settings.category ?? "custom"),
+      coverImage: signed?.signedUrl ?? (typeof settings.coverImageUrl === "string" ? settings.coverImageUrl : rows.find(row => row.image_url)?.image_url ?? null),
+      coverPosition: settings.coverPosition && typeof settings.coverPosition === "object" ? settings.coverPosition as { x: number; y: number } : { x: 50, y: 50 }
+    };
+  }));
+  return NextResponse.json({ items });
+}

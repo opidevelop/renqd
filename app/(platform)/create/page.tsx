@@ -1,0 +1,2 @@
+import {CreateRenqForm} from "@/components/create-renq-form";
+export default async function CreatePage({searchParams}:{searchParams:Promise<{category?:string}>}){const {category}=await searchParams;return <><div className="platform-page-heading"><h1>Crea un Renq.</h1></div><CreateRenqForm initialCategory={category}/></>}

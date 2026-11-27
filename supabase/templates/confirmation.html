@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Conferma il tuo indirizzo email</title>
+  </head>
+  <body style="margin:0;padding:0;background-color:#f7f5f2;font-family:Arial,Helvetica,sans-serif;color:#25231f;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">Conferma il tuo indirizzo email per completare la registrazione a Renqd.</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f7f5f2;">
+      <tr><td align="center" style="padding:42px 16px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:580px;">
+          <tr><td align="center" style="padding:0 0 25px;">
+            <a href="{{ .SiteURL }}" style="font-size:32px;line-height:1;font-weight:800;letter-spacing:-2px;text-decoration:none;color:#25231f;">renqd<span style="color:#ff7900;">.</span></a>
+          </td></tr>
+          <tr><td style="padding:42px 42px 38px;background:#ffffff;border:1px solid #eee7df;border-radius:20px;">
+            <div style="margin:0 0 15px;color:#d66b12;font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;">BENVENUTO SU RENQD</div>
+            <h1 style="margin:0 0 16px;color:#25231f;font-size:29px;line-height:1.16;letter-spacing:-1px;font-weight:750;">Conferma il tuo indirizzo email.</h1>
+            <p style="margin:0 0 25px;color:#706960;font-size:15px;line-height:1.75;">Ci siamo quasi. Per completare la registrazione e confermare che questo indirizzo email è tuo, fai clic sul pulsante qui sotto.</p>
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td align="center" style="border-radius:999px;background:#ff7900;">
+              <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:15px 25px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:999px;">Verifica il mio indirizzo</a>
+            </td></tr></table>
+            <p style="margin:27px 0 7px;color:#928a81;font-size:12px;line-height:1.7;">Se il pulsante non funziona, copia e incolla questo link nel browser:</p>
+            <p style="margin:0;word-break:break-all;font-size:12px;line-height:1.7;"><a href="{{ .ConfirmationURL }}" style="color:#c65f0a;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+            <div style="height:1px;margin:30px 0 20px;background:#f0ebe5;"></div>
+            <p style="margin:0;color:#928a81;font-size:12px;line-height:1.7;">Se non hai creato tu un account Renqd, puoi ignorare questa email. Non verrà effettuata alcuna registrazione senza la verifica.</p>
+          </td></tr>
+          <tr><td align="center" style="padding:22px 18px 0;color:#a29a91;font-size:11px;line-height:1.8;">
+            <strong style="color:#706960;font-weight:700;">Renqd</strong><br>
+            Le tue idee, in ordine.<br>
+            <a href="{{ .SiteURL }}" style="color:#a36a3c;text-decoration:none;">renqd.app</a>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </body>
+</html>

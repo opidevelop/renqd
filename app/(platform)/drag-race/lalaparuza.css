@@ -1,0 +1,61 @@
+.drag-lalaparuza-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.drag-lalaparuza-card{display:grid;align-content:start;gap:12px;min-height:210px;padding:20px;border:1px solid #ecdce5;border-radius:17px;background:#fff}.drag-lalaparuza-card>span{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:#fbedf4;color:#a83f77}.drag-lalaparuza-card h2{margin:0;color:#493340;font-size:16px}.drag-lalaparuza-card p{margin:0;color:#8a7a84;font-size:10px;line-height:1.7}.drag-lalaparuza-card a{display:flex;align-items:center;gap:7px;margin-top:auto;color:#a03d72;font-size:10px;font-weight:850;text-decoration:none}.drag-lalaparuza-card small{margin-top:auto;color:#9b8793;font-size:9px;font-weight:800}@media(max-width:760px){.drag-lalaparuza-grid{grid-template-columns:1fr}}
+
+.drag-lalaparuza-card{min-height:245px;text-decoration:none;cursor:pointer;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+a.drag-lalaparuza-card:hover{transform:translateY(-3px);border-color:#cf75a8;box-shadow:0 14px 30px rgba(122,43,88,.12)}
+a.drag-lalaparuza-card:focus-visible{outline:3px solid rgba(220,85,157,.45);outline-offset:3px}
+.drag-lalaparuza-card>strong{display:flex;align-items:center;gap:7px;margin-top:auto;color:#a03d72;font-size:11px;font-weight:850}
+.drag-lalaparuza-card.is-coming{cursor:default}
+
+
+.drag-lalaparuza-grid{grid-template-columns:minmax(0,1fr);max-width:860px;width:100%;margin-inline:auto}
+.drag-lalaparuza-card{min-height:190px}
+
+
+/* Pop Collectible — Lalaparuza game center */
+.drag-race-pop-lalaparuza{--pop-ink:#392640;gap:23px}
+.drag-race-pop-lalaparuza>.drag-back{width:max-content;padding:8px 11px;border:1px solid #ead7ef;border-radius:9px;background:#fffaff;color:#875594;font-size:10px;font-weight:850}
+.drag-race-pop-lalaparuza .drag-game-heading{position:relative;overflow:hidden;padding:clamp(28px,4vw,45px);border:1px solid #e8d3f0;border-radius:24px;background:radial-gradient(circle at 85% 20%,rgba(255,255,255,.9),transparent 23%),linear-gradient(115deg,#fff0f7,#f4e8ff 58%,#e9dcff);box-shadow:0 16px 42px rgba(111,68,134,.08)}
+.drag-race-pop-lalaparuza .drag-game-heading:after{position:absolute;right:-40px;bottom:-145px;width:330px;height:330px;border:1px solid #d9b9e9;border-radius:50%;content:"";box-shadow:0 0 0 25px rgba(239,216,248,.45),0 0 0 50px rgba(239,216,248,.22);pointer-events:none}
+.drag-race-pop-lalaparuza .drag-game-heading>span{position:relative;z-index:1;color:#a45b9e;font-size:8px;font-weight:950;letter-spacing:1.7px}
+.drag-race-pop-lalaparuza .drag-game-heading h1{position:relative;z-index:1;margin:13px 0 9px;color:#392640;font-size:clamp(45px,6vw,72px);font-weight:1000;letter-spacing:-3.5px;line-height:.95}
+.drag-race-pop-lalaparuza .drag-game-heading h1 em{color:#a45bd2;font-style:normal;text-shadow:2px 2px 0 #f6c9e2}
+.drag-race-pop-lalaparuza .drag-game-heading p{position:relative;z-index:1;max-width:560px;color:#806c88;font-size:11px;line-height:1.7}
+.drag-race-pop-lalaparuza .drag-lalaparuza-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:none;gap:14px}
+.drag-race-pop-lalaparuza .drag-lalaparuza-card{position:relative;isolation:isolate;overflow:hidden;min-height:245px;padding:21px;border:1px solid #ead7ef;border-radius:19px;background:linear-gradient(145deg,#fff,#fff8fd 68%,#f6efff);box-shadow:0 8px 22px rgba(103,64,124,.055);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+.drag-race-pop-lalaparuza a.drag-lalaparuza-card:hover{transform:translateY(-5px);border-color:#d1a4e2;box-shadow:0 16px 32px rgba(103,64,124,.13)}
+.drag-race-pop-lalaparuza .drag-lalaparuza-card:after{position:absolute;z-index:-1;right:-55px;top:-65px;width:170px;height:170px;border:1px solid rgba(180,126,203,.25);border-radius:50%;content:"";box-shadow:0 0 0 18px rgba(231,211,241,.25),0 0 0 36px rgba(231,211,241,.13)}
+.drag-race-pop-lalaparuza .drag-lalaparuza-card>span{width:52px;height:52px;border:1px solid #ead7ef;border-radius:15px;background:linear-gradient(145deg,#fff0f7,#eee4ff);color:#a45ca8}
+.drag-race-pop-lalaparuza .drag-lalaparuza-card h2{color:#49334f;font-size:17px;font-weight:950;letter-spacing:-.3px}
+.drag-race-pop-lalaparuza .drag-lalaparuza-card p{color:#89768f;font-size:10px;line-height:1.75}
+.drag-race-pop-lalaparuza .drag-lalaparuza-card>strong{color:#9856a4;font-size:10px}
+.drag-race-pop-lalaparuza .drag-lalaparuza-card.is-coming{opacity:.7}
+@media(max-width:900px){.drag-race-pop-lalaparuza .drag-lalaparuza-grid{grid-template-columns:1fr;max-width:680px;margin-inline:auto}.drag-race-pop-lalaparuza .drag-lalaparuza-card{min-height:180px}}
+@media(max-width:600px){.drag-race-pop-lalaparuza .drag-game-heading{padding:24px 20px}.drag-race-pop-lalaparuza .drag-game-heading h1{font-size:clamp(42px,12vw,56px);letter-spacing:-2.5px}.drag-race-pop-lalaparuza .drag-lalaparuza-card{min-height:165px;padding:18px}}
+
+
+/* Shared Pop Collectible treatment for the three Lalaparuza game screens.
+   The approved Slayoff bracket geometry and match layout remain untouched. */
+.drag-race-pop-guess-lipsync,.drag-race-pop-your-life,.drag-race-pop-slayoff{--pop-ink:#392640;--pop-plum:#8d59b5;--pop-rose:#d86da9}
+.drag-race-pop-guess-lipsync .drag-back,.drag-race-pop-your-life .drag-back,.drag-race-pop-slayoff .drag-back{width:max-content;padding:8px 11px;border:1px solid #ead7ef;border-radius:9px;background:#fffaff;color:#875594;font-size:10px;font-weight:850}
+.drag-race-pop-guess-lipsync .drag-game-heading,.drag-race-pop-your-life .drag-game-heading,.drag-race-pop-slayoff .drag-game-heading{position:relative;overflow:hidden;padding:clamp(24px,4vw,38px);border:1px solid #e8d3f0;border-radius:22px;background:radial-gradient(circle at 88% 18%,rgba(255,255,255,.9),transparent 23%),linear-gradient(115deg,#fff0f7,#f4e8ff 58%,#e9dcff);box-shadow:0 14px 36px rgba(111,68,134,.07)}
+.drag-race-pop-guess-lipsync .drag-game-heading:after,.drag-race-pop-your-life .drag-game-heading:after,.drag-race-pop-slayoff .drag-game-heading:after{position:absolute;right:-45px;bottom:-125px;width:280px;height:280px;border:1px solid #d9b9e9;border-radius:50%;content:"";box-shadow:0 0 0 22px rgba(239,216,248,.45),0 0 0 44px rgba(239,216,248,.22);pointer-events:none}
+.drag-race-pop-guess-lipsync .drag-game-heading>span,.drag-race-pop-your-life .drag-game-heading>span,.drag-race-pop-slayoff .drag-game-heading>span{position:relative;z-index:1;color:#a45b9e;font-size:8px;font-weight:950;letter-spacing:1.6px}
+.drag-race-pop-guess-lipsync .drag-game-heading h1,.drag-race-pop-your-life .drag-game-heading h1,.drag-race-pop-slayoff .drag-game-heading h1{position:relative;z-index:1;color:#392640;font-size:clamp(38px,5.5vw,60px);font-weight:1000;letter-spacing:-2.7px;line-height:.98}
+.drag-race-pop-guess-lipsync .drag-game-heading h1 em,.drag-race-pop-your-life .drag-game-heading h1 em,.drag-race-pop-slayoff .drag-game-heading h1 em{color:#a45bd2;text-shadow:2px 2px 0 #f6c9e2}
+.drag-race-pop-guess-lipsync .drag-game-heading p,.drag-race-pop-your-life .drag-game-heading p,.drag-race-pop-slayoff .drag-game-heading p{position:relative;z-index:1;color:#806c88;font-size:11px;line-height:1.7}
+.drag-race-pop-guess-lipsync .drag-config-card,.drag-race-pop-your-life .drag-config-card,.drag-race-pop-slayoff .drag-config-card{border-color:#ead8f0;border-radius:19px;background:linear-gradient(145deg,#fff,#fff8fd 70%,#f8f1ff);box-shadow:0 10px 26px rgba(103,64,124,.05)}
+.drag-race-pop-guess-lipsync .drag-config-block h2,.drag-race-pop-your-life .drag-config-block h2,.drag-race-pop-slayoff .drag-config-block h2{color:#4b3452;font-weight:950}
+.drag-race-pop-guess-lipsync .drag-number-input,.drag-race-pop-your-life .drag-number-input,.drag-race-pop-slayoff .drag-number-input{border-color:#e7d5ed;border-radius:9px;background:#fff;color:#654a70}
+.drag-race-pop-guess-lipsync .drag-chip-list button,.drag-race-pop-your-life .drag-chip-list button,.drag-race-pop-slayoff .drag-chip-list button{border-color:#ead8ef;background:#fff;color:#80668b}
+.drag-race-pop-guess-lipsync .drag-chip-list button.is-selected,.drag-race-pop-your-life .drag-chip-list button.is-selected,.drag-race-pop-slayoff .drag-chip-list button.is-selected{border-color:#c99bdf;background:#f8edff;color:#87509d}
+.drag-race-pop-guess-lipsync .drag-check input,.drag-race-pop-your-life .drag-check input,.drag-race-pop-slayoff .drag-check input{accent-color:#a45bd2}
+.drag-race-pop-guess-lipsync .drag-start-row button,.drag-race-pop-your-life .drag-start-row button,.drag-race-pop-slayoff .drag-start-row button,.drag-race-pop-guess-lipsync .drag-result-card>button,.drag-race-pop-your-life .drag-result-card>button,.drag-race-pop-slayoff .drag-result-card>button{border-radius:9px;background:linear-gradient(110deg,#d86da9,#9564d1);box-shadow:0 7px 17px rgba(177,91,166,.17)}
+.drag-race-pop-guess-lipsync .drag-current-song,.drag-race-pop-your-life .drag-current-song{border-color:#ead8f0;border-radius:18px;background:linear-gradient(145deg,#fff,#f8efff);box-shadow:0 12px 30px rgba(103,64,124,.06)}
+.drag-race-pop-guess-lipsync .drag-queen-pair,.drag-race-pop-your-life .drag-queen-pair{gap:12px}
+.drag-race-pop-guess-lipsync .drag-queen-pair>*,.drag-race-pop-your-life .drag-queen-pair>*{border-color:#ead8f0}
+.drag-race-pop-guess-lipsync .drag-answer-card,.drag-race-pop-your-life .drag-lipsync-outcome{border-color:#ead8f0;border-radius:16px;background:#fffaff}
+.drag-race-pop-guess-lipsync .drag-result-card,.drag-race-pop-your-life .drag-result-card,.drag-race-pop-slayoff .drag-result-card{border-color:#ead8f0;border-radius:21px;background:linear-gradient(145deg,#fff,#f8efff);box-shadow:0 14px 36px rgba(103,64,124,.07)}
+.drag-race-pop-guess-lipsync .drag-result-card h1,.drag-race-pop-your-life .drag-result-card h1,.drag-race-pop-slayoff .drag-result-card h1{color:#432c4a}
+.drag-race-pop-guess-lipsync .drag-result-stats>div,.drag-race-pop-your-life .drag-result-stats>div,.drag-race-pop-slayoff .drag-result-stats>div{border-color:#ead8f0;background:#fff}
+.drag-race-pop-guess-lipsync .drag-result-stats strong,.drag-race-pop-your-life .drag-result-stats strong,.drag-race-pop-slayoff .drag-result-stats strong{color:#9157a3}
+@media(max-width:600px){.drag-race-pop-guess-lipsync .drag-game-heading,.drag-race-pop-your-life .drag-game-heading,.drag-race-pop-slayoff .drag-game-heading{padding:22px 18px}.drag-race-pop-guess-lipsync .drag-game-heading h1,.drag-race-pop-your-life .drag-game-heading h1,.drag-race-pop-slayoff .drag-game-heading h1{font-size:clamp(34px,10vw,46px);letter-spacing:-1.8px}.drag-race-pop-guess-lipsync .drag-start-row,.drag-race-pop-your-life .drag-start-row,.drag-race-pop-slayoff .drag-start-row{align-items:stretch;flex-direction:column}.drag-race-pop-guess-lipsync .drag-start-row button,.drag-race-pop-your-life .drag-start-row button,.drag-race-pop-slayoff .drag-start-row button{width:100%}}
