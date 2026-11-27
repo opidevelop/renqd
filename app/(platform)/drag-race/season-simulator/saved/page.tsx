@@ -1,9 +1,0 @@
-import Link from "next/link";
-import {ArrowLeft,ArrowRight,Crown} from "lucide-react";
-import {createClient} from "@/lib/supabase/server";
-export const dynamic="force-dynamic";
-export default async function SavedSeasonArchivePage(){
- const db=await createClient();const {data:{user}}=await db.auth.getUser();if(!user)return null;
- const {data:seasons}=await db.from("drag_race_saved_seasons").select("id,title,created_at,statistics").eq("owner_id",user.id).order("created_at",{ascending:false});
- return <main className="ss-page"><Link className="drag-back" href="/drag-race/season-simulator"><ArrowLeft size={16}/> Season Simulator</Link><header className="ss-heading"><span>ARCHIVIO PERSONALE</span><h1>Le tue <em>stagioni.</em></h1><p>Le stagioni salvate sono definitive e consultabili in sola lettura. Non possono essere riprese o modificate.</p></header>{!seasons?.length?<section className="ss-panel"><p>Non hai ancora salvato nessuna stagione.</p><Link className="ss-primary" href="/drag-race/season-simulator">Crea la prima stagione <ArrowRight size={15}/></Link></section>:<section className="ss-saved-grid">{seasons.map(s=>{const stats=s.statistics as {queenCount?:number;episodes?:number;winnerId?:string;queenStatistics?:Array<{queenId:string;queenName:string;challengeWins:number}>};const winner=stats.queenStatistics?.find(q=>q.queenId===stats.winnerId)?.queenName;return <Link className="ss-saved-card" key={s.id} href={"/drag-race/season-simulator/saved/"+s.id}><span><Crown size={17}/></span><strong>{s.title}</strong><small>{new Date(s.created_at).toLocaleDateString("it-IT")} · {stats.queenCount??"—"} Queen · {stats.episodes??"—"} episodi</small><b>{winner?"Vincitrice: "+winner:"Stagione completata"} <ArrowRight size={14}/></b></Link>;})}</section>}</main>;
-}

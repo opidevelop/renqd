@@ -192,3 +192,82 @@
 @media(max-width:850px){.drag-lala-collectibles{grid-template-columns:repeat(2,minmax(0,1fr))!important}.drag-lala-hero{grid-template-columns:1fr .7fr}}
 @media(max-width:620px){.drag-lala-hero{grid-template-columns:1fr;min-height:unset;padding:24px 22px 12px;border-radius:24px}.drag-lala-hero h1{font-size:clamp(58px,17vw,82px)}.drag-lala-hero-art{min-height:205px}.drag-lala-disc{width:190px}.drag-lala-section-head{align-items:start;flex-direction:column;margin-top:26px}.drag-lala-collectibles{grid-template-columns:1fr!important}.drag-lala-card{min-height:unset!important}.drag-lala-card-art{min-height:170px;margin:10px 0 13px}}
 @media(prefers-reduced-motion:reduce){.drag-lala-card,.drag-guess-card{transition:none!important}}
+
+
+/* Track Record — archive shelves, Hall of Fame and editor workspace */
+.drag-race-pop-track-hub .drag-game-heading,.drag-race-pop-track-editor .drag-game-heading{margin-bottom:22px}
+.drag-race-pop-track-hub .drag-track-hof-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:13px}
+.drag-race-pop-track-hub .drag-track-hof-card{position:relative;overflow:hidden;border:1px solid #e8ddec;border-radius:19px;background:linear-gradient(155deg,#fff,#faf5fc);box-shadow:0 10px 28px #3b24470b;transition:transform .22s ease,box-shadow .22s ease}
+.drag-race-pop-track-hub .drag-track-hof-card:hover{transform:translateY(-4px);box-shadow:0 17px 35px #49305016}
+.drag-race-pop-track-hub .drag-track-hof-image{aspect-ratio:4/5;overflow:hidden;background:#f1e7f4}
+.drag-race-pop-track-hub .drag-track-hof-image img{width:100%;height:100%;object-fit:cover;object-position:top}
+.drag-race-pop-track-hub .drag-track-template-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:13px}
+.drag-race-pop-track-hub .drag-track-card{overflow:hidden;border:1px solid #e8ddec;border-radius:18px;background:#fff;box-shadow:0 9px 26px #3b24470a;transition:transform .2s ease,box-shadow .2s ease}
+.drag-race-pop-track-hub .drag-track-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px #49305014}
+.drag-race-pop-track-hub .drag-track-card-content{padding:16px}
+.drag-race-pop-track-hub .drag-track-record-list{display:grid;gap:9px}
+.drag-race-pop-track-hub .drag-track-record-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border:1px solid #e9dfed;border-radius:15px;background:#fff}
+.drag-race-pop-track-editor .drag-track-title-input{min-height:48px;border:1px solid #e5d9ea;border-radius:13px;background:#fff;color:#302137;font-size:clamp(18px,3vw,25px);font-weight:900}
+.drag-race-pop-track-editor .drag-track-save-status{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border-radius:99px;background:#f4edf7;color:#8a6995;font-size:9px;font-weight:850}
+.drag-race-pop-track-editor .drag-track-toolbar{position:sticky;top:70px;z-index:12;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px;border:1px solid #e8ddec;border-radius:16px;background:#ffffffed;backdrop-filter:blur(18px);box-shadow:0 9px 24px #3b244710}
+.drag-race-pop-track-editor .drag-track-stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.drag-race-pop-track-editor .drag-track-stats-grid>div{padding:15px;border:1px solid #e8ddec;border-radius:15px;background:linear-gradient(145deg,#fff,#faf5fc)}
+.drag-race-pop-track-editor .drag-track-stats-grid strong{display:block;color:#34213d;font-size:24px;font-weight:950;letter-spacing:-1px}
+.drag-race-pop-track-editor .drag-track-table-wrap{overflow:auto;border:1px solid #e8ddec;border-radius:18px;background:#fff}
+.drag-race-pop-track-editor .drag-track-table{min-width:680px;border-collapse:separate;border-spacing:0}
+.drag-race-pop-track-editor .drag-track-table thead th{position:sticky;top:0;z-index:2}
+.drag-race-pop-track-editor .drag-track-queen-cell{min-width:145px;background:#fff}
+.drag-race-pop-track-editor .drag-track-queen-initial{display:grid;place-items:center;width:35px;height:35px;border-radius:50%;background:#f2e8f5;color:#965da9;font-weight:950}
+.drag-race-pop-track-editor .drag-track-mobile-cards{display:grid;gap:12px}
+.drag-race-pop-track-editor .drag-track-mobile-cards>article{overflow:hidden;border:1px solid #e8ddec;border-radius:17px;background:#fff}
+.drag-race-pop-track-editor .drag-track-mobile-episode{padding:12px;border-top:1px solid #f0e9f2}
+.drag-race-pop-track-editor .drag-track-mobile-episode-info{color:#8a7b90;font-size:10px}
+.drag-race-pop-track-editor .drag-track-placement-stats{display:flex;flex-wrap:wrap;gap:7px}
+.drag-race-pop-track-editor .drag-track-placement-stats>span{padding:7px 9px;border-radius:9px;background:#f4edf7;color:#795b83;font-size:9px;font-weight:850}
+
+/* Season Simulator — studio-like configuration and episode dashboard */
+.drag-race-pop-season-sim .ss-heading{padding:clamp(22px,4vw,38px);border:1px solid #eaddec;border-radius:25px;background:linear-gradient(120deg,#f9e1ef,#eee6fb 60%,#ded4f7)}
+.drag-race-pop-season-sim .ss-heading h1{color:#2c1d34;font-size:clamp(38px,6vw,66px);font-weight:1000;letter-spacing:-.075em}
+.drag-race-pop-season-sim .ss-heading h1 em{color:#c02d83}
+.drag-race-pop-season-sim .ss-panel{border:1px solid #e8ddec;background:linear-gradient(155deg,#fff,#fdfafe);box-shadow:0 10px 28px #3b24470b}
+.drag-race-pop-season-sim .ss-step-label{color:#c02d83;font-size:9px;font-weight:950;letter-spacing:1.5px}
+.drag-race-pop-season-sim .ss-grid{gap:12px}
+.drag-race-pop-season-sim .ss-queen-mini{border:1px solid #e8ddec;border-radius:14px;background:#fff;box-shadow:0 6px 18px #3b244708}
+.drag-race-pop-season-sim .ss-queen-mini-image{overflow:hidden;border-radius:10px;background:#f1e8f5}
+.drag-race-pop-season-sim .ss-queen-mini-image img{width:100%;height:100%;object-fit:cover;object-position:top}
+.drag-race-pop-season-sim .ss-primary{background:linear-gradient(110deg,#c42f8c,#8656c5)!important;color:#fff!important;box-shadow:0 9px 22px #ad4b9d32}
+.drag-race-pop-season-sim .ss-mode-tabs{padding:5px;border:1px solid #e9deed;border-radius:14px;background:#f7f1f8}
+.drag-race-pop-season-sim .ss-mode-tabs button[aria-pressed="true"],.drag-race-pop-season-sim .ss-mode-tabs button.is-active{background:#fff;box-shadow:0 4px 12px #39234212;color:#b52d84}
+.drag-race-pop-season-sim .ss-live-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:9px}
+.drag-race-pop-season-sim .ss-live-stats>div{padding:13px;border:1px solid #e8ddec;border-radius:14px;background:#fff}
+
+/* Queen profile, public archive and community rankings */
+.drag-race-pop-queen-head{display:grid;grid-template-columns:190px minmax(0,1fr);gap:24px;align-items:center;padding:22px;border:1px solid #e8ddec;border-radius:25px;background:linear-gradient(120deg,#f9e4f0,#eee7fb)}
+.drag-race-pop-queen-head>img{width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top;border:5px solid #fff;border-radius:18px;box-shadow:0 14px 32px #45264d24}
+.drag-race-pop-queen-head h1{margin:8px 0;color:#2e1e37;font-size:clamp(35px,6vw,64px);font-weight:1000;letter-spacing:-.07em}
+.drag-race-pop-queen-head>div>span{color:#b33c8c;font-size:9px;font-weight:950;letter-spacing:1.5px}
+.drag-race-pop-queen-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin:16px 0}
+.drag-race-pop-queen-stats>div{padding:15px 10px;border:1px solid #e8ddec;border-radius:15px;background:#fff;text-align:center}
+.drag-race-pop-queen-stats strong{display:block;color:#35213e;font-size:26px;font-weight:950}
+.drag-race-pop-queen-stats small{color:#8d7d93;font-size:9px}
+.drag-race-pop-season-card{display:grid;grid-template-columns:76px minmax(0,1fr) auto;align-items:center;gap:14px;padding:12px;border:1px solid #e8ddec;border-radius:16px;background:#fff}
+.drag-race-pop-season-card img{width:76px;height:100px;object-fit:cover;border-radius:9px;background:#f0e8f3}
+.dra-profile-archive .dra-profile-heading{padding:22px;border:1px solid #e8ddec;border-radius:23px;background:linear-gradient(120deg,#f9e2ef,#eee7fb)}
+.dra-profile-archive .dra-profile-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:9px}
+.dra-profile-archive .dra-profile-stats>div{padding:14px;border:1px solid #e8ddec;border-radius:14px;background:#fff}
+.dra-profile-archive .dra-profile-history{display:grid;gap:10px}
+.dra-profile-archive .dra-profile-history-main{display:flex;align-items:center;gap:12px}
+.dra-profile-archive .dra-profile-history-stats{display:flex;flex-wrap:wrap;gap:7px}
+.dra-profile-archive .dra-profile-history-stats>span{padding:6px 8px;border-radius:8px;background:#f3edf6;color:#795d84;font-size:9px}
+.dra-leaderboards .ss-heading{padding:clamp(20px,4vw,36px);border-radius:24px;background:linear-gradient(120deg,#f9e1ef,#eee6fb)}
+.dra-leaderboards .ss-heading h1{color:#2c1d34;font-size:clamp(36px,6vw,60px);font-weight:1000;letter-spacing:-.07em}
+.dra-leaderboard-period{display:grid;gap:14px;margin:20px 0}
+.dra-leaderboard-period>div:first-child{display:flex;align-items:center;gap:10px;color:#bd3d8e}
+.dra-leaderboard-period>div:first-child h2{color:#33223b;font-size:21px;font-weight:950}
+.dra-leaderboard-table{overflow:auto;border:1px solid #e8ddec;border-radius:15px;background:#fff}
+.dra-leaderboard-table table{min-width:760px;border-collapse:collapse}
+.dra-leaderboard-table th{background:#f4edf7;color:#755a80;font-size:9px}
+.dra-leaderboard-table td{color:#55465d;font-size:10px}
+.dra-leaderboard-table tr:nth-child(even) td{background:#fcf9fd}
+@media(max-width:760px){.drag-race-pop-queen-head{grid-template-columns:110px minmax(0,1fr);gap:14px;padding:14px}.drag-race-pop-queen-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.drag-race-pop-season-card{grid-template-columns:58px minmax(0,1fr)}.drag-race-pop-season-card img{width:58px;height:78px}.drag-race-pop-season-card .drag-queen-season-badges,.drag-race-pop-season-card .drag-queen-season-metrics{grid-column:1/-1}.drag-race-pop-track-editor .drag-track-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.drag-race-pop-track-editor .drag-track-toolbar{top:62px}}
+@media(max-width:520px){.drag-race-pop-queen-head{grid-template-columns:1fr}.drag-race-pop-queen-head>img{width:150px;max-height:190px}.drag-race-pop-track-hub .drag-track-template-grid{grid-template-columns:1fr}.drag-race-pop-track-hub .drag-track-hof-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
