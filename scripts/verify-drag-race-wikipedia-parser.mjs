@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {parseProgressTable} from "../supabase/functions/drag-race-track-record-wikipedia-sync/parser.js";
+import {parseLipsyncTables} from "../supabase/functions/drag-race-catalog-sync/wikipedia-parser.js";
 
 const episodes=[{number:1},{number:2},{number:3}];
 const queens=[
@@ -24,3 +25,33 @@ assert.deepEqual(parsed.filter(x=>x.queenId==="porkchop").map(x=>[x.episode,x.co
 const ambiguous=parseProgressTable(html,episodes,[...queens,{id:"other",name:"Other Queen",aliases:["Nina Flowers"]}]);
 assert.equal(ambiguous.some(x=>x.queenId==="nina"),false,"ambiguous aliases must not be matched");
 console.log("Wikipedia Track Record parser: all checks passed.");
+
+const lipQueens=[
+ {id:"sahara",name:"Sahara Davenport",aliases:[]},
+ {id:"shangela",name:"Shangela Laquifa Wadley",aliases:["Shangela"]},
+ {id:"mimi",name:"Mimi Imfurst",aliases:["Mimi"]},
+ {id:"chad",name:"Chad Michaels",aliases:["Chad"]}
+];
+const regularLipSync=parseLipsyncTables(`
+<table class="wikitable">
+ <tr><th>Episode</th><th>Contestants</th><th>Song</th><th>Eliminated</th></tr>
+ <tr><td>1 [1]</td><td>Sahara Davenport</td><td>vs.</td><td>Shangela Laquifa Wadley</td><td>"Cover Girl (Put the Bass in Your Walk)" (RuPaul)</td><td>Shangela</td></tr>
+</table>`,episodes,lipQueens);
+assert.equal(regularLipSync.length,1,"regular two-Queen lip sync should be parsed");
+assert.deepEqual(regularLipSync[0].queenIds,["sahara","shangela"]);
+assert.equal(regularLipSync[0].songTitle,"Cover Girl (Put the Bass in Your Walk)");
+assert.equal(regularLipSync[0].songArtist,"RuPaul");
+const teamLipSync=parseLipsyncTables(`
+<table class="wikitable">
+ <tr><th>Episode</th><th>Bottom teams (Lip syncers)</th><th>Song</th><th>Eliminated</th></tr>
+ <tr><td>1</td><td>Mandora (Mimi)</td><td>vs.</td><td>Shad (Chad)</td><td>"Opposites Attract" (Paula Abdul)</td><td>Mandora</td></tr>
+</table>`,episodes,lipQueens);
+assert.equal(teamLipSync.length,1,"team-season row should resolve the individual lip syncers");
+assert.deepEqual(teamLipSync[0].queenIds,["mimi","chad"]);
+const tripleLipSync=parseLipsyncTables(`
+<table class="wikitable">
+ <tr><th>Episode</th><th>Contestants</th><th>Song</th></tr>
+ <tr><td>1</td><td>Sahara Davenport</td><td>vs.</td><td>Shangela Laquifa Wadley</td><td>vs.</td><td>Mimi Imfurst</td><td>"A Song" (Artist)</td></tr>
+</table>`,episodes,lipQueens);
+assert.equal(tripleLipSync.length,0,"three-Queen rows must be excluded from two-Queen guessing mode");
+console.log("Wikipedia Track Record and Lipsync parsers: all checks passed.");

@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { parseLipsyncTables } from "./wikipedia-parser.js";
 
 const VERSION="1.1.1";
 const SOURCE_ID="@tkalejandro/drag-race-mcp";
@@ -23,6 +24,41 @@ const norm=(s:string)=>s.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowe
 async function itunes(song:string):Promise<ItunesMatch|null>{try{const p=new URLSearchParams({term:song,entity:"song",limit:"20",country:"IT"});const r=await fetch("https://itunes.apple.com/search?"+p,{signal:AbortSignal.timeout(6500)});if(!r.ok)return null;const d=await r.json() as {results?:Array<{trackName?:string;artistName?:string;previewUrl?:string;trackViewUrl?:string}>};const m=(d.results??[]).filter(x=>x.trackName&&x.artistName&&norm(x.trackName)===norm(song));const artists=[...new Set(m.map(x=>x.artistName!))];if(artists.length!==1)return null;const chosen=m.find(x=>x.previewUrl)??m[0];return{artist:artists[0],preview:chosen.previewUrl??null,url:chosen.trackViewUrl??null};}catch{return null;}}
 let admin:ReturnType<typeof createClient>|null=null;
 async function upsert(table:string,rows:Record<string,unknown>[],key:string){if(!admin)throw new Error("Database client unavailable");for(let i=0;i<rows.length;i+=100){const {error}=await admin.from(table).upsert(rows.slice(i,i+100),{onConflict:key});if(error)throw error;}}
+
+type WikiLipRow={episode:number;songTitle:string;songArtist:string|null;queenIds:string[];rawRow:string[]};
+type WikiSeasonResult={sectionFound:boolean;title:string;url:string;revisionId:string;rows:WikiLipRow[]};
+type ExistingLipsyncRow={id:string;season_id:string;episode_id:string;song_title:string;song_artist:string|null;queen_ids:string[];winner_ids:string[];kind:string|null;preview_url:string|null;apple_music_url:string|null;metadata_status:string;is_eligible:boolean;source_version:string;raw_data:Record<string,unknown>|null};
+const wikiTitle=(name:string)=>name.replace(/ Season ([0-9]+)$/i," season $1").replace(/ Series ([0-9]+)$/i," series $1");
+async function wikipediaSeason(pack:SeasonPack,queens:QueenSource[]):Promise<WikiSeasonResult|null>{
+ if(!pack.season||!pack.episodes)return null;
+ const title=wikiTitle(pack.season.name),endpoint=new URL("https://en.wikipedia.org/w/api.php");
+ endpoint.searchParams.set("action","parse");endpoint.searchParams.set("page",title);endpoint.searchParams.set("prop","sections");endpoint.searchParams.set("format","json");endpoint.searchParams.set("formatversion","2");
+ const headers={"User-Agent":"Renqd/1.0 (https://renqd.app)","Accept":"application/json"};
+ const metaResponse=await fetch(endpoint,{headers,signal:AbortSignal.timeout(10000)});if(!metaResponse.ok)return null;
+ const meta=await metaResponse.json() as {parse?:{title?:string;revid?:number;sections?:Array<{line:string;index:string}>}};
+ if(!meta.parse)return null;
+ const section=meta.parse.sections?.find(item=>/lip.?sync/i.test(item.line)),pageTitle=meta.parse.title??title,pageUrl="https://en.wikipedia.org/wiki/"+encodeURIComponent(pageTitle.replace(/ /g,"_"));
+ if(!section)return{sectionFound:false,title:pageTitle,url:pageUrl,revisionId:String(meta.parse.revid??"unknown"),rows:[]};
+ const contentUrl=new URL(endpoint);contentUrl.searchParams.set("prop","text");contentUrl.searchParams.set("section",section.index);
+ const contentResponse=await fetch(contentUrl,{headers,signal:AbortSignal.timeout(10000)});
+ if(!contentResponse.ok)return{sectionFound:true,title:pageTitle,url:pageUrl,revisionId:String(meta.parse.revid??"unknown"),rows:[]};
+ const content=await contentResponse.json() as {parse?:{text?:string}},cast=queens.filter(queen=>(pack.season?.castIds??[]).includes(queen.id));
+ const rows=parseLipsyncTables(content.parse?.text??"",pack.episodes.map(episode=>({number:episode.episodeNumber})),cast) as WikiLipRow[];
+ return{sectionFound:true,title:pageTitle,url:pageUrl,revisionId:String(meta.parse.revid??"unknown"),rows};
+}
+async function wikipediaLipsyncCatalog(seasons:SeasonPack[],queens:QueenSource[]){
+ const rows:Array<WikiLipRow&{seasonId:string;episodeId:string;pageTitle:string;sourceUrl:string;revisionId:string}>=[];
+ let sections=0,errors=0;
+ for(let index=0;index<seasons.length;index+=4){
+  const batch=await Promise.all(seasons.slice(index,index+4).map(async pack=>{try{return{pack,result:await wikipediaSeason(pack,queens)};}catch(error){console.warn("Wikipedia season sync",pack.season?.id,error);return{pack,result:null};}}));
+  for(const item of batch){const pack=item.pack,result=item.result;if(!pack.season||!result){errors++;continue;}if(!result.sectionFound)continue;sections++;const episodeByNumber=new Map((pack.episodes??[]).map(episode=>[episode.episodeNumber,episode.id]));for(const row of result.rows){const episodeId=episodeByNumber.get(row.episode);if(episodeId&&row.queenIds.length===2)rows.push({...row,seasonId:pack.season.id,episodeId,pageTitle:result.title,sourceUrl:result.url,revisionId:result.revisionId});}}
+  await new Promise(resolve=>setTimeout(resolve,100));
+ }
+ return{rows,sections,errors};
+}
+const slug=(value:string)=>norm(value).slice(0,36)||"song";
+const lipKey=(row:{season_id:string;episode_id:string;song_title:string;queen_ids:string[]})=>[row.season_id,row.episode_id,norm(row.song_title),[...(row.queen_ids??[])].sort().join(",")].join("|");
+
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response("ok",{status:200,headers:corsHeaders});
  if(req.method!=="POST")return reply({error:"Method not allowed"},405);
@@ -140,9 +176,26 @@ Deno.serve(async(req:Request)=>{
   for(let i=0;i<songs.length;i+=6){const found=await Promise.all(songs.slice(i,i+6).map(async song=>({song,value:await itunes(song)})));for(const x of found)metadata.set(norm(x.song),x.value);}
   const enriched=lips.map(x=>{const m=metadata.get(norm(x.song_title)),artist=m?.artist??null,preview=m?.preview??null;return{...x,song_artist:artist,preview_url:preview,apple_music_url:m?.url??null,metadata_status:!artist?"MISSING_ARTIST":!preview?"MISSING_PREVIEW":"READY",is_eligible:x.queen_ids.length===2&&x.queen_ids.every((id:string)=>queenIds.has(id))&&Boolean(artist&&preview)};});
   await upsert("drag_race_lipsyncs",enriched,"id");
-  const eligible=enriched.filter(x=>x.is_eligible).length;
-  const {error:se}=await admin.from("drag_race_catalog_sync_state").update({source_version:VERSION,last_synced_at:now,sync_lock_until:null,franchise_count:franchises.length,queen_count:queenRows.length,season_count:seasonRows.length,episode_count:episodeRows.length,lipsync_count:lips.length,eligible_lipsync_count:eligible,updated_at:now}).eq("id",1);
+  const {rows:wikiRows,sections:wikiSections,errors:wikiErrors}=await wikipediaLipsyncCatalog(seasons,queens);
+  const wikiSongs=[...new Set(wikiRows.map(row=>row.songTitle).filter(song=>!metadata.has(norm(song))))];
+  for(let i=0;i<wikiSongs.length;i+=6){const matches=await Promise.all(wikiSongs.slice(i,i+6).map(async song=>({song,value:await itunes(song)})));for(const item of matches)metadata.set(norm(item.song),item.value);}
+  const existingResult=await admin.from("drag_race_lipsyncs").select("id,season_id,episode_id,song_title,song_artist,queen_ids,winner_ids,kind,preview_url,apple_music_url,metadata_status,is_eligible,source_version,raw_data").limit(5000);
+  if(existingResult.error)throw existingResult.error;
+  const existingLips=(existingResult.data??[]) as unknown as ExistingLipsyncRow[],existingIndex=new Map<string,ExistingLipsyncRow>(existingLips.map(row=>[lipKey(row),row]));
+  const wikiUpserts:Record<string,unknown>[]=[];
+  for(const item of wikiRows){
+   const key=lipKey({season_id:item.seasonId,episode_id:item.episodeId,song_title:item.songTitle,queen_ids:item.queenIds}),old=existingIndex.get(key),match=metadata.get(norm(item.songTitle));
+   const oldArtist=typeof old?.song_artist==="string"?old.song_artist:null,artist=oldArtist??item.songArtist??match?.artist??null;
+   const sourceArtistMismatch=Boolean(oldArtist&&item.songArtist&&norm(oldArtist)!==norm(item.songArtist)),itunesArtistMismatch=Boolean(item.songArtist&&match?.artist&&norm(item.songArtist)!==norm(match.artist)),canUseMatch=!sourceArtistMismatch&&!itunesArtistMismatch;
+   const preview=old?.preview_url??(canUseMatch?match?.preview??null:null),appleUrl=old?.apple_music_url??(canUseMatch?match?.url??null:null);
+   const raw=old?.raw_data&&typeof old.raw_data==="object"&&!Array.isArray(old.raw_data)?old.raw_data:{},id=old?.id??("WIKI-"+item.seasonId+"-"+item.episodeId+"-"+slug(item.songTitle)+"-"+item.queenIds.map(slug).join("-"));
+   const row={id,season_id:item.seasonId,episode_id:item.episodeId,song_title:old?.song_title??item.songTitle,song_artist:artist,queen_ids:old?.queen_ids??item.queenIds,winner_ids:old?.winner_ids??[],kind:old?.kind??null,preview_url:preview,apple_music_url:appleUrl,metadata_status:old?.metadata_status==="READY"?"READY":sourceArtistMismatch||itunesArtistMismatch?"ARTIST_MISMATCH":!artist?"MISSING_ARTIST":!preview?"MISSING_PREVIEW":"READY",is_eligible:item.queenIds.length===2&&item.queenIds.every(id=>queenIds.has(id))&&Boolean(artist&&preview),source_version:(old?.source_version??VERSION)+"+wikipedia-"+item.revisionId,raw_data:{...raw,wikipedia:{page_title:item.pageTitle,source_url:item.sourceUrl,revision_id:item.revisionId,section:"Lip syncs",raw_row:item.rawRow}},updated_at:now};
+   wikiUpserts.push(row);existingIndex.set(key,row as ExistingLipsyncRow);
+  }
+  await upsert("drag_race_lipsyncs",wikiUpserts,"id");
+  const {count:totalLipsyncs,error:totalError}=await admin.from("drag_race_lipsyncs").select("id",{count:"exact",head:true}),{count:eligible,error:eligibleError}=await admin.from("drag_race_lipsyncs").select("id",{count:"exact",head:true}).eq("is_eligible",true);
+  if(totalError)throw totalError;if(eligibleError)throw eligibleError;
+  const {error:se}=await admin.from("drag_race_catalog_sync_state").update({source_version:VERSION,last_synced_at:now,sync_lock_until:null,franchise_count:franchises.length,queen_count:queenRows.length,season_count:seasonRows.length,episode_count:episodeRows.length,lipsync_count:totalLipsyncs??lips.length+wikiUpserts.length,eligible_lipsync_count:eligible??0,updated_at:now}).eq("id",1);
   if(se)throw se;
-  return reply({synced:true,sourceVersion:VERSION,franchises:franchises.length,queens:queenRows.length,seasons:seasonRows.length,episodes:episodeRows.length,queenEpisodeFacts:factsRows.length,trackRecordTemplates:templates.length,lipsyncs:lips.length,eligibleLipsyncs:eligible,lastSyncedAt:now});
- }catch(e){await admin.from("drag_race_catalog_sync_state").update({sync_lock_until:null,updated_at:new Date().toISOString()}).eq("id",1);console.error("drag-race-catalog-sync",e);return reply({error:"Catalog sync failed",detail:e instanceof Error?e.message:"Unknown error"},502);}
+  return reply({synced:true,sourceVersion:VERSION,wikipedia:{seasonsWithSection:wikiSections,rowsParsed:wikiRows.length,rowsUpserted:wikiUpserts.length,errors:wikiErrors},franchises:franchises.length,queens:queenRows.length,seasons:seasonRows.length,episodes:episodeRows.length,queenEpisodeFacts:factsRows.length,trackRecordTemplates:templates.length,lipsyncs:totalLipsyncs??lips.length+wikiUpserts.length,eligibleLipsyncs:eligible??0,lastSyncedAt:now}); }catch(e){await admin.from("drag_race_catalog_sync_state").update({sync_lock_until:null,updated_at:new Date().toISOString()}).eq("id",1);console.error("drag-race-catalog-sync",e);return reply({error:"Catalog sync failed",detail:e instanceof Error?e.message:"Unknown error"},502);}
 });

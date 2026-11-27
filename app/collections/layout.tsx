@@ -19,6 +19,7 @@ import "../(platform)/drag-race/lalaparuza.css";
 import "../(platform)/drag-race/slayoff.css";
 import "../(platform)/drag-race/guess-them-all.css";
 import "../(platform)/drag-race/track-record.css";
+import "../(platform)/drag-race/visual-system.css";
 import "../(platform)/admin-visual.css";
 export const dynamic="force-dynamic";
 export default async function CollectionsLayout({children}:{children:React.ReactNode}){

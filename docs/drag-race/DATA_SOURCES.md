@@ -25,6 +25,17 @@ L'importatore Supabase Edge Function `drag-race-catalog-sync`:
 5. genera una struttura di partenza Track Record per ogni stagione presente nel catalogo;
 6. arricchisce i lipsync con metadati Apple/iTunes, senza considerare riproducibili quelli senza preview.
 
+## Fonte dinamica per i lipsync
+
+La sincronizzazione catalogo interroga la MediaWiki API pubblica di Wikipedia per ogni stagione, individua la sezione `Lip syncs` e prova a estrarre episodio, brano, artista e coppia Queen. Il parser accetta soltanto righe con due Queen risolte senza ambiguità e un episodio presente nel catalogo. Ogni record conserva URL della pagina, revisione Wikipedia e riga sorgente in `raw_data.wikipedia`.
+
+- La copertura è verificata dinamicamente a ogni sincronizzazione: il 27 novembre 2026, 71 delle 82 stagioni presenti nel catalogo esponevano una sezione `Lip syncs`; le altre 11 restano coperte dal pacchetto strutturato.
+- I record Wikipedia vengono riconciliati con quelli già presenti tramite stagione, episodio, titolo normalizzato e coppia Queen; non vengono creati duplicati quando la corrispondenza esiste.
+- Le preview Apple/iTunes già verificate vengono conservate. Per nuovi brani, artista e preview sono associati soltanto quando i metadati sono compatibili; in caso di dubbio il brano resta non eleggibile.
+- Le righe senza coppia esattamente doppia, episodio riconosciuto o titolo/artista identificabili vengono ignorate e non alterano il catalogo.
+- Wikipedia è la fonte dinamica primaria per le coppie; il pacchetto community resta fallback per le pagine mancanti o prive di una sezione utilizzabile.
+- Non viene effettuato scraping automatizzato di Fandom.
+
 ## Regola vincolante Track Record: struttura sì, risultati no
 
 Track Record è una funzionalità personale: l'utente crea una propria scheda e decide autonomamente i risultati della stagione. Non è un archivio di Track Record ufficiali e non deve riprodurre le classifiche competitive reali.
