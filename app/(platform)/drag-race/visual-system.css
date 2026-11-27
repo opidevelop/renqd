@@ -184,3 +184,18 @@
 .drag-guess-card.is-found .drag-guess-profile-link{min-width:0}
 .drag-guess-card.is-found>svg{position:absolute;right:10px;top:10px}
 @media(max-width:600px){.drag-guess-filters{grid-template-columns:1fr}.drag-guess-card.is-found{grid-template-columns:54px minmax(0,1fr)}.drag-guess-card.is-found .drag-guess-image{width:54px;height:66px}}
+
+
+.drag-season-poster,.drag-season-poster-fallback{display:block;position:relative;overflow:hidden;aspect-ratio:3/4;width:100%;max-width:150px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:linear-gradient(145deg,#2a1a31,#8d3974 58%,#e94ca0)}
+.drag-season-poster img{display:block;width:100%;height:100%;object-fit:cover}
+.drag-season-poster-fallback{display:grid;place-items:end start;padding:12px;color:#fff;font-size:11px;font-weight:800;line-height:1.3}
+.drag-track-card{display:grid;grid-template-columns:minmax(100px,132px) minmax(0,1fr);gap:16px;align-items:start}
+.drag-track-card-content{min-width:0}
+.drag-track-card-content h3{color:#fff5fb}
+.drag-track-card-content p{color:#b9a9c0}
+.drag-track-card-content .drag-track-template-status{color:#b9a9c0}
+.drag-queen-season-list article{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px 14px;align-items:start}
+.drag-queen-season-list .drag-season-poster,.drag-queen-season-list .drag-season-poster-fallback{grid-row:span 3;width:76px;max-width:76px;border-radius:10px}
+.drag-queen-season-main{display:flex;flex-direction:column;gap:4px;min-width:0}
+.drag-queen-season-badges,.drag-queen-season-metrics{grid-column:2;margin-top:0}
+@media(max-width:560px){.drag-track-card{grid-template-columns:92px minmax(0,1fr);gap:12px}.drag-track-card .drag-season-poster,.drag-track-card .drag-season-poster-fallback{max-width:92px}.drag-queen-season-list article{grid-template-columns:64px minmax(0,1fr)}.drag-queen-season-list .drag-season-poster,.drag-queen-season-list .drag-season-poster-fallback{width:64px;max-width:64px}}
