@@ -5,6 +5,27 @@ type CommonsImageInfo={url?:string;thumburl?:string;descriptionurl?:string;thumb
 type CommonsPage={title?:string;imageinfo?:CommonsImageInfo[]};
 type Candidate={title:string;info:CommonsImageInfo};
 const headers={"Cache-Control":"private, max-age=3600, s-maxage=604800, stale-while-revalidate=86400"};
+
+type FandomImage={title:string;url?:string;thumburl?:string;descriptionurl?:string};
+async function fandomPageImages(title:string):Promise<FandomImage[]>{
+ try{
+  const api="https://rupaulsdragrace.fandom.com/api.php?";
+  const page=new URLSearchParams({action:"query",titles:title,prop:"images",imlimit:"500",format:"json"});
+  const response=await fetch(api+page.toString(),{headers:{"User-Agent":"Renqd/1.0 (https://renqd.app)","Accept":"application/json"},next:{revalidate:86400},signal:AbortSignal.timeout(12000)});
+  if(!response.ok)return[];
+  const payload=await response.json() as {query?:{pages?:Record<string,{images?:{title:string}[]}>}};
+  const files=Object.values(payload.query?.pages??{}).flatMap(x=>x.images??[]).map(x=>x.title).filter(x=>/^File:/i.test(x));
+  const matches=files.filter(x=>/\.jpe?g$|\.png$|\.webp$/i.test(x)).slice(0,80);
+  if(!matches.length)return[];
+  const info=new URLSearchParams({action:"query",titles:matches.join("|"),prop:"imageinfo",iiprop:"url",iiurlwidth:"900",format:"json"});
+  const detail=await fetch(api+info.toString(),{headers:{"User-Agent":"Renqd/1.0 (https://renqd.app)"},next:{revalidate:86400},signal:AbortSignal.timeout(12000)});
+  if(!detail.ok)return[];
+  const data=await detail.json() as {query?:{pages?:Record<string,{title:string;imageinfo?:{url?:string;thumburl?:string;descriptionurl?:string}[]}>}};
+  return Object.values(data.query?.pages??{}).flatMap(x=>(x.imageinfo??[]).map(i=>({title:x.title,url:i.url,thumburl:i.thumburl,descriptionurl:i.descriptionurl})));
+ }catch{return[];}
+}
+const fileNorm=(value:string)=>norm(value.replace(/^File:/i,"").replace(/\.[^.]+$/,""));
+
 const escapeXml=(value:string)=>value.replace(/[<>&"']/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&apos;"}[c]??c));
 const norm=(value:string)=>value.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 const stripHtml=(value:string)=>value.replace(/<[^>]*>/g," ").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g," ").trim();
@@ -17,9 +38,30 @@ export async function GET(request:Request){
  const db=await createClient(),{data:{user}}=await db.auth.getUser();if(!user)return new NextResponse("Unauthorized",{status:401});
  const {data:profile}=await db.from("profiles").select("status").eq("id",user.id).maybeSingle();if(profile?.status!=="APPROVED")return new NextResponse("Forbidden",{status:403});
  const params=new URL(request.url).searchParams,id=params.get("id"),source=params.get("source")==="1";if(!id||id.length>180)return new NextResponse("Bad request",{status:400});
- const {data:queen}=await db.from("drag_race_queens").select("name,image_url").eq("id",id).maybeSingle();if(!queen)return new NextResponse("Not found",{status:404});
+ const {data:queen}=await db.from("drag_race_queens").select("name,image_url,appearances").eq("id",id).maybeSingle();if(!queen)return new NextResponse("Not found",{status:404});
  if(source){const image=await findImage(queen.name);return NextResponse.redirect(image?.sourceUrl??("https://commons.wikimedia.org/w/index.php?search="+encodeURIComponent('"'+queen.name+'" drag queen')),{headers});}
- if(queen.image_url&&/^https:\/\//.test(queen.image_url))return NextResponse.redirect(queen.image_url,{headers});
+
+ const appearances=(queen.appearances??[]) as {seasonId?:string}[];
+ const seasonIds=[...new Set(appearances.map(x=>x.seasonId).filter((x):x is string=>Boolean(x)))];
+ if(seasonIds.length){
+  const {data:seasons}=await db.from("drag_race_seasons").select("id,franchise_code,season_number,year").in("id",seasonIds).order("year",{ascending:false});
+  const latest=seasons?.[0];
+  if(latest){
+   const {data:franchise}=await db.from("drag_race_franchises").select("name").eq("code",latest.franchise_code).maybeSingle();
+   if(franchise?.name){
+    const title=franchise.name.replace(/[’‘]/g,"'")+" (Season "+latest.season_number+")";
+    const images=await fandomPageImages(title),target=norm(queen.name);
+    const match=images.map(image=>({...image,score:fileNorm(image.title).includes(target)?(fileNorm(image.title).includes("promo")?3:2):0})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score)[0];
+    if(match?.thumburl||match?.url){
+     const imageUrl=match.thumburl??match.url!;
+     if(source)return NextResponse.redirect(match.descriptionurl??"https://rupaulsdragrace.fandom.com/wiki/"+encodeURIComponent(title.replace(/ /g,"_")),{headers});
+     return NextResponse.redirect(imageUrl,{headers});
+    }
+   }
+  }
+ }
+ if(source){const image=await findImage(queen.name);return NextResponse.redirect(image?.sourceUrl??("https://commons.wikimedia.org/w/index.php?search="+encodeURIComponent('"'+queen.name+'" drag queen')),{headers});}
+
  const image=await findImage(queen.name);if(image?.imageUrl)return NextResponse.redirect(image.imageUrl,{headers});
  return new NextResponse(fallback(queen.name),{status:200,headers:{...headers,"Content-Type":"image/svg+xml; charset=utf-8"}});
 }
