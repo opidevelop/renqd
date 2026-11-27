@@ -453,3 +453,86 @@
 @media(prefers-reduced-motion:reduce) {
   .drag-race-page *, .drag-game-page *, .ss-page * { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; }
 }
+
+
+/* Hub layout — reinterpret the supplied media-dashboard reference for Drag Race. */
+.drag-race-pop-hub { display:grid; gap:clamp(24px,3vw,38px); }
+.drag-race-pop-hero,.world-hub-hero.world-hub-drag {
+  position:relative; display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,.9fr);
+  align-items:center; min-height:330px; gap:20px; padding:clamp(24px,4vw,48px);
+  overflow:hidden; border:1px solid #eee8f6 !important; border-radius:28px !important;
+  background:linear-gradient(120deg,#fff 0%,#fffaff 52%,#f2edff 100%) !important;
+  box-shadow:var(--renqd-dr-shadow) !important;
+}
+.drag-race-pop-hero-copy { position:relative; z-index:2; max-width:560px; }
+.drag-race-pop-overline { color:#7045ce !important; font-size:10px; font-weight:900; letter-spacing:1.4px; }
+.drag-race-pop-hero-copy h1 { margin:16px 0 12px; color:#171d35 !important; font-size:clamp(44px,6vw,76px); line-height:.93; letter-spacing:-3px; }
+.drag-race-pop-hero-copy h1 em { color:#e91e91 !important; font-style:normal; }
+.drag-race-pop-hero-copy p { max-width:440px; color:#77809a !important; font-size:15px; line-height:1.7; }
+.drag-race-pop-tags i { border:1px solid #e8e2f3; border-radius:99px; background:#fff !important; color:#6244a6 !important; }
+.drag-race-pop-edition { color:#9279bc !important; font-size:9px; font-weight:850; letter-spacing:1.2px; }
+.drag-race-pop-portraits { position:relative; min-height:280px; display:flex; align-items:center; justify-content:center; gap:12px; }
+.drag-race-pop-portrait {
+  position:relative; width:31%; max-width:170px; aspect-ratio:3/4; overflow:hidden;
+  border:5px solid #fff; border-radius:20px; background:#f4eaff;
+  box-shadow:0 16px 34px rgba(54,39,90,.17);
+}
+.drag-race-pop-portrait-one { transform:translateY(18px) rotate(-7deg); z-index:1; }
+.drag-race-pop-portrait-two { transform:translateY(-12px); z-index:2; }
+.drag-race-pop-portrait-three { transform:translateY(18px) rotate(7deg); z-index:1; }
+.drag-race-pop-portrait img { width:100%; height:100%; object-fit:cover; display:block; }
+.drag-race-pop-portrait span { position:absolute; left:8px; right:8px; bottom:8px; padding:6px 4px; border-radius:7px; background:rgba(255,255,255,.88); color:#513c79; font-size:8px; font-weight:900; letter-spacing:.7px; text-align:center; }
+.drag-race-pop-spark { color:#ed168b !important; text-shadow:0 5px 15px rgba(237,22,139,.2); }
+.drag-race-pop-hero-orbit { color:rgba(117,81,190,.06) !important; }
+.drag-race-pop-section-heading { display:grid; gap:5px; }
+.drag-race-pop-section-heading h2 { margin:0; color:#171d35 !important; font-size:clamp(25px,3vw,34px); letter-spacing:-1px; }
+.drag-race-pop-section-heading h2 em { color:#e91e91 !important; font-style:normal; }
+.drag-race-pop-section-heading p { color:#8790a7 !important; }
+.drag-race-pop-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; }
+.drag-race-pop-card {
+  position:relative; display:flex; flex-direction:column; min-width:0; min-height:350px;
+  padding:14px !important; overflow:hidden; border:1px solid #e8eaf2 !important;
+  border-radius:22px !important; background:#fff !important;
+  box-shadow:0 10px 28px rgba(28,35,70,.065) !important;
+}
+.drag-race-pop-card-top { display:flex; justify-content:space-between; align-items:center; color:#9aa1b4 !important; font-size:9px; font-weight:850; letter-spacing:.8px; }
+.drag-race-pop-card-number { color:#d8dbe5 !important; font-size:12px; }
+.drag-race-pop-card-art {
+  position:relative; display:grid; place-items:center; min-height:168px; margin:10px 0 14px;
+  overflow:hidden; border-radius:16px; color:#fff !important;
+  background:linear-gradient(135deg,#e7d9ff,#f7d8e9) !important;
+}
+.drag-race-pop-card[data-tone="rose"] .drag-race-pop-card-art { background:linear-gradient(140deg,#f7b6d6,#e9429a) !important; }
+.drag-race-pop-card[data-tone="violet"] .drag-race-pop-card-art { background:linear-gradient(140deg,#c9b5ff,#7650d6) !important; }
+.drag-race-pop-card[data-tone="lilac"] .drag-race-pop-card-art { background:linear-gradient(140deg,#d8ccff,#9b8be9) !important; }
+.drag-race-pop-card[data-tone="plum"] .drag-race-pop-card-art { background:linear-gradient(140deg,#f4b9dc,#b65cc2) !important; }
+.drag-race-pop-card-art svg { width:52px; height:52px; filter:drop-shadow(0 5px 12px rgba(40,20,70,.16)); }
+.drag-race-pop-card-star { position:absolute; top:14px; right:16px; color:rgba(255,255,255,.8) !important; font-size:28px; }
+.drag-race-pop-card-halo { position:absolute; width:140px; height:140px; border:1px solid rgba(255,255,255,.32); border-radius:50%; box-shadow:0 0 0 18px rgba(255,255,255,.12),0 0 0 38px rgba(255,255,255,.08); }
+.drag-race-pop-card-copy { display:grid; gap:6px; }
+.drag-race-pop-card-eyebrow { color:#957fb7 !important; font-size:8px; font-weight:900; letter-spacing:1px; }
+.drag-race-pop-card-copy strong { color:#171d35 !important; font-size:20px; letter-spacing:-.6px; }
+.drag-race-pop-card-copy small { color:#818aa1 !important; font-size:11px; line-height:1.55; }
+.drag-race-pop-card-tags i { border:1px solid #eeeaf5; border-radius:99px; background:#faf9fd !important; color:#79659d !important; font-size:8px; }
+.drag-race-pop-card-status { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:14px; color:#6a48c8 !important; font-size:11px; font-weight:850; }
+.drag-race-pop-card-shine { display:none; }
+.drag-race-pop-staff-tools { border:1px solid #e8eaf2 !important; border-radius:16px; background:#fff !important; }
+.drag-race-pop-staff-tools summary { color:#5c4a7d !important; }
+.drag-race-pop-shortcuts a { border:1px solid #e7e9f1; border-radius:14px; background:#fff; color:#5f4a91 !important; }
+@media(max-width:1050px) {
+  .drag-race-pop-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .drag-race-pop-card { min-height:320px; }
+}
+@media(max-width:700px) {
+  .drag-race-pop-hero,.world-hub-hero.world-hub-drag { grid-template-columns:1fr; min-height:0; }
+  .drag-race-pop-portraits { min-height:220px; }
+  .drag-race-pop-portrait { max-width:132px; }
+  .drag-race-pop-grid { gap:11px; }
+  .drag-race-pop-card { min-height:290px; padding:10px !important; }
+  .drag-race-pop-card-art { min-height:130px; }
+}
+@media(max-width:420px) {
+  .drag-race-pop-grid { grid-template-columns:1fr; }
+  .drag-race-pop-card { min-height:0; }
+  .drag-race-pop-card-art { min-height:150px; }
+}
