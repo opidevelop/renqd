@@ -104,3 +104,13 @@ Controlli superati:
 - conteggio episodi di ogni stagione coerente con `episodeCount`.
 
 **Stato della verifica:** il pacchetto sorgente è integro rispetto ai controlli sopra. Questa verifica non equivale alla sincronizzazione del catalogo live. La sincronizzazione Supabase deve ancora essere eseguita da un account staff autenticato; fino ad allora non vanno considerati disponibili i template Track Record derivati dal catalogo. L'arricchimento Apple/iTunes e la riproducibilità effettiva delle preview saranno verificati dopo la sincronizzazione.
+
+
+## Risoluzione preview Apple/iTunes e raggruppamento dei brani — 27 novembre 2026
+
+- La ricerca Apple/iTunes del sincronizzatore usa il catalogo statunitense (`country=US`) e fino a 50 risultati per aumentare la copertura dei brani non presenti nello storefront italiano. Il matching continua a richiedere titolo normalizzato esatto e, quando disponibile nella fonte, artista normalizzato esatto. Non vengono accettate corrispondenze fuzzy o ambigue.
+- Una preview è considerata disponibile soltanto quando il risultato Apple/iTunes contiene un `previewUrl` effettivo. La ricerca del brano non equivale alla verifica di riproducibilità.
+- Nel gioco Guess the Lipsync, i record sono raggruppati per titolo e artista normalizzati. Tutte le coppie Queen distinte provenienti dagli episodi/stagioni selezionati vengono associate allo stesso prompt; la prima risposta può essere qualunque Queen appartenente a una delle coppie e la seconda deve appartenere alla stessa coppia della prima risposta. Il reveal di rinuncia mostra tutte le coppie associate al brano.
+- Lipsync for Your Life e Slayoff usano una lista deduplicata per titolo/artista, così un brano ripetuto in più episodi non aumenta artificialmente la probabilità di estrazione.
+- Verifica catalogo live precedente alla nuova sincronizzazione: 845 record lipsync, circa 802 combinazioni distinte titolo-artista, 17 record con preview e 17 eleggibili con preview. Il numero dei record non deve essere presentato come numero di canzoni uniche.
+- Edge Function `drag-race-catalog-sync` distribuita alla versione 10. Il nuovo criterio di ricerca non è ancora stato misurato su una sincronizzazione completa: i conteggi sopra descrivono il catalogo precedente all'esecuzione della versione 10.
