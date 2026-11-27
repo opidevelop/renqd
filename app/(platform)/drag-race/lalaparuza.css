@@ -5,3 +5,7 @@ a.drag-lalaparuza-card:hover{transform:translateY(-3px);border-color:#cf75a8;box
 a.drag-lalaparuza-card:focus-visible{outline:3px solid rgba(220,85,157,.45);outline-offset:3px}
 .drag-lalaparuza-card>strong{display:flex;align-items:center;gap:7px;margin-top:auto;color:#a03d72;font-size:11px;font-weight:850}
 .drag-lalaparuza-card.is-coming{cursor:default}
+
+
+.drag-lalaparuza-grid{grid-template-columns:minmax(0,1fr);max-width:860px;width:100%;margin-inline:auto}
+.drag-lalaparuza-card{min-height:190px}
