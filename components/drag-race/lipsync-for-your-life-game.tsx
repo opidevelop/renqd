@@ -9,7 +9,8 @@ import {useDragRacePreferences} from "@/lib/drag-race/use-preferences";
 import {ArrowLeft,Crown,Check,StopCircle,LoaderCircle} from "lucide-react";
 type Queen={id:string;name:string;aliases:string[];image_url:string|null;franchiseCodes:string[]};
 type Season={id:string;name:string;franchise_code:string;season_number:number};
-type Song={id:string;season_id:string;song_title:string;song_artist:string|null;preview_url:string|null;apple_music_url:string|null;source_version:string|null};
+type Song={id:string;season_id:string;song_title:string;song_artist:string|null;preview_url:string|null;apple_music_url:string|null;source_version:string|null;recordIds?:string[]};
+const norm=(value:string)=>value.normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 const shuffle=<T,>(items:T[])=>[...items].sort(()=>Math.random()-.5);
 const pickRandom=<T,>(items:T[])=>items.length?items[Math.floor(Math.random()*items.length)]:undefined;
 type Props={franchises:{code:string;name:string}[];seasons:Season[];queens:Queen[];songs:Song[]};
@@ -20,7 +21,7 @@ export function LipsyncForYourLifeGame({franchises,seasons,queens,songs}:Props){
  const [pair,setPair]=useState<Queen[]>([]);const [song,setSong]=useState<Song|null>(null);const [wins,setWins]=useState<Record<string,number>>({});const [losses,setLosses]=useState<Record<string,number>>({});
  const [total,setTotal]=useState(0);const [lastWinner,setLastWinner]=useState<string|null>(null);const [failedPreviewId,setFailedPreviewId]=useState<string|null>(null);const [confirmStop,setConfirmStop]=useState(false);const [finished,setFinished]=useState(false);const [notice,setNotice]=useState("");
  const seasonPool=seasons.filter(s=>selected.includes(s.franchise_code));const queenPool=queens.filter(q=>q.franchiseCodes.some(code=>selected.includes(code)));
- const songPool=songs.filter(s=>{const season=seasons.find(x=>x.id===s.season_id);return season&&selected.includes(season.franchise_code)&&(allSeasons||seasonIds.includes(s.season_id));});
+ const songPool=useMemo(()=>{const rows=songs.filter(s=>{const season=seasons.find(x=>x.id===s.season_id);return season&&selected.includes(season.franchise_code)&&(allSeasons||seasonIds.includes(s.season_id));});const groups=new Map<string,Song[]>();for(const row of rows){const key=norm(row.song_title)+"|"+norm(row.song_artist??"");const list=groups.get(key)??[];list.push(row);groups.set(key,list);}return [...groups.values()].map(group=>({...group.find(item=>Boolean(item.preview_url))??group[0],recordIds:group.map(item=>item.id)}));},[songs,seasons,selected,allSeasons,seasonIds]);
  useEffect(()=>{const player=playerRef.current;if(!player)return;player.volume=preferences.sounds_enabled?preferences.player_volume:0;if(song?.preview_url&&preferences.player_autoplay&&preferences.sounds_enabled)void player.play().catch(()=>{});else player.pause();},[song?.id,song?.preview_url,preferences.player_autoplay,preferences.player_volume,preferences.sounds_enabled]);
  function randomRound(pool=queenPool,songsAvailable=songPool){if(pool.length<2||!songsAvailable.length){setNotice("Servono almeno due Queen e una canzone nel catalogo selezionato.");return false;}const copy=shuffle(pool);setPair(copy.slice(0,2));setSong(pickRandom(songsAvailable)??null);setFailedPreviewId(null);setLastWinner(null);return true;}
  function changeSong(){const candidates=songPool.filter(item=>Boolean(item.preview_url)&&item.id!==song?.id);if(!candidates.length){setNotice("Non ci sono altre canzoni con anteprima disponibile per questi filtri.");return;}setSong(pickRandom(candidates)??null);setFailedPreviewId(null);setNotice("");}
