@@ -2237,4 +2237,14 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 
 - Guess the Lipsync limita il secondo suggerimento alla Queen partner della coppia corrente; il filtro ammette solo lipsync con esattamente due Queen.
 - Guess the Lipsync, Lipsync for Your Life e Slayoff mostrano «Cambia canzone» quando la preview iTunes manca o genera un errore. Il cambio mantiene invariata la coppia Queen o il duello e seleziona un brano alternativo con preview disponibile.
-- La richiesta di usare una Wiki come fonte dinamica è registrata. In questo rilascio resta attiva la sincronizzazione automatica del catalogo strutturato già integrato; non è stato sostituito con parsing live Wikipedia, perché le pagine non garantiscono copertura uniforme per tutti i franchise e non va introdotto uno scraping Fandom senza autorizzazione. Non dichiarare completata la sostituzione della fonte finché non è disponibile una fonte Wiki verificabile per tutte le stagioni supportate.
+- La fonte dinamica Wikipedia è ora integrata nel sincronizzatore catalogo tramite MediaWiki API: viene letta la sezione `Lip syncs` delle pagine stagione, vengono accettate solo righe con episodio e coppia di due Queen risolti senza ambiguità e viene conservata la provenienza in `raw_data.wikipedia`. La verifica del 27 novembre 2026 ha rilevato una sezione `Lip syncs` in 71/82 stagioni; per le 11 pagine senza sezione utilizzabile resta il catalogo strutturato come fallback. Non viene effettuato scraping Fandom. La sincronizzazione effettiva del database va lanciata da un account staff tramite il pulsante catalogo nell'hub Drag Race.
+
+
+## Aggiornamento implementazione Drag Race — 27 novembre 2026
+
+- Pubblicato il sistema visuale condiviso Pop Collectible / Minimal Glam per hub, giochi, selettori, tabelloni, Season Simulator e Track Record, con stati responsive, focus accessibili e supporto a `prefers-reduced-motion`.
+- Guess Them All mantiene la ricerca sticky durante lo scorrimento; dopo aver indovinato una Queen, il nome apre il profilo completo. La fotografia mantiene il collegamento alla propria attribuzione/licenza.
+- Slayoff usa il componente immagini Queen con fallback e collegamento alla fonte, invece di un'immagine diretta non attribuita.
+- Il sincronizzatore Supabase `drag-race-catalog-sync` è alla versione 8 e integra la fonte Wikipedia descritta in `docs/drag-race/DATA_SOURCES.md`. I record già presenti vengono riconciliati e le preview Apple/iTunes verificate sono conservate.
+- Il pulsante staff dell'hub mostra il numero di lipsync riconciliati e il numero di stagioni con sezione Wikipedia. La sincronizzazione non viene considerata eseguita finché non è stata lanciata da un account staff.
+- Verifiche locali: `npm run drag-race:wikipedia-parser:verify`, `npx tsc --noEmit`, `npx eslint --quiet`, `npm run build` e `git diff --check` superati.
