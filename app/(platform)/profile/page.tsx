@@ -32,6 +32,16 @@ export default async function ProfilePage() {
     supabase.from("drag_race_results").select("id,session_id,mode,score,wins,losses,errors,hints,duration_seconds,accuracy,summary,completed_at").eq("user_id",user.id).order("completed_at",{ascending:false}).limit(100),
     supabase.from("drag_race_saved_seasons").select("id,title,created_at,statistics").eq("owner_id",user.id).order("created_at",{ascending:false}).limit(100),
   ]);
+  const historyQueenIds=[...new Set((dragRaceSessions??[]).flatMap((session:{state:unknown})=>{const state=session.state&&typeof session.state==="object"?session.state as Record<string,unknown>:{};return Array.isArray(state.queue)?state.queue.filter((id):id is string=>typeof id==="string"):[]}))];
+  const [{data:historyQueens},{data:historySeasons},{data:historyFranchises}]=await Promise.all([
+    historyQueenIds.length?supabase.from("drag_race_queens").select("id,name,appearances").in("id",historyQueenIds):Promise.resolve({data:[] as Array<{id:string;name:string;appearances:unknown[]}>}),
+    supabase.from("drag_race_seasons").select("id,name,franchise_code,season_number"),
+    supabase.from("drag_race_franchises").select("code,name"),
+  ]);
+  const historySeasonMap=new Map((historySeasons??[]).map(season=>[season.id,season]));
+  const historyFranchiseMap=new Map((historyFranchises??[]).map(franchise=>[franchise.code,franchise.name]));
+  const historyFlags:Record<string,string>={US:"🇺🇸",AS:"🇺🇸",UK:"🇬🇧",UKVTW:"🌍",DE:"🇩🇪",FR:"🇫🇷",NL:"🇳🇱",BE:"🇧🇪",SE:"🇸🇪",ES:"🇪🇸",ESAS:"🇪🇸",GAS:"🌍",CA:"🇨🇦",CVTW:"🌍",CAS:"🇨🇦",DU:"🇦🇺🇳🇿",TH:"🇹🇭",PH:"🇵🇭",PHSR:"🇵🇭",IT:"🇮🇹",BR:"🇧🇷",MX:"🇲🇽",FRAS:"🇫🇷"};
+  const queenHistoryCatalog=Object.fromEntries((historyQueens??[]).map(queen=>[queen.id,{name:queen.name,appearances:(Array.isArray(queen.appearances)?queen.appearances:[]).map((appearance:{seasonId?:string;placement?:number})=>{const season=appearance.seasonId?historySeasonMap.get(appearance.seasonId):null;const code=season?.franchise_code??"";return {seasonName:season?.name??appearance.seasonId??"Stagione",franchiseName:historyFranchiseMap.get(code)??(code||"Drag Race"),franchiseFlag:historyFlags[code]??"🌍",placement:typeof appearance.placement==="number"?appearance.placement:null};})}]));
   const blockedUsers = await Promise.all((blockedRows??[]).map(async (row:{user_id:string;username:string;display_name:string;avatar_url:string|null})=>({
     userId:row.user_id,username:row.username,displayName:row.display_name||row.username,
     avatarUrl:await getProfileMediaUrl(supabase,row.avatar_url),
@@ -46,7 +56,7 @@ export default async function ProfilePage() {
     stats={(dragRaceStats??[]) as Parameters<typeof DragRaceProfileArchive>[0]["stats"]}
     sessions={(dragRaceSessions??[]) as Parameters<typeof DragRaceProfileArchive>[0]["sessions"]}
     results={(dragRaceResults??[]) as Parameters<typeof DragRaceProfileArchive>[0]["results"]}
-    savedSeasons={(dragRaceSavedSeasons??[]) as Parameters<typeof DragRaceProfileArchive>[0]["savedSeasons"]}/>;
+    savedSeasons={(dragRaceSavedSeasons??[]) as Parameters<typeof DragRaceProfileArchive>[0]["savedSeasons"]} queenCatalog={queenHistoryCatalog}/>;
   const profileForUi = {
     ...profile,
     avatar_display_url: await getProfileMediaUrl(supabase, profile.avatar_url),
