@@ -536,3 +536,47 @@
   .drag-race-pop-card { min-height:0; }
   .drag-race-pop-card-art { min-height:150px; }
 }
+
+
+/* Definitive Drag Race refresh — clean streaming dashboard + Pop Collectible palette */
+.drag-race-page,.drag-game-page,.ss-page{--dr-ink:#171525;--dr-muted:#777487;--dr-plum:#29213d;--dr-berry:#c21891;--dr-pink:#f23aa9;--dr-blush:#fff5fc;--dr-line:#eee5f1;--dr-gold:#efc85b;color:var(--dr-ink);background:#f5f6fa;border:0;border-radius:0;box-shadow:none;padding:clamp(14px,2.2vw,28px)}
+.drag-race-page h1,.drag-race-page h2,.drag-race-page h3,.drag-game-page h1,.drag-game-page h2,.drag-game-page h3,.ss-page h1,.ss-page h2,.ss-page h3{color:var(--dr-ink)}
+.drag-race-hero,.drag-race-module-card,.drag-lalaparuza-card,.drag-config-card,.drag-answer-card,.drag-result-card,.drag-current-song,.drag-active-duel,.drag-bracket>section,.drag-bracket-match,.drag-track-section,.ss-panel,.ss-finish-card{color:var(--dr-ink);border:1px solid #e9e7ef;background:#fff;box-shadow:0 8px 24px rgba(31,24,52,.055)}
+.drag-race-hero{background:linear-gradient(120deg,#fff 0%,#fff7fc 62%,#f0e9ff 100%);border-radius:24px}
+.drag-race-hero h1,.drag-race-catalog h2,.drag-race-section-heading h2,.drag-game-heading h1,.drag-game-top h1,.drag-result-card h1{color:#1c1930}
+.drag-race-hero h1 em,.drag-race-catalog h2 em,.drag-race-section-heading h2 em,.drag-game-heading h1 em,.drag-game-top h1 em,.drag-result-card h1 em{color:#d21a9b}
+.drag-race-module-card,.drag-lalaparuza-card{border-radius:20px;background:#fff;min-height:unset}
+.drag-race-module-card:hover,.drag-lalaparuza-card:hover{border-color:#e7a6d3;box-shadow:0 14px 32px rgba(153,45,126,.12)}
+.drag-race-module-name,.drag-race-module-copy h2,.drag-race-section-heading h2,.drag-lalaparuza-card h2,.drag-config-block h2,.drag-track-section-head h2{color:#29213d}
+.drag-race-module-copy small,.drag-lalaparuza-card p,.drag-game-heading p,.drag-race-hero p{color:#777487}
+.drag-race-module-icon,.drag-lalaparuza-card>span,.drag-franchise-cover{border:1px solid #f0d8eb;background:linear-gradient(145deg,#fff1fa,#f1eaff);color:#c21891}
+.drag-number-input,.drag-search-field,.drag-search-field input,.drag-track-search,.ss-search input,.ss-custom-form input,.ss-custom-form select,.ss-episode-title input{border-color:#e7e5ed;background:#fff;color:#29213d}
+.drag-chip-list button,.drag-suggestions button,.drag-skip,.drag-bracket-match select,.drag-bracket-pair>div,.ss-secondary{border-color:#e9e5ee;background:#f8f7fb;color:#393348}
+.drag-chip-list button.is-selected,.drag-suggestions button:hover{border-color:#dc65b4;background:#fff0fa;color:#ad167e}
+.drag-guess-card,.drag-queen-card,.drag-track-card,.drag-track-hof-card,.drag-track-record-row,.drag-franchise-option{border-color:#e9e5ee;background:#fff;color:#29213d}
+.drag-guess-card strong,.drag-queen-card strong,.drag-guess-profile-link,.drag-franchise-option-copy strong{color:#29213d}
+.drag-guess-card.is-found,.drag-queen-card.is-found{border-color:#9fd5b1;background:#f1fbf4}
+.drag-guess-image,.drag-queen-image{background:#f4eaf3;color:#c21891}
+.drag-game-heading>span,.drag-game-top>div:first-child>span,.drag-race-kicker,.drag-race-section-heading .drag-race-kicker{color:#c21891}
+.drag-back,.drag-game-footer button,.drag-lalaparuza-card>strong{color:#c21891}
+.drag-start-row button,.drag-result-card>button,.ss-primary,.ss-actions button:first-child{background:linear-gradient(110deg,#ed299d,#8d36ed);color:white;border:0;box-shadow:0 7px 18px rgba(197,36,151,.2)}
+.drag-game-progress span{background:linear-gradient(90deg,#ed299d,#8d36ed,#42cfc0)}
+.drag-modal-backdrop{background:rgba(23,16,35,.55);backdrop-filter:blur(9px)}.drag-confirm-modal{border:1px solid #eee1ed;background:#fff;color:#29213d}.drag-confirm-modal h2{color:#29213d}.drag-confirm-modal p{color:#777487}
+.drag-notice,.ss-notice{border-color:#f0d4e8;background:#fff1fa;color:#a21c7a}
+.drag-slayoff-tools{display:flex;gap:8px;flex-wrap:wrap}
+.drag-race-pop-hub{background:#f4f6fa}
+.drag-race-pop-hero{min-height:280px;padding:clamp(24px,4vw,48px);border-radius:24px;background:linear-gradient(115deg,#fff 0%,#fff5fc 60%,#f0e8ff 100%);box-shadow:0 8px 28px rgba(30,24,50,.06)}
+.drag-race-pop-hero h1{font-size:clamp(38px,5vw,64px);line-height:.98;letter-spacing:-2px}
+.drag-race-pop-hero h1 em{color:#d21a9b}
+.drag-race-pop-portrait{border:5px solid #fff;border-radius:20px;box-shadow:0 12px 30px rgba(42,27,52,.16)}
+.drag-race-pop-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.drag-race-pop-card{display:flex;min-height:320px;flex-direction:column;border:1px solid #e9e5ee;border-radius:20px;background:#fff;box-shadow:0 8px 24px rgba(31,24,52,.055)}
+.drag-race-pop-card-art{display:grid;position:relative;min-height:150px;place-items:center;overflow:hidden;border-radius:15px;background:linear-gradient(145deg,#fce7f4,#e9ddff 62%,#fdf0d1);color:#c21891}
+.drag-race-pop-card[data-tone="violet"] .drag-race-pop-card-art{background:linear-gradient(145deg,#e7e1ff,#d9c8ff,#f7eaff)}
+.drag-race-pop-card[data-tone="lilac"] .drag-race-pop-card-art{background:linear-gradient(145deg,#f7e6ff,#e4d8ff,#fce9f4)}
+.drag-race-pop-card[data-tone="plum"] .drag-race-pop-card-art{background:linear-gradient(145deg,#f9dff1,#e7d5fa,#ffe9ed)}
+.drag-race-pop-card-copy strong{font-size:19px;color:#211b32}
+.drag-race-pop-card-copy small{color:#777487;line-height:1.5}
+.drag-race-pop-card-status{color:#bf168d}
+@media(max-width:900px){.drag-race-pop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.drag-race-pop-grid{grid-template-columns:1fr}.drag-race-pop-card{min-height:unset}.drag-race-pop-card-art{min-height:125px}.drag-race-page,.drag-game-page,.ss-page{padding:12px}}
