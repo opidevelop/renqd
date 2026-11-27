@@ -415,3 +415,29 @@
 @media(max-width:900px){.drag-race-pop-lalaparuza .drag-lala-collectibles{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:620px){.drag-race-pop-lalaparuza .drag-lala-collectibles{grid-template-columns:1fr!important;max-width:520px;margin-inline:auto}.drag-race-pop-lalaparuza .drag-lala-card{min-height:330px!important}}
 @media(prefers-reduced-motion:reduce){.drag-race-pop-card[data-tone] .drag-race-pop-card-art{transition:none!important}}
+
+
+/* Lalaparuza cards: match the hub collectible layout and eliminate compressed art */
+.drag-lala-collectibles{align-items:stretch!important}
+.drag-lala-collectibles>.drag-lala-card{
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;
+ gap:0!important;width:100%!important;min-width:0!important;min-height:440px!important;
+ padding:16px!important;box-sizing:border-box!important;text-align:left!important
+}
+.drag-lala-collectibles .drag-race-pop-card-top{display:flex!important;flex:0 0 auto!important;width:100%!important;min-height:28px!important;align-items:center!important;justify-content:space-between!important}
+.drag-lala-collectibles .drag-race-pop-card-art{
+ display:grid!important;position:relative!important;place-items:center!important;flex:0 0 174px!important;
+ width:100%!important;height:174px!important;min-height:174px!important;max-height:174px!important;
+ margin:14px 0 16px!important;padding:0!important;overflow:hidden!important;border-radius:18px!important
+}
+.drag-lala-collectibles .drag-race-pop-card-art>svg{display:block!important;width:66px!important;height:66px!important;max-width:66px!important;max-height:66px!important;flex:none!important;position:relative!important;z-index:2!important}
+.drag-lala-collectibles .drag-race-pop-card-halo{width:132px!important;height:132px!important;max-width:none!important;flex:none!important}
+.drag-lala-collectibles .drag-race-pop-card-star{position:absolute!important;right:18%!important;top:15%!important}
+.drag-lala-collectibles .drag-race-pop-card-copy{display:grid!important;grid-template-columns:minmax(0,1fr)!important;align-content:start!important;align-items:start!important;justify-items:start!important;gap:8px!important;width:100%!important;min-width:0!important;flex:0 0 auto!important}
+.drag-lala-collectibles .drag-race-pop-card-copy .drag-race-pop-card-eyebrow{display:block!important}
+.drag-lala-collectibles .drag-race-pop-card-copy h2{display:block!important;width:100%!important;margin:0!important;padding:0!important;color:#302137!important;font-size:clamp(19px,1.8vw,23px)!important;line-height:1.12!important;font-weight:950!important;letter-spacing:-.7px!important}
+.drag-lala-collectibles .drag-race-pop-card-copy p{display:block!important;width:100%!important;min-height:40px!important;margin:0!important;padding:0!important;color:#82758a!important;font-size:10px!important;line-height:1.55!important}
+.drag-lala-collectibles .drag-race-pop-card-tags{display:flex!important;width:100%!important;margin-top:2px!important}
+.drag-lala-collectibles .drag-race-pop-card-status{display:flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:center!important;align-self:flex-end!important;gap:6px!important;width:auto!important;min-height:40px!important;margin-top:auto!important;padding:10px 13px!important;border:1px solid #e7c6e7!important;border-radius:12px!important;background:#f5edf8!important;color:#75517f!important;font-size:9px!important;font-weight:950!important;white-space:nowrap!important}
+.drag-lala-collectibles .drag-lala-card:hover .drag-race-pop-card-status{background:linear-gradient(110deg,#c42f8c,#8656c5)!important;border-color:transparent!important;color:#fff!important}
+@media(max-width:620px){.drag-lala-collectibles{grid-template-columns:1fr!important}.drag-lala-collectibles>.drag-lala-card{min-height:unset!important}.drag-lala-collectibles .drag-race-pop-card-art{flex-basis:155px!important;height:155px!important;min-height:155px!important;max-height:155px!important}.drag-lala-collectibles .drag-race-pop-card-copy p{min-height:0!important}}
