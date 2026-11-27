@@ -5,6 +5,27 @@ type CommonsImageInfo={url?:string;thumburl?:string;descriptionurl?:string;thumb
 type CommonsPage={title?:string;imageinfo?:CommonsImageInfo[]};
 type Candidate={title:string;info:CommonsImageInfo};
 const headers={"Cache-Control":"private, max-age=3600, s-maxage=604800, stale-while-revalidate=86400"};
+
+type FandomImage={title:string;url?:string;thumburl?:string;descriptionurl?:string};
+async function fandomPageImages(title:string):Promise<FandomImage[]>{
+ try{
+  const api="https://rupaulsdragrace.fandom.com/api.php?";
+  const page=new URLSearchParams({action:"query",titles:title,prop:"images",imlimit:"500",format:"json"});
+  const response=await fetch(api+page.toString(),{headers:{"User-Agent":"Renqd/1.0 (https://renqd.app)","Accept":"application/json"},next:{revalidate:86400},signal:AbortSignal.timeout(12000)});
+  if(!response.ok)return[];
+  const payload=await response.json() as {query?:{pages?:Record<string,{images?:{title:string}[]}>}};
+  const files=Object.values(payload.query?.pages??{}).flatMap(x=>x.images??[]).map(x=>x.title).filter(x=>/^File:/i.test(x));
+  const matches=files.filter(x=>/\.jpe?g$|\.png$|\.webp$/i.test(x)).slice(0,80);
+  if(!matches.length)return[];
+  const info=new URLSearchParams({action:"query",titles:matches.join("|"),prop:"imageinfo",iiprop:"url",iiurlwidth:"900",format:"json"});
+  const detail=await fetch(api+info.toString(),{headers:{"User-Agent":"Renqd/1.0 (https://renqd.app)"},next:{revalidate:86400},signal:AbortSignal.timeout(12000)});
+  if(!detail.ok)return[];
+  const data=await detail.json() as {query?:{pages?:Record<string,{title:string;imageinfo?:{url?:string;thumburl?:string;descriptionurl?:string}[]}>}};
+  return Object.values(data.query?.pages??{}).flatMap(x=>(x.imageinfo??[]).map(i=>({title:x.title,url:i.url,thumburl:i.thumburl,descriptionurl:i.descriptionurl})));
+ }catch{return[];}
+}
+const fileNorm=(value:string)=>norm(value.replace(/^File:/i,"").replace(/\.[^.]+$/,""));
+
 const escapeXml=(value:string)=>value.replace(/[<>&"']/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&apos;"}[c]??c));
 const norm=(value:string)=>value.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 const stripHtml=(value:string)=>value.replace(/<[^>]*>/g," ").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/\s+/g," ").trim();
@@ -32,6 +53,15 @@ export async function GET(request:Request){
  const {data:profile}=await db.from("profiles").select("status").eq("id",user.id).maybeSingle();if(profile?.status!=="APPROVED")return new NextResponse("Forbidden",{status:403});
  const params=new URL(request.url).searchParams,code=params.get("code"),source=params.get("source")==="1";if(!code||code.length>20)return new NextResponse("Bad request",{status:400});
  const {data:franchise}=await db.from("drag_race_franchises").select("name").eq("code",code).maybeSingle();if(!franchise)return new NextResponse("Not found",{status:404});
+
+ const fandomImages=await fandomPageImages("Drag Race (Franchise)");
+ const wanted=norm(franchise.name.replace(/[’‘]/g,"'"));
+ const logo=fandomImages.map(image=>{const name=fileNorm(image.title);const words=wanted.split(/(?=[A-Z])|[^a-z0-9]+/i).filter(Boolean);const matched=name.includes(wanted);const logoWord=/logo/i.test(name);return{image,score:(matched?8:0)+(logoWord?4:0)};}).filter(x=>x.score>=8).sort((a,b)=>b.score-a.score)[0]?.image;
+ if(logo?.thumburl||logo?.url){
+  if(source)return NextResponse.redirect(logo.descriptionurl??"https://rupaulsdragrace.fandom.com/wiki/Drag_Race_(Franchise)",{headers});
+  return NextResponse.redirect(logo.thumburl??logo.url!,{headers});
+ }
  const image=await findImage(franchise.name);if(source)return NextResponse.redirect(image?.sourceUrl??("https://commons.wikimedia.org/w/index.php?search="+encodeURIComponent(franchise.name+" logo")),{headers});if(image?.imageUrl)return NextResponse.redirect(image.imageUrl,{headers});
+
  return new NextResponse(fallback(code,franchise.name),{status:200,headers:{...headers,"Content-Type":"image/svg+xml; charset=utf-8"}});
 }
