@@ -21,6 +21,7 @@ import "./drag-race/guess-them-all.css";
 import "./drag-race/track-record.css";
 import "./drag-race/season-simulator.css";
 import "./drag-race/visual-system.css";
+import "./drag-race/reference-redesign.css";
 import "./admin-visual.css";
 export const dynamic = "force-dynamic";
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
