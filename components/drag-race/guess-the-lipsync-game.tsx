@@ -27,8 +27,8 @@ export function GuessTheLipsyncGame({franchises,seasons,queens,lipsyncs}:Props){
  const [input,setInput]=useState("");
  const [feedback,setFeedback]=useState<"correct"|"wrong"|null>(null);
  const [revealed,setRevealed]=useState(false);
- const [failedPreviewId,setFailedPreviewId]=useState<string|null>(null);
  const [sessionId,setSessionId]=useState<string|null>(null);
+ const [failedPreviewId,setFailedPreviewId]=useState<string|null>(null);
  const [startedAt,setStartedAt]=useState<number|null>(null);
  const [busy,setBusy]=useState(false);
  const [notice,setNotice]=useState("");
@@ -54,8 +54,8 @@ export function GuessTheLipsyncGame({franchises,seasons,queens,lipsyncs}:Props){
   const {data,error}=await supabase.rpc("drag_race_create_session",{p_mode:"GUESS_THE_LIPSYNC",p_config:config,p_state:{queue:chosen.map(x=>x.id),index:0}});
   if(error){setNotice("Non è stato possibile avviare e registrare la partita.");setBusy(false);return;}
   finishLock.current=false;setSessionId(data);setStartedAt(Date.now());setQueue(chosen);setIndex(0);setFound([]);setErrorSlots([]);setErrors(0);setSkipped(0);setFinished(false);setBusy(false);
- function changeSong(){if(!current)return;const upcomingIds=new Set(queue.slice(index+1).map(x=>x.id));const candidates=filtered.filter(x=>Boolean(x.preview_url)&&x.id!==current.id&&(!queue.some(item=>item.id===x.id)||upcomingIds.has(x.id)));if(!candidates.length){setNotice("Non ci sono altre canzoni con anteprima disponibile per questi filtri.");return;}const replacement=candidates[Math.floor(Math.random()*candidates.length)];const next=[...queue];const swapIndex=next.findIndex((item,i)=>i>index&&item.id===replacement.id);if(swapIndex>=0)next[swapIndex]=current;next[index]=replacement;setQueue(next);setFailedPreviewId(null);setNotice("");setFound([]);setErrorSlots([]);setInput("");setFeedback(null);setRevealed(false);}
  }
+ function changeSong(){if(!current)return;const upcomingIds=new Set(queue.slice(index+1).map(x=>x.id));const candidates=filtered.filter(x=>Boolean(x.preview_url)&&x.id!==current.id&&(!queue.some(item=>item.id===x.id)||upcomingIds.has(x.id)));if(!candidates.length){setNotice("Non ci sono altre canzoni con anteprima disponibile per questi filtri.");return;}const replacement=candidates[Math.floor(Math.random()*candidates.length)];const next=[...queue];const swapIndex=next.findIndex((item,i)=>i>index&&item.id===replacement.id);if(swapIndex>=0)next[swapIndex]=current;next[index]=replacement;setQueue(next);setFailedPreviewId(null);setNotice("");setFound([]);setErrorSlots([]);setInput("");setFeedback(null);setRevealed(false);}
  function guess(queen:Queen){
   if(!current||found.includes(queen.id)||feedback)return;
   const correct=current.queen_ids.includes(queen.id);

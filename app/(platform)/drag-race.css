@@ -244,9 +244,9 @@ a.drag-race-module-card:hover{transform:translateY(-4px);border-color:#d99abd;bo
 .drag-bracket-queen-thumb{width:28px;height:36px;flex:0 0 28px;object-fit:cover;border-radius:5px}
 .drag-bracket-pair>div{display:flex;align-items:center;gap:7px}
 @media(max-width:900px){.drag-franchise-picker{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.drag-franchise-picker{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.drag-franchise-option{min-height:76px;gap:7px;padding:6px 24px 6px 6px}.drag-franchise-cover{flex-basis:48px;width:48px;height:60px}.drag-franchise-option-copy strong{font-size:9px}.drag-franchise-option-copy small{font-size:7px}.drag-franchise-source{right:4px;bottom:4px;width:17px;height:17px}}
 
 .drag-song-recovery{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:9px 13px;border:1px solid #e8b4d0;border-radius:999px;background:#fff4fa;color:#8d315f;font:inherit;font-size:12px;cursor:pointer;transition:background .18s ease,border-color .18s ease,transform .18s ease}
 .drag-song-recovery:hover{background:#fce5f1;border-color:#d987b2;transform:translateY(-1px)}
 .drag-song-recovery span{color:#9a6b84;font-size:11px}
 .drag-song-recovery strong{font-weight:800;letter-spacing:.01em}
-@media(max-width:520px){.drag-franchise-picker{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.drag-franchise-option{min-height:76px;gap:7px;padding:6px 24px 6px 6px}.drag-franchise-cover{flex-basis:48px;width:48px;height:60px}.drag-franchise-option-copy strong{font-size:9px}.drag-franchise-option-copy small{font-size:7px}.drag-franchise-source{right:4px;bottom:4px;width:17px;height:17px}}

@@ -47,9 +47,9 @@ export function SlayoffGame({franchises,queens,songs}:Props){
   if(third&&!third.winner)return{type:"third",match:third,round:-2,index:0};
   return null;
  }
+ const active=currentMatch();
  const activeSong=active?songMap.get(active.match.songId??"")??null:null;
  function changeActiveSong(){if(!active)return;const candidates=songs.filter(item=>Boolean(item.preview_url)&&item.id!==active.match.songId);if(!candidates.length){setNotice("Non ci sono altre canzoni con anteprima disponibile.");return;}const next=pickRandom(candidates);if(next){updateSong(active.match.id,next.id);setFailedPreviewId(null);setNotice("");}}
- const active=currentMatch();
  useEffect(()=>{const player=playerRef.current;if(!player)return;const song=active?songMap.get(active.match.songId??""):null;player.volume=preferences.sounds_enabled?preferences.player_volume:0;if(song?.preview_url&&preferences.player_autoplay&&preferences.sounds_enabled)void player.play().catch(()=>{});else player.pause();},[active?.match.id,active?.match.songId,preferences.player_autoplay,preferences.player_volume,preferences.sounds_enabled]);
  function askWinner(id:string){setPendingWinner(id);setConfirm(true);}
  function confirmWinner(){
