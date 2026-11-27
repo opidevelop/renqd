@@ -160,3 +160,8 @@
 .dra-profile-game-details section strong{color:#fff5fb}
 .dra-profile-game-details section p{color:#b9a9c0}
 @media(max-width:760px){.drag-race-page,.drag-game-page,.ss-page{padding:14px;border-radius:18px}}
+
+
+.drag-guess-card[role="button"]{cursor:pointer}
+.drag-guess-card.is-active{border-color:#f044a0;box-shadow:0 0 0 2px rgba(240,68,160,.18),0 12px 26px rgba(0,0,0,.24)}
+.drag-guess-card[role="button"]:focus-visible{outline:3px solid rgba(255,112,189,.55);outline-offset:3px}
