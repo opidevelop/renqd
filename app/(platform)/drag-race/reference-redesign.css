@@ -131,3 +131,64 @@
 }
 @media(max-width:380px){.drag-race-pop-card{min-height:280px!important}.drag-race-pop-card-copy>strong{font-size:15px}.drag-race-pop-card-tags{display:none}}
 @media(prefers-reduced-motion:reduce){.drag-race-pop-card,.drag-race-pop-card-shine,.drag-race-page button,.drag-game-page button{transition:none!important;animation:none!important}}
+
+
+/* Reference finish — Lalaparuza collectible cards, game states and responsive rhythm */
+.drag-lala-hero{position:relative;display:grid;grid-template-columns:1.1fr .9fr;min-height:390px;overflow:hidden;padding:clamp(26px,5vw,58px);border-radius:32px;background:linear-gradient(120deg,#f9d9ec 0%,#e8d9fa 53%,#c9b8f1 100%);color:#2b1b35;isolation:isolate}
+.drag-lala-hero:after{content:"";position:absolute;inset:14px;border:1px solid #ffffffa8;border-radius:23px;pointer-events:none}
+.drag-lala-hero-copy{position:relative;z-index:2;align-self:center}
+.drag-lala-kicker{display:block;margin-top:28px;color:#9a4b8b;font-size:9px;font-weight:950;letter-spacing:2.2px}
+.drag-lala-hero h1{margin:13px 0 12px;font-size:clamp(64px,9vw,112px);line-height:.76;letter-spacing:-.09em;font-weight:1000;color:#2c1c35}
+.drag-lala-hero h1 em{color:#c52d89;font-style:normal}
+.drag-lala-hero p{max-width:410px;color:#634d6e;font-size:14px;line-height:1.7}
+.drag-lala-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:22px}
+.drag-lala-pills i{padding:8px 11px;border:1px solid #fff9;border-radius:99px;background:#fff7;color:#754b7d;font-size:8px;font-style:normal;font-weight:950;letter-spacing:1px}
+.drag-lala-hero-art{position:relative;min-height:280px;display:grid;place-items:center}
+.drag-lala-disc{position:absolute;width:min(26vw,260px);aspect-ratio:1;border-radius:50%;border:1px solid #fff9;background:repeating-radial-gradient(circle at center,#fff1 0 2px,#a84c9c12 3px 7px);box-shadow:0 20px 60px #784a9140}
+.drag-lala-disc-one{transform:translate(-20px,12px) rotate(-16deg);background-color:#e7a8d0}
+.drag-lala-disc-two{transform:translate(42px,-18px) rotate(13deg);background-color:#b7a0e9;mix-blend-mode:multiply}
+.drag-lala-wordmark{position:relative;z-index:2;padding:24px 18px;border:1px solid #fff9;border-radius:50%;background:#30213c;color:white;font-size:29px;font-weight:1000;line-height:.85;letter-spacing:-2px;text-align:center;transform:rotate(-9deg);box-shadow:0 18px 35px #40274b40}
+.drag-lala-star{position:absolute;z-index:3;top:5%;right:10%;color:#fff;font-size:55px;text-shadow:0 5px 20px #9b4b9c}
+.drag-lala-section-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:34px 0 16px}
+.drag-lala-section-head>div>span{color:#c02d83;font-size:9px;font-weight:950;letter-spacing:1.8px}
+.drag-lala-section-head h2{margin:6px 0 0;color:#2d2035;font-size:clamp(26px,4vw,40px);letter-spacing:-.06em}
+.drag-lala-section-head h2 em{color:#c02d83;font-style:normal}
+.drag-lala-section-head>small{color:#9c8ca2;font-size:8px;font-weight:950;letter-spacing:1.4px}
+.drag-lala-collectibles{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px!important}
+.drag-lala-card{position:relative;display:flex!important;flex-direction:column!important;min-height:440px;padding:17px!important;overflow:hidden;border:1px solid #e8ddec!important;border-radius:25px!important;background:linear-gradient(155deg,#fff,#faf5fc)!important;box-shadow:0 15px 38px #3b24470e!important;transition:transform .25s ease,box-shadow .25s ease!important}
+.drag-lala-card:hover{transform:translateY(-7px)!important;box-shadow:0 25px 50px #633c791c!important}
+.drag-lala-card-top{display:flex;align-items:center;justify-content:space-between;color:#a18ba7;font-size:8px;font-weight:950;letter-spacing:1.3px}
+.drag-lala-card-top b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#f3eaf6;color:#9565a7;font-size:9px}
+.drag-lala-card-art{position:relative;display:grid;place-items:center;min-height:205px;margin:14px 0 16px;overflow:hidden;border-radius:19px;background:radial-gradient(circle at 50% 45%,#fff 0%,#ffe3f1 55%,#f4c4df 100%);color:#ce3e91}
+.drag-lala-card[data-tone="violet"] .drag-lala-card-art{background:radial-gradient(circle,#fff 0%,#eee7ff 56%,#d6c8f6 100%);color:#7953c4}
+.drag-lala-card[data-tone="plum"] .drag-lala-card-art{background:radial-gradient(circle,#fff 0%,#f8e6f4 56%,#e9c7e6 100%);color:#a24d98}
+.drag-lala-card-art>svg{position:relative;z-index:2;filter:drop-shadow(0 10px 12px #442a5a24)}
+.drag-lala-card-art>i{position:absolute;top:17%;right:19%;font-size:28px;font-style:normal;color:#fff;text-shadow:0 4px 12px #8d4c9c55}
+.drag-lala-card-orbit{position:absolute;width:140px;height:140px;border:1px solid currentColor;border-radius:50%;opacity:.2;box-shadow:0 0 0 18px #fff5,0 0 0 36px #fff3}
+.drag-lala-card-copy{display:grid;gap:8px}
+.drag-lala-card-copy>small{color:#bd4b94;font-size:8px;font-weight:950;letter-spacing:1.5px}
+.drag-lala-card-copy h2{margin:0;color:#302137;font-size:22px;font-weight:950;letter-spacing:-.8px}
+.drag-lala-card-copy p{margin:0;color:#82758a;font-size:11px;line-height:1.65}
+.drag-lala-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:17px}
+.drag-lala-card-bottom>i{padding:6px 8px;border-radius:7px;background:#f1eaf5;color:#8d7199;font-size:7px;font-style:normal;font-weight:950;letter-spacing:.8px}
+.drag-lala-card-bottom>strong{display:flex;align-items:center;gap:5px;color:#49334f;font-size:8px;font-weight:950;letter-spacing:.8px}
+.drag-guess-image-mystery{display:flex!important;align-items:center;justify-content:center;gap:5px;position:relative;background:radial-gradient(circle,#fff 0%,#f8e5f3 54%,#eadcf4 100%)!important;color:#b35ca1!important}
+.drag-guess-mystery-mark{display:grid;place-items:center;width:31px;height:44px;border:1px solid #fff;border-radius:10px;background:#ffffffa8;color:#9a5bb0;font-size:29px;font-weight:950;box-shadow:0 8px 20px #512c5b18;transform:rotate(-8deg)}
+.drag-guess-mystery-mark:nth-child(2){transform:translateY(-9px) rotate(2deg);background:#fce9f5}
+.drag-guess-mystery-mark:nth-child(3){transform:rotate(8deg)}
+.drag-guess-mystery-label{position:absolute;bottom:12px;color:#a38aa7;font-size:7px;font-weight:950;letter-spacing:1.5px}
+.drag-guess-card{cursor:pointer;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease!important}
+.drag-guess-card:hover{transform:translateY(-4px);border-color:#d9b3e1!important;box-shadow:0 15px 28px #49305014!important}
+.drag-guess-card.is-active{border-color:#d65ba4!important;box-shadow:0 0 0 3px #f5d4e8,0 12px 30px #59334c12!important}
+.drag-guess-card>button{display:flex;align-items:center;justify-content:center;gap:6px;width:calc(100% - 20px);margin:8px 10px 12px;padding:10px;border:1px solid #edc9df;background:#fff5fa;color:#a03f7c;font-size:10px;font-weight:850}
+.drag-bracket-collectible{padding:13px!important;border:1px solid #e8ddec!important;border-radius:18px!important;background:linear-gradient(145deg,#fff,#faf5fc)!important;box-shadow:0 9px 24px #3923430c!important}
+.drag-bracket-collectible .drag-bracket-pair>div{min-height:54px;padding:8px 10px;border:1px solid #eee5f0;border-radius:12px;background:#fff;color:#49334f;font-size:10px;font-weight:850}
+.drag-bracket-collectible .drag-bracket-queen-thumb{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #f0dced}
+.drag-bracket-collectible select{width:100%;margin:10px 0;border:1px solid #e7dceb;border-radius:10px;background:#fff;color:#49334f;padding:9px;font-size:10px}
+.drag-bracket-collectible .drag-match-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.drag-bracket-collectible .drag-match-actions button{min-height:40px;border:0;background:#33243d;color:#fff;font-size:9px;font-weight:850}
+.drag-bracket-collectible .drag-match-actions button:hover{background:#bd3f91}
+.drag-lalaparuza-page .drag-game-heading{margin-bottom:20px}
+@media(max-width:850px){.drag-lala-collectibles{grid-template-columns:repeat(2,minmax(0,1fr))!important}.drag-lala-hero{grid-template-columns:1fr .7fr}}
+@media(max-width:620px){.drag-lala-hero{grid-template-columns:1fr;min-height:unset;padding:24px 22px 12px;border-radius:24px}.drag-lala-hero h1{font-size:clamp(58px,17vw,82px)}.drag-lala-hero-art{min-height:205px}.drag-lala-disc{width:190px}.drag-lala-section-head{align-items:start;flex-direction:column;margin-top:26px}.drag-lala-collectibles{grid-template-columns:1fr!important}.drag-lala-card{min-height:unset!important}.drag-lala-card-art{min-height:170px;margin:10px 0 13px}}
+@media(prefers-reduced-motion:reduce){.drag-lala-card,.drag-guess-card{transition:none!important}}
