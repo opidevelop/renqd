@@ -116,7 +116,12 @@ export function DragRaceHub({ canSync, lastSyncedAt, sourceVersion }: Props) {
             <span>THE ICON</span>
           </div>
           <div className="drag-race-pop-portrait drag-race-pop-portrait-two">
-            <img src={DRAG_RACE_BRAND_IMAGES.naomi} alt="" referrerPolicy="no-referrer" decoding="async" />
+            <img src={DRAG_RACE_BRAND_IMAGES.naomi} alt="" referrerPolicy="no-referrer" decoding="async" onError={(event) => {
+              const image = event.currentTarget;
+              if (image.dataset.fallbackUsed) return;
+              image.dataset.fallbackUsed = "true";
+              image.src = DRAG_RACE_BRAND_IMAGES.naomiFallback;
+            }} />
             <span>THE SUPERMODEL</span>
           </div>
           <div className="drag-race-pop-portrait drag-race-pop-portrait-three">
