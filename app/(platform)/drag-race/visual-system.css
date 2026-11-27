@@ -211,3 +211,17 @@
 .drag-lipsync-outcome{margin:8px 0 14px;padding:14px;border:1px solid rgba(240,68,160,.3);border-radius:14px;background:rgba(240,68,160,.12);color:#ff9bd0;text-align:center;font-size:19px;font-weight:900;animation:drag-lipsync-reveal .35s ease both}
 @keyframes drag-lipsync-reveal{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:520px){.drag-double-outcomes{grid-template-columns:1fr}}
+
+
+.drag-active-queen-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.drag-active-queen-card{display:grid;gap:10px;justify-items:center;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:linear-gradient(150deg,#2a1c33,#1b1422);color:#fff5fb;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.drag-active-queen-card img{display:block;width:100%;max-width:180px;aspect-ratio:4/5;object-fit:cover;border-radius:13px}
+.drag-active-queen-card span{font-size:14px;font-weight:850}
+.drag-active-queen-card strong{padding:8px 16px;border-radius:999px;background:linear-gradient(110deg,#f044a0,#bd3de0);color:white;font-size:12px}
+.drag-active-queen-card:hover{transform:translateY(-3px);border-color:rgba(240,68,160,.6);box-shadow:0 14px 28px rgba(0,0,0,.25)}
+.drag-active-queen-card:focus-visible{outline:3px solid rgba(255,112,189,.55);outline-offset:3px}
+.drag-bracket-match{transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;animation:drag-bracket-enter .28s ease both}
+.drag-bracket-pair>div.is-found{animation:drag-bracket-advance .45s cubic-bezier(.2,.8,.2,1) both}
+@keyframes drag-bracket-enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes drag-bracket-advance{0%{transform:scale(1);box-shadow:0 0 0 rgba(240,68,160,0)}45%{transform:scale(1.04);box-shadow:0 0 0 5px rgba(240,68,160,.16)}100%{transform:scale(1);box-shadow:0 0 0 rgba(240,68,160,0)}}
+@media(max-width:520px){.drag-active-queen-pair{gap:8px}.drag-active-queen-card{padding:8px}.drag-active-queen-card span{font-size:12px}}
