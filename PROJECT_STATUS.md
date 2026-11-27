@@ -2258,3 +2258,26 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 - Tutte le altre richieste Drag Race restano obbligatorie e devono essere portate a termine.
 - Direzione grafica approvata: Camp & Colourful minimal/Apple-like, ispirazione app TV Time e Muvy, senza copiarne l'interfaccia; resta vincolante la reference visiva canonica Renqd.
 - Stato di questa registrazione: decisioni chiarite e documentate. Non equivale a implementazione o verifica funzionale delle attività mancanti.
+
+
+## Avvio completamento Drag Race — interventi iniziali (27 novembre 2026)
+
+### Guess Them All
+- Le Queen nascoste mostrano ora soltanto `???`, senza mascherare la lunghezza del nome carattere per carattere.
+- Il controllo Aiuto compare soltanto dopo aver selezionato la card della Queen; il click successivo rivela una lettera. La card selezionata ha uno stato visivo e supporta tastiera.
+- L'avvio della partita crea una sessione `GUESS_THEM_ALL`; la finalizzazione salva lo stato completo e il riepilogo (queue, Queen indovinate e mancanti con nome, franchise, errori, aiuti, tempo e percentuale).
+- La cronologia nel profilo mostra i dettagli delle Queen indovinate e mancanti, oltre agli errori, aiuti, percentuale e durata.
+- La finalizzazione usa la nuova RPC transazionale `drag_race_finalize_guess_them_all_session`, che salva sessione/risultato e richiama l'aggiornamento delle statistiche nella stessa transazione, evitando il doppio conteggio tra `drag_race_update_session` e `drag_race_record_guess_them_all`.
+- La cancellazione di una singola partita ricostruisce gli aggregati e i dati periodici, inclusi i totali Queen indovinate di Guess Them All, a partire dalle sessioni rimaste.
+- Migrazione applicata a Supabase: `20261127095553_drag_race_guess_them_all_history_integrity`. File locale allineato allo stesso identificativo.
+- Verifica read-only: 723 Queen e 82 stagioni presenti nel catalogo live; prima dell'attivazione del nuovo flusso non risultavano sessioni/risultati/stats Guess Them All. La nuova RPC esiste, è eseguibile da `authenticated` e non da `anon`. Advisors eseguiti: restano warning preesistenti generali su funzioni SECURITY DEFINER e tabelle RLS senza policy; la nuova RPC segue il modello RPC protetto con controllo account approvato e ownership.
+
+### UX e visual
+- Applicata la prima passata della direzione approvata Camp & Colourful minimal/Apple-like: superfici scure, accenti rosa/viola, contrasti e card coerenti nelle pagine Drag Race e nei giochi.
+- Le card Lalaparuza sono interamente cliccabili, più alte e con CTA coerente.
+- La direzione è applicata nel codice ma non è ancora stata sottoposta al collaudo visuale manuale su desktop/mobile.
+
+### Verifiche e rilascio
+- GitHub Actions ha superato TypeScript, ESLint e build per i commit `e1938ea`, `8828eab` e `4fb4e9e`. I primi tentativi `bba383d`, `7418482` e `ab76eb7` avevano rilevato un errore JSX nella mappa delle card Lalaparuza, corretto nel commit `4fb4e9e`.
+- I controlli automatici sui commit della nuova migrazione e del flusso atomico sono ancora in esecuzione; verificarne l'esito prima di dichiarare completato il blocco.
+- Nessun deployment Production eseguito. Non è stato eseguito un test browser autenticato; il catalogo e i nuovi flussi richiedono ancora collaudo end-to-end.
