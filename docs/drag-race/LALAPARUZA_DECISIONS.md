@@ -69,3 +69,6 @@ Approvate dall'utente il 26 novembre 2026. Le scelte qui riportate sono vincolan
 | 51 | I lipsync e le coppie Queen devono provenire dinamicamente dalla Wiki, evitando un catalogo manuale di canzoni e coppie in Renqd. La fonte automatica deve rispettare i limiti di accesso e copertura; non usare scraping Fandom non autorizzato. |
 | 52 | Nel gioco di riconoscimento l'ordine delle due risposte è libero; dopo la prima Queen, la seconda risposta deve essere l'altra Queen della stessa coppia originale. |
 | 53 | Se la preview iTunes manca o non è riproducibile, l'utente può richiedere una canzone alternativa. Vale per Guess the Lipsync, Lipsync for Your Life e Slayoff. |
+
+
+| 54 | Se lo stesso brano (titolo e artista normalizzati) compare in più episodi/stagioni, Guess the Lipsync lo presenta come un unico prompt e accetta tutte le coppie Queen distinte associate a quel brano. Dopo la prima risposta, la seconda deve appartenere alla stessa coppia della Queen scelta. Il reveal di rinuncia mostra tutte le coppie. Lipsync for Your Life e Slayoff deduplicano le estrazioni per titolo/artista. |
