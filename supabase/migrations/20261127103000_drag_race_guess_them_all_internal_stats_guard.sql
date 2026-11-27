@@ -1,0 +1,1 @@
+revoke all on function public.drag_race_add_guess_them_all_queen_counts(uuid,jsonb) from public, anon, authenticated;
