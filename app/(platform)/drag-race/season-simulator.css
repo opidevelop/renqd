@@ -4,3 +4,30 @@
 .ss-finale-song{display:grid;gap:10px;padding:14px;border:1px solid #f0dce8;border-radius:14px;background:#fff}.ss-finale-song label{display:grid;gap:6px;color:#806a79;font-size:10px;font-weight:800}.ss-finale-song select{width:100%;min-width:0;padding:10px 11px;border:1px solid #eadde5;border-radius:10px;background:#fff;color:#4b3544;font:inherit;font-size:11px}.ss-finale-song audio{width:100%;max-width:520px}.ss-finale-song small{color:#927b8a;font-size:10px}.ss-finale-song a{color:#a9447b;font-size:10px;font-weight:800}
 
 .ss-queen-mini-image{display:block;width:68px;height:78px;overflow:hidden;border-radius:9px;background:#f8e8f0}.ss-queen-mini-image img{display:block;width:100%;height:100%;object-fit:cover}.ss-suggestions button{display:inline-flex;align-items:center;gap:7px;padding:6px 9px}.ss-queen-suggestion-image{display:block;width:27px;height:34px;flex:0 0 27px;overflow:hidden;border-radius:5px;background:#f8e8f0}.ss-queen-suggestion-image img{display:block;width:100%;height:100%;object-fit:cover}.ss-suggestions button span{min-width:0;text-align:left}
+
+
+/* Pop Collectible — Season Simulator */
+.drag-race-pop-season-sim{--pop-plum:#925bb6;--pop-rose:#d86da9;--pop-lilac:#c9b5f0}
+.drag-race-pop-season-sim .ss-heading{position:relative;overflow:hidden;padding:clamp(24px,4vw,38px);border:1px solid #e8d3f0;border-radius:22px;background:radial-gradient(circle at 88% 18%,rgba(255,255,255,.9),transparent 23%),linear-gradient(115deg,#fff0f7,#f4e8ff 58%,#e9dcff);box-shadow:0 14px 36px rgba(111,68,134,.07)}
+.drag-race-pop-season-sim .ss-heading>span{color:#a45b9e}
+.drag-race-pop-season-sim .ss-heading h1{color:#392640}
+.drag-race-pop-season-sim .ss-heading h1 em{color:#a45bd2;text-shadow:2px 2px 0 #f6c9e2}
+.drag-race-pop-season-sim .ss-heading p{color:#806c88}
+.drag-race-pop-season-sim .ss-panel{border-color:#ead8f0;background:linear-gradient(145deg,#fff,#fff8fd 70%,#f8f1ff);box-shadow:0 10px 26px rgba(103,64,124,.05)}
+.drag-race-pop-season-sim .ss-primary{border-color:#9b61bd;background:linear-gradient(110deg,#d86da9,#9564d1);box-shadow:0 7px 17px rgba(177,91,166,.17)}
+.drag-race-pop-season-sim .ss-toggle-grid input,.drag-race-pop-season-sim .ss-franchise-list input{accent-color:#a45bd2}
+@media(max-width:600px){.drag-race-pop-season-sim .ss-heading{padding:22px 18px}}
+
+/* Saved-season archive and read-only detail: responsive finishing pass */
+.ss-saved-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+.ss-saved-card{min-width:0;display:flex;flex-direction:column;gap:9px;min-height:164px;padding:18px;border:1px solid var(--border,#e5dce3);border-radius:16px;background:linear-gradient(145deg,var(--surface,#fff),color-mix(in srgb,var(--accent,#d94d8a) 5%,var(--surface,#fff)));transition:border-color .18s,transform .18s,box-shadow .18s}
+.ss-saved-card:hover{border-color:color-mix(in srgb,var(--accent,#d94d8a) 48%,var(--border,#e5dce3));transform:translateY(-2px);box-shadow:0 12px 28px #8c426015}
+.ss-saved-card>span{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:color-mix(in srgb,var(--accent,#d94d8a) 12%,transparent);color:var(--accent,#d94d8a)}
+.ss-saved-card strong{overflow-wrap:anywhere;font-size:16px;line-height:1.3}
+.ss-saved-card small{color:var(--text-secondary,#777);font-size:11px;line-height:1.5}
+.ss-saved-card b{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;color:var(--accent,#d94d8a);font-size:11px}
+.ss-readonly-table{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.ss-readonly-table table{min-width:560px}
+.ss-result-list,.ss-stats-grid,.ss-live-stats{min-width:0}
+@media(max-width:680px){.ss-saved-grid{grid-template-columns:minmax(0,1fr);gap:10px}.ss-saved-card{min-height:0;padding:15px}.ss-heading h1{font-size:clamp(30px,9vw,42px)}.ss-page{padding-left:clamp(12px,3.5vw,20px);padding-right:clamp(12px,3.5vw,20px)}.ss-panel{padding:14px;border-radius:14px}.ss-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ss-live-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.ss-podium{grid-template-columns:1fr;gap:8px}.ss-episode-readonly{overflow-wrap:anywhere}}
+@media(max-width:390px){.ss-stats-grid,.ss-live-stats{grid-template-columns:1fr 1fr;gap:7px}.ss-stats-grid>*{min-width:0}.ss-step-label{font-size:10px}}

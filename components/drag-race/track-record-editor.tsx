@@ -162,7 +162,7 @@ export function TrackRecordEditor({recordId,title,visibility:initialVisibility,i
  async function deleteRecord(){if(!canEdit||deleteBusy)return;setDeleteBusy(true);setError("");const {error:deleteError}=await db.from("drag_race_track_records").delete().eq("id",recordId);if(deleteError){setError("Eliminazione non riuscita: "+deleteError.message);setDeleteBusy(false);return;}router.push("/drag-race/track-record");router.refresh();}
  function jumpToEpisode(value:string){if(!value)return;const selector=window.matchMedia("(max-width: 760px)").matches?".drag-track-mobile-episode[data-episode=\""+value+"\"]":".drag-track-table th[data-episode=\""+value+"\"]";document.querySelector(selector)?.scrollIntoView({behavior:"smooth",block:"center"});}
 
- return <main className="drag-race-page">
+ return <main className="drag-race-page drag-race-pop-track-editor">
   <Link className="drag-back" href="/drag-race/track-record"><ArrowLeft size={16}/> Track Record</Link>
   <header className="drag-game-heading">
    <span>{data.franchise_code??"CUSTOM"} · STAGIONE {data.season_number??"—"}</span>

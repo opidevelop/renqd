@@ -244,8 +244,8 @@ export function DragRaceSeasonSimulator({userId,franchises,seasons,queens,songs,
  }
  function renderQueen(q:Queen){return <div className="ss-queen-mini" key={q.id}>{q.image_url?(q.custom?<img src={q.image_url} alt=""/>:<QueenCatalogImage id={q.id} name={q.name} src={q.image_url} className="ss-queen-mini-image"/>):<span>{q.name.slice(0,1)}</span>}<strong>{q.name}</strong>{q.custom&&<small>Custom</small>}</div>;}
  const finaleSong=songs.find(song=>song.id===finaleSongId)??null;
- if(stage==="saved")return <main className="ss-page"><section className="ss-finish-card"><Crown size={38}/><span>STAGIONE SALVATA</span><h1>Herstory <em>made.</em></h1><p>La stagione è stata salvata in sola lettura. Non può essere ripresa o modificata.</p>{savedId&&<Link href={"/drag-race/season-simulator/saved/"+savedId}>Apri stagione salvata <ArrowRight size={16}/></Link>}<button onClick={()=>window.location.reload()}>Nuova stagione</button></section></main>;
- return <main className="ss-page">
+ if(stage==="saved")return <main className="ss-page drag-race-pop-season-sim"><section className="ss-finish-card"><Crown size={38}/><span>STAGIONE SALVATA</span><h1>Herstory <em>made.</em></h1><p>La stagione è stata salvata in sola lettura. Non può essere ripresa o modificata.</p>{savedId&&<Link href={"/drag-race/season-simulator/saved/"+savedId}>Apri stagione salvata <ArrowRight size={16}/></Link>}<button onClick={()=>window.location.reload()}>Nuova stagione</button></section></main>;
+ return <main className="ss-page drag-race-pop-season-sim">
   <Link className="drag-back" href="/drag-race"><ArrowLeft size={16}/> Drag Race</Link>
   <header className="ss-heading"><span>RENQD × DRAG RACE · SEASON SIMULATOR</span><h1>Make <em>herstory.</em></h1><p>Crea il cast, costruisci le relazioni e guida ogni episodio fino alla corona.</p></header>
   {savedSeasons.length>0&&stage==="setup"&&<section className="ss-saved-strip"><div><strong>Le tue stagioni</strong><small>Archivio personale · sola lettura</small></div><Link href="/drag-race/season-simulator/saved">Vedi archivio <ArrowRight size={15}/></Link></section>}

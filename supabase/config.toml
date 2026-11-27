@@ -19,3 +19,6 @@ verify_jwt = true
 
 [functions.drag-race-track-record-wikipedia-sync]
 verify_jwt = true
+
+[functions.drag-race-lipsync-source]
+verify_jwt = true

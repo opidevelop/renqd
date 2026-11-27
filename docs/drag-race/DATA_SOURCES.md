@@ -23,18 +23,25 @@ L'importatore Supabase Edge Function `drag-race-catalog-sync`:
 3. importa franchise, Queen, stagioni ed episodi;
 4. conserva separatamente i fatti Queen/episodio nella tabella `drag_race_episode_queen_facts`;
 5. genera una struttura di partenza Track Record per ogni stagione presente nel catalogo;
-6. arricchisce i lipsync con metadati Apple/iTunes, senza considerare riproducibili quelli senza preview.
+6. non importa lipsync, canzoni o metadati Apple/iTunes; questi dati sono esclusi dalla sincronizzazione permanente.
 
-## Fonte dinamica per i lipsync
+## Lipsync dinamici — senza catalogo permanente
 
-La sincronizzazione catalogo interroga la MediaWiki API pubblica di Wikipedia per ogni stagione, individua la sezione `Lip syncs` e prova a estrarre episodio, brano, artista e coppia Queen. Il parser accetta soltanto righe con due Queen risolte senza ambiguità e un episodio presente nel catalogo. Ogni record conserva URL della pagina, revisione Wikipedia e riga sorgente in `raw_data.wikipedia`.
+Le modalità Guess the Lipsync, Lipsync for Your Life e Slayoff recuperano i dati delle canzoni al momento del gioco tramite la Wikipedia MediaWiki API. La sincronizzazione permanente del catalogo non importa più lipsync, coppie Queen, canzoni, vincitrici/eliminate dei lipsync o metadati Apple/iTunes.
 
-- La copertura è verificata dinamicamente a ogni sincronizzazione: il 27 novembre 2026, 71 delle 82 stagioni presenti nel catalogo esponevano una sezione `Lip syncs`; le altre 11 restano coperte dal pacchetto strutturato.
-- I record Wikipedia vengono riconciliati con quelli già presenti tramite stagione, episodio, titolo normalizzato e coppia Queen; non vengono creati duplicati quando la corrispondenza esiste.
-- Le preview Apple/iTunes già verificate vengono conservate. Per i record Wikipedia, la ricerca Apple/iTunes usa titolo e artista e accetta soltanto corrispondenze esatte dopo normalizzazione; i risultati ambigui restano non eleggibili con stato `AMBIGUOUS`.
-- Le righe senza coppia esattamente doppia, episodio riconosciuto o titolo/artista identificabili vengono ignorate e non alterano il catalogo.
-- Wikipedia è la fonte dinamica primaria per le coppie; il pacchetto community resta fallback per le pagine mancanti o prive di una sezione utilizzabile.
-- Non viene effettuato scraping automatizzato di Fandom.
+Il servizio dinamico:
+- legge le pagine delle stagioni selezionate e individua le tabelle di lipsync;
+- accetta soltanto righe con episodio presente nel catalogo, titolo, artista e due Queen risolte senza ambiguità nel cast della stagione;
+- raggruppa le occorrenze per titolo e artista normalizzati, mantenendo tutte le coppie Queen distinte;
+- interroga Apple/iTunes e accetta soltanto corrispondenze esatte di titolo e artista con una previewUrl effettiva;
+- scarta automaticamente brani incompleti, ambigui o privi di preview e prova il candidato successivo;
+- conserva la provenienza Wikipedia (pagina e revisione) nel risultato temporaneo restituito alla partita.
+
+La cache è esclusivamente tecnica, in memoria e con scadenza; non costituisce un catalogo persistente e non richiede sincronizzazione manuale. Tutti i franchise e tutte le stagioni sono inclusi per impostazione predefinita, con i filtri di gioco già previsti. Se la fonte non offre righe valide o iTunes non restituisce brani riproducibili, il sistema non inventa dati e non ricorre al vecchio catalogo.
+
+La copertura varia in base alle pagine Wikipedia effettivamente disponibili. Non viene effettuato scraping automatizzato di Fandom.
+
+**Eccezione temporanea:** Season Simulator resta fuori dal perimetro attuale per decisione già approvata e continua a leggere i record lipsync legacy esistenti. La sincronizzazione non li aggiorna più; non svuotare né eliminare la tabella finché la specifica Season Simulator non viene riaperta.
 
 ## Regola vincolante Track Record: struttura sì, risultati no
 

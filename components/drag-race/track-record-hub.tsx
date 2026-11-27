@@ -52,7 +52,7 @@ export function TrackRecordHub({userId,templates,records,franchiseNames,hallOfFa
   if(error){setNotice("Non è stato possibile creare la Track Record: "+error.message);setBusy(null);return;}
   router.push("/drag-race/track-record/"+data.id);
  }
- return <main className="drag-race-page"><Link className="drag-back" href="/drag-race"><ArrowLeft size={16}/> Drag Race</Link>
+ return <main className="drag-race-page drag-race-pop-track-hub"><Link className="drag-back" href="/drag-race"><ArrowLeft size={16}/> Drag Race</Link>
   <header className="drag-game-heading"><span>RUPAUL’S DRAG RACE · ARCHIVIO</span><h1>Track <em>Record.</em></h1><p>Usa la struttura di una stagione dal catalogo — cast, episodi e challenge — e assegna manualmente tutti i placement nella tua Track Record.</p></header>
   {notice&&<p className="drag-notice">{notice}</p>}
   <section className="drag-track-section"><div className="drag-track-section-head"><div><span>HALL OF FAME</span><h2>Queen vincitrici</h2></div><Trophy size={22}/></div>

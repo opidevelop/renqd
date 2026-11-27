@@ -2325,3 +2325,57 @@ Restano test autenticati multi-account, controllo visuale mobile/iframe con acco
 
 - Guess Them All salva inoltre lo stato attivo ogni 15 secondi tramite `drag_race_update_session`: queue, Queen trovate, errori, aiuti e tempo. Se la scheda viene chiusa senza passare dal pulsante di uscita, la sessione resta consultabile come In corso con l'ultimo stato sincronizzato; la finalizzazione esplicita la chiude come COMPLETED o ABANDONED.
 - Test SQL transazionale con rollback superato anche per autosave ACTIVE → finalizzazione ABANDONED → statistiche interrotte → cancellazione e ricostruzione. Nessun dato di prova persistente.
+
+## 27 novembre 2026 — nuova architettura catalogo Queen e lipsync dinamici (lavoro in corso)
+
+### Decisione funzionale confermata
+- Il catalogo permanente è centrato su Queen, fotografie con provenienza/licenza, alias, franchise, stagioni di partecipazione e statistiche/placement originali disponibili.
+- Restano i dati strutturali di franchise, stagioni, episodi e challenge necessari alle funzionalità esistenti, inclusa Track Record. I placement originali delle Queen sono dati di carriera e non precompilano le Track Record personali.
+- Non devono più essere sincronizzati o mantenuti come catalogo permanente canzoni, lipsync, coppie Queen o metadati Apple/iTunes.
+- Le tre modalità Lalaparuza useranno Wikipedia MediaWiki API e Apple/iTunes al momento del gioco. Candidati ambigui, incompleti o senza preview vengono scartati automaticamente.
+- Tutti i franchise e le stagioni sono selezionati per impostazione predefinita; i filtri utente restano disponibili.
+- Le tabelle e i dati lipsync legacy non sono stati cancellati: saranno dismessi soltanto dopo la rimozione e la verifica di tutte le dipendenze applicative.
+
+### Modifiche locali iniziali
+- Creato supabase/functions/drag-race-lipsync-source/ con un nuovo servizio Edge Function autenticato, parser Wikipedia isolato, verifica cast/episodi, raggruppamento per titolo/artista, preview iTunes esatta e cache in memoria a 6 ore. Il risultato include tutte le coppie e le occorrenze con provenienza Wikipedia.
+- Guess the Lipsync, Lipsync for Your Life e Slayoff sono stati collegati al nuovo helper client; le rispettive pagine non interrogano più drag_race_lipsyncs. I filtri franchise/stagione e le funzioni di cambio brano usano il recupero dinamico.
+- Il nuovo servizio non scrive canzoni o coppie nel database. La richiesta può filtrare franchise/stagioni, chiedere fino a 200 candidati ed escludere brani già proposti.
+- Modificata localmente supabase/functions/drag-race-catalog-sync/index.ts: la sincronizzazione non scrive più righe drag_race_lipsyncs, non arricchisce brani con iTunes, azzera il campo legacy drag_race_episodes.lip_sync, non conserva dati lipsync dentro raw_data, non scrive fatti lipsync e non inserisce il titolo della canzone nei template Track Record. I conteggi lipsync legacy vengono azzerati nello stato sincronizzazione.
+- Aggiunta la configurazione verify_jwt = true per il nuovo servizio in supabase/config.toml.
+- Nessuna migrazione database eseguita; nessun dato legacy cancellato; nessuna Edge Function live aggiornata; nessun deployment Vercel/Production eseguito.
+- Verifiche locali superate: npm run drag-race:wikipedia-parser:verify; npx tsc --noEmit; npm run lint (solo warning preesistenti, nessun errore); npm run build; transpilation esbuild delle due Edge Function; diff check. Il nuovo servizio Edge è stato inoltre sottoposto a controllo TypeScript con stub locali per i global Deno; il vero deno check non è disponibile nella sandbox corrente.
+- Audit read-only database: 845 righe legacy in drag_race_lipsyncs e 802 valori non null in drag_race_episodes.lip_sync. Le tre modalità Lalaparuza non leggono più drag_race_lipsyncs; Season Simulator resta però una dipendenza legacy temporanea e continua a leggerla, essendo fuori perimetro. Per questo la tabella non viene svuotata o eliminata finché Season Simulator non sarà riaperto. Il nuovo catalog sync azzererà lip_sync sugli episodi alla prossima sincronizzazione; nessun dato è stato modificato nel database in questo ciclo.
+- Non è ancora stato eseguito un test end-to-end contro il nuovo servizio live: le Edge Function non sono state distribuite. Nessuna migrazione database, nessun push e nessun deployment Vercel eseguiti.
+
+
+## 27 novembre 2026 — fase grafica Pop Collectible: Hub Drag Race
+
+- Avviata la fase grafica senza riaprire la progettazione: identità rosa/viola/lilla, linguaggio pop e televisivo, hub con quattro card. Il solo mockup già approvato resta il tabellone Slayoff; nessun mockup aggiuntivo richiesto o introdotto.
+- Ridisegnato components/drag-race/hub.tsx: hero editoriale Pop Collectible con collage di tre ritratti già presenti nel progetto, titolo e micro-label; quattro card originali con gerarchia tipografica, numerazione, artwork iconografico, varianti cromatiche e CTA.
+- Aggiornato app/(platform)/drag-race.css con stile dedicato e responsive per desktop e mobile. Le scorciatoie Classifiche community e I tuoi risultati, gli strumenti staff e il flusso di sincronizzazione sono stati mantenuti.
+- Nessuna modifica alla navigazione globale, alla bottom navigation mobile, alle funzionalità delle modalità o ai dati.
+- Verifiche del blocco Hub: npx tsc --noEmit, npx eslint --quiet components/drag-race/hub.tsx, npm run build e git diff --check superati.
+- Stato: Hub aggiornato localmente; non eseguiti push GitHub né deploy. Prossimo blocco: profilo Queen e pagine stagione, poi Guess Them All e le modalità Lalaparuza; Slayoff dovrà rispettare il tabellone approvato.
+
+
+## 27 novembre 2026 — fase grafica Pop Collectible: avanzamento schermate
+
+- Ripresa la fase grafica dall'Hub Drag Race e dal profilo Queen, già aggiornati nel blocco precedente.
+- Completata la veste Pop Collectible per Guess Them All: configurazione, schermata di gioco, card delle Queen, stato completato e risultati. Nessuna modifica a regole, progressi, autosalvataggio o persistenza.
+- Completato il Game Center Lalaparuza con tre card dedicate, responsive desktop/mobile.
+- Allineate alla stessa identità le schermate Guess the Lipsync, Lipsync for Your Life e Slayoff: hero, configurazione, controlli, superfici di gioco e risultati. La geometria e la disposizione del tabellone Slayoff approvato non sono state modificate.
+- Allineati anche Track Record (archivio e editor) e Season Simulator: hero, pannelli, card e accenti coerenti con la palette rosa/lilla/viola.
+- Nessuna modifica a navigazione globale o bottom navigation mobile. Nessuna modifica funzionale, al database o alle Edge Function in questo blocco grafico.
+- Verifiche superate dopo l'insieme delle modifiche: `npx tsc --noEmit`, ESLint mirato sui componenti modificati, `npm run build` e `git diff --check`.
+- Stato: modifiche locali non ancora committate, push o deploy. Restano da completare la revisione visiva responsive effettiva e le schermate secondarie (stagioni salvate, dettaglio Track Record, classifiche e risultati personali).
+
+## 2026-11-27 — Drag Race: schermate secondarie e responsive pass
+
+- Ripreso il lavoro dalla sandbox persistente `renqd-drag-race-completion`; recuperato lo snapshot locale con le modifiche grafiche precedenti non committate. Nessuna modifica precedente è stata scartata.
+- Rifinite le card dell'archivio Stagioni salvate e la presentazione in sola lettura delle stagioni completate; aggiunti adattamenti per viewport stretti e tabelle scorrevoli.
+- Eseguito un pass responsive sul dettaglio Track Record: toolbar verticale su mobile, controlli export a griglia, statistiche più compatte, contenitori con larghezza vincolata e stampa senza controlli.
+- Eseguito un pass responsive su classifiche e archivio personale Drag Race: gestione overflow tabelle, filtri in colonna e griglie statistiche adattive.
+- Le pagine di archivio, dettaglio stagione, dettaglio Track Record e classifiche erano già presenti come funzionalità; questo blocco ne completa soprattutto la rifinitura visiva/responsive senza cambiare il modello dati o la logica applicativa.
+- Verifiche superate: `npx tsc --noEmit`, ESLint mirato (0 errori; 1 warning preesistente `@next/next/no-img-element` nel dettaglio stagione salvata), `npm run build`, `git diff --check`.
+- Limite della verifica: non è stato eseguito un collaudo browser autenticato a viewport desktop/tablet/mobile; il responsive pass è verificato tramite CSS/build e resta da controllare visivamente su dispositivi reali.
+- Nessun commit, push, deploy, migrazione o intervento sul database eseguito.
