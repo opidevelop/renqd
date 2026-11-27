@@ -114,3 +114,10 @@ Controlli superati:
 - Lipsync for Your Life e Slayoff usano una lista deduplicata per titolo/artista, così un brano ripetuto in più episodi non aumenta artificialmente la probabilità di estrazione.
 - Verifica catalogo live precedente alla nuova sincronizzazione: 845 record lipsync, circa 802 combinazioni distinte titolo-artista, 17 record con preview e 17 eleggibili con preview. Il numero dei record non deve essere presentato come numero di canzoni uniche.
 - Edge Function `drag-race-catalog-sync` distribuita alla versione 10. Il nuovo criterio di ricerca non è ancora stato misurato su una sincronizzazione completa: i conteggi sopra descrivono il catalogo precedente all'esecuzione della versione 10.
+
+
+## Artwork franchise e poster stagioni
+
+- Le copertine franchise e i poster stagionali sono risolti da Wikimedia Commons, con controllo della licenza riutilizzabile (CC0, pubblico dominio, CC BY, CC BY-SA e GFDL) e corrispondenza del nome franchise/stagione.
+- Le immagini stagionali vengono usate nel catalogo Track Record e nelle schede carriera delle Queen. Il link sull'immagine apre la pagina sorgente/licenza.
+- Se non esiste un artwork con licenza compatibile e corrispondenza sufficientemente precisa, viene mostrato un fallback Renqd. Non si usano immagini Fandom scaricate automaticamente né artwork senza licenza verificata.
